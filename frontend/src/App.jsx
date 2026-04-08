@@ -6,7 +6,7 @@ import './App.css';
 // Extracted components
 import LoginScreen from './components/LoginScreen';
 import PantallaAdmin from './components/PantallaAdmin';
-import UserMenu from './components/UserMenu';
+import UserView from './components/UserView';
 import PantallaCheckin from './components/PantallaCheckin';
 import PantallaConsumo from './components/PantallaConsumo';
 import PantallaVer from './components/PantallaVer';
@@ -93,10 +93,7 @@ export default function App() {
         path="/user"
         element={
           rol === 'user' ? (
-            <UserMenu
-              onNavigate={(screen) => navigate(`/user/${screen}`)}
-              onExit={handleExit}
-            />
+            <UserView onExit={handleExit} />
           ) : (
             <Navigate to="/" replace />
           )
