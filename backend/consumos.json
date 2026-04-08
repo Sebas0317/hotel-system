@@ -1,10 +1,106 @@
 [
   {
-    "id": "1775621870414-r1ln0",
-    "roomId": "2006",
-    "descripcion": "Cerveza Águila",
+    "id": "cons-001",
+    "roomId": "sb-102",
+    "descripcion": "Desayuno americano",
+    "categoria": "restaurante",
+    "precio": 28000,
+    "fecha": "2026-04-06T08:30:00.000Z"
+  },
+  {
+    "id": "cons-002",
+    "roomId": "sb-102",
+    "descripcion": "Cena BBQ",
+    "categoria": "restaurante",
+    "precio": 45000,
+    "fecha": "2026-04-06T19:45:00.000Z"
+  },
+  {
+    "id": "cons-003",
+    "roomId": "sb-102",
+    "descripcion": "Cocteles tropicales (2)",
     "categoria": "bar",
-    "precio": 7000,
-    "fecha": "2026-04-08T04:17:50.414Z"
+    "precio": 56000,
+    "fecha": "2026-04-06T21:00:00.000Z"
+  },
+  {
+    "id": "cons-004",
+    "roomId": "sb-102",
+    "descripcion": "Desayuno buffet",
+    "categoria": "restaurante",
+    "precio": 35000,
+    "fecha": "2026-04-07T08:00:00.000Z"
+  },
+  {
+    "id": "cons-005",
+    "roomId": "ss-202",
+    "descripcion": "Almuerzo regional",
+    "categoria": "restaurante",
+    "precio": 35000,
+    "fecha": "2026-04-07T13:00:00.000Z"
+  },
+  {
+    "id": "cons-006",
+    "roomId": "ss-202",
+    "descripcion": "Cerveza artesanal (3)",
+    "categoria": "bar",
+    "precio": 45000,
+    "fecha": "2026-04-07T17:30:00.000Z"
+  },
+  {
+    "id": "cons-007",
+    "roomId": "hd-502",
+    "descripcion": "Bandeja paisa",
+    "categoria": "restaurante",
+    "precio": 38000,
+    "fecha": "2026-04-08T13:30:00.000Z"
+  },
+  {
+    "id": "cons-008",
+    "roomId": "hd-502",
+    "descripcion": "Jugo natural (2)",
+    "categoria": "bar",
+    "precio": 24000,
+    "fecha": "2026-04-08T14:00:00.000Z"
+  },
+  {
+    "id": "cons-009",
+    "roomId": "hd-502",
+    "descripcion": "Servicio a habitación",
+    "categoria": "servicios",
+    "precio": 12000,
+    "fecha": "2026-04-08T20:00:00.000Z"
+  },
+  {
+    "id": "cons-010",
+    "roomId": "cb-01",
+    "descripcion": "Desayuno americano (4 pers)",
+    "categoria": "restaurante",
+    "precio": 112000,
+    "fecha": "2026-04-05T08:30:00.000Z"
+  },
+  {
+    "id": "cons-011",
+    "roomId": "cb-01",
+    "descripcion": "Almuerzo regional (4 pers)",
+    "categoria": "restaurante",
+    "precio": 140000,
+    "fecha": "2026-04-05T13:00:00.000Z"
+  },
+  {
+    "id": "cons-012",
+    "roomId": "cb-01",
+    "descripcion": "Tour guiado senderos (4 pers)",
+    "categoria": "servicios",
+    "precio": 200000,
+    "fecha": "2026-04-05T15:30:00.000Z"
+  },
+  {
+    "id": "cons-013",
+    "roomId": "sb-102",
+    "descripcion": "Masaje relajante 60min",
+    "categoria": "servicios",
+    "precio": 100000,
+    "fecha": "2026-04-07T16:00:00.000Z"
   }
 ]
