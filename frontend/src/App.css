@@ -642,6 +642,37 @@ input, select { font-family: inherit; }
 .stat-pill.operativa .sp-num  { color: #8b5cf6; }
 
 /* ══════════════════════════════════════════════
+   USER VIEW (Room List + Details)
+══════════════════════════════════════════════ */
+.user-view {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.user-room-list h3 {
+  color: #1e2533;
+  font-weight: 600;
+}
+
+.room-list-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.room-list-item:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.user-room-detail .bg-white {
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+
+.user-room-detail .border {
+  border-color: #e5e7eb;
+}
+
+/* ══════════════════════════════════════════════
    PANEL ADMINISTRADOR
 ══════════════════════════════════════════════ */
 .admin-content {
