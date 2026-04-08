@@ -645,9 +645,31 @@ input, select { font-family: inherit; }
    USER VIEW - Use admin styles for room list/detail
    (rd- classes defined in admin section below)
 ══════════════════════════════════════════════ */
-.admin-room-list,
+.admin-room-list {
+  flex: 0 0 40%;
+  min-width: 300px;
+}
+
 .admin-room-detail {
-  min-height: 500px;
+  flex: 1;
+  min-width: 300px;
+  background: #fff;
+  border-radius: 14px;
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+}
+
+.admin-room-list .piso-grupo {
+  margin-bottom: 0;
+}
+
+.admin-room-list .rooms-grid {
+  max-height: none;
+  overflow: visible;
+}
+
+.admin-room-list .piso-titulo {
+  margin-bottom: 16px;
 }
 
 .admin-room-detail {
