@@ -13,6 +13,21 @@ export class ApiError extends Error {
 }
 
 /**
+ * Check if the backend is reachable
+ * @returns {Promise<boolean>}
+ */
+export async function checkHealth() {
+  try {
+    const response = await fetch(`${API_BASE}/health`, { 
+      signal: AbortSignal.timeout(5000) 
+    });
+    return response.ok;
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Generic fetch wrapper with error handling
  * @param {string} endpoint - API endpoint path
  * @param {Object} options - Fetch options (method, body, etc.)

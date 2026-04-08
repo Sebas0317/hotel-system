@@ -26,6 +26,9 @@ const authRoutes = require('./src/routes/auth');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// Track server start time for health checks
+const startTime = Date.now();
+
 // ── GLOBAL MIDDLEWARE ──
 app.use(cors());
 app.use(express.json({ limit: '1mb' }));
@@ -34,8 +37,15 @@ app.use(sanitizeBody);
 // Request logging (useful for debugging; can be disabled in production)
 app.use(requestLogger);
 
-// ── ROUTES ──
+// ── HEALTH CHECKS ──
 app.get('/', (_req, res) => res.json({ service: 'EcoBosque API', status: 'running' }));
+app.get('/health', (_req, res) => {
+  res.json({
+    status: 'healthy',
+    uptime: Math.floor((Date.now() - startTime) / 1000) + 's',
+    timestamp: new Date().toISOString(),
+  });
+});
 app.use('/auth', authRoutes);
 app.use('/rooms', roomsRoutes);
 app.use('/consumos', consumosRoutes);
