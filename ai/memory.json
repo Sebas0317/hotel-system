@@ -1,0 +1,14 @@
+{
+  "project_name": "hotel-system",
+  "backend": "Node.js + Express",
+  "frontend": "web app",
+  "features": [
+    "check-in con PIN",
+    "registro de consumos",
+    "check-out con pagos"
+  ],
+  "decisions": [
+    "sistema offline-first",
+    "uso de PIN por habitación"
+  ]
+}

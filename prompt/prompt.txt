@@ -1,0 +1,75 @@
+Lee los siguientes elementos del proyecto:
+- ai/context.txt
+- ai/memory.json (si existe)
+- todos los archivos dentro de ai/skills/
+- todas las carpetas y archivos dentro de backend/ y frontend/
+
+IMPORTANTE:
+- NO modifiques ningún archivo del backend ni del frontend
+- NO ejecutes cambios en el código del sistema
+- Solo análisis y mejora de skills
+
+Luego realiza lo siguiente:
+
+1. ENTENDIMIENTO DEL CONTEXTO
+- Comprende completamente el sistema hotelero:
+  - flujo de check-in
+  - generación de PIN
+  - registro de consumos
+  - validación
+  - check-out
+- Usa ai/context.txt como base
+
+2. ANÁLISIS DEL PROYECTO
+- Analiza la estructura completa del backend y frontend
+- Identifica:
+  - tecnologías usadas
+  - arquitectura (rutas, controladores, componentes, etc.)
+  - flujo de datos entre frontend y backend
+- Explica claramente cómo funciona el sistema de extremo a extremo
+
+3. ANÁLISIS FUNCIONAL (IMPORTANTE)
+- Evalúa si el sistema cumple con:
+  - control de consumos
+  - validación por PIN
+  - proceso de cobro
+- Detecta posibles debilidades conceptuales (NO código, solo lógica)
+
+4. USO DE SKILLS ACTUALES
+- Lee todas las skills actuales
+- Evalúa:
+  - si son genéricas o específicas
+  - si cubren bien el sistema hotelero
+  - si tienen reglas claras o ambiguas
+
+5. MEJORA DE SKILLS (ÚNICO CAMBIO PERMITIDO)
+- Mejora cada archivo en ai/skills/
+- Hazlas:
+  - más específicas para este proyecto
+  - alineadas con arquitectura real encontrada
+  - con reglas claras y accionables
+- Puedes sobrescribir los archivos de skills
+
+6. CREACIÓN DE NUEVAS SKILLS (SI ES NECESARIO)
+- Si detectas necesidades nuevas, crea skills adicionales
+Ejemplos:
+  - auth_security
+  - payments_manager
+  - offline_system_expert
+
+7. MEMORIA (SIN MODIFICAR SI NO ES NECESARIO)
+- Solo sugiere qué debería guardarse en ai/memory.json
+- NO lo modifiques automáticamente
+
+8. SALIDA FINAL
+- Explica:
+  - cómo funciona el sistema completo
+  - fortalezas
+  - debilidades conceptuales
+  - qué cambió en las skills
+  - por qué esas mejoras
+
+Reglas finales:
+- NO tocar código del sistema (backend/frontend)
+- SOLO modificar archivos dentro de ai/skills/
+- Ser claro, técnico y estructurado

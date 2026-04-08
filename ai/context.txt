@@ -1,0 +1,17 @@
+Sistema hotelero offline-first.
+
+Tiene:
+- backend en Node.js
+- frontend web
+- gestión de habitaciones
+- consumos por habitación
+- validación con PIN
+- check-in y check-out
+
+Objetivo:
+Sistema simple, confiable, sin internet, con control total de consumos.
+
+Reglas:
+- priorizar simplicidad
+- evitar dependencias externas
+- código limpio y mantenible
