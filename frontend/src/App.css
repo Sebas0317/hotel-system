@@ -10,7 +10,7 @@ input, select { font-family: inherit; }
 ══════════════════════════════════════════════ */
 .login-bg {
   min-height: 100svh;
-  background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 45%, #2563eb 70%, #0ea5e9 100%);
+  background: linear-gradient(135deg, #1a4731 0%, #2d5a3d 40%, #3d6b4f 70%, #4a7c59 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -128,7 +128,7 @@ input, select { font-family: inherit; }
   padding: 14px 24px;
   border: none;
   border-radius: 12px;
-  background: #2563eb;
+  background: #2d5a3d;
   color: #fff;
   font-size: 15px;
   font-weight: 600;
@@ -137,7 +137,7 @@ input, select { font-family: inherit; }
 }
 
 .login-btn-primary:hover {
-  background: #1d4ed8;
+  background: #1e3a2b;
 }
 
 .login-btn-primary:disabled {
@@ -559,7 +559,8 @@ input, select { font-family: inherit; }
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
-.topbar-badge.admin { background: #eff6ff; color: #2563eb; }
+.topbar-badge.admin {   background: #f0f5f1;
+  color: #2d5a3d; }
 .topbar-badge.user  { background: #f0fdf4; color: #16a34a; }
 
 .btn-salir {
@@ -762,7 +763,7 @@ input, select { font-family: inherit; }
 .menu-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
 .menu-card:active { transform: scale(0.97); }
 
-.menu-card.checkin  { background: linear-gradient(135deg, #2563eb, #1d4ed8); }
+.menu-card.checkin  {   background: linear-gradient(135deg, #3d7a54, #2d5a3d); }
 .menu-card.consumo  { background: linear-gradient(135deg, #059669, #047857); }
 .menu-card.ver      { background: linear-gradient(135deg, #7c3aed, #6d28d9); }
 .menu-card.checkout { background: linear-gradient(135deg, #dc2626, #b91c1c); }
@@ -835,7 +836,7 @@ input, select { font-family: inherit; }
 .btn-main-action {
   width: 100%;
   padding: 13px;
-  background: #2563eb;
+  background: #2d5a3d;
   color: #fff;
   border: none;
   border-radius: 12px;
@@ -908,7 +909,7 @@ input, select { font-family: inherit; }
 .it-row strong { color: #1e2533; }
 
 .pin-row { padding-top: 10px; border-top: 1px solid #e5e7eb; margin-top: 4px; }
-.pin-grande { font-size: 36px; font-weight: 900; color: #2563eb; letter-spacing: 6px; font-family: monospace; }
+.pin-grande { font-size: 36px; font-weight: 900; color: #3d7a54; letter-spacing: 6px; font-family: monospace; }
 .pin-aviso { font-size: 12px; color: #f59e0b; text-align: center; }
 .precio-verde { color: #10b981; font-size: 18px; }
 
@@ -1059,7 +1060,8 @@ input, select { font-family: inherit; }
 }
 .metodo-btn span:first-child { font-size: 22px; }
 .metodo-btn:hover { border-color: #9ca3af; background: #fff; }
-.metodo-btn.activo { border-color: #2563eb; background: #eff6ff; color: #2563eb; }
+.metodo-btn.activo { border-color: #2563eb;   background: #f0f5f1;
+  color: #2d5a3d; }
 
 .cambio-preview {
   font-size: 13px;
@@ -1118,7 +1120,7 @@ input, select { font-family: inherit; }
 
 .room-select:focus {
   outline: none;
-  border-color: #3b82f6;
+  border-  color: #5a8f6b;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
@@ -1246,7 +1248,7 @@ input, select { font-family: inherit; }
 }
 
 .toast-info {
-  background: #2563eb;
+  background: #2d5a3d;
   color: #fff;
 }
 
@@ -1427,7 +1429,7 @@ input, select { font-family: inherit; }
 }
 
 .res-cal-day.has-events {
-  border-color: #3b82f6;
+  border-  color: #5a8f6b;
   background: #f0f7ff;
 }
 
@@ -1748,7 +1750,7 @@ input, select { font-family: inherit; }
 }
 
 .pe-add-btn {
-  background: #2563eb;
+  background: #2d5a3d;
   color: #fff;
   border: none;
   border-radius: 6px;
@@ -1761,7 +1763,7 @@ input, select { font-family: inherit; }
 }
 
 .pe-add-btn:hover {
-  background: #1d4ed8;
+  background: #1e3a2b;
 }
 
 /* Grid for room rates */
@@ -1805,7 +1807,7 @@ input, select { font-family: inherit; }
 
 .pe-input:focus {
   outline: none;
-  border-color: #3b82f6;
+  border-  color: #5a8f6b;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
@@ -1859,7 +1861,7 @@ input, select { font-family: inherit; }
 
 .pe-name-input:focus {
   outline: none;
-  border-color: #3b82f6;
+  border-  color: #5a8f6b;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
@@ -2109,7 +2111,7 @@ input, select { font-family: inherit; }
 
 .factura-print-btn {
   padding: 10px 20px;
-  background: #2563eb;
+  background: #2d5a3d;
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -2120,7 +2122,7 @@ input, select { font-family: inherit; }
 }
 
 .factura-print-btn:hover {
-  background: #1d4ed8;
+  background: #1e3a2b;
 }
 
 .factura {
@@ -2964,7 +2966,7 @@ input, select { font-family: inherit; }
 }
 
 .rd-value.rd-email {
-  color: #2563eb;
+  color: #3d7a54;
   word-break: break-all;
 }
 
@@ -3242,12 +3244,12 @@ input, select { font-family: inherit; }
 }
 
 .ra-btn-primary {
-  background: #2563eb;
+  background: #2d5a3d;
   color: #fff;
 }
 
 .ra-btn-primary:hover {
-  background: #1d4ed8;
+  background: #1e3a2b;
 }
 
 .ra-btn-primary:disabled {
@@ -3325,7 +3327,7 @@ input, select { font-family: inherit; }
 .ra-field input:focus,
 .ra-field select:focus {
   outline: none;
-  border-color: #3b82f6;
+  border-  color: #5a8f6b;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
@@ -3400,7 +3402,7 @@ input, select { font-family: inherit; }
 }
 
 .ra-cat-tab.activo {
-  background: #2563eb;
+  background: #2d5a3d;
   color: #fff;
   border-color: #2563eb;
 }
@@ -3433,7 +3435,7 @@ input, select { font-family: inherit; }
 }
 
 .ra-cat-item.seleccionado {
-  border-color: #3b82f6;
+  border-  color: #5a8f6b;
   background: #eff6ff;
 }
 
@@ -3492,7 +3494,7 @@ input, select { font-family: inherit; }
 }
 
 .ra-metodo-btn.activo {
-  border-color: #3b82f6;
+  border-  color: #5a8f6b;
   background: #eff6ff;
   color: #1e40af;
 }
@@ -3600,7 +3602,7 @@ input, select { font-family: inherit; }
 }
 
 .ra-status-btn.activo {
-  border-color: #3b82f6;
+  border-  color: #5a8f6b;
   background: #eff6ff;
   color: #1e40af;
   font-weight: 600;
