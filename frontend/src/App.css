@@ -5,6 +5,24 @@ body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background
 button { cursor: pointer; font-family: inherit; }
 input, select { font-family: inherit; }
 
+/* Admin filter select styling */
+.filtro-tipo {
+  background: white;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 14px;
+  color: #374151;
+  cursor: pointer;
+  min-width: 160px;
+}
+
+.filtro-tipo:focus {
+  outline: none;
+  border-color: #5a8f6b;
+  box-shadow: 0 0 0 2px rgba(90, 143, 107, 0.2);
+}
+
 /* ══════════════════════════════════════════════
    LOGIN
 ══════════════════════════════════════════════ */

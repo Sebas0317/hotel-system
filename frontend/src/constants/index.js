@@ -36,7 +36,8 @@ export const ESTADO_CFG = {
   reservada:      { label: 'Reserved',     color: '#059669', bg: '#d1fae5', border: '#6ee7b7', dot: '#059669' },
   disponible:     { label: 'Available',    color: '#0891b2', bg: '#cffafe', border: '#a5f3fc', dot: '#0891b2' },
   limpieza:       { label: 'Cleaning',     color: '#7c3aed', bg: '#ede9fe', border: '#c4b5fd', dot: '#7c3aed' },
-  mantenimiento:  { label: 'Maintenance', color: '#dc2626', bg: '#fee2e2', border: '#fca5a5', dot: '#dc2626' },
+  mantenimiento:  { label: 'Maintenance',  color: '#dc2626', bg: '#fee2e2', border: '#fca5a5', dot: '#dc2626' },
+  'fuera-servicio': { label: 'Out of Service', color: '#6b7280', bg: '#f3f4f6', border: '#d1d5db', dot: '#6b7280' },
 };
 
 /**
