@@ -45,7 +45,13 @@ export default function App() {
    */
   const handleRol = (r) => {
     setRol(r);
-    navigate(r === 'admin' ? '/admin' : '/usuario', { replace: true });
+    navigate(r === 'admin' ? '/admin' : '/user', { replace: true });
+  };
+
+  const handleSalir = () => {
+    setRol(null);
+    setAuthToken(null);
+    navigate('/', { replace: true });
   };
 
   /**
@@ -60,19 +66,17 @@ export default function App() {
 
   return (
     <Routes>
-      {/* Login — only show when no role is active; otherwise redirect */}
       <Route
         path="/"
         element={
           !rol ? (
             <PantallaLogin onRol={handleRol} />
           ) : (
-            <Navigate to={rol === 'admin' ? '/admin' : '/usuario'} replace />
+            <Navigate to={rol === 'admin' ? '/admin' : '/user'} replace />
           )
         }
       />
 
-      {/* Admin dashboard — protect from non-admin access */}
       <Route
         path="/admin"
         element={
@@ -84,9 +88,8 @@ export default function App() {
         }
       />
 
-      {/* Admin reservations — protect from non-admin access */}
       <Route
-        path="/admin/reservaciones"
+        path="/admin/reservations"
         element={
           rol === 'admin' ? (
             <PantallaReservaciones onNav={() => navigate('/admin', { replace: true })} />
@@ -96,13 +99,12 @@ export default function App() {
         }
       />
 
-      {/* Reception screens — nested under /usuario */}
       <Route
-        path="/usuario"
+        path="/user"
         element={
-          rol === 'usuario' ? (
+          rol === 'user' ? (
             <PantallaMenuUsuario
-              onNav={(screen) => navigate(`/usuario/${screen}`)}
+              onNav={(screen) => navigate(`/user/${screen}`)}
               onSalir={handleSalir}
             />
           ) : (
@@ -111,50 +113,47 @@ export default function App() {
         }
       />
       <Route
-        path="/usuario/checkin"
+        path="/user/register"
         element={
-          rol === 'usuario' ? (
-            <PantallaCheckin onNav={(screen) => navigate(`/usuario/${screen}`)} />
+          rol === 'user' ? (
+            <PantallaCheckin onNav={(screen) => navigate(`/user/${screen}`)} />
           ) : (
             <Navigate to="/" replace />
           )
         }
       />
       <Route
-        path="/usuario/consumo"
+        path="/user/transactions"
         element={
-          rol === 'usuario' ? (
-            <PantallaConsumo onNav={(screen) => navigate(`/usuario/${screen}`)} />
+          rol === 'user' ? (
+            <PantallaConsumo onNav={(screen) => navigate(`/user/${screen}`)} />
           ) : (
             <Navigate to="/" replace />
           )
         }
       />
       <Route
-        path="/usuario/ver"
+        path="/user/room"
         element={
-          rol === 'usuario' ? (
-            <PantallaVer onNav={(screen) => navigate(`/usuario/${screen}`)} />
+          rol === 'user' ? (
+            <PantallaVer onNav={(screen) => navigate(`/user/${screen}`)} />
           ) : (
             <Navigate to="/" replace />
           )
         }
       />
       <Route
-        path="/usuario/checkout"
+        path="/user/checkout"
         element={
-          rol === 'usuario' ? (
-            <PantallaCheckout onNav={(screen) => navigate(`/usuario/${screen}`)} />
+          rol === 'user' ? (
+            <PantallaCheckout onNav={(screen) => navigate(`/user/${screen}`)} />
           ) : (
             <Navigate to="/" replace />
           )
         }
       />
 
-      {/* Landing page — public site (must be before catch-all) */}
       <Route path="/landing/*" element={<LandingPage />} />
-
-      {/* Catch-all — redirect unknown paths to login */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
