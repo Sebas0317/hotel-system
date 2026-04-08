@@ -35,9 +35,11 @@ function getRoomStats(_req, res) {
   const rooms = getRooms();
   res.json({
     total: rooms.length,
-    ocupadas: rooms.filter(r => r.estado === 'ocupada').length,
-    reservadas: rooms.filter(r => r.estado === 'reservada').length,
     disponibles: rooms.filter(r => r.estado === 'disponible').length,
+    reservadas: rooms.filter(r => r.estado === 'reservada').length,
+    ocupadas: rooms.filter(r => r.estado === 'ocupada').length,
+    limpieza: rooms.filter(r => r.estado === 'limpieza').length,
+    mantenimiento: rooms.filter(r => r.estado === 'mantenimiento').length,
   });
 }
 
@@ -72,10 +74,23 @@ function checkIn(req, res) {
     return res.status(400).json({ error: 'Habitación ya está ocupada' });
   }
 
-  const OPERATIONAL_STATES = ['limpieza', 'mantenimiento', 'fuera-servicio'];
-  if (idx !== -1 && OPERATIONAL_STATES.includes(rooms[idx].estado)) {
-    const labels = { limpieza: 'En limpieza', mantenimiento: 'En mantenimiento', 'fuera-servicio': 'Fuera de servicio' };
-    return res.status(400).json({ error: `Habitación ${labels[rooms[idx].estado]}. No se puede hacer check-in.` });
+  if (idx !== -1 && rooms[idx].estado === 'reservada') {
+    const pin = generarPin();
+    const now = new Date().toISOString();
+    rooms[idx] = {
+      ...rooms[idx],
+      huesped,
+      pin,
+      estado: 'ocupada',
+      checkIn: now,
+    };
+    saveRooms(rooms);
+    return res.json(rooms[idx]);
+  }
+
+  const BLOCKED_STATES = ['limpieza', 'mantenimiento'];
+  if (idx !== -1 && BLOCKED_STATES.includes(rooms[idx].estado)) {
+    return res.status(400).json({ error: `Habitación en estado "${rooms[idx].estado}". Primero cámbiala a disponible.` });
   }
 
   const pin = generarPin();
@@ -123,10 +138,10 @@ function reservar(req, res) {
 
   const room = rooms[idx];
 
-  const OPERATIONAL_STATES = ['limpieza', 'mantenimiento', 'fuera-servicio'];
+  const OPERATIONAL_STATES = ['limpieza', 'mantenimiento'];
   if (room.estado !== 'disponible') {
     if (OPERATIONAL_STATES.includes(room.estado)) {
-      const labels = { limpieza: 'En limpieza', mantenimiento: 'En mantenimiento', 'fuera-servicio': 'Fuera de servicio' };
+      const labels = { limpieza: 'En limpieza', mantenimiento: 'En mantenimiento' };
       return res.status(400).json({ error: `Habitación ${labels[room.estado]}. No se puede reservar.` });
     }
     return res.status(400).json({ error: `Solo se pueden reservar habitaciones disponibles. Estado actual: ${room.estado}` });
@@ -182,8 +197,7 @@ function actualizarHuesped(req, res) {
 
 function actualizarEstado(req, res) {
   const { estado } = req.body;
-  const VALID_ESTADOS = ['disponible', 'reservada', 'limpieza', 'mantenimiento', 'fuera-servicio'];
-  const OPERATIONAL_STATES = ['limpieza', 'mantenimiento', 'fuera-servicio'];
+  const VALID_ESTADOS = ['disponible', 'reservada', 'limpieza', 'mantenimiento'];
 
   if (!VALID_ESTADOS.includes(estado)) {
     return res.status(400).json({ error: `Estado inválido. Debe ser: ${VALID_ESTADOS.join(', ')}` });
@@ -202,8 +216,15 @@ function actualizarEstado(req, res) {
     return res.status(400).json({ error: 'No se puede cambiar el estado de una habitación ocupada. Realiza check-out primero.' });
   }
 
-  if (estado === 'reservada' && OPERATIONAL_STATES.includes(room.estado)) {
-    return res.status(400).json({ error: `No se puede reservar una habitación en estado "${room.estado}". Primero cámbiala a disponible.` });
+  const ALLOWED_TRANSITIONS = {
+    disponible: ['reservada', 'limpieza', 'mantenimiento'],
+    reservada: ['disponible', 'limpieza', 'mantenimiento'],
+    limpieza: ['disponible', 'mantenimiento'],
+    mantenimiento: ['disponible', 'limpieza'],
+  };
+
+  if (!ALLOWED_TRANSITIONS[room.estado]?.includes(estado)) {
+    return res.status(400).json({ error: `No se puede cambiar de "${room.estado}" a "${estado}"` });
   }
 
   const updates = { estado };
@@ -296,7 +317,7 @@ function checkout(req, res) {
     checkIn: null,
     checkOut: null,
     noches: null,
-    estado: 'disponible',
+    estado: 'limpieza',
     checkOutAt: new Date().toISOString(),
     pago: {
       metodoPago,
