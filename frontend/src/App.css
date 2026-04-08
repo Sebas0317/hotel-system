@@ -778,6 +778,39 @@ input, select { font-family: inherit; }
   margin-top: 8px;
 }
 
+.rdp-payment-info {
+  background: #f0fdf4;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+  border: 1px solid #bbf7d0;
+}
+
+.rdp-payment-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.rdp-payment-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.rdp-payment-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  color: #6b7280;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.rdp-payment-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e2533;
+}
+
 .rdp-empty {
   color: #9ca3af;
   font-size: 14px;

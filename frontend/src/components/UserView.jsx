@@ -146,6 +146,23 @@ export default function UserView({ onExit }) {
                 </div>
               </div>
 
+              {/* Payment Info */}
+              {selectedRoom.pago && (
+                <div className="rdp-section rdp-payment-info">
+                  <h3 className="rdp-section-title">Payment Details</h3>
+                  <div className="rdp-payment-grid">
+                    <div className="rdp-payment-item">
+                      <span className="rdp-payment-label">Payment Method</span>
+                      <span className="rdp-payment-value">{selectedRoom.pago.metodo}</span>
+                    </div>
+                    <div className="rdp-payment-item">
+                      <span className="rdp-payment-label">Total Paid</span>
+                      <span className="rdp-payment-value text-green-600">{COP(selectedRoom.pago.pagado)}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Room Charges */}
               <div className="rdp-section">
                 <h3 className="rdp-section-title">Room Charges</h3>
@@ -189,10 +206,6 @@ export default function UserView({ onExit }) {
                 <div className="rdp-total-row rdp-total-grand">
                   <span>Total to Pay</span>
                   <span>{COP(totalAPagar)}</span>
-                </div>
-                <div className="rdp-total-row rdp-paid">
-                  <span>Already Paid</span>
-                  <span className="text-green-600">{COP(pagado)}</span>
                 </div>
                 <div className="rdp-total-row rdp-balance">
                   <span>Remaining Balance</span>

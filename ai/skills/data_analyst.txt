@@ -13,3 +13,9 @@ Siempre responde con:
 - recomendaciones prácticas
 
 opencode -s ses_29528bd04ffeg5CxSUnSFA2IMN
+
+Guest Registration
+Register new guest and assign room
+
+Transaction Entry
+Add charges to active room
