@@ -782,21 +782,33 @@ input, select { font-family: inherit; }
 .rdp-total-row {
   display: flex;
   justify-content: space-between;
-  padding: 8px 0;
+  padding: 10px 0;
   font-size: 14px;
+  color: #4b5563;
+}
+
+.rdp-total-row.rdp-paid {
+  padding-top: 12px;
+  border-top: 1px dashed #e5e7eb;
+  margin-top: 8px;
+}
+
+.rdp-total-row.rdp-balance {
+  font-weight: 600;
+  font-size: 16px;
+  color: #1e2533;
+  padding-top: 12px;
+  border-top: 1px solid #e5e7eb;
+  margin-top: 4px;
 }
 
 .rdp-total-grand {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 700;
   color: #1e2533;
-  border-top: 1px solid #e5e7eb;
-  margin-top: 8px;
+  border-top: 2px solid #e5e7eb;
+  margin-top: 12px;
   padding-top: 12px;
-}
-
-.rdp-total-balance {
-  font-weight: 600;
 }
 
 .rdp-checkout-btn {

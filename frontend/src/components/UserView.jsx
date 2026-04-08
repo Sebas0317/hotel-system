@@ -166,22 +166,22 @@ export default function UserView({ onExit }) {
               {/* Totals */}
               <div className="rdp-totals">
                 <div className="rdp-total-row">
-                  <span>Room ({selectedRoom.noches} nights)</span>
+                  <span>Room ({selectedRoom.noches} night{selectedRoom.noches > 1 ? 's' : ''})</span>
                   <span>{COP(roomTotal)}</span>
                 </div>
                 <div className="rdp-total-row">
-                  <span>Consumptions</span>
+                  <span>Consumptions ({consumos.length} item{consumos.length !== 1 ? 's' : ''})</span>
                   <span>{COP(totalConsumos)}</span>
                 </div>
                 <div className="rdp-total-row rdp-total-grand">
                   <span>Total</span>
                   <span>{COP(totalAPagar)}</span>
                 </div>
-                <div className="rdp-total-row">
+                <div className="rdp-total-row rdp-paid">
                   <span>Paid</span>
                   <span className="text-green-600">{COP(pagado)}</span>
                 </div>
-                <div className="rdp-total-row rdp-total-balance">
+                <div className="rdp-total-row rdp-balance">
                   <span>Balance Due</span>
                   <span className={saldoPendiente > 0 ? 'text-red-600' : 'text-green-600'}>
                     {COP(saldoPendiente)}
