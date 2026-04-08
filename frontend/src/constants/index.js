@@ -61,15 +61,13 @@ export const ESTADO_CFG = {
  * Room type icons mapping
  */
 export const TIPO_ICON = {
-  'estándar': '🛏️',
-  'doble': '🛏️🛏️',
-  'deluxe': '✨',
-  'suite': '👑',
-  'suite junior': '⭐',
-  'suite ejecutiva': '💎',
-  'presidencial': '🏆',
-  'cabaña': '🏕️',
-  'cabaña premium': '🌟',
+  'Suite Bosque': '🌲',
+  'Suite Sunset': '🌅',
+  'Suite Eden': '🌿',
+  'Habitacion Pareja': '💑',
+  'Habitacion Doble': '🛏️🛏️',
+  'Habitacion Cuadruple': '👨‍👩‍👧‍👦',
+  'Cabana Familiar en Bote': '⛵',
 };
 
 /**
@@ -100,16 +98,46 @@ export const CAT_ICONS = {
 };
 
 /**
+ * Amenity icons and labels for room display
+ */
+export const AMENIDADES_CFG = {
+  jacuzzi: { icon: '🛁', label: 'Jacuzzi' },
+  wifi: { icon: '📶', label: 'WiFi' },
+  ac: { icon: '❄️', label: 'Aire Acondicionado' },
+  balcon: { icon: '🌅', label: 'Balcón' },
+  'vista-bosque': { icon: '🌲', label: 'Vista al Bosque' },
+  'vista-puesta-sol': { icon: '🌇', label: 'Vista Puesta de Sol' },
+  sala: { icon: '🛋️', label: 'Sala' },
+  cocina: { icon: '🍳', label: 'Cocina' },
+  terraza: { icon: '🏡', label: 'Terraza' },
+  ' Ducha Exclusiva': { icon: '🚿', label: 'Ducha Exclusiva' },
+  chimenea: { icon: '🔥', label: 'Chimenea' },
+  hamaca: { icon: '🌴', label: 'Hamaca' },
+  'vista-lago': { icon: '🌊', label: 'Vista al Lago' },
+};
+
+/**
+ * Room type labels for display
+ */
+export const TIPO_LABEL = {
+  'Suite Bosque': 'Suite Bosque',
+  'Suite Sunset': 'Suite Sunset',
+  'Suite Eden': 'Suite Eden',
+  'Habitacion Pareja': 'Habitación Pareja',
+  'Habitacion Doble': 'Habitación Doble',
+  'Habitacion Cuadruple': 'Habitación Cuádruple',
+  'Cabana Familiar en Bote': 'Cabaña Familiar en Bote',
+};
+
+/**
  * Available room types for check-in
  */
 export const TIPOS_HABITACION = [
-  { value: 'estándar', label: 'Estándar' },
-  { value: 'doble', label: 'Doble' },
-  { value: 'deluxe', label: 'Deluxe' },
-  { value: 'suite junior', label: 'Suite Junior' },
-  { value: 'suite', label: 'Suite' },
-  { value: 'suite ejecutiva', label: 'Suite Ejecutiva' },
-  { value: 'presidencial', label: 'Presidencial' },
-  { value: 'cabaña', label: 'Cabaña' },
-  { value: 'cabaña premium', label: 'Cabaña Premium' },
+  { value: 'Suite Bosque', label: 'Suite Bosque' },
+  { value: 'Suite Sunset', label: 'Suite Sunset' },
+  { value: 'Suite Eden', label: 'Suite Eden' },
+  { value: 'Habitacion Pareja', label: 'Habitación Pareja' },
+  { value: 'Habitacion Doble', label: 'Habitación Doble' },
+  { value: 'Habitacion Cuadruple', label: 'Habitación Cuádruple' },
+  { value: 'Cabana Familiar en Bote', label: 'Cabaña Familiar en Bote' },
 ];
