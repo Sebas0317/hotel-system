@@ -29,18 +29,12 @@ export const calcularTotal = (items) =>
   items.reduce((sum, item) => sum + (item.precio || 0), 0);
 
 /**
- * Group rooms by floor for display
- * @param {Array} rooms - Array of room objects
+ * Group rooms by floor
+ * @param {Array} rooms - Room array
  * @returns {Object} Object keyed by floor name with room arrays
  */
 export const agruparPorPiso = (rooms) => {
-  const grupos = {};
-  rooms.forEach((r) => {
-    const key = r.piso === 0 ? 'Cabañas' : `Piso ${r.piso}`;
-    if (!grupos[key]) grupos[key] = [];
-    grupos[key].push(r);
-  });
-  return grupos;
+  return { 'Todas las habitaciones': rooms };
 };
 
 /**
