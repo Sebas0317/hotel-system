@@ -187,15 +187,15 @@ export default function UserView({ onExit }) {
               {/* Grand Total */}
               <div className="rdp-totals">
                 <div className="rdp-total-row rdp-total-grand">
-                  <span>Grand Total</span>
+                  <span>Total to Pay</span>
                   <span>{COP(totalAPagar)}</span>
                 </div>
                 <div className="rdp-total-row rdp-paid">
-                  <span>Paid</span>
+                  <span>Already Paid</span>
                   <span className="text-green-600">{COP(pagado)}</span>
                 </div>
                 <div className="rdp-total-row rdp-balance">
-                  <span>Balance Due</span>
+                  <span>Remaining Balance</span>
                   <span className={saldoPendiente > 0 ? 'text-red-600' : 'text-green-600'}>
                     {COP(saldoPendiente)}
                   </span>
