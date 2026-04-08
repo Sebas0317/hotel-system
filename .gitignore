@@ -8,3 +8,4 @@ oi_env/
 ngrok.exe
 cloudflared.exe
 *.zip
+.aider*

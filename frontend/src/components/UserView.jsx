@@ -165,10 +165,10 @@ export default function UserView({ onExit }) {
 
               {/* Room Charges */}
               <div className="rdp-section">
-                <h3 className="rdp-section-title">Room Charges</h3>
+                <h3 className="rdp-section-title">Room</h3>
                 <div className="rdp-room-charges">
                   <div className="rdp-charge-item">
-                    <span>Room rate x {selectedRoom.noches} night{selectedRoom.noches > 1 ? 's' : ''} ({COP(selectedRoom.tarifa)}/night)</span>
+                    <span>Room rate ({selectedRoom.tarifa} x {selectedRoom.noches} night{selectedRoom.noches > 1 ? 's' : ''})</span>
                     <span>{COP(roomTotal)}</span>
                   </div>
                 </div>
