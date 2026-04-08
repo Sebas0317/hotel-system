@@ -112,7 +112,7 @@ export default function RoomDetail({ room, onRefresh }) {
 
       {/* Guest Information Section */}
       <div className="rd-section">
-        <h4 className="rd-section-title">👤 Datos del Huésped</h4>
+        <h4 className="rd-section-title">🌿 Datos del Huésped</h4>
         <div className="rd-grid">
           <div className="rd-field">
             <span className="rd-label">Nombre</span>

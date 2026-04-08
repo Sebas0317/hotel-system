@@ -26,11 +26,11 @@ export default function PantallaMenuUsuario({ onNav, onSalir }) {
     <div className="app-shell">
       <header className="topbar flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0 px-3 sm:px-6 py-3">
         <div className="topbar-left flex items-center gap-2">
-          <span className="topbar-logo text-xl">🏨</span>
+          <span className="topbar-logo text-xl">🌿</span>
           <HotelTitle />
           <span className="topbar-badge user text-xs">Recepción</span>
         </div>
-        <button className="btn-salir text-sm" onClick={onSalir}>← Cerrar sesión</button>
+        <button className="btn-salir text-sm" onClick={onSalir}>← Salir</button>
       </header>
 
       <div className="usuario-content p-4 sm:p-6 max-w-[800px] mx-auto">
@@ -43,8 +43,8 @@ export default function PantallaMenuUsuario({ onNav, onSalir }) {
 
         <div className="menu-grid grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
           <button className="menu-card checkin text-left p-5 sm:p-6" onClick={() => onNav('checkin')}>
-            <span className="mc-icon text-3xl sm:text-4xl">🛎️</span>
-            <span className="mc-title text-lg sm:text-xl">Check-in</span>
+            <span className="mc-icon text-3xl sm:text-4xl">🌱</span>
+            <span className="mc-title text-lg sm:text-xl">Registro de Huésped</span>
             <span className="mc-desc text-sm sm:text-base">Registrar nuevo huésped y asignar habitación</span>
           </button>
           <button className="menu-card consumo text-left p-5 sm:p-6" onClick={() => onNav('consumo')}>
@@ -58,9 +58,9 @@ export default function PantallaMenuUsuario({ onNav, onSalir }) {
             <span className="mc-desc text-sm sm:text-base">Consultar consumos y estado de cuenta</span>
           </button>
           <button className="menu-card checkout text-left p-5 sm:p-6" onClick={() => onNav('checkout')}>
-            <span className="mc-icon text-3xl sm:text-4xl">💳</span>
-            <span className="mc-title text-lg sm:text-xl">Check-out</span>
-            <span className="mc-desc text-sm sm:text-base">Facturar, cobrar y liberar habitación</span>
+            <span className="mc-icon text-3xl sm:text-4xl">🍃</span>
+            <span className="mc-title text-lg sm:text-xl">Salida de Huésped</span>
+            <span className="mc-desc text-sm sm:text-base">Procesar checkout y generar factura</span>
           </button>
         </div>
       </div>

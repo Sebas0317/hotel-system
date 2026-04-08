@@ -69,26 +69,26 @@ export default function PantallaLogin({ onRol }) {
     <div className="login-bg min-h-screen flex items-center justify-center p-4 sm:p-6">
       <div className="login-container max-w-[520px] w-full">
         <div className="login-header mb-8 sm:mb-10">
-          <div className="login-logo text-7xl block mb-3">🏨</div>
+          <div className="login-logo text-7xl block mb-3">🌿</div>
           <HotelTitle variant="login" />
         </div>
-        <p className="login-pregunta text-sm font-semibold uppercase tracking-wide mb-4">¿Cómo deseas ingresar?</p>
+        <p className="login-pregunta text-sm font-semibold uppercase tracking-wide mb-4">Bienvenido a Eco Hotel El Bosque</p>
         <div className="login-cards flex flex-col gap-3 sm:gap-4 mb-8">
           <button className="login-card admin-card text-left p-5 sm:p-6" onClick={() => setAdminMode(true)}>
-            <span className="lc-icon text-3xl sm:text-4xl">🗂️</span>
-            <span className="lc-title text-lg sm:text-xl font-extrabold">Administrador</span>
-            <span className="lc-desc text-sm text-gray-500 sm:text-base">Panel de control · Estado de habitaciones · Gestión completa</span>
+            <span className="lc-icon text-3xl sm:text-4xl">🌲</span>
+            <span className="lc-title text-lg sm:text-xl font-extrabold">Administración</span>
+            <span className="lc-desc text-sm text-gray-500 sm:text-base">Panel de gestión · Habitaciones · Tarifas</span>
             <span className="lc-arrow absolute right-5 sm:right-6 top-1/2 -translate-y-1/2 text-xl sm:text-2xl">→</span>
           </button>
           <button className="login-card user-card text-left p-5 sm:p-6" onClick={() => onRol('usuario')}>
-            <span className="lc-icon text-3xl sm:text-4xl">🛎️</span>
-            <span className="lc-title text-lg sm:text-xl font-extrabold">Recepción / Usuario</span>
-            <span className="lc-desc text-sm sm:text-base">Check-in · Consumos · Check-out · Consultas</span>
+            <span className="lc-icon text-3xl sm:text-4xl">🌱</span>
+            <span className="lc-title text-lg sm:text-xl font-extrabold">Recepción</span>
+            <span className="lc-desc text-sm sm:text-base">Check-in · Consumos · Check-out</span>
             <span className="lc-arrow absolute right-5 sm:right-6 top-1/2 -translate-y-1/2 text-xl sm:text-2xl">→</span>
           </button>
         </div>
-        <p className="login-footer text-xs text-white/50 mb-4">Red local · Sin conexión a internet requerida</p>
-        <a href="/landing" className="login-landing-link block text-center mt-4 py-3 px-5 rounded-lg">🌿 Visitar Eco Hotel El Bosque</a>
+        <p className="login-footer text-xs text-white/50 mb-4">Sistema interno · Conexión local</p>
+        <a href="/landing" className="login-landing-link block text-center mt-4 py-3 px-5 rounded-lg">🌿 Visitar sitio público</a>
       </div>
     </div>
   );

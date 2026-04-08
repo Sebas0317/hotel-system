@@ -131,14 +131,14 @@ export default function PantallaAdmin({ onSalir, onNav }) {
       <div className="app-shell">
         <header className="topbar flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0 px-3 sm:px-6 py-3">
           <div className="topbar-left flex items-center gap-2">
-            <span className="topbar-logo text-xl">🏨</span>
+            <span className="topbar-logo text-xl">🌿</span>
             <HotelTitle />
             <span className="topbar-badge admin text-xs">Admin</span>
           </div>
           <button className="btn-salir text-sm" onClick={onSalir}>← Cerrar sesión</button>
         </header>
         <div className="admin-content">
-          <p style={{ textAlign: 'center', padding: '2rem' }}>Cargando habitaciones...</p>
+          <p style={{ textAlign: 'center', padding: '2rem' }}>🌱 Cargando habitaciones...</p>
         </div>
       </div>
     );
@@ -153,19 +153,19 @@ export default function PantallaAdmin({ onSalir, onNav }) {
           className={`admin-primary-btn px-4 py-3 sm:px-5 text-sm sm:text-base ${activeView === 'rooms' ? 'activo' : ''}`}
           onClick={() => setView('rooms')}
         >
-          🏠 Lista de Habitaciones
+          🌿 Habitaciones
         </button>
         <button
           className={`admin-primary-btn px-4 py-3 sm:px-5 text-sm sm:text-base ${activeView === 'prices' ? 'activo' : ''}`}
           onClick={() => setView('prices')}
         >
-          💰 Modificar Tarifas y Consumibles
+          🌲 Tarifas y Precios
         </button>
         <button
           className="admin-primary-btn admin-primary-btn-nav px-4 py-3 sm:px-5 text-sm sm:text-base"
           onClick={() => onNav('/admin/reservaciones')}
         >
-          📋 Reservaciones
+          📋 Reservas
         </button>
       </div>
 
@@ -173,9 +173,9 @@ export default function PantallaAdmin({ onSalir, onNav }) {
       <div className="admin-stats flex flex-wrap gap-2 sm:gap-3 mb-4">
         <div className="stat-pill total flex-1 min-w-[70px] sm:min-w-[90px] p-3 sm:p-4"><span className="sp-num text-xl sm:text-3xl">{stats.total}</span><span className="sp-lbl text-[10px] sm:text-xs">Total</span></div>
         <div className="stat-pill ocupada flex-1 min-w-[70px] sm:min-w-[90px] p-3 sm:p-4"><span className="sp-num text-xl sm:text-3xl">{stats.ocupadas}</span><span className="sp-lbl text-[10px] sm:text-xs">Ocupadas</span></div>
-        <div className="stat-pill reservada flex-1 min-w-[70px] sm:min-w-[90px] p-3 sm:p-4"><span className="sp-num text-xl sm:text-3xl">{stats.reservadas}</span><span className="sp-lbl text-[10px] sm:text-xs">Reservadas</span></div>
-        <div className="stat-pill disponible flex-1 min-w-[70px] sm:min-w-[90px] p-3 sm:p-4"><span className="sp-num text-xl sm:text-3xl">{stats.disponibles}</span><span className="sp-lbl text-[10px] sm:text-xs">Disponibles</span></div>
-        <div className="stat-pill operativa flex-1 min-w-[70px] sm:min-w-[90px] p-3 sm:p-4"><span className="sp-num text-xl sm:text-3xl">{stats.operativas}</span><span className="sp-lbl text-[10px] sm:text-xs">Operativas</span></div>
+        <div className="stat-pill reservada flex-1 min-w-[70px] sm:min-w-[90px] p-3 sm:p-4"><span className="sp-num text-xl sm:text-3xl">{stats.reservadas}</span><span className="sp-lbl text-[10px] sm:text-xs">Reservas</span></div>
+        <div className="stat-pill disponible flex-1 min-w-[70px] sm:min-w-[90px] p-3 sm:p-4"><span className="sp-num text-xl sm:text-3xl">{stats.disponibles}</span><span className="sp-lbl text-[10px] sm:text-xs">Libres</span></div>
+        <div className="stat-pill operativa flex-1 min-w-[70px] sm:min-w-[90px] p-3 sm:p-4"><span className="sp-num text-xl sm:text-3xl">{stats.operativas}</span><span className="sp-lbl text-[10px] sm:text-xs">Limpieza</span></div>
       </div>
 
       {/* Filters */}
@@ -348,12 +348,12 @@ export default function PantallaAdmin({ onSalir, onNav }) {
   return (
     <div className="app-shell">
       <header className="topbar flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0 px-3 sm:px-6 py-3">
-        <div className="topbar-left flex items-center gap-2">
-          <span className="topbar-logo text-xl">🏨</span>
-          <HotelTitle />
-          <span className="topbar-badge admin text-xs">Admin</span>
-        </div>
-        <button className="btn-salir text-sm" onClick={onSalir}>← Cerrar sesión</button>
+          <div className="topbar-left flex items-center gap-2">
+            <span className="topbar-logo text-xl">🌿</span>
+            <HotelTitle />
+            <span className="topbar-badge admin text-xs">Admin</span>
+          </div>
+          <button className="btn-salir text-sm" onClick={onSalir}>← Salir</button>
       </header>
 
       <div className="admin-content p-4 sm:p-6 max-w-[1200px] mx-auto">

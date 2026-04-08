@@ -69,7 +69,7 @@ export default function PantallaCheckin({ onNav }) {
       <PantallaForm titulo="🛎️ Check-in" onVolver={() => onNav('menu')}>
         <div className="exito-box">
           <div className="exito-icon">✅</div>
-          <h3>¡Check-in exitoso!</h3>
+          <h3>🌿 ¡Huésped registrado!</h3>
           <div className="info-table">
             <div className="it-row"><span>Habitación</span><strong>#{resultado.numero}</strong></div>
             <div className="it-row"><span>Huésped</span><strong>{resultado.huesped}</strong></div>
@@ -84,7 +84,7 @@ export default function PantallaCheckin({ onNav }) {
   }
 
   return (
-    <PantallaForm titulo="🛎️ Check-in" desc="Selecciona una habitación disponible y registra al huésped" onVolver={() => onNav('menu')}>
+    <PantallaForm titulo="🌿 Registrar Huésped" desc="Selecciona una habitación disponible y registra los datos del huésped" onVolver={() => onNav('menu')}>
       <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }} onKeyDown={handleKeyDown}>
       {/* Room selector — only available rooms */}
       <div className="form-group">
