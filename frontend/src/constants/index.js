@@ -4,44 +4,27 @@
  */
 export const PRODUCTOS = {
   restaurante: [
-    { nombre: 'Desayuno americano',     precio: 18000 },
-    { nombre: 'Desayuno continental',   precio: 12000 },
-    { nombre: 'Almuerzo del día',       precio: 25000 },
-    { nombre: 'Bandeja paisa',          precio: 28000 },
-    { nombre: 'Cena ejecutiva',         precio: 32000 },
-    { nombre: 'Sanduche de pollo',      precio: 15000 },
-    { nombre: 'Ensalada fresca',        precio: 12000 },
-    { nombre: 'Porción de frutas',      precio: 8000  },
-    { nombre: 'Sopa del día',           precio: 10000 },
-    { nombre: 'Ajiaco bogotano',        precio: 22000 },
+    { nombre: 'Desayuno americano',     precio: 28000 },
+    { nombre: 'Desayuno buffet',       precio: 35000, incluye: true },
+    { nombre: 'Almuerzo regional',    precio: 35000 },
+    { nombre: 'Bandeja paisa',        precio: 38000 },
+    { nombre: 'Cena BBQ',             precio: 45000 },
+    { nombre: 'Menú infantil',        precio: 22000 },
   ],
   bar: [
-    { nombre: 'Agua Cristal 600ml',          precio: 4000  },
-    { nombre: 'Gaseosa 350ml',               precio: 5000  },
-    { nombre: 'Jugo natural',                precio: 7000  },
-    { nombre: 'Cerveza Club Colombia',       precio: 8000  },
-    { nombre: 'Cerveza Águila',              precio: 7000  },
-    { nombre: 'Aguardiente Antioqueño',      precio: 45000 },
-    { nombre: 'Ron Medellín Añejo',          precio: 55000 },
-    { nombre: 'Vino tinto (copa)',           precio: 18000 },
-    { nombre: 'Café americano',              precio: 5000  },
-    { nombre: 'Cappuccino',                  precio: 7000  },
-    { nombre: 'Aromática',                   precio: 4000  },
-    { nombre: 'Michelada',                   precio: 12000 },
+    { nombre: 'Agua mineral',          precio: 6000  },
+    { nombre: 'Jugo natural',         precio: 12000 },
+    { nombre: 'Cerveza artesanal',    precio: 15000 },
+    { nombre: 'Cocteles tropicales',  precio: 28000 },
+    { nombre: 'Vino por copa',        precio: 25000 },
   ],
   servicios: [
-    { nombre: 'Toallas extra (par)',           precio: 5000  },
-    { nombre: 'Servicio de lavandería',        precio: 20000 },
-    { nombre: 'Planchado de ropa',             precio: 15000 },
-    { nombre: 'Servicio a la habitación',      precio: 8000  },
-    { nombre: 'Bloqueador solar',              precio: 12000 },
-    { nombre: 'Kit de afeitado',               precio: 8000  },
-    { nombre: 'Parqueadero adicional (día)',   precio: 15000 },
-    { nombre: 'Llamada nacional',              precio: 3000  },
-    { nombre: 'Tour ciudad (por persona)',     precio: 35000 },
-    { nombre: 'Masaje relajante 60min',        precio: 80000 },
-    { nombre: 'Flotadores / accesorios piscina', precio: 10000 },
-    { nombre: 'Adaptador eléctrico',           precio: 6000  },
+    { nombre: 'Servicio a habitación',   precio: 12000 },
+    { nombre: 'Lavandería',               precio: 25000 },
+    { nombre: 'Masaje relajante 60min', precio: 100000 },
+    { nombre: 'Tour guiado senderos',     precio: 50000 },
+    { nombre: 'Parqueadero',              precio: 15000 },
+    { nombre: 'Mascota por noche',       precio: 50000 },
   ],
 };
 
@@ -49,12 +32,11 @@ export const PRODUCTOS = {
  * Room state configuration with visual styling
  */
 export const ESTADO_CFG = {
-  ocupada:        { label: 'Ocupada',         color: '#ef4444', bg: '#fef2f2', border: '#fca5a5', dot: '#ef4444' },
-  reservada:      { label: 'Reservada',       color: '#f59e0b', bg: '#fffbeb', border: '#fde68a', dot: '#f59e0b' },
-  disponible:     { label: 'Disponible',      color: '#10b981', bg: '#f0fdf4', border: '#6ee7b7', dot: '#10b981' },
-  limpieza:       { label: 'En limpieza',     color: '#8b5cf6', bg: '#f5f3ff', border: '#c4b5fd', dot: '#8b5cf6' },
-  mantenimiento:  { label: 'Mantenimiento',   color: '#f97316', bg: '#fff7ed', border: '#fdba74', dot: '#f97316' },
-  'fuera-servicio': { label: 'Fuera de servicio', color: '#6b7280', bg: '#f9fafb', border: '#d1d5db', dot: '#6b7280' },
+  ocupada:        { label: 'Ocupada',         color: '#d97706', bg: '#fef3c7', border: '#fcd34d', dot: '#d97706' },
+  reservada:      { label: 'Reservada',       color: '#059669', bg: '#d1fae5', border: '#6ee7b7', dot: '#059669' },
+  disponible:     { label: 'Disponible',      color: '#0891b2', bg: '#cffafe', border: '#a5f3fc', dot: '#0891b2' },
+  limpieza:       { label: 'Limpieza',        color: '#7c3aed', bg: '#ede9fe', border: '#c4b5fd', dot: '#7c3aed' },
+  mantenimiento:  { label: 'Mantenimiento',   color: '#dc2626', bg: '#fee2e2', border: '#fca5a5', dot: '#dc2626' },
 };
 
 /**
@@ -63,10 +45,10 @@ export const ESTADO_CFG = {
 export const TIPO_ICON = {
   'Suite Bosque': '🌲',
   'Suite Sunset': '🌅',
-  'Suite Eden': '🌿',
-  'Habitacion Pareja': '💑',
-  'Habitacion Doble': '🛏️🛏️',
-  'Habitacion Cuadruple': '👨‍👩‍👧‍👦',
+  'Suite Edén': '🌿',
+  'Habitación Pareja': '💑',
+  'Habitación Doble Estándar': '🛏️',
+  'Habitación Cuádruple Estándar': '👨‍👩‍👧‍👦',
   'Cabana Familiar en Bote': '⛵',
 };
 
@@ -101,19 +83,21 @@ export const CAT_ICONS = {
  * Amenity icons and labels for room display
  */
 export const AMENIDADES_CFG = {
-  jacuzzi: { icon: '🛁', label: 'Jacuzzi' },
+  jacuzzi_privado: { icon: '🛁', label: 'Jacuzzi privado' },
   wifi: { icon: '📶', label: 'WiFi' },
-  ac: { icon: '❄️', label: 'Aire Acondicionado' },
+  ac: { icon: '❄️', label: 'Aire acondicionado' },
+  tv: { icon: '📺', label: 'Televisor' },
+  baño_privado: { icon: '🚿', label: 'Baño privado' },
   balcon: { icon: '🌅', label: 'Balcón' },
-  'vista-bosque': { icon: '🌲', label: 'Vista al Bosque' },
-  'vista-puesta-sol': { icon: '🌇', label: 'Vista Puesta de Sol' },
-  sala: { icon: '🛋️', label: 'Sala' },
-  cocina: { icon: '🍳', label: 'Cocina' },
   terraza: { icon: '🏡', label: 'Terraza' },
-  ' Ducha Exclusiva': { icon: '🚿', label: 'Ducha Exclusiva' },
-  chimenea: { icon: '🔥', label: 'Chimenea' },
-  hamaca: { icon: '🌴', label: 'Hamaca' },
-  'vista-lago': { icon: '🌊', label: 'Vista al Lago' },
+  vista_bosque: { icon: '🌲', label: 'Vista al bosque' },
+  vista_bosque_premium: { icon: '🌄', label: 'Vista premium' },
+  orientacion_solar: { icon: '☀️', label: 'Orientación solar' },
+  ducha_exterior: { icon: '🚿', label: 'Ducha exterior' },
+  jardin_privado: { icon: '🌱', label: 'Jardín privado' },
+  arquitectura_sostenible: { icon: '🪵', label: 'Arquitectura sostenible' },
+  vista_lago: { icon: '🌊', label: 'Vista al lago' },
+  hamacas: { icon: '🌴', label: 'Hamacas' },
 };
 
 /**
@@ -122,11 +106,11 @@ export const AMENIDADES_CFG = {
 export const TIPO_LABEL = {
   'Suite Bosque': 'Suite Bosque',
   'Suite Sunset': 'Suite Sunset',
-  'Suite Eden': 'Suite Eden',
-  'Habitacion Pareja': 'Habitación Pareja',
-  'Habitacion Doble': 'Habitación Doble',
-  'Habitacion Cuadruple': 'Habitación Cuádruple',
-  'Cabana Familiar en Bote': 'Cabaña Familiar en Bote',
+  'Suite Edén': 'Suite Edén',
+  'Habitación Pareja': 'Habitación Pareja',
+  'Habitación Doble Estándar': 'Habitación Doble',
+  'Habitación Cuádruple Estándar': 'Habitación Cuádruple',
+  'Cabana Familiar en Bote': 'Cabaña Familiar',
 };
 
 /**
@@ -135,9 +119,27 @@ export const TIPO_LABEL = {
 export const TIPOS_HABITACION = [
   { value: 'Suite Bosque', label: 'Suite Bosque' },
   { value: 'Suite Sunset', label: 'Suite Sunset' },
-  { value: 'Suite Eden', label: 'Suite Eden' },
-  { value: 'Habitacion Pareja', label: 'Habitación Pareja' },
-  { value: 'Habitacion Doble', label: 'Habitación Doble' },
-  { value: 'Habitacion Cuadruple', label: 'Habitación Cuádruple' },
-  { value: 'Cabana Familiar en Bote', label: 'Cabaña Familiar en Bote' },
+  { value: 'Suite Edén', label: 'Suite Edén' },
+  { value: 'Habitación Pareja', label: 'Habitación Pareja' },
+  { value: 'Habitación Doble Estándar', label: 'Habitación Doble' },
+  { value: 'Habitación Cuádruple Estándar', label: 'Habitación Cuádruple' },
+  { value: 'Cabana Familiar en Bote', label: 'Cabaña Familiar' },
 ];
+
+/**
+ * Hotel configuration
+ */
+export const HOTEL_CFG = {
+  nombre: 'El Bosque Hotel Boutique',
+  nombreMarketing: 'Eco Hotel El Bosque',
+  ubicacion: 'Doradal, Colombia',
+  horarios: {
+    checkIn: { inicio: '15:00', fin: '16:00' },
+    checkOut: { inicio: '12:00', fin: '12:30' },
+  },
+  politicas: {
+    edadMinima: 0,
+    mascotas: true,
+    tarifaMascota: 50000,
+  },
+};

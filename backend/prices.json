@@ -1,75 +1,164 @@
 {
+  "hotel": {
+    "nombre": "El Bosque Hotel Boutique",
+    "nombreMarketing": "Eco Hotel El Bosque",
+    "ubicacion": "Doradal, Colombia",
+    "direccion": "Vereda El Rosario, a 2km por vía sin pavimentar"
+  },
+  "horarios": {
+    "checkIn": {
+      "inicio": "15:00",
+      "fin": "16:00",
+      "nota": "Estricto: solo se permite check-in entre 3:00 PM y 4:00 PM"
+    },
+    "checkOut": {
+      "inicio": "12:00",
+      "fin": "12:30",
+      "nota": "Estricto: solo se permite check-out entre 12:00 PM y 12:30 PM"
+    }
+  },
+  "politicas": {
+    "edadMinima": 0,
+    "notaEdad": "Sin restricciones de edad para registro de huéspedes",
+    "mascotas": true,
+    "tarifaMascota": 50000,
+    "notaMascotas": "Propiedad pet-friendly con tarifa adicional por mascota"
+  },
   "tarifas": {
     "Suite Bosque": {
       "precio": 350000,
-      "descripcion": "Suite con jacuzzi privado y vista al bosque",
+      "descripcion": "Suite con jacuzzi privado y arquitectura en madera y bambú sostenible",
       "incluyeDesayuno": true,
-      "nochesMinimas": 1
+      "nochesMinimas": 1,
+      "capacidad": 2,
+      "camas": "1 cama king"
     },
     "Suite Sunset": {
       "precio": 420000,
-      "descripcion": "Suite premium con jacuzzi y vista al atardecer",
+      "descripcion": "Suite con orientación solar optimizada para vistas premium del bosque",
       "incluyeDesayuno": true,
-      "nochesMinimas": 1
+      "nochesMinimas": 1,
+      "capacidad": 2,
+      "camas": "1 cama king"
     },
-    "Suite Eden": {
+    "Suite Edén": {
       "precio": 480000,
-      "descripcion": "Suite familiar con jacuzzi, cocina y terraza",
+      "descripcion": "Suite con ducha exterior y acceso a jardín privado",
       "incluyeDesayuno": true,
-      "nochesMinimas": 1
+      "nochesMinimas": 1,
+      "capacidad": 2,
+      "camas": "1 cama king"
     },
-    "Habitacion Pareja": {
+    "Habitación Pareja": {
       "precio": 180000,
-      "descripcion": "Habitación acogedora para parejas",
+      "descripcion": "Habitación para parejas con control climático e internet inalámbrico",
       "incluyeDesayuno": true,
-      "nochesMinimas": 1
+      "nochesMinimas": 1,
+      "capacidad": 2,
+      "camas": "1 cama king",
+      "mascotas": true
     },
-    "Habitacion Doble": {
+    "Habitación Doble Estándar": {
+      "precio": 160000,
+      "descripcion": "Habitación estándar con cama king, control climático, TV pantalla plana y baño privado",
+      "incluyeDesayuno": true,
+      "nochesMinimas": 1,
+      "capacidad": 2,
+      "camas": "1 cama king"
+    },
+    "Habitación Cuádruple Estándar": {
       "precio": 220000,
-      "descripcion": "Habitación amplia con dos camas dobles",
+      "descripcion": "Habitación familiar para 4 personas con control climático y televisión",
       "incluyeDesayuno": true,
-      "nochesMinimas": 1
+      "nochesMinimas": 1,
+      "capacidad": 4,
+      "camas": "2 camas dobles"
     },
-    "Habitacion Cuadruple": {
-      "precio": 280000,
-      "descripcion": "Habitación familiar con sala integrada",
-      "incluyeDesayuno": true,
-      "nochesMinimas": 1
-    },
-    "Cabana Familiar en Bote": {
+    "Cabaña Familiar en Bote": {
       "precio": 550000,
-      "descripcion": "Cabana única en forma de barco, ideal para grupos",
+      "descripcion": "Estructura única sobre el agua con 3 literas, capacidad para 6 personas",
       "incluyeDesayuno": true,
-      "nochesMinimas": 2
+      "nochesMinimas": 2,
+      "capacidad": 6,
+      "camas": "3 literas"
+    }
+  },
+  "amenidades": {
+    "habitacion": {
+      "jacuzzi_privado": "Jacuzzi privado",
+      "wifi": "WiFi",
+      "ac": "Aire acondicionado",
+      "tv": "Televisor",
+      "baño_privado": "Baño privado",
+      "balcon": "Balcón",
+      "terraza": "Terraza",
+      "vista_bosque": "Vista al bosque",
+      "vista_bosque_premium": "Vista premium al bosque",
+      "orientacion_solar": "Orientación solar optimizada",
+      "ducha_exterior": "Ducha exterior",
+      "jardin_privado": "Jardín privado",
+      "arquitectura_sostenible": "Arquitectura sostenible",
+      "vista_lago": "Vista al lago",
+      "hamacas": "Hamacas"
+    },
+    "zonas_comunes": {
+      "piscina_infinity": "Piscina infinita exterior",
+      "piscina_ninos": "Piscina para niños",
+      "agua_parque": "Parque de agua con toboganes",
+      "restaurante": "Restaurante (cocina regional y barbacoa)",
+      "bar_piscina": "Bar piscina",
+      "snack_bar": "Snack bar",
+      "senderos_ecologicos": "Senderos ecológicos Canario y Manantial",
+      "cine_forestal": "Cine al aire libre en zona forestada"
+    }
+  },
+  "horarios_zonas": {
+    "piscina": {
+      "inicio": "09:00",
+      "fin": "21:00"
+    },
+    "desayunador": {
+      "inicio": "07:00",
+      "fin": "10:00"
+    },
+    "restaurante_almuerzo": {
+      "inicio": "12:00",
+      "fin": "14:30"
+    },
+    "restaurante_cena": {
+      "inicio": "19:00",
+      "fin": "21:30"
     }
   },
   "productos": {
     "restaurante": [
-      { "nombre": "Desayuno americano", "precio": 25000, "incluye": false },
+      { "nombre": "Desayuno americano", "precio": 28000, "incluye": false },
       { "nombre": "Desayuno buffet", "precio": 35000, "incluye": true, "nota": "Incluido en tarifa" },
-      { "nombre": "Almuerzo del día", "precio": 32000, "incluye": false },
-      { "nombre": "Bandeja paisa", "precio": 35000, "incluye": false },
-      { "nombre": "Cena ejecutiva", "precio": 40000, "incluye": false },
-      { "nombre": "Menu Infantil", "precio": 20000, "incluye": false }
+      { "nombre": "Almuerzo regional", "precio": 35000, "incluye": false },
+      { "nombre": "Bandeja paisa", "precio": 38000, "incluye": false },
+      { "nombre": "Cena BBQ", "precio": 45000, "incluye": false },
+      { "nombre": "Menú infantil", "precio": 22000, "incluye": false }
     ],
     "bar": [
-      { "nombre": "Agua mineral", "precio": 5000, "incluye": false },
-      { "nombre": "Jugos naturales", "precio": 10000, "incluye": false },
-      { "nombre": "Cerveza nacional", "precio": 12000, "incluye": false },
-      { "nombre": "Cocteles especiales", "precio": 25000, "incluye": false },
-      { "nombre": "Vino por copa", "precio": 22000, "incluye": false }
+      { "nombre": "Agua mineral", "precio": 6000, "incluye": false },
+      { "nombre": "Jugo natural", "precio": 12000, "incluye": false },
+      { "nombre": "Cerveza artesanal", "precio": 15000, "incluye": false },
+      { "nombre": "Cocteles tropicales", "precio": 28000, "incluye": false },
+      { "nombre": "Vino por copa", "precio": 25000, "incluye": false }
     ],
     "servicios": [
-      { "nombre": "Servicio a habitación", "precio": 10000, "incluye": false },
+      { "nombre": "Servicio a habitación", "precio": 12000, "incluye": false },
       { "nombre": "Lavandería", "precio": 25000, "incluye": false },
-      { "nombre": "Masaje relajante", "precio": 90000, "incluye": false },
-      { "nombre": "Tour guiado", "precio": 45000, "incluye": false },
-      { "nombre": "Parqueadero", "precio": 15000, "incluye": false }
+      { "nombre": "Masaje relajante (60 min)", "precio": 100000, "incluye": false },
+      { "nombre": "Tour guiado senderos", "precio": 50000, "incluye": false },
+      { "nombre": "Parqueadero", "precio": 15000, "incluye": false },
+      { "nombre": "Mascota por noche", "precio": 50000, "incluye": false }
     ]
   },
   "notas": {
-    "desayuno": "El desayuno está incluido en todas las tarifas y se sirve de 7:00 AM a 10:00 AM en el restaurante del hotel.",
-    "politicas": "Tarifa por noche. Check-in: 3:00 PM. Check-out: 11:00 AM.",
-    "temporadas": "Las tarifas pueden variar en temporada alta (Semana Santa, diciembre, junio-agosto)."
+    "desayuno": "El desayuno americano está incluido en todas las tarifas y se sirve de 7:00 AM a 10:00 AM en el restaurante principal.",
+    "conectividad": "El hotel opera en zona rural con conectividad fluctuante. El sistema está diseñado para funcionar sin conexión a internet.",
+    "acceso": "El acceso al hotel es por vía de 2km sin pavimentar. Se recomienda vehículo 4x4 en época de lluvias.",
+    "temporadas": "Las tarifas pueden variar en temporada alta: Semana Santa, junio-agosto, diciembre-enero."
   }
 }
