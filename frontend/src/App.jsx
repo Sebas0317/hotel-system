@@ -60,7 +60,7 @@ export default function App() {
         path="/"
         element={
           !rol ? (
-            <LoginScreen onRol={handleRol} />
+            <LoginScreen onRole={handleRol} />
           ) : (
             <Navigate to={rol === 'admin' ? '/admin' : '/user'} replace />
           )
