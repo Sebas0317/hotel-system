@@ -1,17 +1,21 @@
 'use strict';
 
+const logger = require('../utils/logger');
+
 /**
  * Centralized error handling middleware
  * Catches unhandled errors and returns consistent error responses
  */
 function errorHandler(err, _req, res, _next) {
-  console.error('[ErrorHandler]', err);
+  logger.error('Unhandled error', { 
+    message: err.message, 
+    stack: process.env.NODE_ENV !== 'production' ? err.stack : undefined 
+  });
 
-  // Don't leak internal error details to the client
   const statusCode = err.statusCode || 500;
   const message = statusCode === 500
-    ? 'Error interno del servidor'
-    : err.message || 'Error desconocido';
+    ? 'Internal server error'
+    : err.message || 'Unknown error';
 
   res.status(statusCode).json({ error: message });
 }
@@ -20,7 +24,7 @@ function errorHandler(err, _req, res, _next) {
  * 404 handler for undefined routes
  */
 function notFoundHandler(_req, res) {
-  res.status(404).json({ error: 'Ruta no encontrada' });
+  res.status(404).json({ error: 'Route not found' });
 }
 
 /**
@@ -32,7 +36,11 @@ function requestLogger(req, _res, next) {
 
   _res.end = function(...args) {
     const duration = Date.now() - start;
-    console.log(`[Request] ${req.method} ${req.originalUrl} - ${_res.statusCode} (${duration}ms)`);
+    const logLevel = _res.statusCode >= 400 ? 'warn' : 'debug';
+    logger[logLevel](`${req.method} ${req.originalUrl}`, { 
+      status: _res.statusCode, 
+      duration: `${duration}ms` 
+    });
     originalEnd.apply(_res, args);
   };
 

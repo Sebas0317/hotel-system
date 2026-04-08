@@ -2,12 +2,24 @@
 export const API_BASE = '';
 
 /**
+ * Custom API error class with status code
+ */
+export class ApiError extends Error {
+  constructor(message, status = 500) {
+    super(message);
+    this.status = status;
+    this.name = 'ApiError';
+  }
+}
+
+/**
  * Generic fetch wrapper with error handling
  * @param {string} endpoint - API endpoint path
  * @param {Object} options - Fetch options (method, body, etc.)
+ * @param {number} [timeout=10000] - Request timeout in ms
  * @returns {Promise<any>} Parsed JSON response
  */
-async function apiFetch(endpoint, options = {}) {
+async function apiFetch(endpoint, options = {}, timeout = 10000) {
   const url = `${API_BASE}${endpoint}`;
   const token = localStorage.getItem('adminToken');
   const config = {
@@ -16,18 +28,25 @@ async function apiFetch(endpoint, options = {}) {
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
     ...options,
-    // Stringify body if provided
     body: options.body ? JSON.stringify(options.body) : undefined,
+    signal: AbortSignal.timeout(timeout),
   };
 
-  const response = await fetch(url, config);
-  const data = await response.json();
+  try {
+    const response = await fetch(url, config);
+    const data = await response.json();
 
-  if (!response.ok) {
-    throw new Error(data.error || 'Error en la solicitud');
+    if (!response.ok) {
+      throw new ApiError(data.error || 'Request failed', response.status);
+    }
+
+    return data;
+  } catch (err) {
+    if (err.name === 'TimeoutError' || err.name === 'AbortError') {
+      throw new ApiError('Request timed out', 408);
+    }
+    throw err;
   }
-
-  return data;
 }
 
 // ── Auth API ──
