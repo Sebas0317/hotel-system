@@ -175,13 +175,28 @@ export default function PantallaAdmin({ onSalir, onNav }) {
         </button>
       </div>
 
-      {/* Stats */}
+      {/* Stats - clickable filters */}
       <div className="admin-stats flex flex-wrap gap-2 sm:gap-3 mb-4">
-        <div className="stat-pill total flex-1 min-w-[70px] sm:min-w-[90px] p-3 sm:p-4"><span className="sp-num text-xl sm:text-3xl">{stats.total}</span><span className="sp-lbl text-[10px] sm:text-xs">Total</span></div>
-        <div className="stat-pill ocupada flex-1 min-w-[70px] sm:min-w-[90px] p-3 sm:p-4"><span className="sp-num text-xl sm:text-3xl">{stats.ocupadas}</span><span className="sp-lbl text-[10px] sm:text-xs">Ocupadas</span></div>
-        <div className="stat-pill reservada flex-1 min-w-[70px] sm:min-w-[90px] p-3 sm:p-4"><span className="sp-num text-xl sm:text-3xl">{stats.reservadas}</span><span className="sp-lbl text-[10px] sm:text-xs">Reservas</span></div>
-        <div className="stat-pill disponible flex-1 min-w-[70px] sm:min-w-[90px] p-3 sm:p-4"><span className="sp-num text-xl sm:text-3xl">{stats.disponibles}</span><span className="sp-lbl text-[10px] sm:text-xs">Libres</span></div>
-        <div className="stat-pill operativa flex-1 min-w-[70px] sm:min-w-[90px] p-3 sm:p-4"><span className="sp-num text-xl sm:text-3xl">{stats.operativas}</span><span className="sp-lbl text-[10px] sm:text-xs">Limpieza</span></div>
+        <button className={`stat-pill total flex-1 min-w-[70px] sm:min-w-[90px] p-3 sm:p-4 ${filtro === 'todos' ? 'activo' : ''}`} onClick={() => setFiltro('todos')}>
+          <span className="sp-num text-xl sm:text-3xl">{stats.total}</span>
+          <span className="sp-lbl text-[10px] sm:text-xs">Total</span>
+        </button>
+        <button className={`stat-pill ocupada flex-1 min-w-[70px] sm:min-w-[90px] p-3 sm:p-4 ${filtro === 'ocupada' ? 'activo' : ''}`} onClick={() => setFiltro('ocupada')}>
+          <span className="sp-num text-xl sm:text-3xl">{stats.ocupadas}</span>
+          <span className="sp-lbl text-[10px] sm:text-xs">Occupied</span>
+        </button>
+        <button className={`stat-pill reservada flex-1 min-w-[70px] sm:min-w-[90px] p-3 sm:p-4 ${filtro === 'reservada' ? 'activo' : ''}`} onClick={() => setFiltro('reservada')}>
+          <span className="sp-num text-xl sm:text-3xl">{stats.reservadas}</span>
+          <span className="sp-lbl text-[10px] sm:text-xs">Reserved</span>
+        </button>
+        <button className={`stat-pill disponible flex-1 min-w-[70px] sm:min-w-[90px] p-3 sm:p-4 ${filtro === 'disponible' ? 'activo' : ''}`} onClick={() => setFiltro('disponible')}>
+          <span className="sp-num text-xl sm:text-3xl">{stats.disponibles}</span>
+          <span className="sp-lbl text-[10px] sm:text-xs">Available</span>
+        </button>
+        <button className={`stat-pill operativa flex-1 min-w-[70px] sm:min-w-[90px] p-3 sm:p-4 ${filtro === 'limpieza' ? 'activo' : ''}`} onClick={() => setFiltro('limpieza')}>
+          <span className="sp-num text-xl sm:text-3xl">{stats.operativas}</span>
+          <span className="sp-lbl text-[10px] sm:text-xs">Cleaning</span>
+        </button>
       </div>
 
       {/* Filters */}

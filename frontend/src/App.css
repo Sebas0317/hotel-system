@@ -613,6 +613,18 @@ input, select { font-family: inherit; }
   background: #fff;
   box-shadow: 0 1px 4px rgba(0,0,0,0.06);
   border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.stat-pill:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.stat-pill.activo {
+  border-color: #5a8f6b;
+  background: #f0fdf4;
 }
 
 .stat-pill.total      { border-color: #e5e7eb; }
