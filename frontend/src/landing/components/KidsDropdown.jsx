@@ -1,4 +1,4 @@
-import { useRoomContext } from '../context/RoomContext';
+import { useRoomContext } from '../context/useRoomContext';
 import { BsChevronDown } from 'react-icons/bs';
 import { kidsList } from '../data';
 import { Menu } from '@headlessui/react';

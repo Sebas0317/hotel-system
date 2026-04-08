@@ -1120,7 +1120,7 @@ input, select { font-family: inherit; }
 
 .room-select:focus {
   outline: none;
-  border-  color: #5a8f6b;
+  border-color: #5a8f6b;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
@@ -1429,7 +1429,7 @@ input, select { font-family: inherit; }
 }
 
 .res-cal-day.has-events {
-  border-  color: #5a8f6b;
+  border-color: #5a8f6b;
   background: #f0f7ff;
 }
 
@@ -1807,7 +1807,7 @@ input, select { font-family: inherit; }
 
 .pe-input:focus {
   outline: none;
-  border-  color: #5a8f6b;
+  border-color: #5a8f6b;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
@@ -1861,7 +1861,7 @@ input, select { font-family: inherit; }
 
 .pe-name-input:focus {
   outline: none;
-  border-  color: #5a8f6b;
+  border-color: #5a8f6b;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
@@ -3327,7 +3327,7 @@ input, select { font-family: inherit; }
 .ra-field input:focus,
 .ra-field select:focus {
   outline: none;
-  border-  color: #5a8f6b;
+  border-color: #5a8f6b;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
@@ -3435,7 +3435,7 @@ input, select { font-family: inherit; }
 }
 
 .ra-cat-item.seleccionado {
-  border-  color: #5a8f6b;
+  border-color: #5a8f6b;
   background: #eff6ff;
 }
 
@@ -3494,7 +3494,7 @@ input, select { font-family: inherit; }
 }
 
 .ra-metodo-btn.activo {
-  border-  color: #5a8f6b;
+  border-color: #5a8f6b;
   background: #eff6ff;
   color: #1e40af;
 }
@@ -3602,7 +3602,7 @@ input, select { font-family: inherit; }
 }
 
 .ra-status-btn.activo {
-  border-  color: #5a8f6b;
+  border-color: #5a8f6b;
   background: #eff6ff;
   color: #1e40af;
   font-weight: 600;

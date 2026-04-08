@@ -5,7 +5,7 @@ export default function ScrollToTop() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const unlisten = navigate((location) => {
+    const unlisten = navigate(() => {
       window.scrollTo(0, 0);
     });
     return unlisten;

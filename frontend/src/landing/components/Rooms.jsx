@@ -1,4 +1,4 @@
-import { useRoomContext } from '../context/RoomContext';
+import { useRoomContext } from '../context/useRoomContext';
 import { SpinnerDotted } from 'spinners-react';
 import Room from './Room';
 

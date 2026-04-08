@@ -4,9 +4,9 @@ import { getAuthToken, setAuthToken } from './services/api';
 import './App.css';
 
 // Extracted components
-import PantallaLogin from './components/PantallaLogin';
+import LoginScreen from './components/LoginScreen';
 import PantallaAdmin from './components/PantallaAdmin';
-import PantallaMenuUsuario from './components/PantallaMenuUsuario';
+import UserMenu from './components/UserMenu';
 import PantallaCheckin from './components/PantallaCheckin';
 import PantallaConsumo from './components/PantallaConsumo';
 import PantallaVer from './components/PantallaVer';
@@ -60,7 +60,7 @@ export default function App() {
         path="/"
         element={
           !rol ? (
-            <PantallaLogin onRol={handleRol} />
+            <LoginScreen onRol={handleRol} />
           ) : (
             <Navigate to={rol === 'admin' ? '/admin' : '/user'} replace />
           )
@@ -93,9 +93,9 @@ export default function App() {
         path="/user"
         element={
           rol === 'user' ? (
-            <PantallaMenuUsuario
+            <UserMenu
               onNav={(screen) => navigate(`/user/${screen}`)}
-              onSalir={handleExit}
+              onExit={handleExit}
             />
           ) : (
             <Navigate to="/" replace />

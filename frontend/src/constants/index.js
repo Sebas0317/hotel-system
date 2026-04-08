@@ -32,72 +32,72 @@ export const PRODUCTOS = {
  * Room state configuration with visual styling
  */
 export const ESTADO_CFG = {
-  ocupada:        { label: 'Ocupada',         color: '#d97706', bg: '#fef3c7', border: '#fcd34d', dot: '#d97706' },
-  reservada:      { label: 'Reservada',       color: '#059669', bg: '#d1fae5', border: '#6ee7b7', dot: '#059669' },
-  disponible:     { label: 'Disponible',      color: '#0891b2', bg: '#cffafe', border: '#a5f3fc', dot: '#0891b2' },
-  limpieza:       { label: 'Limpieza',        color: '#7c3aed', bg: '#ede9fe', border: '#c4b5fd', dot: '#7c3aed' },
-  mantenimiento:  { label: 'Mantenimiento',   color: '#dc2626', bg: '#fee2e2', border: '#fca5a5', dot: '#dc2626' },
+  ocupada:        { label: 'Occupied',      color: '#d97706', bg: '#fef3c7', border: '#fcd34d', dot: '#d97706' },
+  reservada:      { label: 'Reserved',     color: '#059669', bg: '#d1fae5', border: '#6ee7b7', dot: '#059669' },
+  disponible:     { label: 'Available',    color: '#0891b2', bg: '#cffafe', border: '#a5f3fc', dot: '#0891b2' },
+  limpieza:       { label: 'Cleaning',     color: '#7c3aed', bg: '#ede9fe', border: '#c4b5fd', dot: '#7c3aed' },
+  mantenimiento:  { label: 'Maintenance', color: '#dc2626', bg: '#fee2e2', border: '#fca5a5', dot: '#dc2626' },
 };
 
 /**
- * Room type icons mapping
+ * Room type icons mapping (using Unicode symbols)
  */
 export const TIPO_ICON = {
-  'Suite Bosque': '🌲',
-  'Suite Sunset': '🌅',
-  'Suite Edén': '🌿',
-  'Habitación Pareja': '💑',
-  'Habitación Doble Estándar': '🛏️',
-  'Habitación Cuádruple Estándar': '👨‍👩‍👧‍👦',
-  'Cabana Familiar en Bote': '⛵',
+  'Suite Bosque': '\uD83C\uDF32',
+  'Suite Sunset': '\uD83C\uDF05',
+  'Suite Edén': '\uD83C\uDF3F',
+  'Habitación Pareja': '\uD83D\uDC91',
+  'Habitación Doble Estándar': '\uD83D\uDECF',
+  'Habitación Cuádruple Estándar': '\uD83D\uDC66\uD83D\uDC67',
+  'Cabana Familiar en Bote': '\u26F5',
 };
 
 /**
  * Valid payment methods
  */
 export const METODOS_PAGO = [
-  { key: 'efectivo',      icon: '💵', label: 'Efectivo' },
-  { key: 'tarjeta',       icon: '💳', label: 'Tarjeta' },
-  { key: 'transferencia', icon: '📲', label: 'Transferencia' },
+  { key: 'efectivo',      icon: '\uD83D\uDCB5', label: 'Cash' },
+  { key: 'tarjeta',       icon: '\uD83D\uDCB3', label: 'Card' },
+  { key: 'transferencia', icon: '\uD83D\uDCF2', label: 'Transfer' },
 ];
 
 /**
  * Consumption category display config
  */
 export const CATEGORIAS_CONSUMO = [
-  { key: 'restaurante', label: '🍽️ Restaurante' },
-  { key: 'bar',         label: '🍹 Bar' },
-  { key: 'servicios',   label: '🛎️ Servicios' },
+  { key: 'restaurante', label: 'Restaurant' },
+  { key: 'bar',         label: 'Bar' },
+  { key: 'servicios',   label: 'Services' },
 ];
 
 /**
  * Category icons for display
  */
 export const CAT_ICONS = {
-  restaurante: '🍽️',
-  bar: '🍹',
-  servicios: '🛎️',
+  restaurante: '\uD83C\uDF7D\uFE0F',
+  bar: '\uD83C\uDF79',
+  servicios: '\uD83D\uDD0E',
 };
 
 /**
  * Amenity icons and labels for room display
  */
 export const AMENIDADES_CFG = {
-  jacuzzi_privado: { icon: '🛁', label: 'Jacuzzi privado' },
-  wifi: { icon: '📶', label: 'WiFi' },
-  ac: { icon: '❄️', label: 'Aire acondicionado' },
-  tv: { icon: '📺', label: 'Televisor' },
-  baño_privado: { icon: '🚿', label: 'Baño privado' },
-  balcon: { icon: '🌅', label: 'Balcón' },
-  terraza: { icon: '🏡', label: 'Terraza' },
-  vista_bosque: { icon: '🌲', label: 'Vista al bosque' },
-  vista_bosque_premium: { icon: '🌄', label: 'Vista premium' },
-  orientacion_solar: { icon: '☀️', label: 'Orientación solar' },
-  ducha_exterior: { icon: '🚿', label: 'Ducha exterior' },
-  jardin_privado: { icon: '🌱', label: 'Jardín privado' },
-  arquitectura_sostenible: { icon: '🪵', label: 'Arquitectura sostenible' },
-  vista_lago: { icon: '🌊', label: 'Vista al lago' },
-  hamacas: { icon: '🌴', label: 'Hamacas' },
+  jacuzzi_privado: { icon: '\uD83E\uDDBB', label: 'Private Jacuzzi' },
+  wifi: { icon: '\uD83D\uDCF6', label: 'WiFi' },
+  ac: { icon: '\u2744\uFE0F', label: 'Air Conditioning' },
+  tv: { icon: '\uD83D\uDCFA', label: 'Television' },
+  bano_privado: { icon: '\uD83E\uDDBF', label: 'Private Bathroom' },
+  balcon: { icon: '\uD83C\uDF05', label: 'Balcony' },
+  terraza: { icon: '\uD83C\uDFE1', label: 'Terrace' },
+  vista_bosque: { icon: '\uD83C\uDF32', label: 'Forest View' },
+  vista_bosque_premium: { icon: '\uD83C\uDF04', label: 'Premium View' },
+  orientacion_solar: { icon: '\u2600\uFE0F', label: 'Sun Orientation' },
+  ducha_exterior: { icon: '\uD83E\uDDBF', label: 'Outdoor Shower' },
+  jardin_privado: { icon: '\uD83C\uDF31', label: 'Private Garden' },
+  arquitectura_sostenible: { icon: '\uD83E\uDDF4', label: 'Sustainable Architecture' },
+  vista_lago: { icon: '\uD83C\uDF0A', label: 'Lake View' },
+  hamacas: { icon: '\uD83C\uDF34', label: 'Hammocks' },
 };
 
 /**

@@ -1,4 +1,4 @@
-import { useRoomContext } from '../context/RoomContext';
+import { useRoomContext } from '../context/useRoomContext';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { LogoWhite, LogoDark } from '../assets';

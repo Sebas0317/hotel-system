@@ -5,7 +5,7 @@ import {
   KidsDropdown,
   ScrollToTop,
 } from "../components";
-import { useRoomContext } from "../context/RoomContext";
+import { useRoomContext } from "../context/useRoomContext";
 import { hotelRules } from "../data";
 import { useParams } from "react-router-dom";
 import { FaCheck } from "react-icons/fa";

@@ -1,5 +1,5 @@
 import { AdultsDropdown, CheckIn, CheckOut, KidsDropdown } from './index';
-import { useRoomContext } from '../context/RoomContext';
+import { useRoomContext } from '../context/useRoomContext';
 
 export default function BookForm() {
   const { handleCheck } = useRoomContext();
