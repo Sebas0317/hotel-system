@@ -2,6 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const logger = require('../utils/logger');
 
 const PRICES_FILE = path.join(__dirname, '..', '..', 'prices.json');
 
@@ -23,7 +24,7 @@ function getPrices() {
     const data = fs.readFileSync(PRICES_FILE, 'utf-8');
     return data ? JSON.parse(data) : null;
   } catch (err) {
-    console.error(`[DataLayer] Error reading ${PRICES_FILE}:`, err.message);
+    logger.error('Failed to read prices file', { file: PRICES_FILE, error: err.message });
     return null;
   }
 }

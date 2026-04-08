@@ -1,11 +1,8 @@
 'use strict';
 
-/**
- * File-based data store with file locking to prevent race conditions
- * when multiple requests try to read/write simultaneously
- */
 const fs = require('fs');
 const path = require('path');
+const logger = require('../utils/logger');
 
 const ROOMS_FILE = path.join(__dirname, '..', '..', 'rooms.json');
 const CONSUMOS_FILE = path.join(__dirname, '..', '..', 'consumos.json');
@@ -31,7 +28,7 @@ function readJSON(filePath) {
     const data = fs.readFileSync(filePath, 'utf-8');
     return data ? JSON.parse(data) : [];
   } catch (err) {
-    console.error(`[DataLayer] Error reading ${filePath}:`, err.message);
+    logger.error('Failed to read JSON file', { file: filePath, error: err.message });
     return [];
   }
 }
