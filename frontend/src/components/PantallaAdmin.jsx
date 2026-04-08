@@ -135,7 +135,7 @@ export default function PantallaAdmin({ onSalir, onNav }) {
             <HotelTitle />
             <span className="topbar-badge admin text-xs">Admin</span>
           </div>
-          <button className="btn-salir text-sm" onClick={onSalir}>← Cerrar sesión</button>
+          <button className="btn-salir text-sm" onClick={onSalir}>Exit</button>
         </header>
         <div className="admin-content">
           <p style={{ textAlign: 'center', padding: '2rem' }}>🌱 Cargando habitaciones...</p>
@@ -149,17 +149,23 @@ export default function PantallaAdmin({ onSalir, onNav }) {
     <>
       {/* Primary action buttons */}
       <div className="admin-primary-actions flex flex-col sm:flex-row gap-2 sm:gap-3 mb-4">
-        <button
+<button
           className={`admin-primary-btn px-4 py-3 sm:px-5 text-sm sm:text-base ${activeView === 'rooms' ? 'activo' : ''}`}
           onClick={() => setView('rooms')}
         >
-          🌿 Habitaciones
+          Rooms
+        </button>
+        <button
+          className="admin-primary-btn admin-primary-btn-nav px-4 py-3 sm:px-5 text-sm sm:text-base"
+          onClick={() => onNav('/admin/reservaciones')}
+        >
+          Reservations
         </button>
         <button
           className={`admin-primary-btn px-4 py-3 sm:px-5 text-sm sm:text-base ${activeView === 'prices' ? 'activo' : ''}`}
           onClick={() => setView('prices')}
         >
-          🌲 Tarifas y Precios
+          Rates & Pricing
         </button>
         <button
           className="admin-primary-btn admin-primary-btn-nav px-4 py-3 sm:px-5 text-sm sm:text-base"
@@ -276,7 +282,7 @@ export default function PantallaAdmin({ onSalir, onNav }) {
             <HotelTitle />
             <span className="topbar-badge admin text-xs">Admin</span>
           </div>
-          <button className="btn-salir text-sm" onClick={() => { setSearchParams({}, { replace: true }); onSalir(); }}>← Cerrar sesión</button>
+          <button className="btn-salir text-sm" onClick={() => { setSearchParams({}, { replace: true }); onSalir(); }}>Exit</button>
         </header>
 
         {/* Two-column split: left = room list, right = detail panel */}
@@ -316,7 +322,7 @@ export default function PantallaAdmin({ onSalir, onNav }) {
             <HotelTitle />
             <span className="topbar-badge admin text-xs">Admin</span>
           </div>
-          <button className="btn-salir text-sm" onClick={() => { setSearchParams({}, { replace: true }); onSalir(); }}>← Cerrar sesión</button>
+          <button className="btn-salir text-sm" onClick={() => { setSearchParams({}, { replace: true }); onSalir(); }}>Exit</button>
         </header>
 
         <div className="admin-content admin-prices-view p-4 sm:p-6">
@@ -326,12 +332,12 @@ export default function PantallaAdmin({ onSalir, onNav }) {
               className="admin-primary-btn px-4 py-3 sm:px-5 text-sm sm:text-base"
               onClick={() => setView('rooms')}
             >
-              🏠 Lista de Habitaciones
+              Room List
             </button>
             <button
               className="admin-primary-btn activo px-4 py-3 sm:px-5 text-sm sm:text-base"
             >
-              💰 Modificar Tarifas y Consumibles
+              Rates & Pricing
             </button>
           </div>
 
