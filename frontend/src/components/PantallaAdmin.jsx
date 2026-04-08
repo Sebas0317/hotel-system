@@ -149,7 +149,7 @@ export default function PantallaAdmin({ onSalir, onNav }) {
     <>
       {/* Primary action buttons */}
       <div className="admin-primary-actions flex flex-col sm:flex-row gap-2 sm:gap-3 mb-4">
-<button
+        <button
           className={`admin-primary-btn px-4 py-3 sm:px-5 text-sm sm:text-base ${activeView === 'rooms' ? 'activo' : ''}`}
           onClick={() => setView('rooms')}
         >
@@ -157,7 +157,19 @@ export default function PantallaAdmin({ onSalir, onNav }) {
         </button>
         <button
           className="admin-primary-btn admin-primary-btn-nav px-4 py-3 sm:px-5 text-sm sm:text-base"
-          onClick={() => onNav('/admin/reservaciones')}
+          onClick={() => onNav('/admin/register')}
+        >
+          Guest Registration
+        </button>
+        <button
+          className="admin-primary-btn admin-primary-btn-nav px-4 py-3 sm:px-5 text-sm sm:text-base"
+          onClick={() => onNav('/admin/transactions')}
+        >
+          Transaction Entry
+        </button>
+        <button
+          className="admin-primary-btn admin-primary-btn-nav px-4 py-3 sm:px-5 text-sm sm:text-base"
+          onClick={() => onNav('/admin/reservations')}
         >
           Reservations
         </button>
@@ -166,12 +178,6 @@ export default function PantallaAdmin({ onSalir, onNav }) {
           onClick={() => setView('prices')}
         >
           Rates & Pricing
-        </button>
-        <button
-          className="admin-primary-btn admin-primary-btn-nav px-4 py-3 sm:px-5 text-sm sm:text-base"
-          onClick={() => onNav('/admin/reservaciones')}
-        >
-          📋 Reservas
         </button>
       </div>
 

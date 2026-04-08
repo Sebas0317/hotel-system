@@ -90,6 +90,28 @@ export default function App() {
       />
 
       <Route
+        path="/admin/register"
+        element={
+          rol === 'admin' ? (
+            <PantallaCheckin onNav={(path) => navigate(path)} />
+          ) : (
+            <Navigate to="/" replace />
+          )
+        }
+      />
+
+      <Route
+        path="/admin/transactions"
+        element={
+          rol === 'admin' ? (
+            <PantallaConsumo onNav={(path) => navigate(path)} />
+          ) : (
+            <Navigate to="/" replace />
+          )
+        }
+      />
+
+      <Route
         path="/user"
         element={
           rol === 'user' ? (
