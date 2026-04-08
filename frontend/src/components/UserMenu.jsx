@@ -3,21 +3,6 @@ import { fetchRooms } from '../services/api';
 import HotelTitle from './HotelTitle';
 
 export default function UserMenu({ onNavigate, onExit }) {
-  const [stats, setStats] = useState({ total: 0, occupied: 0, reserved: 0, available: 0 });
-
-  useEffect(() => {
-    fetchRooms()
-      .then((rooms) => {
-        setStats({
-          total: rooms.length,
-          occupied: rooms.filter((r) => r.estado === 'ocupada').length,
-          reserved: rooms.filter((r) => r.estado === 'reservada').length,
-          available: rooms.filter((r) => r.estado === 'disponible').length,
-        });
-      })
-      .catch(() => {});
-  }, []);
-
   return (
     <div className="app-shell">
       <header className="topbar flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0 px-3 sm:px-6 py-3">
@@ -31,16 +16,6 @@ export default function UserMenu({ onNavigate, onExit }) {
 
       <div className="usuario-content p-4 sm:p-6 max-w-[800px] mx-auto">
         <div className="menu-grid grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-          <button className="menu-card checkin text-left p-5 sm:p-6" onClick={() => onNavigate('register')}>
-            <span className="mc-icon text-3xl sm:text-4xl"></span>
-            <span className="mc-title text-lg sm:text-xl">Guest Registration</span>
-            <span className="mc-desc text-sm sm:text-base">Register new guest and assign room</span>
-          </button>
-          <button className="menu-card consumo text-left p-5 sm:p-6" onClick={() => onNavigate('transactions')}>
-            <span className="mc-icon text-3xl sm:text-4xl"></span>
-            <span className="mc-title text-lg sm:text-xl">Transaction Entry</span>
-            <span className="mc-desc text-sm sm:text-base">Add charges to active room</span>
-          </button>
           <button className="menu-card ver text-left p-5 sm:p-6" onClick={() => onNavigate('room')}>
             <span className="mc-icon text-3xl sm:text-4xl"></span>
             <span className="mc-title text-lg sm:text-xl">Room Status</span>
