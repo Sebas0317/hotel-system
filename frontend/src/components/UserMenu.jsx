@@ -30,13 +30,6 @@ export default function UserMenu({ onNavigate, onExit }) {
       </header>
 
       <div className="usuario-content p-4 sm:p-6 max-w-[800px] mx-auto">
-        <div className="usuario-stats flex flex-wrap gap-2 sm:gap-3 mb-6">
-          <div className="stat-pill total flex-1 min-w-[80px]"><span className="sp-num text-xl sm:text-3xl">{stats.total}</span><span className="sp-lbl text-[10px] sm:text-xs">Total</span></div>
-          <div className="stat-pill occupied flex-1 min-w-[80px]"><span className="sp-num text-xl sm:text-3xl">{stats.occupied}</span><span className="sp-lbl text-[10px] sm:text-xs">Occupied</span></div>
-          <div className="stat-pill reserved flex-1 min-w-[80px]"><span className="sp-num text-xl sm:text-3xl">{stats.reserved}</span><span className="sp-lbl text-[10px] sm:text-xs">Reserved</span></div>
-          <div className="stat-pill available flex-1 min-w-[80px]"><span className="sp-num text-xl sm:text-3xl">{stats.available}</span><span className="sp-lbl text-[10px] sm:text-xs">Available</span></div>
-        </div>
-
         <div className="menu-grid grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
           <button className="menu-card checkin text-left p-5 sm:p-6" onClick={() => onNavigate('register')}>
             <span className="mc-icon text-3xl sm:text-4xl"></span>
