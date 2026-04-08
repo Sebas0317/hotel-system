@@ -7,6 +7,7 @@ import './App.css';
 import LoginScreen from './components/LoginScreen';
 import PantallaAdmin from './components/PantallaAdmin';
 import UserView from './components/UserView';
+import UserCheckout from './components/UserCheckout';
 import PantallaCheckin from './components/PantallaCheckin';
 import PantallaConsumo from './components/PantallaConsumo';
 import PantallaVer from './components/PantallaVer';
@@ -155,7 +156,7 @@ export default function App() {
         path="/user/checkout"
         element={
           rol === 'user' ? (
-            <PantallaCheckout onNav={(screen) => navigate(`/user/${screen}`)} />
+            <UserCheckout onExit={handleExit} />
           ) : (
             <Navigate to="/" replace />
           )
