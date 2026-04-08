@@ -67,7 +67,7 @@ export default function LoginScreen({ onRole }) {
           <div className="login-logo text-7xl block mb-3"></div>
           <HotelTitle variant="login" />
         </div>
-        <p className="login-pregunta text-sm font-semibold uppercase tracking-wide mb-4">El Bosque Hotel Boutique - Property Management System</p>
+        <p className="login-pregunta text-sm font-semibold uppercase tracking-wide mb-4">Eco Hotel El Bosque - Property Management System</p>
         <div className="login-cards flex flex-col gap-3 sm:gap-4 mb-8">
           <button className="login-card admin-card text-left p-5 sm:p-6" onClick={() => setAdminMode(true)}>
             <span className="lc-icon text-3xl sm:text-4xl"></span>
