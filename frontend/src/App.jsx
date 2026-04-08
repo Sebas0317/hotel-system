@@ -94,7 +94,7 @@ export default function App() {
         element={
           rol === 'user' ? (
             <UserMenu
-              onNav={(screen) => navigate(`/user/${screen}`)}
+              onNavigate={(screen) => navigate(`/user/${screen}`)}
               onExit={handleExit}
             />
           ) : (
