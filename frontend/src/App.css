@@ -642,88 +642,144 @@ input, select { font-family: inherit; }
 .stat-pill.operativa .sp-num  { color: #8b5cf6; }
 
 /* ══════════════════════════════════════════════
-   USER VIEW (Room List + Details)
+   USER VIEW - Use admin styles for room list/detail
+   (rd- classes defined in admin section below)
 ══════════════════════════════════════════════ */
-.user-view {
-  max-width: 1200px;
-  margin: 0 auto;
-  width: 100%;
+.admin-room-list,
+.admin-room-detail {
+  min-height: 500px;
 }
 
-.user-room-list {
-  flex: 1;
-  min-width: 280px;
-}
-
-.user-room-list h3 {
-  color: #1e2533;
-  font-weight: 600;
-  font-size: 18px;
-  margin-bottom: 12px;
-}
-
-.room-list-item {
-  display: flex;
-  flex-direction: column;
-  padding: 16px;
-  border-radius: 12px;
+.admin-room-detail {
   background: #fff;
-  border: 2px solid #e5e7eb;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  width: 100%;
-  text-align: left;
-}
-
-.room-list-item:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  border-color: #d1d5db;
-}
-
-.room-list-item.selected,
-.room-list-item.active {
-  border-color: #5a8f6b !important;
-  background: #f0fdf4 !important;
-}
-
-.user-room-detail {
-  flex: 2;
-  min-width: 300px;
-}
-
-.user-room-detail > div {
-  background: #fff;
-  border-radius: 16px;
-  padding: 24px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  border-radius: 14px;
   border: 1px solid #e5e7eb;
+  overflow: hidden;
 }
 
-.user-room-detail h2 {
+.room-detail-panel {
+  padding: 24px;
+}
+
+.rdp-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.rdp-title {
   font-size: 24px;
   font-weight: 700;
   color: #1e2533;
 }
 
-.user-room-detail h3 {
+.rdp-subtitle {
+  font-size: 14px;
+  color: #6b7280;
+  margin-top: 4px;
+}
+
+.rdp-estado {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 20px;
+}
+
+.rdp-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.rdp-info-item {
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  background: #f9fafb;
+  border-radius: 8px;
+}
+
+.rdp-info-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  color: #9ca3af;
+  font-weight: 600;
+}
+
+.rdp-info-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e2533;
+  margin-top: 4px;
+}
+
+.rdp-section {
+  margin-bottom: 20px;
+}
+
+.rdp-section-title {
   font-size: 14px;
   font-weight: 600;
   color: #374151;
   margin-bottom: 12px;
 }
 
-.user-room-detail .border-b {
+.rdp-empty {
+  color: #9ca3af;
+  font-size: 14px;
+}
+
+.rdp-consumos-list {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.rdp-consumo-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
   border-bottom: 1px solid #e5e7eb;
+  font-size: 14px;
 }
 
-.user-room-detail .border-t {
+.rdp-consumo-item:last-child {
+  border-bottom: none;
+}
+
+.rdp-totals {
   border-top: 2px solid #e5e7eb;
+  padding-top: 16px;
+  margin-top: 16px;
 }
 
-.user-room-detail button {
+.rdp-total-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  font-size: 14px;
+}
+
+.rdp-total-grand {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1e2533;
+  border-top: 1px solid #e5e7eb;
+  margin-top: 8px;
+  padding-top: 12px;
+}
+
+.rdp-total-balance {
+  font-weight: 600;
+}
+
+.rdp-checkout-btn {
   width: 100%;
-  padding: 12px;
+  padding: 14px;
   background: #5a8f6b;
   color: #fff;
   font-weight: 600;
@@ -731,11 +787,20 @@ input, select { font-family: inherit; }
   border: none;
   cursor: pointer;
   transition: background 0.2s;
-  margin-top: 24px;
+  margin-top: 20px;
+  font-size: 16px;
 }
 
-.user-room-detail button:hover {
+.rdp-checkout-btn:hover {
   background: #4a7c59;
+}
+
+.rdp-empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  color: #9ca3af;
 }
 
 /* ══════════════════════════════════════════════

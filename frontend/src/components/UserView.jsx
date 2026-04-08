@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { fetchRooms, fetchConsumos } from '../services/api';
-import { COP } from '../utils/helpers';
+import { COP, FECHA } from '../utils/helpers';
+import { ESTADO_CFG } from '../constants';
 import HotelTitle from './HotelTitle';
 
 export default function UserView({ onExit }) {
@@ -53,6 +54,8 @@ export default function UserView({ onExit }) {
     );
   }
 
+  const cfg = selectedRoom ? (ESTADO_CFG[selectedRoom.estado] || ESTADO_CFG.disponible) : null;
+
   return (
     <div className="app-shell">
       <header className="topbar flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0 px-3 sm:px-6 py-3">
@@ -64,71 +67,96 @@ export default function UserView({ onExit }) {
         <button className="btn-salir text-sm" onClick={onExit}>Exit</button>
       </header>
 
-      <div className="user-view flex flex-col lg:flex-row gap-4 p-4 sm:p-6">
-        {/* Left panel - Room list */}
-        <div className="user-room-list w-full lg:w-1/3">
-          <h3 className="text-lg font-semibold mb-3">Occupied Rooms</h3>
-          {rooms.length === 0 ? (
-            <p className="text-gray-500">No occupied rooms</p>
-          ) : (
-            <div className="flex flex-col gap-2">
-              {rooms.map((room) => (
-                <button
-                  key={room.id}
-                  className={`room-list-item text-left p-4 rounded-lg border-2 transition-all ${
-                    selectedRoom?.id === room.id
-                      ? 'border-[#5a8f6b] bg-[#f0fdf4]'
-                      : 'border-gray-200 bg-white hover:border-gray-300'
-                  }`}
-                  onClick={() => setSelectedRoom(room)}
-                >
-                  <div className="flex justify-between items-center">
-                    <span className="font-bold text-lg">#{room.numero}</span>
-                    <span className="text-sm text-gray-500">{room.tipo}</span>
-                  </div>
-                  <div className="text-sm text-gray-600 mt-1">{room.huesped}</div>
-                </button>
-              ))}
+      <div className="admin-content flex flex-col lg:flex-row gap-4 p-4 sm:p-6">
+        {/* Left panel - Room list (like admin) */}
+        <div className="admin-room-list w-full lg:w-2/5">
+          <div className="piso-grupo">
+            <div className="piso-titulo">
+              <span>Occupied Rooms</span>
+              <span className="piso-count">{rooms.length} rooms</span>
             </div>
-          )}
+            <div className="rooms-grid">
+              {rooms.map((r) => {
+                const roomCfg = ESTADO_CFG[r.estado] || ESTADO_CFG.disponible;
+                const isSelected = selectedRoom?.id === r.id;
+                return (
+                  <div
+                    key={r.id}
+                    className={`room-card ${isSelected ? 'selected' : ''}`}
+                    style={{ borderColor: roomCfg.border, background: roomCfg.bg || '#fff' }}
+                    onClick={() => setSelectedRoom(r)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setSelectedRoom(r); }}
+                  >
+                    <div className="rc-top">
+                      <span className="rc-numero">#{r.numero}</span>
+                      <span className="rc-dot" style={{ background: roomCfg.dot }} />
+                    </div>
+                    <div className="rc-tipo">{r.tipo}</div>
+                    <div className="rc-camas">{r.camas}</div>
+                    {r.huesped && (
+                      <div className="rc-huesped">
+                        <span>{r.huesped}</span>
+                      </div>
+                    )}
+                    <div className="rc-estado" style={{ color: roomCfg.color, background: roomCfg.bg, border: `1px solid ${roomCfg.border}` }}>
+                      {roomCfg.label}
+                    </div>
+                  </div>
+                );
+              })}
+              {rooms.length === 0 && (
+                <p className="text-gray-500 p-4">No occupied rooms</p>
+              )}
+            </div>
+          </div>
         </div>
 
-        {/* Right panel - Room details */}
-        <div className="user-room-detail w-full lg:w-2/3">
+        {/* Right panel - Room detail (like admin) */}
+        <div className="admin-room-detail w-full lg:w-3/5">
           {selectedRoom ? (
-            <div className="bg-white rounded-xl p-6 shadow-sm border">
-              <div className="flex justify-between items-start mb-6">
+            <div className="room-detail-panel">
+              <div className="rdp-header">
                 <div>
-                  <h2 className="text-2xl font-bold">Room #{selectedRoom.numero}</h2>
-                  <p className="text-gray-500">{selectedRoom.tipo}</p>
+                  <h2 className="rdp-title">Room #{selectedRoom.numero}</h2>
+                  <p className="rdp-subtitle">{selectedRoom.tipo}</p>
                 </div>
-                <span className="px-3 py-1 rounded-full bg-amber-100 text-amber-700 text-sm font-medium">
-                  Occupied
-                </span>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4 mb-6">
-                <div className="p-4 bg-gray-50 rounded-lg">
-                  <span className="text-xs text-gray-500 uppercase">Guest</span>
-                  <p className="font-medium">{selectedRoom.huesped}</p>
-                </div>
-                <div className="p-4 bg-gray-50 rounded-lg">
-                  <span className="text-xs text-gray-500 uppercase">Nights</span>
-                  <p className="font-medium">{selectedRoom.noches}</p>
+                <div className="rdp-estado" style={{ color: cfg.color, background: cfg.bg, border: `1px solid ${cfg.border}` }}>
+                  {cfg.label}
                 </div>
               </div>
 
-              {/* Consumption summary */}
-              <div className="mb-6">
-                <h3 className="text-sm font-semibold text-gray-700 mb-3">Consumptions</h3>
+              <div className="rdp-info-grid">
+                <div className="rdp-info-item">
+                  <span className="rdp-info-label">Guest</span>
+                  <span className="rdp-info-value">{selectedRoom.huesped}</span>
+                </div>
+                <div className="rdp-info-item">
+                  <span className="rdp-info-label">Nights</span>
+                  <span className="rdp-info-value">{selectedRoom.noches}</span>
+                </div>
+                <div className="rdp-info-item">
+                  <span className="rdp-info-label">Check-in</span>
+                  <span className="rdp-info-value">{FECHA(selectedRoom.checkIn)}</span>
+                </div>
+                <div className="rdp-info-item">
+                  <span className="rdp-info-label">Check-out</span>
+                  <span className="rdp-info-value">{FECHA(selectedRoom.checkOut)}</span>
+                </div>
+              </div>
+
+              {/* Consumptions */}
+              <div className="rdp-section">
+                <h3 className="rdp-section-title">Consumptions</h3>
                 {consumos.length === 0 ? (
-                  <p className="text-gray-400 text-sm">No consumptions recorded</p>
+                  <p className="rdp-empty">No consumptions recorded</p>
                 ) : (
-                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                  <div className="rdp-consumos-list">
                     {consumos.map((c) => (
-                      <div key={c.id} className="flex justify-between text-sm py-2 border-b">
+                      <div key={c.id} className="rdp-consumo-item">
                         <span>{c.descripcion}</span>
-                        <span className="font-medium">{COP(c.precio)}</span>
+                        <span>{COP(c.precio)}</span>
                       </div>
                     ))}
                   </div>
@@ -136,24 +164,24 @@ export default function UserView({ onExit }) {
               </div>
 
               {/* Totals */}
-              <div className="border-t pt-4 space-y-2">
-                <div className="flex justify-between">
+              <div className="rdp-totals">
+                <div className="rdp-total-row">
                   <span>Room ({selectedRoom.noches} nights)</span>
                   <span>{COP(roomTotal)}</span>
                 </div>
-                <div className="flex justify-between">
+                <div className="rdp-total-row">
                   <span>Consumptions</span>
                   <span>{COP(totalConsumos)}</span>
                 </div>
-                <div className="flex justify-between text-xl font-bold pt-2 border-t">
+                <div className="rdp-total-row rdp-total-grand">
                   <span>Total</span>
                   <span>{COP(totalAPagar)}</span>
                 </div>
-                <div className="flex justify-between text-sm">
+                <div className="rdp-total-row">
                   <span>Paid</span>
                   <span className="text-green-600">{COP(pagado)}</span>
                 </div>
-                <div className="flex justify-between text-sm font-semibold">
+                <div className="rdp-total-row rdp-total-balance">
                   <span>Balance Due</span>
                   <span className={saldoPendiente > 0 ? 'text-red-600' : 'text-green-600'}>
                     {COP(saldoPendiente)}
@@ -161,17 +189,13 @@ export default function UserView({ onExit }) {
                 </div>
               </div>
 
-              {/* Checkout button */}
-              <button
-                className="w-full mt-6 py-3 bg-[#5a8f6b] text-white font-semibold rounded-lg hover:bg-[#4a7c59] transition-colors"
-                onClick={() => window.location.href = '/user/checkout'}
-              >
+              <button className="rdp-checkout-btn" onClick={() => window.location.href = '/user/checkout'}>
                 Guest Checkout
               </button>
             </div>
           ) : (
-            <div className="bg-white rounded-xl p-6 shadow-sm border text-center text-gray-500">
-              Select a room to view details
+            <div className="room-detail-panel rdp-empty-state">
+              <p>Select a room to view details</p>
             </div>
           )}
         </div>
