@@ -1,0 +1,75 @@
+{
+  "tarifas": {
+    "Suite Bosque": {
+      "precio": 350000,
+      "descripcion": "Suite con jacuzzi privado y vista al bosque",
+      "incluyeDesayuno": true,
+      "nochesMinimas": 1
+    },
+    "Suite Sunset": {
+      "precio": 420000,
+      "descripcion": "Suite premium con jacuzzi y vista al atardecer",
+      "incluyeDesayuno": true,
+      "nochesMinimas": 1
+    },
+    "Suite Eden": {
+      "precio": 480000,
+      "descripcion": "Suite familiar con jacuzzi, cocina y terraza",
+      "incluyeDesayuno": true,
+      "nochesMinimas": 1
+    },
+    "Habitacion Pareja": {
+      "precio": 180000,
+      "descripcion": "Habitación acogedora para parejas",
+      "incluyeDesayuno": true,
+      "nochesMinimas": 1
+    },
+    "Habitacion Doble": {
+      "precio": 220000,
+      "descripcion": "Habitación amplia con dos camas dobles",
+      "incluyeDesayuno": true,
+      "nochesMinimas": 1
+    },
+    "Habitacion Cuadruple": {
+      "precio": 280000,
+      "descripcion": "Habitación familiar con sala integrada",
+      "incluyeDesayuno": true,
+      "nochesMinimas": 1
+    },
+    "Cabana Familiar en Bote": {
+      "precio": 550000,
+      "descripcion": "Cabana única en forma de barco, ideal para grupos",
+      "incluyeDesayuno": true,
+      "nochesMinimas": 2
+    }
+  },
+  "productos": {
+    "restaurante": [
+      { "nombre": "Desayuno americano", "precio": 25000, "incluye": false },
+      { "nombre": "Desayuno buffet", "precio": 35000, "incluye": true, "nota": "Incluido en tarifa" },
+      { "nombre": "Almuerzo del día", "precio": 32000, "incluye": false },
+      { "nombre": "Bandeja paisa", "precio": 35000, "incluye": false },
+      { "nombre": "Cena ejecutiva", "precio": 40000, "incluye": false },
+      { "nombre": "Menu Infantil", "precio": 20000, "incluye": false }
+    ],
+    "bar": [
+      { "nombre": "Agua mineral", "precio": 5000, "incluye": false },
+      { "nombre": "Jugos naturales", "precio": 10000, "incluye": false },
+      { "nombre": "Cerveza nacional", "precio": 12000, "incluye": false },
+      { "nombre": "Cocteles especiales", "precio": 25000, "incluye": false },
+      { "nombre": "Vino por copa", "precio": 22000, "incluye": false }
+    ],
+    "servicios": [
+      { "nombre": "Servicio a habitación", "precio": 10000, "incluye": false },
+      { "nombre": "Lavandería", "precio": 25000, "incluye": false },
+      { "nombre": "Masaje relajante", "precio": 90000, "incluye": false },
+      { "nombre": "Tour guiado", "precio": 45000, "incluye": false },
+      { "nombre": "Parqueadero", "precio": 15000, "incluye": false }
+    ]
+  },
+  "notas": {
+    "desayuno": "El desayuno está incluido en todas las tarifas y se sirve de 7:00 AM a 10:00 AM en el restaurante del hotel.",
+    "politicas": "Tarifa por noche. Check-in: 3:00 PM. Check-out: 11:00 AM.",
+    "temporadas": "Las tarifas pueden variar en temporada alta (Semana Santa, diciembre, junio-agosto)."
+  }
+}

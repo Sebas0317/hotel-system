@@ -174,24 +174,29 @@ export default function PriceEditor({ onUpdate, onNotify }) {
 
       {/* Room Rates Section */}
       <div className="pe-section">
-        <h5 className="pe-section-title">🛏️ Tarifas por Noche</h5>
-        <p className="pe-section-desc">Precio por noche para cada tipo de habitación. Se aplica automáticamente al calcular el total de checkout.</p>
+        <h5 className="pe-section-title">🌿 Tarifas por Noche</h5>
+        <p className="pe-section-desc">Precio por noche para cada tipo de habitación. Todas las tarifas incluyen desayuno.</p>
         <div className="pe-grid">
-          {Object.entries(data.tarifas).map(([tipo, precio]) => (
-            <div key={tipo} className="pe-field">
-              <label className="pe-field-label">{tipo}</label>
-              <div className="pe-field-row">
-                <input
-                  type="number"
-                  className="pe-input"
-                  value={precio}
-                  onChange={(e) => updateTarifa(tipo, e.target.value)}
-                  min="1"
-                />
-                <span className="pe-preview">{COP(precio)}</span>
+          {Object.entries(data.tarifas).map(([tipo, tarifa]) => {
+            const precio = typeof tarifa === 'object' ? tarifa.precio : tarifa;
+            const descripcion = typeof tarifa === 'object' ? tarifa.descripcion : '';
+            return (
+              <div key={tipo} className="pe-field">
+                <label className="pe-field-label">{tipo}</label>
+                {descripcion && <p className="pe-field-desc">{descripcion}</p>}
+                <div className="pe-field-row">
+                  <input
+                    type="number"
+                    className="pe-input"
+                    value={precio}
+                    onChange={(e) => updateTarifa(tipo, e.target.value)}
+                    min="1"
+                  />
+                  <span className="pe-preview">{COP(precio)}</span>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 

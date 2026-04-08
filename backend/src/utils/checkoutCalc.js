@@ -4,16 +4,20 @@
  * Checkout calculation utility.
  * Computes room charges, consumos total, IVA, and grand total.
  * Used by both backend checkout and frontend checkout panels.
+ * 
+ * All tariffs include breakfast - no extra charge needed.
  *
  * @param {Object} params
- * @param {string} params.roomTipo - Room type (e.g., 'estándar', 'suite')
+ * @param {string} params.roomTipo - Room type (e.g., 'Suite Bosque', 'Habitacion Doble')
  * @param {string} [params.checkIn] - ISO check-in date
  * @param {Array} [params.consumos] - Array of consumo objects with { precio }
- * @param {Object} [params.tarifas] - Live tariff map from backend { [tipo]: price }
- * @returns {Object} { tarifaNoche, noches, cargoHabitacion, totalConsumos, subtotal, iva, total }
+ * @param {Object} [params.tarifas] - Live tariff map from backend { [tipo]: { precio, incluyeDesayuno } }
+ * @returns {Object} { tarifaNoche, noches, cargoHabitacion, totalConsumos, subtotal, iva, total, incluyeDesayuno }
  */
 function calcularCheckout({ roomTipo, checkIn, consumos = [], tarifas = {} }) {
-  const tarifaNoche = tarifas[roomTipo] || 80000;
+  const roomTarifa = tarifas[roomTipo];
+  const tarifaNoche = roomTarifa?.precio || 200000;
+  const incluyeDesayuno = roomTarifa?.incluyeDesayuno || true;
 
   let noches = 1;
   if (checkIn) {
@@ -36,6 +40,7 @@ function calcularCheckout({ roomTipo, checkIn, consumos = [], tarifas = {} }) {
     subtotal,
     iva,
     total,
+    incluyeDesayuno,
   };
 }
 
