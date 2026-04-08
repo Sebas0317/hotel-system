@@ -146,9 +146,24 @@ export default function UserView({ onExit }) {
                 </div>
               </div>
 
+              {/* Room Charges */}
+              <div className="rdp-section">
+                <h3 className="rdp-section-title">Room Charges</h3>
+                <div className="rdp-room-charges">
+                  <div className="rdp-charge-item">
+                    <span>Room rate x {selectedRoom.noches} night{selectedRoom.noches > 1 ? 's' : ''} ({COP(selectedRoom.tarifa)}/night)</span>
+                    <span>{COP(roomTotal)}</span>
+                  </div>
+                </div>
+                <div className="rdp-subtotal">
+                  <span>Room Subtotal</span>
+                  <span>{COP(roomTotal)}</span>
+                </div>
+              </div>
+
               {/* Consumptions */}
               <div className="rdp-section">
-                <h3 className="rdp-section-title">Consumptions</h3>
+                <h3 className="rdp-section-title">Consumptions ({consumos.length} item{consumos.length !== 1 ? 's' : ''})</h3>
                 {consumos.length === 0 ? (
                   <p className="rdp-empty">No consumptions recorded</p>
                 ) : (
@@ -161,20 +176,18 @@ export default function UserView({ onExit }) {
                     ))}
                   </div>
                 )}
+                {consumos.length > 0 && (
+                  <div className="rdp-subtotal">
+                    <span>Consumptions Subtotal</span>
+                    <span>{COP(totalConsumos)}</span>
+                  </div>
+                )}
               </div>
 
-              {/* Totals */}
+              {/* Grand Total */}
               <div className="rdp-totals">
-                <div className="rdp-total-row">
-                  <span>Room ({selectedRoom.noches} night{selectedRoom.noches > 1 ? 's' : ''})</span>
-                  <span>{COP(roomTotal)}</span>
-                </div>
-                <div className="rdp-total-row">
-                  <span>Consumptions ({consumos.length} item{consumos.length !== 1 ? 's' : ''})</span>
-                  <span>{COP(totalConsumos)}</span>
-                </div>
                 <div className="rdp-total-row rdp-total-grand">
-                  <span>Total</span>
+                  <span>Grand Total</span>
                   <span>{COP(totalAPagar)}</span>
                 </div>
                 <div className="rdp-total-row rdp-paid">
