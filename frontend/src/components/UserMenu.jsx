@@ -24,7 +24,7 @@ export default function UserMenu({ onNavigate, onExit }) {
         <div className="topbar-left flex items-center gap-2">
           <span className="topbar-logo text-xl"></span>
           <HotelTitle />
-          <span className="topbar-badge user text-xs">Front Desk</span>
+          <span className="topbar-badge user text-xs">User</span>
         </div>
         <button className="btn-salir text-sm" onClick={onExit}>Exit</button>
       </header>

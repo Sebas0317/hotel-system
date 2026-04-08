@@ -77,7 +77,7 @@ export default function LoginScreen({ onRole }) {
           </button>
           <button className="login-card user-card text-left p-5 sm:p-6" onClick={() => onRole('user')}>
             <span className="lc-icon text-3xl sm:text-4xl"></span>
-            <span className="lc-title text-lg sm:text-xl font-extrabold">Front Desk</span>
+            <span className="lc-title text-lg sm:text-xl font-extrabold">User</span>
             <span className="lc-desc text-sm sm:text-base">Guest registration - Transactions - Checkout</span>
             <span className="lc-arrow absolute right-5 sm:right-6 top-1/2 -translate-y-1/2 text-xl sm:text-2xl"></span>
           </button>
