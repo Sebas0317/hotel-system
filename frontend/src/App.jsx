@@ -48,17 +48,7 @@ export default function App() {
     navigate(r === 'admin' ? '/admin' : '/user', { replace: true });
   };
 
-  const handleSalir = () => {
-    setRol(null);
-    setAuthToken(null);
-    navigate('/', { replace: true });
-  };
-
-  /**
-   * Called from any screen's "Cerrar sesión" button.
-   * Clears role state, removes auth token, and redirects to login.
-   */
-  const handleSalir = () => {
+  const handleExit = () => {
     setRol(null);
     setAuthToken(null);
     navigate('/', { replace: true });
@@ -81,7 +71,7 @@ export default function App() {
         path="/admin"
         element={
           rol === 'admin' ? (
-            <PantallaAdmin onSalir={handleSalir} onNav={(path) => navigate(path)} />
+            <PantallaAdmin onSalir={handleExit} onNav={(path) => navigate(path)} />
           ) : (
             <Navigate to="/" replace />
           )
@@ -105,7 +95,7 @@ export default function App() {
           rol === 'user' ? (
             <PantallaMenuUsuario
               onNav={(screen) => navigate(`/user/${screen}`)}
-              onSalir={handleSalir}
+              onSalir={handleExit}
             />
           ) : (
             <Navigate to="/" replace />
