@@ -37,8 +37,10 @@ export default function RoomDetails() {
   useEffect(() => {
     fetchRooms()
       .then((rooms) => {
-        // Try to match by id (like "sb-101"), by numero (like "101"), or by tipo name
-        const found = rooms.find((r) => 
+        // Try to match by index (id 1 -> first room, etc), or by id (sb-101), or by numero (101)
+        const index = parseInt(id) - 1;
+        const found = rooms.find((r, i) => 
+          i === index ||
           r.id === id || 
           r.numero === id ||
           r.tipo.toLowerCase().replace(/ /g, '-') === id.toLowerCase()
