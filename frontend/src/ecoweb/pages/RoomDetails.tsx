@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { FaCheck } from 'react-icons/fa';
 import { fetchRooms } from '../../services/api';
 import { COP } from '../../utils/helpers';
+import { ScrollToTop } from '../shared/ScrollToTop';
 
 const hotelRules = [
   { rules: 'Check-in: 3:00 PM - 9:00 PM' },
@@ -29,15 +30,14 @@ const amenidadesLabels: Record<string, string> = {
 };
 
 export default function RoomDetails() {
-  const { id } = useParams<{ id: string }>();
+  const { id } = useParams();
   const navigate = useNavigate();
-  const [room, setRoom] = useState<any>(null);
+  const [room, setRoom] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchRooms()
       .then((rooms) => {
-        // Try to match by index (id 1 -> first room, etc), or by id (sb-101), or by numero (101)
         const index = parseInt(id) - 1;
         const found = rooms.find((r, i) => 
           i === index ||
@@ -54,9 +54,9 @@ export default function RoomDetails() {
   if (loading) {
     return (
       <section>
-        <div className="bg-room h-[300px] lg:h-[400px] relative flex justify-center items-center bg-cover bg-center">
-          <div className="absolute w-full h-full bg-black/60" />
-          <h1 className="text-4xl lg:text-6xl text-white z-20 font-primary text-center px-4">
+        <div className="bg-room h-[560px] relative flex justify-center items-center bg-cover bg-center">
+          <div className="absolute w-full h-full bg-black/70" />
+          <h1 className="text-6xl text-white z-20 font-primary text-center">
             Cargando...
           </h1>
         </div>
@@ -85,40 +85,38 @@ export default function RoomDetails() {
 
   return (
     <section>
-      <div className="bg-room h-[300px] lg:h-[400px] relative flex justify-center items-center bg-cover bg-center">
-        <div className="absolute w-full h-full bg-black/60" />
-        <h1 className="text-4xl lg:text-6xl text-white z-20 font-primary text-center px-4">
-          {tipo}
+      <ScrollToTop />
+      <div className="bg-room h-[560px] relative flex justify-center items-center bg-cover bg-center">
+        <div className="absolute w-full h-full bg-black/70" />
+        <h1 className="text-6xl text-white z-20 font-primary text-center">
+          {tipo} Details
         </h1>
         <button
-          onClick={() => navigate('/')}
+          onClick={() => navigate('/landing')}
           className="absolute top-4 left-4 z-30 bg-white/20 hover:bg-white/40 text-white px-4 py-2 rounded backdrop-blur-sm"
         >
           ← Volver
         </button>
       </div>
 
-      <div className="container mx-auto max-w-7xl px-4">
-        <div className="flex flex-col lg:flex-row lg:gap-x-8 py-8 lg:py-12">
-          <div className="w-full text-justify">
-            <h2 className="text-3xl lg:text-4xl font-primary mb-4">{tipo}</h2>
-            <p className="mb-6 text-gray-700 leading-relaxed">{descripcion}</p>
-
-            <div className="mb-8">
-              <h3 className="text-xl font-semibold mb-3">Capacidad</h3>
-              <p className="text-gray-600">{capacidad} personas</p>
-            </div>
-
+      <div className="container mx-auto max-w-7xl">
+        <div className="flex flex-col lg:flex-row lg:gap-x-8 h-full py-24">
+          <div className="w-full h-full text-justify">
+            <h2 className="h2">{tipo}</h2>
+            <p className="mb-8">{descripcion}</p>
+            
             {amenidades && amenidades.length > 0 && (
-              <div className="mb-8">
-                <h3 className="text-xl font-semibold mb-4">Amenidades</h3>
-                <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="mt-12">
+                <h3 className="h3 mb-3">Amenidades</h3>
+                <div className="grid grid-cols-3 gap-6 mb-12">
                   {amenidades.map((amenidad, index) => (
-                    <div key={index} className="flex items-center gap-2">
-                      <FaCheck className="text-accent text-sm" />
-                      <span className="text-gray-700">
+                    <div key={index} className="flex items-center gap-x-3 flex-1">
+                      <div className="text-3xl text-accent">
+                        <FaCheck />
+                      </div>
+                      <div className="text-base">
                         {amenidadesLabels[amenidad] || amenidad}
-                      </span>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -126,16 +124,12 @@ export default function RoomDetails() {
             )}
           </div>
 
-          <div className="w-full lg:max-w-xs mt-8 lg:mt-0">
-            <div className="py-6 px-5 bg-amber-50 border border-amber-200 rounded-lg mb-6">
-              <h3 className="text-lg font-semibold mb-4">Resumen</h3>
+          <div className="w-full lg:max-w-xs h-full">
+            <div className="py-8 px-6 bg-accent/20 mb-12 w-full">
+              <h3 className="text-lg font-semibold mb-4">Tu Reserva</h3>
               <div className="space-y-3 mb-4">
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Tipo:</span>
-                  <span className="font-medium">{tipo}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Número:</span>
+                  <span className="text-gray-600">Habitación:</span>
                   <span className="font-medium">{numero}</span>
                 </div>
                 <div className="flex justify-between">
@@ -146,26 +140,27 @@ export default function RoomDetails() {
                   <span className="text-gray-600">Capacidad:</span>
                   <span className="font-medium">{capacidad} personas</span>
                 </div>
+                {estado && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Estado:</span>
+                    <span className="capitalize font-medium">{estado}</span>
+                  </div>
+                )}
               </div>
-              <div className="border-t border-amber-300 pt-3 mb-4">
-                <div className="flex justify-between text-lg">
-                  <span className="font-semibold">Precio por noche:</span>
-                  <span className="font-bold text-accent">{COP(price)}</span>
-                </div>
-              </div>
-              {estado && (
-                <div className="text-sm text-gray-500 mt-2">
-                  Estado: <span className="capitalize font-medium">{estado}</span>
-                </div>
-              )}
+              <button type="button" className="btn btn-lg btn-primary w-full">
+                book now for {COP(price)}
+              </button>
             </div>
 
             <div>
-              <h3 className="text-xl font-semibold mb-3">Normas del Hotel</h3>
-              <ul className="flex flex-col gap-y-3">
+              <h3 className="h3">Normas del Hotel</h3>
+              <p className="mb-6 text-justify">
+                Por favor respeta las normas del hotel durante tu estadía.
+              </p>
+              <ul className="flex flex-col gap-y-4">
                 {hotelRules.map((rule, idx) => (
-                  <li key={idx} className="flex items-center gap-x-3 text-gray-700">
-                    <FaCheck className="text-accent text-sm" />
+                  <li key={idx} className="flex items-center gap-x-4">
+                    <FaCheck className="text-accent" />
                     {rule.rules}
                   </li>
                 ))}
