@@ -37,7 +37,12 @@ export default function RoomDetails() {
   useEffect(() => {
     fetchRooms()
       .then((rooms) => {
-        const found = rooms.find((r: any) => r.id === id || r.numero === id);
+        // Try to match by id (like "sb-101"), by numero (like "101"), or by tipo name
+        const found = rooms.find((r) => 
+          r.id === id || 
+          r.numero === id ||
+          r.tipo.toLowerCase().replace(/ /g, '-') === id.toLowerCase()
+        );
         setRoom(found);
       })
       .catch(() => setRoom(null))
@@ -106,7 +111,7 @@ export default function RoomDetails() {
               <div className="mb-8">
                 <h3 className="text-xl font-semibold mb-4">Amenidades</h3>
                 <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-                  {amenidades.map((amenidad: string, index: number) => (
+                  {amenidades.map((amenidad, index) => (
                     <div key={index} className="flex items-center gap-2">
                       <FaCheck className="text-accent text-sm" />
                       <span className="text-gray-700">
