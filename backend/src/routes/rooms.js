@@ -74,6 +74,12 @@ router.post(
   roomController.checkout
 );
 
+// POST /rooms/:id/solicitar-checkout - Guest requests checkout (no auth - public)
+router.post(
+  '/:id/solicitar-checkout',
+  roomController.solicitarCheckout
+);
+
 // POST /rooms/:id/cancel - Cancel a reservation
 router.post(
   '/:id/cancel',

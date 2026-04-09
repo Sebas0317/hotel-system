@@ -160,6 +160,19 @@ export async function checkout(roomId, { metodoPago, valorRecibido }) {
 }
 
 /**
+ * Guest requests checkout (public - no auth required)
+ * @param {string|number} roomId - Room ID
+ * @param {string} checkOutDate - Optional check-out date (YYYY-MM-DD)
+ * @returns {Promise<Object>} Result with updated room
+ */
+export async function solicitarCheckout(roomId, checkOutDate) {
+  return apiFetch(`/rooms/${roomId}/solicitar-checkout`, {
+    method: 'POST',
+    body: { checkOutDate },
+  });
+}
+
+/**
  * Cancel a reservation
  * @param {string|number} roomId - Room ID
  * @returns {Promise<Object>} Cancel result with updated room

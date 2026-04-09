@@ -1,5 +1,3 @@
-import { useState, useEffect } from 'react';
-import { fetchRooms } from '../services/api';
 import HotelTitle from './HotelTitle';
 
 export default function UserMenu({ onNavigate, onExit }) {

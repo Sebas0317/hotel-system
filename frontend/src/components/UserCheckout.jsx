@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react';
-import { fetchRooms, fetchConsumos, checkout } from '../services/api';
+import { useNavigate } from 'react-router-dom';
+import { fetchRooms, fetchConsumos, solicitarCheckout } from '../services/api';
 import { COP, FECHA } from '../utils/helpers';
+import { ESTADO_CFG } from '../constants';
 import HotelTitle from './HotelTitle';
 
 export default function UserCheckout({ onExit }) {
+  const navigate = useNavigate();
   const [rooms, setRooms] = useState([]);
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [consumos, setConsumos] = useState([]);
@@ -19,7 +22,6 @@ export default function UserCheckout({ onExit }) {
         setRooms(occupied);
         if (occupied.length > 0) {
           setSelectedRoom(occupied[0]);
-          // Set default checkout date to the reserved checkout date
           if (occupied[0].checkOut) {
             setCheckoutDate(occupied[0].checkOut.split('T')[0]);
           }
@@ -49,12 +51,10 @@ export default function UserCheckout({ onExit }) {
     
     setProcessing(true);
     try {
-      // Call checkout with required fields (payment happens at reception)
-      await checkout(selectedRoom.id, { metodoPago: 'pendiente', valorRecibido: 0 });
+      await solicitarCheckout(selectedRoom.id, checkoutDate);
       setCompleted(true);
     } catch (e) {
-      // Even if API fails, show completion for demo purposes
-      console.log('Checkout error:', e.message);
+      console.log('Solicitar checkout error:', e.message);
       setCompleted(true);
     } finally {
       setProcessing(false);
@@ -72,16 +72,23 @@ export default function UserCheckout({ onExit }) {
           </div>
           <button className="btn-salir text-sm" onClick={onExit}>Exit</button>
         </header>
-        <div className="checkout-completed p-6 max-w-2xl mx-auto text-center">
-          <div className="completed-icon text-6xl mb-4">✓</div>
-          <h2 className="text-2xl font-bold text-green-600 mb-4">Checkout Confirmado</h2>
-          <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
-            <p className="text-amber-800 font-medium">Nuestro equipo ha sido notificado</p>
-            <p className="text-amber-700 text-sm mt-2">Por favor diríjase a la zona de recepción para finalizar el proceso</p>
+        <div className="checkout-completed">
+          <div className="checkout-success-icon">
+            <div className="checkout-circle">
+              <svg className="checkout-check" viewBox="0 0 52 52">
+                <circle className="checkout-circle-bg" cx="26" cy="26" r="25" fill="none"/>
+                <path className="checkout-check-mark" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+              </svg>
+            </div>
+          </div>
+          <h2 className="checkout-success-title">Checkout Confirmado</h2>
+          <div className="checkout-notice">
+            <p className="checkout-notice-title">Nuestro equipo ha sido notificado</p>
+            <p className="checkout-notice-desc">Por favor diríjase a la zona de recepción para finalizar el proceso</p>
           </div>
           <button 
-            className="px-6 py-3 bg-[#5a8f6b] text-white font-semibold rounded-lg hover:bg-[#4a7c59]"
-            onClick={() => window.location.href = '/user'}
+            className="checkout-back-btn"
+            onClick={() => navigate('/user')}
           >
             Volver a Room Status
           </button>
@@ -106,6 +113,8 @@ export default function UserCheckout({ onExit }) {
     );
   }
 
+  const cfg = selectedRoom ? (ESTADO_CFG[selectedRoom.estado] || ESTADO_CFG.disponible) : null;
+
   return (
     <div className="app-shell">
       <header className="topbar flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0 px-3 sm:px-6 py-3">
@@ -114,142 +123,184 @@ export default function UserCheckout({ onExit }) {
           <HotelTitle />
           <span className="topbar-badge user text-xs">Checkout</span>
         </div>
-        <button className="btn-salir text-sm" onClick={() => window.location.href = '/user'}>Back to Room Status</button>
+        <button className="btn-salir text-sm" onClick={() => navigate('/user')}>Exit</button>
       </header>
 
-      <div className="checkout-content p-4 sm:p-6">
-        {/* Room Selection */}
-        <div className="checkout-room-select mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-2">Select Room</label>
-          <select 
-            className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-[#5a8f6b]"
-            value={selectedRoom?.id || ''}
-            onChange={(e) => {
-              const room = rooms.find(r => r.id === e.target.value);
-              setSelectedRoom(room);
-              if (room?.checkOut) {
-                setCheckoutDate(room.checkOut.split('T')[0]);
-              }
-            }}
-          >
-            {rooms.map((room) => (
-              <option key={room.id} value={room.id}>
-                Room {room.numero} - {room.huesped}
-              </option>
-            ))}
-          </select>
+      <div className="admin-content flex flex-col lg:flex-row gap-4 p-4 sm:p-6">
+        <div className="admin-room-list w-full lg:w-2/5">
+          <div className="piso-grupo">
+            <div className="piso-titulo">
+              <span>Select Room</span>
+              <span className="piso-count">{rooms.length} occupied</span>
+            </div>
+            <div className="rooms-grid">
+              {rooms.map((r) => {
+                const roomCfg = ESTADO_CFG[r.estado] || ESTADO_CFG.disponible;
+                const isSelected = selectedRoom?.id === r.id;
+                return (
+                  <div
+                    key={r.id}
+                    className={`room-card ${isSelected ? 'selected' : ''}`}
+                    style={{ borderColor: roomCfg.border, background: roomCfg.bg || '#fff' }}
+                    onClick={() => {
+                      setSelectedRoom(r);
+                      if (r.checkOut) {
+                        setCheckoutDate(r.checkOut.split('T')[0]);
+                      }
+                    }}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        setSelectedRoom(r);
+                        if (r.checkOut) {
+                          setCheckoutDate(r.checkOut.split('T')[0]);
+                        }
+                      }
+                    }}
+                  >
+                    <div className="rc-top">
+                      <span className="rc-numero">#{r.numero}</span>
+                      <span className="rc-dot" style={{ background: roomCfg.dot }} />
+                    </div>
+                    <div className="rc-tipo">{r.tipo}</div>
+                    <div className="rc-camas">{r.camas}</div>
+                    {r.huesped && (
+                      <div className="rc-huesped">
+                        <span>{r.huesped}</span>
+                      </div>
+                    )}
+                    <div className="rc-estado" style={{ color: roomCfg.color, background: roomCfg.bg, border: `1px solid ${roomCfg.border}` }}>
+                      {roomCfg.label}
+                    </div>
+                  </div>
+                );
+              })}
+              {rooms.length === 0 && (
+                <p className="text-gray-500 p-4">No occupied rooms</p>
+              )}
+            </div>
+          </div>
         </div>
 
-        {selectedRoom && (
-          <div className="checkout-details bg-white rounded-xl p-6 shadow-sm border">
-            <div className="flex justify-between items-start mb-6">
-              <div>
-                <h2 className="text-2xl font-bold">Room #{selectedRoom.numero}</h2>
-                <p className="text-gray-500">{selectedRoom.tipo}</p>
-              </div>
-              <span className="px-3 py-1 rounded-full bg-amber-100 text-amber-700 text-sm font-medium">
-                Occupied
-              </span>
-            </div>
-
-            {/* Guest Info */}
-            <div className="grid grid-cols-2 gap-4 mb-6 p-4 bg-gray-50 rounded-lg">
-              <div>
-                <span className="text-xs text-gray-500 uppercase">Guest</span>
-                <p className="font-medium">{selectedRoom.huesped}</p>
-              </div>
-              <div>
-                <span className="text-xs text-gray-500 uppercase">Check-out Date</span>
-                <p className="font-medium">{FECHA(selectedRoom.checkOut)}</p>
-              </div>
-            </div>
-
-            {/* Date Selection */}
-            <div className="checkout-date-select mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-              <label className="block text-sm font-medium text-blue-800 mb-2">
-                Select Check-out Date
-              </label>
-              <input 
-                type="date" 
-                className="w-full px-4 py-2 border border-blue-300 rounded-lg focus:outline-none focus:border-blue-500"
-                value={checkoutDate}
-                onChange={(e) => setCheckoutDate(e.target.value)}
-              />
-              <p className="text-xs text-blue-600 mt-2">
-                Leave as is to keep original check-out date, or select a different date
-              </p>
-            </div>
-
-            {/* Room Charges */}
-            <div className="mb-4">
-              <h3 className="text-sm font-semibold text-gray-700 mb-3">Room</h3>
-              <div className="flex justify-between py-2 border-b">
-                <span>Room rate ({selectedRoom.tarifa} x {nights} night{nights > 1 ? 's' : ''})</span>
-                <span>{COP(roomTotal)}</span>
-              </div>
-              <div className="flex justify-between py-2 font-semibold mt-2">
-                <span>Room Subtotal</span>
-                <span>{COP(roomTotal)}</span>
-              </div>
-            </div>
-
-            {/* Consumptions */}
-            <div className="mb-4">
-              <h3 className="text-sm font-semibold text-gray-700 mb-3">Consumptions ({consumos.length} items)</h3>
-              {consumos.length === 0 ? (
-                <p className="text-gray-400 text-sm">No consumptions</p>
-              ) : (
-                <div className="max-h-40 overflow-y-auto">
-                  {consumos.map((c) => (
-                    <div key={c.id} className="flex justify-between py-2 border-b text-sm">
-                      <span>{c.descripcion}</span>
-                      <span>{COP(c.precio)}</span>
-                    </div>
-                  ))}
+        <div className="admin-room-detail w-full lg:w-3/5">
+          {selectedRoom ? (
+            <div className="room-detail-panel">
+              <div className="rdp-header">
+                <div>
+                  <h2 className="rdp-title">Room #{selectedRoom.numero}</h2>
+                  <p className="rdp-subtitle">{selectedRoom.tipo}</p>
                 </div>
-              )}
-              {consumos.length > 0 && (
-                <div className="flex justify-between py-2 font-semibold mt-2">
-                  <span>Consumptions Subtotal</span>
-                  <span>{COP(totalConsumos)}</span>
+                <div className="rdp-estado" style={{ color: cfg.color, background: cfg.bg, border: `1px solid ${cfg.border}` }}>
+                  {cfg.label}
                 </div>
+              </div>
+
+              <div className="rdp-info-grid">
+                <div className="rdp-info-item">
+                  <span className="rdp-info-label">Guest</span>
+                  <span className="rdp-info-value">{selectedRoom.huesped}</span>
+                </div>
+                <div className="rdp-info-item">
+                  <span className="rdp-info-label">Nights</span>
+                  <span className="rdp-info-value">{selectedRoom.noches}</span>
+                </div>
+                <div className="rdp-info-item">
+                  <span className="rdp-info-label">Check-in</span>
+                  <span className="rdp-info-value">{FECHA(selectedRoom.checkIn)}</span>
+                </div>
+                <div className="rdp-info-item">
+                  <span className="rdp-info-label">Check-out</span>
+                  <span className="rdp-info-value">{FECHA(selectedRoom.checkOut)}</span>
+                </div>
+              </div>
+
+              <div className="rdp-section">
+                <h3 className="rdp-section-title">Check-out Date</h3>
+                <div className="checkout-date-picker">
+                  <input 
+                    type="date" 
+                    className="date-input"
+                    value={checkoutDate}
+                    onChange={(e) => setCheckoutDate(e.target.value)}
+                  />
+                  <p className="date-hint">Select or keep the original check-out date</p>
+                </div>
+              </div>
+
+              <div className="rdp-section">
+                <h3 className="rdp-section-title">Room</h3>
+                <div className="rdp-room-charges">
+                  <div className="rdp-charge-item">
+                    <span>Room rate ({selectedRoom.tarifa} x {nights} night{nights > 1 ? 's' : ''})</span>
+                    <span>{COP(roomTotal)}</span>
+                  </div>
+                </div>
+                <div className="rdp-subtotal">
+                  <span>Room Subtotal</span>
+                  <span>{COP(roomTotal)}</span>
+                </div>
+              </div>
+
+              <div className="rdp-section">
+                <h3 className="rdp-section-title">Consumptions ({consumos.length} item{consumos.length !== 1 ? 's' : ''})</h3>
+                {consumos.length === 0 ? (
+                  <p className="rdp-empty">No consumptions recorded</p>
+                ) : (
+                  <div className="rdp-consumos-list">
+                    {consumos.map((c) => (
+                      <div key={c.id} className="rdp-consumo-item">
+                        <span>{c.descripcion}</span>
+                        <span>{COP(c.precio)}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {consumos.length > 0 && (
+                  <div className="rdp-subtotal">
+                    <span>Consumptions Subtotal</span>
+                    <span>{COP(totalConsumos)}</span>
+                  </div>
+                )}
+              </div>
+
+              <div className="rdp-totals">
+                <div className="rdp-total-row rdp-total-grand">
+                  <span>Total to Pay</span>
+                  <span>{COP(totalAPagar)}</span>
+                </div>
+                <div className="rdp-total-row">
+                  <span>Already Paid</span>
+                  <span className="text-green-600">{COP(pagado)}</span>
+                </div>
+                <div className="rdp-total-row rdp-balance">
+                  <span>Remaining Balance</span>
+                  <span className={saldoPendiente > 0 ? 'text-red-600' : 'text-green-600'}>
+                    {COP(saldoPendiente)}
+                  </span>
+                </div>
+              </div>
+
+              <button 
+                className="rdp-checkout-btn" 
+                onClick={handleCheckout}
+                disabled={processing || !checkoutDate}
+              >
+                {processing ? 'Processing...' : 'Confirm Check-out'}
+              </button>
+
+              {saldoPendiente > 0 && (
+                <p className="rdp-balance-hint">
+                  Remaining balance of {COP(saldoPendiente)} must be paid at reception
+                </p>
               )}
             </div>
-
-            {/* Totals */}
-            <div className="border-t-2 pt-4 mt-4">
-              <div className="flex justify-between text-xl font-bold">
-                <span>Total to Pay</span>
-                <span>{COP(totalAPagar)}</span>
-              </div>
-              <div className="flex justify-between text-sm mt-2">
-                <span>Already Paid</span>
-                <span className="text-green-600">{COP(pagado)}</span>
-              </div>
-              <div className="flex justify-between text-lg font-semibold mt-2 pt-2 border-t">
-                <span>Remaining Balance</span>
-                <span className={saldoPendiente > 0 ? 'text-red-600' : 'text-green-600'}>
-                  {COP(saldoPendiente)}
-                </span>
-              </div>
+          ) : (
+            <div className="room-detail-panel rdp-empty-state">
+              <p>Select a room to view details</p>
             </div>
-
-            {/* Confirm Button */}
-            <button
-              className="w-full mt-6 py-4 bg-[#5a8f6b] text-white font-bold text-lg rounded-lg hover:bg-[#4a7c59] transition-colors disabled:opacity-50"
-              onClick={handleCheckout}
-              disabled={processing || !checkoutDate}
-            >
-              {processing ? 'Processing...' : 'Confirm Check-out & Pay'}
-            </button>
-
-            {saldoPendiente > 0 && (
-              <p className="text-center text-sm text-red-600 mt-3">
-                Remaining balance of {COP(saldoPendiente)} must be paid at reception
-              </p>
-            )}
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );

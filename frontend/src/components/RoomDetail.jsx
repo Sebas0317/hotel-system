@@ -110,6 +110,19 @@ export default function RoomDetail({ room, onRefresh }) {
         {room.estado === 'reservada' && '🟡 Reservada'}
       </div>
 
+      {/* Checkout Request Notification */}
+      {room.solicitudCheckout && (
+        <div className="rd-checkout-request">
+          <div className="rd-cr-header">
+            <span className="rd-cr-icon">🔔</span>
+            <span className="rd-cr-title">El cliente desea retirarse</span>
+          </div>
+          <p className="rd-cr-message">
+            El huésped ha solicitado check-out para el <strong>{FECHA(room.solicitudCheckout.fecha)}</strong> y se dirigirá a recepción.
+          </p>
+        </div>
+      )}
+
       {/* Guest Information Section */}
       <div className="rd-section">
         <h4 className="rd-section-title">🌿 Datos del Huésped</h4>

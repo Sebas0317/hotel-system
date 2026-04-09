@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { fetchRooms, fetchConsumos } from '../services/api';
 import { COP, FECHA } from '../utils/helpers';
 import { ESTADO_CFG } from '../constants';
 import HotelTitle from './HotelTitle';
 
 export default function UserView({ onExit }) {
+  const navigate = useNavigate();
   const [rooms, setRooms] = useState([]);
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [consumos, setConsumos] = useState([]);
@@ -215,7 +217,7 @@ export default function UserView({ onExit }) {
                 </div>
               </div>
 
-              <button className="rdp-checkout-btn" onClick={() => window.location.href = '/user/checkout'}>
+              <button className="rdp-checkout-btn" onClick={() => navigate('/user/checkout')}>
                 Guest Checkout
               </button>
             </div>

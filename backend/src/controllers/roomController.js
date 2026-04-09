@@ -14,6 +14,33 @@ const pinAttempts = new Map();
 const PIN_MAX_ATTEMPTS = 5;
 const PIN_WINDOW_MS = 60 * 1000;
 
+function solicitarCheckout(req, res) {
+  const { checkOutDate } = req.body;
+  const rooms = getRooms();
+  const idx = rooms.findIndex(r => String(r.id) === req.params.id);
+
+  if (idx === -1) {
+    return res.status(404).json({ error: 'Habitación no encontrada' });
+  }
+
+  const room = rooms[idx];
+
+  if (room.estado !== 'ocupada') {
+    return res.status(400).json({ error: `Solo huéspedes ocupando pueden solicitar checkout. Estado actual: ${room.estado}` });
+  }
+
+  rooms[idx] = {
+    ...room,
+    solicitudCheckout: {
+      fecha: checkOutDate || new Date().toISOString().split('T')[0],
+      hora: new Date().toISOString(),
+    },
+  };
+  saveRooms(rooms);
+
+  res.json({ success: true, room: rooms[idx] });
+}
+
 const TARIFAS_POR_TIPO = {
   'estándar': 80000,
   'doble': 120000,
@@ -402,5 +429,6 @@ module.exports = {
   actualizarEstado,
   validarPin,
   checkout,
+  solicitarCheckout,
   cancelarReserva,
 };

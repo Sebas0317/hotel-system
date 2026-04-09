@@ -257,6 +257,9 @@ export default function PantallaAdmin({ onSalir, onNav }) {
                 >
                   <div className="rc-top">
                     <span className="rc-numero">#{r.numero}</span>
+                    {r.solicitudCheckout && (
+                      <span className="rc-bell" title="Cliente solicita retirarse">🔔</span>
+                    )}
                     <span className="rc-dot" style={{ background: cfg.dot }} />
                     {/* Selection indicator */}
                     <span className={`rc-expand-icon ${isSelected ? 'open' : ''}`}>

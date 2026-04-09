@@ -889,6 +889,154 @@ input, select { font-family: inherit; }
   background: #4a7c59;
 }
 
+.rdp-checkout-btn:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+}
+
+.rdp-balance-hint {
+  text-align: center;
+  font-size: 14px;
+  color: #dc2626;
+  margin-top: 12px;
+}
+
+.checkout-date-picker {
+  padding: 12px;
+  background: #eff6ff;
+  border-radius: 8px;
+  border: 1px solid #bfdbfe;
+}
+
+.checkout-date-picker .date-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #bfdbfe;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #1e2533;
+  background: #fff;
+}
+
+.checkout-date-picker .date-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+}
+
+.checkout-date-picker .date-hint {
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 8px;
+}
+
+.checkout-completed {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 80px);
+  padding: 24px;
+  text-align: center;
+}
+
+.checkout-success-icon {
+  margin-bottom: 24px;
+}
+
+.checkout-circle {
+  width: 100px;
+  height: 100px;
+}
+
+.checkout-check {
+  width: 100%;
+  height: 100%;
+}
+
+.checkout-circle-bg {
+  stroke: #10b981;
+  stroke-width: 2;
+  stroke-dasharray: 166;
+  stroke-dashoffset: 166;
+  animation: checkout-circle-anim 0.6s ease-in-out forwards;
+}
+
+.checkout-check-mark {
+  stroke: #10b981;
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 48;
+  stroke-dashoffset: 48;
+  animation: checkout-check-anim 0.3s ease-in-out 0.4s forwards;
+}
+
+@keyframes checkout-circle-anim {
+  0% { stroke-dashoffset: 166; }
+  100% { stroke-dashoffset: 0; }
+}
+
+@keyframes checkout-check-anim {
+  0% { stroke-dashoffset: 48; }
+  100% { stroke-dashoffset: 0; }
+}
+
+.checkout-success-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #059669;
+  margin-bottom: 24px;
+}
+
+.checkout-notice {
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  border: 1px solid #f59e0b;
+  border-radius: 12px;
+  padding: 20px 32px;
+  margin-bottom: 32px;
+  max-width: 400px;
+}
+
+.checkout-notice-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #92400e;
+  margin-bottom: 8px;
+}
+
+.checkout-notice-desc {
+  font-size: 14px;
+  color: #b45309;
+}
+
+.checkout-back-btn {
+  background: #5a8f6b;
+  color: #fff;
+  font-weight: 600;
+  padding: 14px 32px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background 0.2s;
+}
+
+.checkout-back-btn:hover {
+  background: #4a7c59;
+}
+
+.rc-bell {
+  font-size: 14px;
+  margin-left: 4px;
+  animation: bell-shake 0.5s ease-in-out;
+}
+
+@keyframes bell-shake {
+  0%, 100% { transform: rotate(0); }
+  20%, 60% { transform: rotate(10deg); }
+  40%, 80% { transform: rotate(-10deg); }
+}
+
 .rdp-empty-state {
   display: flex;
   align-items: center;
@@ -3470,7 +3618,39 @@ input, select { font-family: inherit; }
 .rd-status-reservada {
   background: #fffbeb;
   color: #92400e;
-  border: 1px solid #fde68a;
+  border: 1px solid #fcd34d;
+}
+
+.rd-checkout-request {
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  border: 1px solid #f59e0b;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+}
+
+.rd-cr-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.rd-cr-icon {
+  font-size: 18px;
+}
+
+.rd-cr-title {
+  font-weight: 600;
+  color: #92400e;
+  font-size: 14px;
+}
+
+.rd-cr-message {
+  font-size: 13px;
+  color: #b45309;
+  margin: 0;
+  line-height: 1.4;
 }
 
 .rd-total-bar {
