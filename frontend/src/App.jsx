@@ -13,7 +13,11 @@ import PantallaConsumo from './components/PantallaConsumo';
 import PantallaVer from './components/PantallaVer';
 import PantallaCheckout from './components/PantallaCheckout';
 import PantallaReservaciones from './components/PantallaReservaciones';
-import LandingPage from './landing/LandingPage';
+
+// EcoWeb landing page
+import EcoWeb from './ecoweb/App';
+import './ecoweb/style/index.css';
+import './ecoweb/style/fonts.css';
 
 /**
  * App root — now driven by URL routes instead of local state.
@@ -72,7 +76,7 @@ export default function App() {
         path="/admin"
         element={
           rol === 'admin' ? (
-            <PantallaAdmin onSalir={handleExit} onNav={(path) => navigate(path)} />
+            <PantallaAdmin onSalir={handleExit} />
           ) : (
             <Navigate to="/" replace />
           )
@@ -80,10 +84,10 @@ export default function App() {
       />
 
       <Route
-        path="/admin/reservations"
+        path="/admin/prices"
         element={
           rol === 'admin' ? (
-            <PantallaReservaciones onNav={() => navigate('/admin', { replace: true })} />
+            <PantallaAdmin onSalir={handleExit} />
           ) : (
             <Navigate to="/" replace />
           )
@@ -91,21 +95,10 @@ export default function App() {
       />
 
       <Route
-        path="/admin/register"
+        path="/admin/reservaciones"
         element={
           rol === 'admin' ? (
-            <PantallaCheckin onNav={(path) => navigate(path)} />
-          ) : (
-            <Navigate to="/" replace />
-          )
-        }
-      />
-
-      <Route
-        path="/admin/transactions"
-        element={
-          rol === 'admin' ? (
-            <PantallaConsumo onNav={(path) => navigate(path)} />
+            <PantallaReservaciones onSalir={handleExit} />
           ) : (
             <Navigate to="/" replace />
           )
@@ -143,7 +136,7 @@ export default function App() {
         }
       />
       <Route
-        path="/user/room"
+        path="/user/ver"
         element={
           rol === 'user' ? (
             <PantallaVer onNav={(screen) => navigate(`/user/${screen}`)} />
@@ -163,7 +156,7 @@ export default function App() {
         }
       />
 
-      <Route path="/landing/*" element={<LandingPage />} />
+      <Route path="/landing/*" element={<EcoWeb />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
