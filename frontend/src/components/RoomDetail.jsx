@@ -11,7 +11,7 @@ const hotelRules = [
   { rules: 'No Pet' },
 ];
 
-const amenidadesLabels: Record<string, string> = {
+const amenidadesLabels = {
   jacuzzi_privado: 'Jacuzzi Privado',
   wifi: 'WiFi',
   ac: 'Aire Acondicionado',
@@ -28,19 +28,17 @@ const amenidadesLabels: Record<string, string> = {
   caja_fuerte: 'Caja Fuerte',
 };
 
-interface RoomDetailProps {
-  onClose?: () => void;
-}
+/** @typedef {{ onClose?: () => void }} RoomDetailProps */
 
-export default function RoomDetail({ onClose }: RoomDetailProps) {
-  const { id } = useParams<{ id: string }>();
-  const [room, setRoom] = useState<any>(null);
+export default function RoomDetail({ onClose }) {
+  const { id } = useParams();
+  const [room, setRoom] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchRooms()
       .then((rooms) => {
-        const found = rooms.find((r: any) => r.id === id || r.numero === id);
+        const found = rooms.find((r) => r.id === id || r.numero === id);
         setRoom(found);
       })
       .catch(() => setRoom(null))
@@ -68,7 +66,7 @@ export default function RoomDetail({ onClose }: RoomDetailProps) {
     );
   }
 
-  const { nombre, tipo, descripcion, capacidad, precio, amenidades, tarifa } = room;
+  const { tipo, descripcion, capacidad, precio, amenidades, tarifa } = room;
   const price = precio || tarifa || 0;
 
   return (
@@ -103,7 +101,7 @@ export default function RoomDetail({ onClose }: RoomDetailProps) {
               <div className="mb-8">
                 <h3 className="text-xl font-semibold mb-4">Amenidades</h3>
                 <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-                  {amenidades.map((amenidad: string, index: number) => (
+                  {amenidades.map((amenidad, index) => (
                     <div key={index} className="flex items-center gap-2">
                       <FaCheck className="text-accent text-sm" />
                       <span className="text-gray-700">

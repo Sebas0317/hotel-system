@@ -27,7 +27,7 @@ export default function Header() {
       ${header ? 'bg-white shadow-lg' : 'bg-transparent'}`}
     >
       <div className="container mx-auto max-w-7xl flex flex-col lg:flex-row items-center lg:justify-between gap-y-6 lg:gap-y-0 h-full">
-        <Link to="/" onClick={resetRoomFilterData} className="block w-[160px] shrink-0" aria-label="Home">
+        <Link to="/landing" onClick={resetRoomFilterData} className="block w-[160px] shrink-0" aria-label="Home">
           {header ? (
             <LogoDark className="w-[160px] h-auto block" />
           ) : (
@@ -39,7 +39,7 @@ export default function Header() {
         flex gap-x-4 lg:gap-x-8 font-tertiary tracking-[3px] text-[15px] items-center uppercase`}
         >
           {navLinks.map((link) => (
-            <Link to="/" className="transition hover:text-accent" key={link}>
+            <Link to="/landing" className="transition hover:text-accent" key={link}>
               {link}
             </Link>
           ))}

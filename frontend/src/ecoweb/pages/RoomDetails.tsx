@@ -63,7 +63,7 @@ export default function RoomDetails() {
         <div className="container mx-auto max-w-7xl py-24 text-center">
           <p className="text-2xl">Habitación no encontrada</p>
           <button 
-            onClick={() => navigate('/')} 
+            onClick={() => navigate('/landing')} 
             className="mt-4 text-accent hover:underline"
           >
             Volver a habitaciones

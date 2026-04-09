@@ -6,7 +6,7 @@ import { RoomContext } from './context/RoomContext';
 
 /**
  * Root app: router with Header/Footer and routes for Home, RoomDetails and 404.
- * Mounted at /landing/* in the main app (parent router handles basename).
+ * Mounted at /landing in the main app (no nested router, uses absolute paths).
  */
 function App() {
   return (
