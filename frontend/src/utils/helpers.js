@@ -34,7 +34,15 @@ export const calcularTotal = (items) =>
  * @returns {Object} Object keyed by floor name with room arrays
  */
 export const agruparPorPiso = (rooms) => {
-  return { 'Todas las habitaciones': rooms };
+  const grupos = {};
+  rooms.forEach((room) => {
+    const tipo = room.tipo || 'Otros';
+    if (!grupos[tipo]) {
+      grupos[tipo] = [];
+    }
+    grupos[tipo].push(room);
+  });
+  return grupos;
 };
 
 /**
