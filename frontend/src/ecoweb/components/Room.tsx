@@ -1,4 +1,5 @@
 import { BsArrowsFullscreen, BsPeople } from 'react-icons/bs';
+import { Link } from 'react-router-dom';
 import type { Room as RoomType } from '../types';
 
 interface RoomProps {
@@ -6,11 +7,11 @@ interface RoomProps {
 }
 
 /**
- * Single room card: image (hover scale), size/maxPerson strip, name, short description, "Book now from $price" button.
- * Used in a grid by Rooms component.
+ * Single room card: image (hover scale), size/maxPerson strip, name, short description, "Book now from $price" link.
+ * Links to /room/:id for details. Used in a grid by Rooms component.
  */
 export default function Room({ room }: RoomProps) {
-  const { name, image, size, maxPerson, description, price } = room;
+  const { id, name, image, size, maxPerson, description, price } = room;
 
   return (
     <div className="bg-white shadow-2xl min-h-[500px] group">
@@ -44,14 +45,17 @@ export default function Room({ room }: RoomProps) {
         </div>
       </div>
       <div className="text-center">
-        <h3 className="h3">{name}</h3>
+        <Link to={`/room/${id}`}>
+          <h3 className="h3">{name}</h3>
+        </Link>
         <p className="max-w-[300px] mx-auto mb-3 lg:mb-6">{description.slice(0, 56)}..</p>
       </div>
-      <div
+      <Link
+        to={`/room/${id}`}
         className="btn btn-secondary btn-sm max-w-[240px] mx-auto duration-300"
       >
         Book now from ${price}
-      </div>
+      </Link>
     </div>
   );
 }
