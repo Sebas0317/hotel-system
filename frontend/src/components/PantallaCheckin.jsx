@@ -86,9 +86,36 @@ export default function PantallaCheckin({ onNav }) {
   return (
     <PantallaForm titulo="🌿 Registrar Huésped" desc="Selecciona una habitación disponible y registra los datos del huésped" onVolver={() => onNav('menu')}>
       <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }} onKeyDown={handleKeyDown}>
+      {/* Selected room preview - always visible */}
+      {form.numero && (
+        <div className="selected-room-preview mb-6 p-5 bg-gradient-to-r from-green-50 to-green-100 border-2 border-green-500 rounded-2xl shadow-lg">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs font-bold text-green-600 uppercase tracking-wide mb-1">Habitación Seleccionada</p>
+              <p className="text-3xl font-extrabold text-green-800">#{rooms.find(r => r.id === form.numero)?.numero}</p>
+              <p className="text-lg font-semibold text-green-700">{rooms.find(r => r.id === form.numero)?.tipo}</p>
+            </div>
+            <div className="text-right">
+              <p className="text-2xl font-extrabold text-green-600">
+                {rooms.find(r => r.id === form.numero)?.tarifa?.toLocaleString('es-CO')}
+              </p>
+              <p className="text-sm text-green-500">COP/noche</p>
+            </div>
+          </div>
+          <button 
+            type="button"
+            className="mt-3 text-xs text-green-600 hover:text-green-800 underline"
+            onClick={() => setForm({ numero: '', huesped: '', tipo: 'estándar' })}
+          >
+            ✕ Cambiar habitación
+          </button>
+        </div>
+      )}
+
       {/* Room selector — only available rooms as cards */}
-      <div className="form-group">
-        <label className="text-xs uppercase font-semibold text-gray-400 tracking-wide mb-3 block">Habitación disponible</label>
+      {!form.numero && (
+        <div className="form-group">
+          <label className="text-xs uppercase font-semibold text-gray-400 tracking-wide mb-3 block">Selecciona una habitación</label>
         {roomsLoading ? (
           <p className="room-select-loading text-sm text-gray-400 p-3">Cargando habitaciones...</p>
         ) : disponibles.length === 0 ? (
@@ -153,16 +180,18 @@ export default function PantallaCheckin({ onNav }) {
           </div>
         )}
       </div>
+      )}
 
       {form.numero && (
-        <div className="form-group">
+        <div className="form-group mt-4">
           <label className="text-xs uppercase font-semibold text-gray-400 tracking-wide">Nombre del huésped</label>
           <input
             type="text"
             placeholder="Ej: Juan García"
             value={form.huesped}
             onChange={(e) => updateField('huesped', e.target.value)}
-            className="w-full px-4 py-3 text-sm sm:text-base"
+            className="w-full px-5 py-4 text-base rounded-lg border-2 border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-200"
+            autoFocus
           />
         </div>
       )}
