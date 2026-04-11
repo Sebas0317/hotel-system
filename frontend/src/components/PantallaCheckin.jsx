@@ -159,12 +159,13 @@ export default function PantallaCheckin({ onNav }) {
           <label className="text-xs uppercase font-semibold text-gray-400 tracking-wide">Nombre del huésped</label>
           <input
             type="text"
-          placeholder="Ej: Juan García"
-          value={form.huesped}
-          onChange={(e) => updateField('huesped', e.target.value)}
-          className="w-full px-4 py-3 text-sm sm:text-base"
-        />
-      </div>
+            placeholder="Ej: Juan García"
+            value={form.huesped}
+            onChange={(e) => updateField('huesped', e.target.value)}
+            className="w-full px-4 py-3 text-sm sm:text-base"
+          />
+        </div>
+      )}
 
       {error && <div className="error-msg text-sm">⚠️ {error}</div>}
       <button
