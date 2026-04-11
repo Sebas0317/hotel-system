@@ -107,6 +107,64 @@ export default function RoomDetail({ room, onRefresh }) {
         </div>
       </div>
 
+      {(room.estado === 'reservada' || room.estado === 'ocupada') && room.huesped && (
+        <div className="rd-section rd-guest-details">
+          <h4 className="rd-section-title">👤 Registro de Huéspedes</h4>
+          
+          <div className="rd-guest-count">
+            <span className="rd-label">Número de personas:</span>
+            <span className="rd-value">{room.personas || 1} persona{room.personas > 1 ? 's' : ''}</span>
+          </div>
+
+          <div className="rd-guest-list">
+            <div className="rd-guest-item rd-guest-main">
+              <span className="rd-guest-type">👤 Huesped Principal {room.estado === 'reservada' && '(Reserva)'}</span>
+              
+              <div className="rd-guest-form">
+                <div className="rd-field">
+                  <span className="rd-label">Nombre completo</span>
+                  <span className="rd-value">{room.huesped || '—'}</span>
+                </div>
+                <div className="rd-field">
+                  <span className="rd-label">Documento</span>
+                  <span className="rd-value">{contacto?.documento || '—'}</span>
+                </div>
+                <div className="rd-field">
+                  <span className="rd-label">Teléfono</span>
+                  <span className="rd-value">{contacto?.telefono || '—'}</span>
+                </div>
+                <div className="rd-field">
+                  <span className="rd-label">Correo electrónico</span>
+                  <span className="rd-value">{contacto?.email || '—'}</span>
+                </div>
+                {room.observaciones && (
+                  <div className="rd-field">
+                    <span className="rd-label">Observaciones</span>
+                    <span className="rd-value">{room.observaciones}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {room.personasAdicionales && room.personasAdicionales.length > 0 && room.personasAdicionales.map((p, i) => (
+              <div key={i} className="rd-guest-item">
+                <span className="rd-guest-type">👥 Persona adicional #{i + 1}</span>
+                <div className="rd-guest-form">
+                  <div className="rd-field">
+                    <span className="rd-label">Nombre</span>
+                    <span className="rd-value">{p.nombre || '—'}</span>
+                  </div>
+                  <div className="rd-field">
+                    <span className="rd-label">Documento</span>
+                    <span className="rd-value">{p.documento || '—'}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {room.pin && (
         <div className="rd-section rd-pin-section">
           <h4 className="rd-section-title">🔐 PIN de Acceso <span className="rd-pin-admin-only">(solo admin)</span></h4>

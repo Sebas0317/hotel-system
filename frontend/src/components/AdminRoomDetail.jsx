@@ -3,6 +3,32 @@ import { fetchRooms, fetchConsumos } from '../services/api';
 import { COP, FECHA } from '../utils/helpers';
 import { ESTADO_CFG, CAT_ICONS } from '../constants';
 
+const AMENIDADES = {
+  jacuzzi_privado: { icono: '🛁', label: 'Jacuzzi Privado' },
+  wifi: { icono: '📶', label: 'WiFi' },
+  ac: { icono: '❄️', label: 'Aire Acondicionado' },
+  balcon: { icono: '🌅', label: 'Balcón' },
+  vista_bosque: { icono: '🌲', label: 'Vista al Bosque' },
+  arquitectura_sostenible: { icono: '🌿', label: 'Arquitectura Sostenible' },
+  cocina: { icono: '🍳', label: 'Cocina Equipada' },
+  chimenea: { icono: '🔥', label: 'Chimenea' },
+  terraza: { icono: '☀️', label: 'Terraza' },
+  jardin_privado: { icono: '🌸', label: 'Jardín Privado' },
+  ducha_exterior: { icono: '🚿', label: 'Ducha Exterior' },
+  tv: { icono: '📺', label: 'TV' },
+  minibar: { icono: '🍷', label: 'Minibar' },
+  caja_fuerte: { icono: '🔐', label: 'Caja Fuerte' },
+  room_service: { icono: '🛎️', label: 'Room Service' },
+  mascota: { icono: '🐕', label: 'Mascotas Bienvenidas' },
+  parking: { icono: '🅿️', label: 'Estacionamiento' },
+  piscina: { icono: '🏊', label: 'Piscina' },
+  spa: { icono: '💆', label: 'Spa' },
+  Restaurante: { icono: '🍽️', label: 'Restaurante' },
+  bar: { icono: '🍸', label: 'Bar' },
+  lavanderia: { icono: '👕', label: 'Lavandería' },
+  gym: { icono: '🏋️', label: 'Gimnasio' },
+};
+
 export default function AdminRoomDetail({ room, onRefresh }) {
   const [consumos, setConsumos] = useState([]);
   const [loadingConsumos, setLoadingConsumos] = useState(true);
@@ -117,11 +143,18 @@ export default function AdminRoomDetail({ room, onRefresh }) {
         <div className="rd-amenidades mb-6">
           <h3 className="text-sm font-semibold text-gray-500 uppercase mb-3">Amenidades</h3>
           <div className="flex flex-wrap gap-2">
-            {room.amenidades.map((amenidad, idx) => (
-              <span key={idx} className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm">
-                {amenidad.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
-              </span>
-            ))}
+            {room.amenidades.map((a, idx) => {
+              const amenidad = AMENIDADES[a];
+              return (
+                <span 
+                  key={idx} 
+                  className="inline-flex items-center gap-1.5 text-xs bg-white/80 backdrop-blur text-blue-700 px-3 py-1.5 rounded-full border border-blue-200 shadow-sm"
+                >
+                  <span className="text-base">{amenidad?.icono || '✓'}</span>
+                  <span className="font-medium">{amenidad?.label || a.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</span>
+                </span>
+              );
+            })}
           </div>
         </div>
       )}

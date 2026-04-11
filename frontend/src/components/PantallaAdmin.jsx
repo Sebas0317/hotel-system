@@ -1,7 +1,6 @@
 import { useMemo, useCallback, useState, useEffect } from 'react';
 import { useRooms } from '../hooks/useRooms';
 import { useRoomSync } from '../hooks/useRoomSync';
-import { useFilterSync } from '../hooks/useFilterSync';
 import { ESTADO_CFG, TIPO_ICON, TIPOS_HABITACION } from '../constants';
 import { FECHA, filtrarRooms, agruparPorPiso } from '../utils/helpers';
 import RoomDetail from './RoomDetail';
@@ -9,60 +8,35 @@ import HotelTitle from './HotelTitle';
 import PriceEditor from './PriceEditor';
 import { Toast } from './RoomActions';
 
-/**
- * Admin dashboard — two-column layout when a room is selected.
- *
- * Two primary views:
- *   - "rooms" — room list with filtering, searching, and detail panel
- *   - "prices" — price editor for room rates and consumables
- *
- * Real-time sync:
- *   - Polls backend every 5 seconds for room changes
- *   - Shows toast notification when another user modifies a room
- *   - Auto-refreshes room list and detail panel
- *
- * URL synchronization:
- *   - Filters: ?estado=ocupada&buscar=101 (via useFilterSync)
- *   - Selected room: ?room=1002
- *   - Active view: ?view=prices (defaults to "rooms")
- *   - All params are shareable and bookmarkable
- *   - Browser back/forward restores previous state
- */
-export default function PantallaAdmin({ onSalir, onNav }) {
+export default function PantallaAdmin({ onSalir }) {
   const { rooms, loading, refresh } = useRooms();
-  const { filtro, setFiltro, tipo, setTipo, buscar, setBuscar } = useFilterSync();
   const [toast, setToast] = useState(null);
-
-  // Hash-based routing state
-  const [hashState, setHashState] = useState(() => {
-    const h = window.location.hash.slice(1) || '/admin';
-    const parts = h.split('/').filter(Boolean);
-    return { filtro: parts[1] || 'todos', room: parts[2] || null };
+  const [selectedRoomId, setSelectedRoomId] = useState(null);
+  const [filtro, setFiltro] = useState('todos');
+  const [buscar, setBuscar] = useState('');
+  const [tipo, setTipo] = useState('todos');
+  const [activeView, setActiveView] = useState(() => {
+    const hash = window.location.hash.slice(1) || '';
+    if (hash.includes('register')) return 'register';
+    if (hash.includes('transactions')) return 'transactions';
+    if (hash.includes('reservations')) return 'reservations';
+    if (hash.includes('prices')) return 'prices';
+    return 'rooms';
   });
 
   useEffect(() => {
-    const handler = () => {
-      const h = window.location.hash.slice(1) || '/admin';
-      const parts = h.split('/').filter(Boolean);
-      setHashState({ filtro: parts[1] || 'todos', room: parts[2] || null });
+    const handleHashChange = () => {
+      const hash = window.location.hash.slice(1) || '';
+      if (hash.includes('register')) setActiveView('register');
+      else if (hash.includes('transactions')) setActiveView('transactions');
+      else if (hash.includes('reservations')) setActiveView('reservations');
+      else if (hash.includes('prices')) setActiveView('prices');
+      else setActiveView('rooms');
     };
-    window.addEventListener('hashchange', handler);
-    return () => window.removeEventListener('hashchange', handler);
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
-  // Force update when hash changes externally
-  useEffect(() => {
-    const currentHash = window.location.hash.slice(1) || '/admin';
-    const parts = currentHash.split('/').filter(Boolean);
-    const roomFromHash = parts[2] || null;
-    if (roomFromHash !== hashState.room) {
-      setHashState(prev => ({ ...prev, room: roomFromHash }));
-    }
-  }, [hashState.room]);
-
-  const selectedRoomId = hashState.room;
-
-  // Real-time sync: polls backend every 5s, shows toast on changes
   const showToast = useCallback((type, message) => {
     setToast({ type, message });
   }, []);
@@ -83,73 +57,32 @@ export default function PantallaAdmin({ onSalir, onNav }) {
     },
   });
 
-  // Active view: 'rooms' or 'prices' — derived from hash
-  const activeView = hashState.filtro === 'prices' ? 'prices' : 'rooms';
-
-  const setView = (view) => {
-    if (view === 'prices') {
-      window.location.hash = '/prices';
-    } else {
-      window.location.hash = '/admin';
-    }
-  };
-
-  const setFiltroUrl = (value) => {
-    const parts = ['/admin', value !== 'todos' ? value : '', hashState.room || ''].filter(Boolean);
-    window.location.hash = parts.join('/');
-  };
-
-  /**
-   * Select a room to show its detail panel on the right.
-   * Uses hash-based routing: #/admin/[filter]/[roomId]
-   */
   const selectRoom = useCallback((roomId) => {
-    // Get current hash directly to avoid stale state
-    const currentHash = window.location.hash.slice(1) || '/admin';
-    const parts = currentHash.split('/').filter(Boolean);
-    const currentRoom = parts[2] || null;
-    
-    let newRoom;
-    if (currentRoom === roomId) {
-      newRoom = null;
-    } else {
-      newRoom = roomId;
-    }
-    
-    const filtro = parts[1] || 'todos';
-    const newParts = ['/admin', filtro !== 'todos' ? filtro : '', newRoom || ''].filter(Boolean);
-    window.location.hash = newParts.join('/');
+    setSelectedRoomId(prev => prev === roomId ? null : roomId);
   }, []);
 
-  /**
-   * Callback passed to RoomDetail for refreshing data after actions
-   */
   const handleRefresh = useCallback(() => {
     refresh();
   }, [refresh]);
 
-  // Memoize filtering to avoid recomputation on every render
   const filtradas = useMemo(
     () => filtrarRooms(rooms, filtro, buscar, tipo),
     [rooms, filtro, buscar, tipo]
   );
 
-  // Memoize grouping by floor
   const grupos = useMemo(() => agruparPorPiso(filtradas), [filtradas]);
 
-  // Compute stats once from the full room list
   const stats = useMemo(
     () => ({
       total: rooms.length,
-      ocupadas: rooms.filter((r) => r.estado === 'ocupada').length,
-      reservadas: rooms.filter((r) => r.estado === 'reservada').length,
-      disponibles: rooms.filter((r) => r.estado === 'disponible').length,
-      operativas: rooms.filter((r) => ['limpieza', 'mantenimiento', 'fuera-servicio'].includes(r.estado)).length,
+      ocupada: rooms.filter((r) => r.estado === 'ocupada').length,
+      reservada: rooms.filter((r) => r.estado === 'reservada').length,
+      disponible: rooms.filter((r) => r.estado === 'disponible').length,
+      limpieza: rooms.filter((r) => r.estado === 'limpieza').length,
     }),
     [rooms]
   );
 
-  // Find the currently selected room object for the detail panel
   const selectedRoom = useMemo(
     () => rooms.find((r) => r.id === selectedRoomId) || null,
     [rooms, selectedRoomId]
@@ -173,79 +106,79 @@ export default function PantallaAdmin({ onSalir, onNav }) {
     );
   }
 
-  // Shared header for the room list column
   const roomListHeader = (
     <>
-      {/* Primary action buttons */}
       <div className="admin-primary-actions flex flex-col sm:flex-row gap-3 sm:gap-4 mb-6">
         <button
           className={`admin-primary-btn px-5 py-3.5 sm:px-6 text-sm sm:text-base font-medium ${activeView === 'rooms' ? 'activo' : ''}`}
-          onClick={() => setView('rooms')}
+          onClick={() => { setActiveView('rooms'); window.location.hash = '#/admin'; }}
         >
           🏠 Habitaciones
         </button>
         <button
-          className="admin-primary-btn admin-primary-btn-nav px-5 py-3.5 sm:px-6 text-sm sm:text-base font-medium"
-          onClick={() => window.location.hash = '/admin/register'}
+          className={`admin-primary-btn admin-primary-btn-nav px-5 py-3.5 sm:px-6 text-sm sm:text-base font-medium ${activeView === 'register' ? 'activo' : ''}`}
+          onClick={() => { setActiveView('register'); window.location.hash = '#/admin/register'; }}
         >
-          📋 Registro de Huéspedes
+          📋 Registro
         </button>
         <button
-          className="admin-primary-btn admin-primary-btn-nav px-5 py-3.5 sm:px-6 text-sm sm:text-base font-medium"
-          onClick={() => window.location.hash = '/admin/transactions'}
+          className={`admin-primary-btn admin-primary-btn-nav px-5 py-3.5 sm:px-6 text-sm sm:text-base font-medium ${activeView === 'transactions' ? 'activo' : ''}`}
+          onClick={() => { setActiveView('transactions'); window.location.hash = '#/admin/transactions'; }}
         >
           💳 Transacciones
         </button>
         <button
-          className="admin-primary-btn admin-primary-btn-nav px-5 py-3.5 sm:px-6 text-sm sm:text-base font-medium"
-          onClick={() => window.location.hash = '/admin/reservations'}
+          className={`admin-primary-btn admin-primary-btn-nav px-5 py-3.5 sm:px-6 text-sm sm:text-base font-medium ${activeView === 'reservations' ? 'activo' : ''}`}
+          onClick={() => { setActiveView('reservations'); window.location.hash = '#/admin/reservations'; }}
         >
           📅 Reservas
         </button>
         <button
           className={`admin-primary-btn px-5 py-3.5 sm:px-6 text-sm sm:text-base font-medium ${activeView === 'prices' ? 'activo' : ''}`}
-          onClick={() => setView('prices')}
+          onClick={() => { setActiveView('prices'); window.location.hash = '#/admin/prices'; }}
         >
           💰 Tarifas
         </button>
       </div>
 
-      {/* Stats - clickable filters */}
       <div className="admin-stats flex flex-wrap gap-3 sm:gap-4 mb-6">
         <button className={`stat-pill total flex-1 min-w-[80px] sm:min-w-[100px] p-4 sm:p-5 ${filtro === 'todos' ? 'activo' : ''}`} onClick={() => setFiltro('todos')}>
           <span className="sp-num text-2xl sm:text-4xl font-bold">{stats.total}</span>
           <span className="sp-lbl text-xs sm:text-sm">Total</span>
         </button>
         <button className={`stat-pill ocupada flex-1 min-w-[80px] sm:min-w-[100px] p-4 sm:p-5 ${filtro === 'ocupada' ? 'activo' : ''}`} onClick={() => setFiltro('ocupada')}>
-          <span className="sp-num text-2xl sm:text-4xl font-bold">{stats.ocupadas}</span>
+          <span className="sp-num text-2xl sm:text-4xl font-bold">{stats.ocupada}</span>
           <span className="sp-lbl text-xs sm:text-sm">Ocupadas</span>
         </button>
         <button className={`stat-pill reservada flex-1 min-w-[80px] sm:min-w-[100px] p-4 sm:p-5 ${filtro === 'reservada' ? 'activo' : ''}`} onClick={() => setFiltro('reservada')}>
-          <span className="sp-num text-2xl sm:text-4xl font-bold">{stats.reservadas}</span>
+          <span className="sp-num text-2xl sm:text-4xl font-bold">{stats.reservada}</span>
           <span className="sp-lbl text-xs sm:text-sm">Reservadas</span>
         </button>
         <button className={`stat-pill disponible flex-1 min-w-[80px] sm:min-w-[100px] p-4 sm:p-5 ${filtro === 'disponible' ? 'activo' : ''}`} onClick={() => setFiltro('disponible')}>
-          <span className="sp-num text-2xl sm:text-4xl font-bold">{stats.disponibles}</span>
+          <span className="sp-num text-2xl sm:text-4xl font-bold">{stats.disponible}</span>
           <span className="sp-lbl text-xs sm:text-sm">Disponibles</span>
         </button>
-        <button className={`stat-pill operativa flex-1 min-w-[80px] sm:min-w-[100px] p-4 sm:p-5 ${filtro === 'limpieza' ? 'activo' : ''}`} onClick={() => setFiltro('limpieza')}>
-          <span className="sp-num text-2xl sm:text-4xl font-bold">{stats.operativas}</span>
+        <button className={`stat-pill limpieza flex-1 min-w-[80px] sm:min-w-[100px] p-4 sm:p-5 ${filtro === 'limpieza' ? 'activo' : ''}`} onClick={() => setFiltro('limpieza')}>
+          <span className="sp-num text-2xl sm:text-4xl font-bold">{stats.limpieza}</span>
           <span className="sp-lbl text-xs sm:text-sm">Limpieza</span>
         </button>
       </div>
 
-      {/* Filters */}
-      <div className="admin-filtros flex flex-col sm:flex-row gap-3 sm:gap-4 mb-6">
-        <input className="buscar-input flex-1 min-w-[250px] px-5 py-3 text-sm rounded-lg" placeholder="🔍 Buscar habitación o huésped..." value={buscar} onChange={(e) => setBuscar(e.target.value)} />
-        <div className="filtro-tabs flex flex-wrap gap-2">
-          {['todos', 'ocupada', 'reservada', 'disponible', 'limpieza', 'mantenimiento', 'fuera-servicio'].map((f) => (
-            <button key={f} className={`ftab px-4 py-2.5 text-sm ${filtro === f ? 'activo' : ''} ${f}`} onClick={() => setFiltro(f)}>
+      <div className="admin-filtros flex flex-nowrap items-center gap-2 mb-4 overflow-x-auto pb-2">
+        <input className="buscar-input flex-shrink-0 w-[180px] px-4 py-2.5 text-sm rounded-lg" placeholder="🔍 Buscar..." value={buscar} onChange={(e) => setBuscar(e.target.value)} />
+        <div className="filtro-tabs flex flex-nowrap gap-1.5">
+          {['todos', 'ocupada', 'reservada', 'disponible', 'limpieza'].map((f) => (
+            <button 
+              key={f} 
+              className={`ftab px-3 py-2 text-xs whitespace-nowrap ${filtro === f ? 'activo' : ''} ${f}`} 
+              onClick={() => setFiltro(f)}
+            >
               {f === 'todos' ? 'Todas' : ESTADO_CFG[f]?.label}
             </button>
           ))}
         </div>
-        <select className="filtro-tipo w-full sm:w-auto px-4 py-3 text-sm rounded-lg" value={tipo} onChange={(e) => setTipo(e.target.value)}>
-          <option value="todos">Todos los tipos</option>
+        <select className="filtro-tipo flex-shrink-0 w-[140px] px-3 py-2 text-xs rounded-lg" value={tipo} onChange={(e) => setTipo(e.target.value)}>
+          <option value="todos">Tipos</option>
           {TIPOS_HABITACION.map((t) => (
             <option key={t.value} value={t.value}>{t.label}</option>
           ))}
@@ -254,7 +187,6 @@ export default function PantallaAdmin({ onSalir, onNav }) {
     </>
   );
 
-  // Shared room grid renderer
   const roomGrid = (
     <>
       {Object.keys(grupos).length === 0 ? (
@@ -290,7 +222,6 @@ export default function PantallaAdmin({ onSalir, onNav }) {
                       <span className="rc-bell" title="Cliente solicita retirarse">🔔</span>
                     )}
                     <span className="rc-dot" style={{ background: cfg.dot }} />
-                    {/* Selection indicator */}
                     <span className={`rc-expand-icon ${isSelected ? 'open' : ''}`}>
                       {isSelected ? '◂' : '▸'}
                     </span>
@@ -324,7 +255,6 @@ export default function PantallaAdmin({ onSalir, onNav }) {
     </>
   );
 
-  // Two-column layout when a room is selected
   if (selectedRoom) {
     return (
       <div className="app-shell">
@@ -335,12 +265,10 @@ export default function PantallaAdmin({ onSalir, onNav }) {
             <HotelTitle />
             <span className="topbar-badge admin text-xs">Admin</span>
           </div>
-          <button className="btn-salir text-sm" onClick={() => { setSearchParams({}, { replace: true }); onSalir(); }}>Exit</button>
+          <button className="btn-salir text-sm" onClick={onSalir}>Exit</button>
         </header>
 
-        {/* Two-column split: left = room list, right = detail panel */}
         <div className="admin-split flex flex-col lg:grid lg:grid-cols-[1fr_420px]">
-          {/* LEFT COLUMN — scrollable room list */}
           <div className="admin-left border-b lg:border-b-0 lg:border-r border-gray-200 max-h-[55vh] lg:max-h-none">
             {roomListHeader}
             <div className="admin-left-scroll">
@@ -348,23 +276,13 @@ export default function PantallaAdmin({ onSalir, onNav }) {
             </div>
           </div>
 
-          {/* RIGHT COLUMN — fixed detail panel */}
           <div className="admin-right">
             <div className="admin-right-inner">
-              {selectedRoom ? (
-                <>
-                  {/* Close button for the detail panel */}
-                  <div className="rd-close-bar flex justify-between items-center p-4 bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
-                    <span className="rd-close-title font-semibold">Habitación #{selectedRoom.numero}</span>
-                    <button className="rd-close-btn bg-red-500 text-white px-3 py-1 rounded text-sm" onClick={() => selectRoom(selectedRoom.id)}>✕ Cerrar</button>
-                  </div>
-                  <RoomDetail room={selectedRoom} onRefresh={handleRefresh} />
-                </>
-              ) : (
-                <div className="p-8 text-center text-gray-400">
-                  Selecciona una habitación para ver los detalles
-                </div>
-              )}
+              <div className="rd-close-bar flex justify-between items-center p-4 bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
+                <span className="rd-close-title font-semibold">Habitación #{selectedRoom.numero}</span>
+                <button className="rd-close-btn bg-red-500 text-white px-3 py-1 rounded text-sm" onClick={() => selectRoom(selectedRoom.id)}>✕ Cerrar</button>
+              </div>
+              <RoomDetail room={selectedRoom} onRefresh={handleRefresh} />
             </div>
           </div>
         </div>
@@ -372,7 +290,6 @@ export default function PantallaAdmin({ onSalir, onNav }) {
     );
   }
 
-  // Prices view
   if (activeView === 'prices') {
     return (
       <div className="app-shell">
@@ -383,15 +300,14 @@ export default function PantallaAdmin({ onSalir, onNav }) {
             <HotelTitle />
             <span className="topbar-badge admin text-xs">Admin</span>
           </div>
-          <button className="btn-salir text-sm" onClick={() => { setSearchParams({}, { replace: true }); onSalir(); }}>Exit</button>
+          <button className="btn-salir text-sm" onClick={onSalir}>Exit</button>
         </header>
 
         <div className="admin-content admin-prices-view p-4 sm:p-6">
-          {/* Primary action buttons */}
           <div className="admin-primary-actions flex flex-col sm:flex-row gap-2 sm:gap-3 mb-4">
             <button
               className="admin-primary-btn px-4 py-3 sm:px-5 text-sm sm:text-base"
-              onClick={() => setView('rooms')}
+              onClick={() => setActiveView('rooms')}
             >
               Room List
             </button>
@@ -411,7 +327,63 @@ export default function PantallaAdmin({ onSalir, onNav }) {
     );
   }
 
-  // Single-column layout — original full-width view
+  if (activeView === 'register') {
+    return (
+      <div className="app-shell">
+        <header className="topbar flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0 px-3 sm:px-6 py-3">
+          <div className="topbar-left flex items-center gap-2">
+            <span className="topbar-logo text-xl">🏨</span>
+            <HotelTitle />
+            <span className="topbar-badge admin text-xs">Admin</span>
+          </div>
+          <button className="btn-salir text-sm" onClick={() => { setActiveView('rooms'); window.location.hash = '#/admin'; }}>← Volver</button>
+        </header>
+        <div className="admin-content p-4">
+          <h2 className="text-xl font-bold mb-4">📋 Registro de Huéspedes</h2>
+          <p className="text-gray-500">Usa el botón "Check-in" en cada habitación</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (activeView === 'transactions') {
+    return (
+      <div className="app-shell">
+        <header className="topbar flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0 px-3 sm:px-6 py-3">
+          <div className="topbar-left flex items-center gap-2">
+            <span className="topbar-logo text-xl">🏨</span>
+            <HotelTitle />
+            <span className="topbar-badge admin text-xs">Admin</span>
+          </div>
+          <button className="btn-salir text-sm" onClick={() => { setActiveView('rooms'); window.location.hash = '#/admin'; }}>← Volver</button>
+        </header>
+        <div className="admin-content p-4">
+          <h2 className="text-xl font-bold mb-4">💳 Transacciones</h2>
+          <p className="text-gray-500">Historial de pagos y consumos</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (activeView === 'reservations') {
+    return (
+      <div className="app-shell">
+        <header className="topbar flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0 px-3 sm:px-6 py-3">
+          <div className="topbar-left flex items-center gap-2">
+            <span className="topbar-logo text-xl">🏨</span>
+            <HotelTitle />
+            <span className="topbar-badge admin text-xs">Admin</span>
+          </div>
+          <button className="btn-salir text-sm" onClick={() => { setActiveView('rooms'); window.location.hash = '#/admin'; }}>← Volver</button>
+        </header>
+        <div className="admin-content p-4">
+          <h2 className="text-xl font-bold mb-4">📅 Reservas</h2>
+          <p className="text-gray-500">Gestión de reservas</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="app-shell">
       <header className="topbar flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0 px-3 sm:px-6 py-3">

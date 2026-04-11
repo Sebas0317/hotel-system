@@ -1,27 +1,38 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { FaCheck } from 'react-icons/fa';
 import { fetchRooms } from '../../services/api';
 import { COP } from '../../utils/helpers';
 import { ScrollToTop } from '../shared/ScrollToTop';
 import { AdultsDropdown, CheckIn, CheckOut, KidsDropdown } from '../components';
 import { hotelRules as originalHotelRules } from '../data';
 
-const amenidadesLabels: Record<string, string> = {
-  jacuzzi_privado: 'Jacuzzi Privado',
-  wifi: 'WiFi',
-  ac: 'Aire Acondicionado',
-  balcon: 'Balcón',
-  vista_bosque: 'Vista al Bosque',
-  arquitectura_sostenible: 'Arquitectura Sostenible',
-  orientacion_solar: 'Orientación Solar',
-  vista_bosque_premium: 'Vista Premium',
-  ducha_exterior: 'Ducha Exterior',
-  jardin_privado: 'Jardín Privado',
-  terra_privada: 'Terraza Privada',
-  tv: 'TV Pantalla Plana',
-  minibar: 'Minibar',
-  caja_fuerte: 'Caja Fuerte',
+const AMENIDADES = {
+  jacuzzi_privado: { icono: '🛁', label: 'Jacuzzi Privado' },
+  wifi: { icono: '📶', label: 'WiFi' },
+  ac: { icono: '❄️', label: 'Aire Acondicionado' },
+  balcon: { icono: '🌅', label: 'Balcón' },
+  vista_bosque: { icono: '🌲', label: 'Vista al Bosque' },
+  arquitectura_sostenible: { icono: '🌿', label: 'Arquitectura Sostenible' },
+  orientacion_solar: { icono: '🌅', label: 'Orientación Solar' },
+  vista_bosque_premium: { icono: '✨', label: 'Vista Premium' },
+  ducha_exterior: { icono: '🚿', label: 'Ducha Exterior' },
+  jardin_privado: { icono: '🌸', label: 'Jardín Privado' },
+  terra_privada: { icono: '☀️', label: 'Terraza Privada' },
+  tv: { icono: '📺', label: 'TV Pantalla Plana' },
+  minibar: { icono: '🍷', label: 'Minibar' },
+  caja_fuerte: { icono: '🔐', label: 'Caja Fuerte' },
+  cocina: { icono: '🍳', label: 'Cocina Equipada' },
+  chimenea: { icono: '🔥', label: 'Chimenea' },
+  terraza: { icono: '🌿', label: 'Terraza' },
+  room_service: { icono: '🛎️', label: 'Room Service' },
+  mascota: { icono: '🐕', label: 'Mascotas Bienvenidas' },
+  parking: { icono: '🅿️', label: 'Estacionamiento' },
+  piscina: { icono: '🏊', label: 'Piscina' },
+  spa: { icono: '💆', label: 'Spa' },
+  Restaurante: { icono: '🍽️', label: 'Restaurante' },
+  bar: { icono: '🍸', label: 'Bar' },
+  lavanderia: { icono: '👕', label: 'Lavandería' },
+  gym: { icono: '🏋️', label: 'Gimnasio' },
 };
 
 export default function RoomDetails() {
@@ -104,17 +115,21 @@ export default function RoomDetails() {
               </p>
               
               {amenidades && amenidades.length > 0 && (
-                <div className="grid grid-cols-3 gap-6 mb-12">
-                  {amenidades.map((amenidad, index) => (
-                    <div key={index} className="flex items-center gap-x-3 flex-1">
-                      <div className="text-3xl text-accent">
-                        <FaCheck />
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-12">
+                  {amenidades.map((a, index) => {
+                    const amenidad = AMENIDADES[a];
+                    return (
+                      <div 
+                        key={index} 
+                        className="flex items-center gap-3 bg-white/10 backdrop-blur-sm px-4 py-3 rounded-xl border border-white/20"
+                      >
+                        <span className="text-2xl">{amenidad?.icono || '✓'}</span>
+                        <span className="text-sm text-white/90">
+                          {amenidad?.label || a.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                        </span>
                       </div>
-                      <div className="text-base">
-                        {amenidadesLabels[amenidad] || amenidad}
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>
