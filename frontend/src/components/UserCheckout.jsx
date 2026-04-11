@@ -266,15 +266,15 @@ export default function UserCheckout({ onExit }) {
 
               <div className="rdp-totals">
                 <div className="rdp-total-row rdp-total-grand">
-                  <span>Total a Pagar</span>
+                  <span>Total de la Estancia</span>
                   <span>{COP(totalAPagar)}</span>
                 </div>
                 <div className="rdp-total-row">
-                  <span>Ya Pagado</span>
+                  <span>Pagado Adelantado</span>
                   <span className="text-green-600">{COP(pagado)}</span>
                 </div>
                 <div className="rdp-total-row rdp-balance">
-                  <span>Remaining Balance</span>
+                  <span>Saldo Pendiente</span>
                   <span className={saldoPendiente > 0 ? 'text-red-600' : 'text-green-600'}>
                     {COP(saldoPendiente)}
                   </span>
@@ -291,13 +291,13 @@ export default function UserCheckout({ onExit }) {
 
               {saldoPendiente > 0 && (
                 <p className="rdp-balance-hint">
-                  Remaining balance of {COP(saldoPendiente)} must be paid at reception
+                  El saldo pendiente de {COP(saldoPendiente)} debe pagarse en recepción
                 </p>
               )}
             </div>
           ) : (
             <div className="room-detail-panel rdp-empty-state">
-              <p>Select a room to view details</p>
+              <p>Selecciona una habitación para ver los detalles</p>
             </div>
           )}
         </div>

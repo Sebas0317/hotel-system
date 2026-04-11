@@ -151,15 +151,17 @@ export default function UserView({ onExit }) {
               {/* Payment Info */}
               {selectedRoom.pago && (
                 <div className="rdp-section rdp-payment-info">
-                  <h3 className="rdp-section-title">Detalles del Pago</h3>
+                  <h3 className="rdp-section-title">Resumen de Pago</h3>
                   <div className="rdp-payment-grid">
                     <div className="rdp-payment-item">
-                      <span className="rdp-payment-label">Método de Pago</span>
-                      <span className="rdp-payment-value">{selectedRoom.pago.metodo}</span>
+                      <span className="rdp-payment-label">Pagado Adelantado</span>
+                      <span className="rdp-payment-value text-green-600">{COP(selectedRoom.pago.pagado)}</span>
                     </div>
                     <div className="rdp-payment-item">
-                      <span className="rdp-payment-label">Total Pagado</span>
-                      <span className="rdp-payment-value text-green-600">{COP(selectedRoom.pago.pagado)}</span>
+                      <span className="rdp-payment-label">Pendiente</span>
+                      <span className={`rdp-payment-value ${saldoPendiente > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                        {COP(saldoPendiente)}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -206,24 +208,18 @@ export default function UserView({ onExit }) {
               {/* Grand Total */}
               <div className="rdp-totals">
                 <div className="rdp-total-row rdp-total-grand">
-                  <span>Total a Pagar</span>
+                  <span>Total de la Estancia</span>
                   <span>{COP(totalAPagar)}</span>
-                </div>
-                <div className="rdp-total-row rdp-balance">
-                  <span>Remaining Balance</span>
-                  <span className={saldoPendiente > 0 ? 'text-red-600' : 'text-green-600'}>
-                    {COP(saldoPendiente)}
-                  </span>
                 </div>
               </div>
 
               <button className="rdp-checkout-btn" onClick={() => navigate('/user/checkout')}>
-                Guest Checkout
+                Solicitar Check-out
               </button>
             </div>
           ) : (
             <div className="room-detail-panel rdp-empty-state">
-              <p>Select a room to view details</p>
+              <p>Selecciona una habitación para ver los detalles</p>
             </div>
           )}
         </div>
