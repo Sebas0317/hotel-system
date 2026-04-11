@@ -1,37 +1,5 @@
 [
   {
-    "id": "cons-001",
-    "roomId": "sb-102",
-    "descripcion": "Desayuno americano",
-    "categoria": "restaurante",
-    "precio": 28000,
-    "fecha": "2026-04-06T08:30:00.000Z"
-  },
-  {
-    "id": "cons-002",
-    "roomId": "sb-102",
-    "descripcion": "Cena BBQ",
-    "categoria": "restaurante",
-    "precio": 45000,
-    "fecha": "2026-04-06T19:45:00.000Z"
-  },
-  {
-    "id": "cons-003",
-    "roomId": "sb-102",
-    "descripcion": "Cocteles tropicales (2)",
-    "categoria": "bar",
-    "precio": 56000,
-    "fecha": "2026-04-06T21:00:00.000Z"
-  },
-  {
-    "id": "cons-004",
-    "roomId": "sb-102",
-    "descripcion": "Desayuno buffet",
-    "categoria": "restaurante",
-    "precio": 35000,
-    "fecha": "2026-04-07T08:00:00.000Z"
-  },
-  {
     "id": "cons-005",
     "roomId": "ss-202",
     "descripcion": "Almuerzo regional",
@@ -94,13 +62,5 @@
     "categoria": "servicios",
     "precio": 200000,
     "fecha": "2026-04-05T15:30:00.000Z"
-  },
-  {
-    "id": "cons-013",
-    "roomId": "sb-102",
-    "descripcion": "Masaje relajante 60min",
-    "categoria": "servicios",
-    "precio": 100000,
-    "fecha": "2026-04-07T16:00:00.000Z"
   }
 ]

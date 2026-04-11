@@ -15,7 +15,14 @@
     "checkOut": null,
     "noches": null,
     "mascotas": false,
-    "amenidades": ["jacuzzi_privado", "wifi", "ac", "balcon", "vista_bosque", "arquitectura_sostenible"],
+    "amenidades": [
+      "jacuzzi_privado",
+      "wifi",
+      "ac",
+      "balcon",
+      "vista_bosque",
+      "arquitectura_sostenible"
+    ],
     "descripcion": "Suite con jacuzzi privado y arquitectura en madera y bambú sostenible",
     "tarifa": 350000
   },
@@ -26,23 +33,42 @@
     "camas": "1 cama king",
     "capacidad": 2,
     "piso": 1,
-    "estado": "ocupada",
-    "huesped": "Carlos Mendoza",
+    "estado": "limpieza",
+    "huesped": null,
     "telefono": "3104567890",
     "email": "carlos.mendoza@email.com",
-    "pin": "4827",
-    "checkIn": "2026-04-05T15:30:00.000Z",
-    "checkOut": "2026-04-09T12:00:00.000Z",
-    "noches": 4,
+    "pin": null,
+    "checkIn": null,
+    "checkOut": null,
+    "noches": null,
     "solicitudCheckout": {
-      "fecha": "2026-04-08",
-      "hora": "2026-04-08T10:30:00.000Z"
+      "fecha": "2026-04-09",
+      "hora": "2026-04-11T19:11:57.230Z"
     },
     "mascotas": false,
-    "pago": { "metodo": "tarjeta", "total": 1400000, "pagado": 700000 },
-    "amenidades": ["jacuzzi_privado", "wifi", "ac", "balcon", "vista_bosque", "arquitectura_sostenible"],
+    "pago": {
+      "metodoPago": "efectivo",
+      "valorRecibido": 32292659,
+      "total": 3229660,
+      "subtotal": 2714000,
+      "iva": 515660,
+      "cargoHabitacion": 2450000,
+      "totalConsumos": 264000,
+      "noches": 7,
+      "tarifaNoche": 350000,
+      "cambio": 29062999
+    },
+    "amenidades": [
+      "jacuzzi_privado",
+      "wifi",
+      "ac",
+      "balcon",
+      "vista_bosque",
+      "arquitectura_sostenible"
+    ],
     "descripcion": "Suite con jacuzzi privado y arquitectura en madera y bambú sostenible",
-    "tarifa": 350000
+    "tarifa": 350000,
+    "checkOutAt": "2026-04-11T19:12:31.849Z"
   },
   {
     "id": "ss-201",
@@ -60,8 +86,18 @@
     "checkOut": "2026-04-12T12:00:00.000Z",
     "noches": 2,
     "mascotas": true,
-    "pago": { "metodo": "transferencia", "total": 840000, "pagado": 420000 },
-    "amenidades": ["jacuzzi_privado", "wifi", "ac", "orientacion_solar", "vista_bosque_premium"],
+    "pago": {
+      "metodo": "transferencia",
+      "total": 840000,
+      "pagado": 420000
+    },
+    "amenidades": [
+      "jacuzzi_privado",
+      "wifi",
+      "ac",
+      "orientacion_solar",
+      "vista_bosque_premium"
+    ],
     "descripcion": "Suite con orientación solar optimizada para vistas premium del bosque",
     "tarifa": 420000
   },
@@ -81,8 +117,18 @@
     "checkOut": "2026-04-08T12:00:00.000Z",
     "noches": 2,
     "mascotas": false,
-    "pago": { "metodo": "efectivo", "total": 840000, "pagado": 840000 },
-    "amenidades": ["jacuzzi_privado", "wifi", "ac", "orientacion_solar", "vista_bosque_premium"],
+    "pago": {
+      "metodo": "efectivo",
+      "total": 840000,
+      "pagado": 840000
+    },
+    "amenidades": [
+      "jacuzzi_privado",
+      "wifi",
+      "ac",
+      "orientacion_solar",
+      "vista_bosque_premium"
+    ],
     "descripcion": "Suite con orientación solar optimizada para vistas premium del bosque",
     "tarifa": 420000
   },
@@ -102,7 +148,13 @@
     "checkOut": null,
     "noches": null,
     "mascotas": false,
-    "amenidades": ["ducha_exterior", "wifi", "ac", "jardin_privado", "terraza"],
+    "amenidades": [
+      "ducha_exterior",
+      "wifi",
+      "ac",
+      "jardin_privado",
+      "terraza"
+    ],
     "descripcion": "Suite con ducha exterior y acceso a jardín privado",
     "tarifa": 480000
   },
@@ -122,7 +174,13 @@
     "checkOut": null,
     "noches": null,
     "mascotas": false,
-    "amenidades": ["ducha_exterior", "wifi", "ac", "jardin_privado", "terraza"],
+    "amenidades": [
+      "ducha_exterior",
+      "wifi",
+      "ac",
+      "jardin_privado",
+      "terraza"
+    ],
     "descripcion": "Suite con ducha exterior y acceso a jardín privado",
     "tarifa": 480000
   },
@@ -142,7 +200,12 @@
     "checkOut": null,
     "noches": null,
     "mascotas": true,
-    "amenidades": ["wifi", "ac", "tv", "baño_privado"],
+    "amenidades": [
+      "wifi",
+      "ac",
+      "tv",
+      "baño_privado"
+    ],
     "descripcion": "Habitación para parejas con control climático e internet inalámbrico",
     "tarifa": 180000
   },
@@ -162,8 +225,17 @@
     "checkOut": "2026-04-14T12:00:00.000Z",
     "noches": 2,
     "mascotas": false,
-    "pago": { "metodo": "tarjeta", "total": 360000, "pagado": 180000 },
-    "amenidades": ["wifi", "ac", "tv", "baño_privado"],
+    "pago": {
+      "metodo": "tarjeta",
+      "total": 360000,
+      "pagado": 180000
+    },
+    "amenidades": [
+      "wifi",
+      "ac",
+      "tv",
+      "baño_privado"
+    ],
     "descripcion": "Habitación para parejas con control climático e internet inalámbrico",
     "tarifa": 180000
   },
@@ -183,7 +255,12 @@
     "checkOut": null,
     "noches": null,
     "mascotas": false,
-    "amenidades": ["wifi", "ac", "tv", "baño_privado"],
+    "amenidades": [
+      "wifi",
+      "ac",
+      "tv",
+      "baño_privado"
+    ],
     "descripcion": "Habitación estándar con cama king, control climático, TV pantalla plana y baño privado",
     "tarifa": 160000
   },
@@ -203,8 +280,17 @@
     "checkOut": "2026-04-09T12:00:00.000Z",
     "noches": 2,
     "mascotas": true,
-    "pago": { "metodo": "efectivo", "total": 360000, "pagado": 360000 },
-    "amenidades": ["wifi", "ac", "tv", "baño_privado"],
+    "pago": {
+      "metodo": "efectivo",
+      "total": 360000,
+      "pagado": 360000
+    },
+    "amenidades": [
+      "wifi",
+      "ac",
+      "tv",
+      "baño_privado"
+    ],
     "descripcion": "Habitación estándar con cama king, control climático, TV pantalla plana y baño privado",
     "tarifa": 160000
   },
@@ -224,7 +310,12 @@
     "checkOut": null,
     "noches": null,
     "mascotas": false,
-    "amenidades": ["wifi", "ac", "tv", "baño_privado"],
+    "amenidades": [
+      "wifi",
+      "ac",
+      "tv",
+      "baño_privado"
+    ],
     "descripcion": "Habitación familiar para 4 personas con control climático y televisión",
     "tarifa": 220000
   },
@@ -244,8 +335,17 @@
     "checkOut": "2026-04-18T12:00:00.000Z",
     "noches": 3,
     "mascotas": true,
-    "pago": { "metodo": "transferencia", "total": 760000, "pagado": 380000 },
-    "amenidades": ["wifi", "ac", "tv", "baño_privado"],
+    "pago": {
+      "metodo": "transferencia",
+      "total": 760000,
+      "pagado": 380000
+    },
+    "amenidades": [
+      "wifi",
+      "ac",
+      "tv",
+      "baño_privado"
+    ],
     "descripcion": "Habitación familiar para 4 personas con control climático y televisión",
     "tarifa": 220000
   },
@@ -265,8 +365,17 @@
     "checkOut": "2026-04-06T12:00:00.000Z",
     "noches": 2,
     "mascotas": false,
-    "pago": { "metodo": "tarjeta", "total": 1100000, "pagado": 1100000 },
-    "amenidades": ["wifi", "vista_lago", "terraza", "hamacas"],
+    "pago": {
+      "metodo": "tarjeta",
+      "total": 1100000,
+      "pagado": 1100000
+    },
+    "amenidades": [
+      "wifi",
+      "vista_lago",
+      "terraza",
+      "hamacas"
+    ],
     "descripcion": "Estructura única sobre el agua con 3 literas, capacidad para 6 personas",
     "tarifa": 550000
   },
@@ -286,7 +395,12 @@
     "checkOut": null,
     "noches": 2,
     "mascotas": false,
-    "amenidades": ["wifi", "vista_lago", "terraza", "hamacas"],
+    "amenidades": [
+      "wifi",
+      "vista_lago",
+      "terraza",
+      "hamacas"
+    ],
     "descripcion": "Estructura única sobre el agua con 3 literas, capacidad para 6 personas",
     "tarifa": 550000
   },

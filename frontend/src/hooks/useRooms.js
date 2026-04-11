@@ -1,32 +1,20 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { fetchRooms } from '../services/api';
 
-/**
- * Hook to fetch and manage rooms data
- * Provides loading, error states and auto-refresh capability
- * @returns {Object} { rooms, loading, error, refresh }
- */
 export function useRooms() {
-  const [rooms, setRooms] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const queryClient = useQueryClient();
 
-  const refresh = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await fetchRooms();
-      setRooms(data);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    refresh();
-  }, [refresh]);
+  const { data: rooms = [], isLoading: loading, error, refetch: refresh } = useQuery({
+    queryKey: ['rooms'],
+    queryFn: fetchRooms,
+    staleTime: 30000,
+    refetchOnWindowFocus: false,
+  });
 
   return { rooms, loading, error, refresh };
+}
+
+export function useInvalidateRooms() {
+  const queryClient = useQueryClient();
+  return () => queryClient.invalidateQueries({ queryKey: ['rooms'] });
 }

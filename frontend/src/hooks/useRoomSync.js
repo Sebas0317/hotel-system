@@ -1,26 +1,23 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { fetchRooms } from '../services/api';
+import { useQueryClient } from '@tanstack/react-query';
+import { useState, useEffect, useRef } from 'react';
 
 /**
  * Hook that polls the backend for room changes and triggers a callback.
- * Compares room data snapshots to detect updates.
+ * Uses React Query for efficient caching and refetching.
  *
  * @param {Object} options
  * @param {number} options.interval - Polling interval in ms (default: 5000)
  * @param {Function} options.onChange - Callback(roomChanges) when changes detected
  * @param {boolean} options.enabled - Whether polling is active
- * @returns {{ rooms, loading, error, refresh }}
  */
 export function useRoomSync({ interval = 5000, onChange, enabled = true } = {}) {
-  const [rooms, setRooms] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const queryClient = useQueryClient();
   const prevSnapshot = useRef('');
   const timerRef = useRef(null);
 
-  const fetchAndCompare = useCallback(async () => {
+  const fetchAndCompare = async () => {
     try {
-      const data = await fetchRooms();
+      const data = await queryClient.fetchQuery({ queryKey: ['rooms'] });
       const snapshot = JSON.stringify(data.map(r => ({ id: r.id, estado: r.estado, huesped: r.huesped, checkIn: r.checkIn })));
 
       if (prevSnapshot.current && snapshot !== prevSnapshot.current && onChange) {
@@ -45,14 +42,10 @@ export function useRoomSync({ interval = 5000, onChange, enabled = true } = {}) 
       }
 
       prevSnapshot.current = snapshot;
-      setRooms(data);
-      setError(null);
     } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
+      console.error('Sync error:', err.message);
     }
-  }, [onChange]);
+  };
 
   useEffect(() => {
     if (!enabled) return;
@@ -63,7 +56,7 @@ export function useRoomSync({ interval = 5000, onChange, enabled = true } = {}) 
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [enabled, interval, fetchAndCompare]);
+  }, [enabled, interval]);
 
-  return { rooms, loading, error, refresh: fetchAndCompare };
+  return { refresh: fetchAndCompare };
 }
