@@ -32,11 +32,11 @@ export const PRODUCTOS = {
  * Room state configuration with visual styling
  */
 export const ESTADO_CFG = {
-  ocupada:        { label: 'Ocupada',     color: '#d97706', bg: '#fef3c7', border: '#fcd34d', dot: '#d97706' },
-  reservada:      { label: 'Reservada',  color: '#059669', bg: '#d1fae5', border: '#6ee7b7', dot: '#059669' },
-  disponible:     { label: 'Disponible', color: '#0891b2', bg: '#cffafe', border: '#a5f3fc', dot: '#0891b2' },
-  limpieza:       { label: 'Limpieza',  color: '#7c3aed', bg: '#ede9fe', border: '#c4b5fd', dot: '#7c3aed' },
-  mantenimiento:  { label: 'Mantenimiento', color: '#dc2626', bg: '#fee2e2', border: '#fca5a5', dot: '#dc2626' },
+  disponible:     { label: 'Disponible', color: '#16a34a', bg: '#dcfce7', border: '#86efac', dot: '#16a34a' },
+  reservada:     { label: 'Reservada', color: '#2563eb', bg: '#dbeafe', border: '#93c5fd', dot: '#2563eb' },
+  ocupante:      { label: 'Ocupada',   color: '#ea580c', bg: '#ffedd5', border: '#fdba74', dot: '#ea580c' },
+  limpieza:      { label: 'Limpieza',  color: '#9333ea', bg: '#f3e8ff', border: '#c4b5fd', dot: '#9333ea' },
+  mantenimiento: { label: 'Mantenimiento', color: '#dc2626', bg: '#fee2e2', border: '#fca5a5', dot: '#dc2626' },
   'fuera-servicio': { label: 'Fuera de servicio', color: '#6b7280', bg: '#f3f4f6', border: '#d1d5db', dot: '#6b7280' },
 };
 
