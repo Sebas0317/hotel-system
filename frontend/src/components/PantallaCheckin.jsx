@@ -86,9 +86,9 @@ export default function PantallaCheckin({ onNav }) {
   return (
     <PantallaForm titulo="🌿 Registrar Huésped" desc="Selecciona una habitación disponible y registra los datos del huésped" onVolver={() => onNav('menu')}>
       <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }} onKeyDown={handleKeyDown}>
-      {/* Room selector — only available rooms */}
+      {/* Room selector — only available rooms as cards */}
       <div className="form-group">
-        <label className="text-xs uppercase font-semibold text-gray-400 tracking-wide">Habitación disponible</label>
+        <label className="text-xs uppercase font-semibold text-gray-400 tracking-wide mb-3 block">Habitación disponible</label>
         {roomsLoading ? (
           <p className="room-select-loading text-sm text-gray-400 p-3">Cargando habitaciones...</p>
         ) : disponibles.length === 0 ? (
@@ -96,32 +96,69 @@ export default function PantallaCheckin({ onNav }) {
             <span>⚠️ No hay habitaciones disponibles</span>
           </div>
         ) : (
-          <>
-            <select
-              value={form.numero}
-              onChange={(e) => handleRoomSelect(e.target.value)}
-              className="room-select w-full px-4 py-3 text-sm sm:text-base"
-            >
-              <option value="">— Selecciona una habitación —</option>
-              {disponibles.map((r) => (
-                <option key={r.id} value={r.id}>
-                  #{r.numero} — {r.tipo} (Piso {r.piso})
-                </option>
-              ))}
-            </select>
-            {form.numero && (
-              <p className="room-selected-info text-xs sm:text-sm mt-2 p-2 bg-green-50 border border-green-200 rounded text-green-800">
-                Tipo: <strong>{form.tipo}</strong> · Piso: <strong>{rooms.find(r => r.id === form.numero)?.piso}</strong>
-              </p>
-            )}
-          </>
+          <div className="room-grid-selector grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-h-[400px] overflow-y-auto p-1">
+            {disponibles.map((r) => {
+              const isSelected = form.numero === r.id;
+              return (
+                <div
+                  key={r.id}
+                  className={`room-card-select p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 hover:shadow-lg ${
+                    isSelected 
+                      ? 'border-green-500 bg-green-50 shadow-md' 
+                      : 'border-gray-200 bg-white hover:border-green-300 hover:bg-green-50/50'
+                  }`}
+                  onClick={() => handleRoomSelect(r.id)}
+                >
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-2xl font-bold text-gray-800">#{r.numero}</span>
+                      <span className={`px-2 py-0.5 text-xs rounded-full ${isSelected ? 'bg-green-500 text-white' : 'bg-green-100 text-green-700'}`}>
+                        Disponible
+                      </span>
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="font-medium text-gray-700">{r.tipo}</p>
+                    <div className="text-xs text-gray-500 flex flex-wrap gap-x-3 gap-y-1">
+                      <span>🛏️ {r.camas}</span>
+                      <span>👥 {r.capacidad} personas</span>
+                      <span>📍 Piso {r.piso === 0 ? 'Cabañas' : r.piso}</span>
+                    </div>
+                    {r.tarifa && (
+                      <p className="text-sm font-semibold text-green-600 mt-2">
+                        {r.tarifa.toLocaleString('es-CO')} COP / noche
+                      </p>
+                    )}
+                    {r.amenidades && r.amenidades.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-2">
+                        {r.amenidades.slice(0, 3).map((a, i) => (
+                          <span key={i} className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">
+                            {a.replace('_', ' ')}
+                          </span>
+                        ))}
+                        {r.amenidades.length > 3 && (
+                          <span className="text-xs text-gray-400">+{r.amenidades.length - 3}</span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  {isSelected && (
+                    <div className="mt-3 pt-2 border-t border-green-200">
+                      <p className="text-xs text-green-700 font-medium">✓ Seleccionada</p>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         )}
       </div>
 
-      <div className="form-group">
-        <label className="text-xs uppercase font-semibold text-gray-400 tracking-wide">Nombre del huésped</label>
-        <input
-          type="text"
+      {form.numero && (
+        <div className="form-group">
+          <label className="text-xs uppercase font-semibold text-gray-400 tracking-wide">Nombre del huésped</label>
+          <input
+            type="text"
           placeholder="Ej: Juan García"
           value={form.huesped}
           onChange={(e) => updateField('huesped', e.target.value)}
