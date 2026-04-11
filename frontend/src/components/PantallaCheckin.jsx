@@ -9,7 +9,17 @@ import PantallaForm from './PantallaForm';
  * Selecting a room auto-fills its type.
  */
 export default function PantallaCheckin({ onNav }) {
-  const [form, setForm] = useState({ numero: '', huesped: '', tipo: 'estándar', numeroHabitacion: '' });
+  const [form, setForm] = useState({ 
+    numero: '', 
+    huesped: '', 
+    tipo: 'estándar', 
+    numeroHabitacion: '',
+    email: '',
+    telefono: '',
+    documento: '',
+    noches: 1,
+    observaciones: ''
+  });
   const [rooms, setRooms] = useState([]);
   const [roomsLoading, setRoomsLoading] = useState(true);
   const [resultado, setResultado] = useState(null);
@@ -36,13 +46,24 @@ export default function PantallaCheckin({ onNav }) {
   const handleRoomSelect = useCallback((roomId) => {
     const room = rooms.find((r) => r.id === roomId);
     if (room) {
-      setForm({ numero: roomId, huesped: form.huesped, tipo: room.tipo, numeroHabitacion: room.numero });
+      setForm((prev) => ({ 
+        ...prev, 
+        numero: roomId, 
+        tipo: room.tipo, 
+        numeroHabitacion: room.numero 
+      }));
     }
-  }, [rooms, form.huesped]);
+  }, [rooms]);
 
   const handleSubmit = async () => {
     if (!form.numero || !form.huesped.trim()) {
       return setError('Selecciona una habitación y completa el nombre del huésped');
+    }
+    if (!form.documento?.trim()) {
+      return setError('Ingresa el número de documento');
+    }
+    if (!form.telefono?.trim()) {
+      return setError('Ingresa el número de teléfono');
     }
     setLoading(true);
     setError('');
@@ -117,7 +138,7 @@ export default function PantallaCheckin({ onNav }) {
               <button 
                 type="button"
                 className="mt-4 px-4 py-2 bg-white border-2 border-green-400 text-green-700 font-semibold rounded-lg hover:bg-green-50 hover:border-green-500 transition-all"
-                onClick={() => setForm({ numero: '', huesped: '', tipo: 'estándar', numeroHabitacion: '' })}
+                onClick={() => setForm({ numero: '', huesped: '', tipo: 'estándar', numeroHabitacion: '', email: '', telefono: '', documento: '', noches: 1, observaciones: '' })}
               >
                 ✕ Cambiar
               </button>
@@ -197,16 +218,80 @@ export default function PantallaCheckin({ onNav }) {
       )}
 
       {form.numero && (
-        <div className="form-group mt-4">
-          <label className="text-xs uppercase font-semibold text-gray-400 tracking-wide">Nombre del huésped</label>
-          <input
-            type="text"
-            placeholder="Ej: Juan García"
-            value={form.huesped}
-            onChange={(e) => updateField('huesped', e.target.value)}
-            className="w-full px-5 py-4 text-base rounded-lg border-2 border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-200"
-            autoFocus
-          />
+        <div className="space-y-4">
+          {/* Guest Name */}
+          <div className="form-group">
+            <label className="text-xs uppercase font-semibold text-gray-400 tracking-wide">Nombre completo del huésped</label>
+            <input
+              type="text"
+              placeholder="Ej: Juan García"
+              value={form.huesped}
+              onChange={(e) => updateField('huesped', e.target.value)}
+              className="w-full px-5 py-4 text-base rounded-lg border-2 border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-200"
+              autoFocus
+            />
+          </div>
+
+          {/* Document and Phone Row */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="form-group">
+              <label className="text-xs uppercase font-semibold text-gray-400 tracking-wide">Número de documento</label>
+              <input
+                type="text"
+                placeholder="Ej: 12345678"
+                value={form.documento}
+                onChange={(e) => updateField('documento', e.target.value)}
+                className="w-full px-5 py-4 text-base rounded-lg border-2 border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-200"
+              />
+            </div>
+            <div className="form-group">
+              <label className="text-xs uppercase font-semibold text-gray-400 tracking-wide">Teléfono</label>
+              <input
+                type="tel"
+                placeholder="Ej: 310 123 4567"
+                value={form.telefono}
+                onChange={(e) => updateField('telefono', e.target.value)}
+                className="w-full px-5 py-4 text-base rounded-lg border-2 border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-200"
+              />
+            </div>
+          </div>
+
+          {/* Email */}
+          <div className="form-group">
+            <label className="text-xs uppercase font-semibold text-gray-400 tracking-wide">Correo electrónico</label>
+            <input
+              type="email"
+              placeholder="Ej: juan@email.com"
+              value={form.email}
+              onChange={(e) => updateField('email', e.target.value)}
+              className="w-full px-5 py-4 text-base rounded-lg border-2 border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-200"
+            />
+          </div>
+
+          {/* Nights */}
+          <div className="form-group">
+            <label className="text-xs uppercase font-semibold text-gray-400 tracking-wide">Número de noches</label>
+            <input
+              type="number"
+              min="1"
+              max="30"
+              value={form.noches}
+              onChange={(e) => updateField('noches', parseInt(e.target.value) || 1)}
+              className="w-full px-5 py-4 text-base rounded-lg border-2 border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-200"
+            />
+          </div>
+
+          {/* Observations */}
+          <div className="form-group">
+            <label className="text-xs uppercase font-semibold text-gray-400 tracking-wide">Observaciones (opcional)</label>
+            <textarea
+              placeholder="Notas especiales, solicitudes, preferencias..."
+              value={form.observaciones}
+              onChange={(e) => updateField('observaciones', e.target.value)}
+              rows={3}
+              className="w-full px-5 py-4 text-base rounded-lg border-2 border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-200 resize-none"
+            />
+          </div>
         </div>
       )}
 
@@ -214,7 +299,7 @@ export default function PantallaCheckin({ onNav }) {
       <button
         className="btn-main-action w-full py-3 sm:py-4 text-sm sm:text-base"
         onClick={handleSubmit}
-        disabled={loading || !form.numero || !form.huesped.trim()}
+        disabled={loading || !form.numero || !form.huesped.trim() || !form.documento?.trim() || !form.telefono?.trim()}
       >
         {loading ? 'Registrando...' : 'Confirmar Check-in'}
       </button>
