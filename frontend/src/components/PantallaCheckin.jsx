@@ -338,24 +338,49 @@ export default function PantallaCheckin({ onNav }) {
           {form.personas > 1 && (
             <div className="space-y-3 mb-4">
               {Array.from({ length: form.personas - 1 }).map((_, i) => (
-                <div key={i} className="bg-white p-3 rounded-lg border border-gray-200">
-                  <p className="text-xs font-bold text-gray-500 uppercase mb-2">Persona {i + 2}</p>
-                  <div className="grid grid-cols-2 gap-2">
+                <div key={i} className="bg-white p-4 rounded-lg border border-gray-200">
+                  <div className="flex justify-between items-center mb-3">
+                    <p className="text-xs font-bold text-gray-500 uppercase">Persona {i + 2}</p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3 mb-3">
                     <input
                       type="text"
                       placeholder="Nombre completo"
                       value={form.personasAdicionales[i]?.nombre || ''}
                       onChange={(e) => actualizarPersonaAdicional(i, 'nombre', e.target.value)}
-                      className="px-3 py-2 text-sm rounded border border-gray-200"
+                      className="px-3 py-2.5 text-sm rounded-lg border border-gray-200"
                     />
                     <input
                       type="text"
                       placeholder="Documento"
                       value={form.personasAdicionales[i]?.documento || ''}
                       onChange={(e) => actualizarPersonaAdicional(i, 'documento', e.target.value)}
-                      className="px-3 py-2 text-sm rounded border border-gray-200"
+                      className="px-3 py-2.5 text-sm rounded-lg border border-gray-200"
                     />
                   </div>
+                  {!form.usarMismoContacto && (
+                    <div className="grid grid-cols-2 gap-3 pt-2 border-t border-gray-100">
+                      <input
+                        type="email"
+                        placeholder="Correo (opcional)"
+                        value={form.personasAdicionales[i]?.email || ''}
+                        onChange={(e) => actualizarPersonaAdicional(i, 'email', e.target.value)}
+                        className="px-3 py-2 text-sm rounded-lg border border-gray-200"
+                      />
+                      <input
+                        type="tel"
+                        placeholder="Teléfono (opcional)"
+                        value={form.personasAdicionales[i]?.telefono || ''}
+                        onChange={(e) => actualizarPersonaAdicional(i, 'telefono', e.target.value)}
+                        className="px-3 py-2 text-sm rounded-lg border border-gray-200"
+                      />
+                    </div>
+                  )}
+                  {form.usarMismoContacto && (
+                    <div className="pt-2 border-t border-gray-100">
+                      <p className="text-xs text-gray-400 italic">📧 Mismos datos de contacto del huésped principal</p>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
