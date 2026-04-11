@@ -96,48 +96,48 @@ export default function PantallaCheckin({ onNav }) {
             <span>⚠️ No hay habitaciones disponibles</span>
           </div>
         ) : (
-          <div className="room-grid-selector grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-h-[400px] overflow-y-auto p-1">
+          <div className="room-grid-selector grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 max-h-[500px] overflow-y-auto p-1">
             {disponibles.map((r) => {
               const isSelected = form.numero === r.id;
               return (
                 <div
                   key={r.id}
-                  className={`room-card-select p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 hover:shadow-lg ${
+                  className={`room-card-select p-5 rounded-2xl border-3 cursor-pointer transition-all duration-300 hover:shadow-xl ${
                     isSelected 
-                      ? 'border-green-500 bg-green-50 shadow-md' 
-                      : 'border-gray-200 bg-white hover:border-green-300 hover:bg-green-50/50'
+                      ? 'border-green-600 bg-green-50 shadow-lg ring-2 ring-green-300' 
+                      : 'border-gray-200 bg-white hover:border-green-400 hover:bg-green-30'
                   }`}
                   onClick={() => handleRoomSelect(r.id)}
                 >
-                  <div className="flex items-start justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <span className="text-2xl font-bold text-gray-800">#{r.numero}</span>
-                      <span className={`px-2 py-0.5 text-xs rounded-full ${isSelected ? 'bg-green-500 text-white' : 'bg-green-100 text-green-700'}`}>
-                        Disponible
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                      <span className="text-3xl font-extrabold text-gray-900">#{r.numero}</span>
+                      <span className={`px-3 py-1 text-xs font-bold rounded-full ${isSelected ? 'bg-green-600 text-white' : 'bg-green-100 text-green-700'}`}>
+                        {isSelected ? '✓ SELECCIONADA' : 'Disponible'}
                       </span>
                     </div>
                   </div>
-                  <div className="space-y-1">
-                    <p className="font-medium text-gray-700">{r.tipo}</p>
-                    <div className="text-xs text-gray-500 flex flex-wrap gap-x-3 gap-y-1">
-                      <span>🛏️ {r.camas}</span>
-                      <span>👥 {r.capacidad} personas</span>
-                      <span>📍 Piso {r.piso === 0 ? 'Cabañas' : r.piso}</span>
+                  <div className="space-y-2">
+                    <p className="font-bold text-lg text-gray-800">{r.tipo}</p>
+                    <div className="text-sm text-gray-500 flex flex-wrap gap-x-4 gap-y-1">
+                      <span className="flex items-center gap-1">🛏️ {r.camas}</span>
+                      <span className="flex items-center gap-1">👥 {r.capacidad} personas</span>
+                      <span className="flex items-center gap-1">📍 {r.piso === 0 ? 'Cabañas' : `Piso ${r.piso}`}</span>
                     </div>
                     {r.tarifa && (
-                      <p className="text-sm font-semibold text-green-600 mt-2">
-                        {r.tarifa.toLocaleString('es-CO')} COP / noche
+                      <p className="text-xl font-extrabold text-green-600 mt-3">
+                        {r.tarifa.toLocaleString('es-CO')} COP<span className="text-sm font-normal">/noche</span>
                       </p>
                     )}
                     {r.amenidades && r.amenidades.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mt-2">
-                        {r.amenidades.slice(0, 3).map((a, i) => (
-                          <span key={i} className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">
+                      <div className="flex flex-wrap gap-1.5 mt-3">
+                        {r.amenidades.slice(0, 4).map((a, i) => (
+                          <span key={i} className="text-xs bg-gray-100 text-gray-600 px-2.5 py-1 rounded-md font-medium">
                             {a.replace('_', ' ')}
                           </span>
                         ))}
-                        {r.amenidades.length > 3 && (
-                          <span className="text-xs text-gray-400">+{r.amenidades.length - 3}</span>
+                        {r.amenidades.length > 4 && (
+                          <span className="text-xs text-gray-400 font-medium">+{r.amenidades.length - 4}</span>
                         )}
                       </div>
                     )}
