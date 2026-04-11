@@ -67,22 +67,22 @@ export default function LoginScreen({ onRole }) {
           <div className="login-logo text-7xl block mb-3"></div>
           <HotelTitle variant="login" />
         </div>
-        <p className="login-pregunta text-sm font-semibold uppercase tracking-wide mb-4">Eco Hotel El Bosque - Property Management System</p>
+        <p className="login-pregunta text-sm font-semibold uppercase tracking-wide mb-4">Eco Hotel El Bosque - Sistema de Gestión Hotelera</p>
         <div className="login-cards flex flex-col gap-3 sm:gap-4 mb-8">
           <button className="login-card admin-card text-left p-5 sm:p-6" onClick={() => setAdminMode(true)}>
             <span className="lc-icon text-3xl sm:text-4xl"></span>
-            <span className="lc-title text-lg sm:text-xl font-extrabold">Administration</span>
-            <span className="lc-desc text-sm text-gray-500 sm:text-base">Room management - Rate configuration - System administration</span>
+            <span className="lc-title text-lg sm:text-xl font-extrabold">Administración</span>
+            <span className="lc-desc text-sm text-gray-500 sm:text-base">Gestión de habitaciones - Configuración de tarifas - Administración del sistema</span>
             <span className="lc-arrow absolute right-5 sm:right-6 top-1/2 -translate-y-1/2 text-xl sm:text-2xl"></span>
           </button>
           <button className="login-card user-card text-left p-5 sm:p-6" onClick={() => onRole('user')}>
             <span className="lc-icon text-3xl sm:text-4xl"></span>
-            <span className="lc-title text-lg sm:text-xl font-extrabold">User</span>
-            <span className="lc-desc text-sm sm:text-base">Guest registration - Transactions - Checkout</span>
+            <span className="lc-title text-lg sm:text-xl font-extrabold">Usuario</span>
+            <span className="lc-desc text-sm sm:text-base">Registro de huéspedes - Transacciones - Check-out</span>
             <span className="lc-arrow absolute right-5 sm:right-6 top-1/2 -translate-y-1/2 text-xl sm:text-2xl"></span>
           </button>
         </div>
-        <p className="login-footer text-xs text-white/50 mb-4">Internal System - Local Connectivity</p>
+        <p className="login-footer text-xs text-white/50 mb-4">Sistema Interno - Conectividad Local</p>
         <a href="/landing" className="login-landing-link block text-center mt-4 py-3 px-5 rounded-lg">Public Website</a>
       </div>
     </div>

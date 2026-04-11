@@ -13,7 +13,7 @@ export default function Footer() {
           <LogoWhite />
         </Link>
         <div className="flex flex-col items-center">
-          <p>&copy; {new Date().getFullYear()}. All Reserved.</p>
+          <p>&copy; {new Date().getFullYear()}. Todos los derechos reservados.</p>
         </div>
       </div>
     </footer>

@@ -25,7 +25,7 @@ export default function BookForm() {
           <KidsDropdown />
         </div>
         <button type="submit" className="btn btn-primary" onClick={(e) => handleCheck(e)}>
-          Check Now
+          Buscar Ahora
         </button>
       </div>
     </form>
