@@ -269,16 +269,20 @@ export default function UserCheckout({ onExit }) {
                   <span>Total de la Estancia</span>
                   <span>{COP(totalAPagar)}</span>
                 </div>
-                <div className="rdp-total-row">
-                  <span>Pagado Adelantado</span>
-                  <span className="text-green-600">{COP(pagado)}</span>
-                </div>
-                <div className="rdp-total-row rdp-balance">
-                  <span>Saldo Pendiente</span>
-                  <span className={saldoPendiente > 0 ? 'text-red-600' : 'text-green-600'}>
-                    {COP(saldoPendiente)}
-                  </span>
-                </div>
+                {pagado > 0 && (
+                  <>
+                    <div className="rdp-total-row">
+                      <span>Anticipo Pagado</span>
+                      <span className="text-green-600">{COP(pagado)}</span>
+                    </div>
+                    {saldoPendiente > 0 && (
+                      <div className="rdp-total-row rdp-balance">
+                        <span>Saldo por Pagar</span>
+                        <span className="text-red-600">{COP(saldoPendiente)}</span>
+                      </div>
+                    )}
+                  </>
+                )}
               </div>
 
               <button 

@@ -166,13 +166,7 @@ export default function PantallaAdmin({ onSalir, onNav }) {
           className={`admin-primary-btn px-4 py-3 sm:px-5 text-sm sm:text-base ${activeView === 'rooms' ? 'activo' : ''}`}
           onClick={() => setView('rooms')}
         >
-          Rooms
-        </button>
-        <button
-          className="admin-primary-btn admin-primary-btn-nav px-4 py-3 sm:px-5 text-sm sm:text-base"
-          onClick={() => window.location.hash = '#/admin'}
-        >
-          Rooms
+          Habitaciones
         </button>
         <button
           className="admin-primary-btn admin-primary-btn-nav px-4 py-3 sm:px-5 text-sm sm:text-base"

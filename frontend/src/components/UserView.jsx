@@ -148,21 +148,27 @@ export default function UserView({ onExit }) {
                 </div>
               </div>
 
-              {/* Payment Info */}
-              {selectedRoom.pago && (
+              {/* Payment Info - Only show if there's payment data */}
+              {selectedRoom.pago && selectedRoom.pago.pagado > 0 && (
                 <div className="rdp-section rdp-payment-info">
-                  <h3 className="rdp-section-title">Resumen de Pago</h3>
+                  <h3 className="rdp-section-title">Pago</h3>
                   <div className="rdp-payment-grid">
                     <div className="rdp-payment-item">
-                      <span className="rdp-payment-label">Pagado Adelantado</span>
+                      <span className="rdp-payment-label">Anticipo Pagado</span>
                       <span className="rdp-payment-value text-green-600">{COP(selectedRoom.pago.pagado)}</span>
                     </div>
-                    <div className="rdp-payment-item">
-                      <span className="rdp-payment-label">Pendiente</span>
-                      <span className={`rdp-payment-value ${saldoPendiente > 0 ? 'text-red-600' : 'text-green-600'}`}>
-                        {COP(saldoPendiente)}
-                      </span>
-                    </div>
+                    {saldoPendiente > 0 && (
+                      <div className="rdp-payment-item">
+                        <span className="rdp-payment-label">Saldo por Pagar</span>
+                        <span className="rdp-payment-value text-red-600">{COP(saldoPendiente)}</span>
+                      </div>
+                    )}
+                    {saldoPendiente <= 0 && (
+                      <div className="rdp-payment-item">
+                        <span className="rdp-payment-label">Estado</span>
+                        <span className="rdp-payment-value text-green-600">✓ Cancelado</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
