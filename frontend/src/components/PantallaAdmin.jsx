@@ -170,19 +170,19 @@ export default function PantallaAdmin({ onSalir, onNav }) {
         </button>
         <button
           className="admin-primary-btn admin-primary-btn-nav px-4 py-3 sm:px-5 text-sm sm:text-base"
-          onClick={() => window.location.hash = '#/admin/register'}
+          onClick={() => window.location.hash = '/admin/register'}
         >
           Registro de Huéspedes
         </button>
         <button
           className="admin-primary-btn admin-primary-btn-nav px-4 py-3 sm:px-5 text-sm sm:text-base"
-          onClick={() => window.location.hash = '#/admin/transactions'}
+          onClick={() => window.location.hash = '/admin/transactions'}
         >
           Registro de Transacciones
         </button>
         <button
           className="admin-primary-btn admin-primary-btn-nav px-4 py-3 sm:px-5 text-sm sm:text-base"
-          onClick={() => window.location.hash = '#/admin/reservations'}
+          onClick={() => window.location.hash = '/admin/reservations'}
         >
           Reservas
         </button>
