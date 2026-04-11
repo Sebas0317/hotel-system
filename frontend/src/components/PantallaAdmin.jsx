@@ -50,6 +50,16 @@ export default function PantallaAdmin({ onSalir, onNav }) {
     return () => window.removeEventListener('hashchange', handler);
   }, []);
 
+  // Force update when hash changes externally
+  useEffect(() => {
+    const currentHash = window.location.hash.slice(1) || '/admin';
+    const parts = currentHash.split('/').filter(Boolean);
+    const roomFromHash = parts[2] || null;
+    if (roomFromHash !== hashState.room) {
+      setHashState(prev => ({ ...prev, room: roomFromHash }));
+    }
+  }, [hashState.room]);
+
   const selectedRoomId = hashState.room;
 
   // Real-time sync: polls backend every 5s, shows toast on changes
