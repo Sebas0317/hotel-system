@@ -94,16 +94,22 @@ export default function PantallaAdmin({ onSalir, onNav }) {
    * Uses hash-based routing: #/admin/[filter]/[roomId]
    */
   const selectRoom = useCallback((roomId) => {
-    const currentRoom = hashState.room;
+    // Get current hash directly to avoid stale state
+    const currentHash = window.location.hash.slice(1) || '/admin';
+    const parts = currentHash.split('/').filter(Boolean);
+    const currentRoom = parts[2] || null;
+    
     let newRoom;
     if (currentRoom === roomId) {
       newRoom = null;
     } else {
       newRoom = roomId;
     }
-    const parts = ['/admin', hashState.filtro !== 'todos' ? hashState.filtro : '', newRoom || ''].filter(Boolean);
-    window.location.hash = parts.join('/');
-  }, [hashState]);
+    
+    const filtro = parts[1] || 'todos';
+    const newParts = ['/admin', filtro !== 'todos' ? filtro : '', newRoom || ''].filter(Boolean);
+    window.location.hash = newParts.join('/');
+  }, []);
 
   /**
    * Callback passed to RoomDetail for refreshing data after actions
@@ -335,12 +341,20 @@ export default function PantallaAdmin({ onSalir, onNav }) {
           {/* RIGHT COLUMN — fixed detail panel */}
           <div className="admin-right">
             <div className="admin-right-inner">
-              {/* Close button for the detail panel */}
-              <div className="rd-close-bar flex justify-between items-center p-4 bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
-                <span className="rd-close-title font-semibold">Habitación #{selectedRoom.numero}</span>
-                <button className="rd-close-btn bg-red-500 text-white px-3 py-1 rounded text-sm" onClick={() => selectRoom(selectedRoom.id)}>✕ Cerrar</button>
-              </div>
-              <RoomDetail room={selectedRoom} onRefresh={handleRefresh} />
+              {selectedRoom ? (
+                <>
+                  {/* Close button for the detail panel */}
+                  <div className="rd-close-bar flex justify-between items-center p-4 bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
+                    <span className="rd-close-title font-semibold">Habitación #{selectedRoom.numero}</span>
+                    <button className="rd-close-btn bg-red-500 text-white px-3 py-1 rounded text-sm" onClick={() => selectRoom(selectedRoom.id)}>✕ Cerrar</button>
+                  </div>
+                  <RoomDetail room={selectedRoom} onRefresh={handleRefresh} />
+                </>
+              ) : (
+                <div className="p-8 text-center text-gray-400">
+                  Selecciona una habitación para ver los detalles
+                </div>
+              )}
             </div>
           </div>
         </div>
