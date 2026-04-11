@@ -76,7 +76,40 @@ export default function App() {
         path="/admin"
         element={
           rol === 'admin' ? (
-            <PantallaAdmin onSalir={handleExit} />
+            <PantallaAdmin onSalir={handleExit} onNav={(path) => navigate(path)} />
+          ) : (
+            <Navigate to="/" replace />
+          )
+        }
+      />
+
+      <Route
+        path="/admin/register"
+        element={
+          rol === 'admin' ? (
+            <PantallaCheckin onSalir={handleExit} onNav={(path) => navigate(path)} />
+          ) : (
+            <Navigate to="/" replace />
+          )
+        }
+      />
+
+      <Route
+        path="/admin/transactions"
+        element={
+          rol === 'admin' ? (
+            <PantallaConsumo onSalir={handleExit} onNav={(path) => navigate(path)} />
+          ) : (
+            <Navigate to="/" replace />
+          )
+        }
+      />
+
+      <Route
+        path="/admin/reservations"
+        element={
+          rol === 'admin' ? (
+            <PantallaReservaciones onSalir={handleExit} onNav={(path) => navigate(path)} />
           ) : (
             <Navigate to="/" replace />
           )
@@ -87,7 +120,7 @@ export default function App() {
         path="/admin/prices"
         element={
           rol === 'admin' ? (
-            <PantallaAdmin onSalir={handleExit} />
+            <PantallaAdmin onSalir={handleExit} onNav={(path) => navigate(path)} />
           ) : (
             <Navigate to="/" replace />
           )
