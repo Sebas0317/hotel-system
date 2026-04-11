@@ -1,167 +1,244 @@
-import { useParams } from 'react-router-dom';
-import { useState, useEffect } from 'react';
-import { FaCheck } from 'react-icons/fa';
-import { fetchRooms } from '../services/api';
-import { COP } from '../utils/helpers';
+import { useMemo, useState, useCallback, useEffect } from 'react';
+import { COP, FECHA, calcularTotal } from '../utils/helpers';
+import { CAT_ICONS } from '../constants';
+import { generarConsumosMock, calcularFechaDisponible, generarContactoMock } from '../utils/mockData';
+import { fetchConsumos } from '../services/api';
+import RoomActions, { Toast } from './RoomActions';
 
-const hotelRules = [
-  { rules: 'Check-in: 3:00 PM - 9:00 PM' },
-  { rules: 'Check-out: 10:30 AM' },
-  { rules: 'No Smoking' },
-  { rules: 'No Pet' },
-];
+export default function RoomDetail({ room, onRefresh }) {
+  const [toast, setToast] = useState(null);
+  const [consumos, setConsumos] = useState([]);
+  const [consumosLoading, setConsumosLoading] = useState(true);
 
-const amenidadesLabels = {
-  jacuzzi_privado: 'Jacuzzi Privado',
-  wifi: 'WiFi',
-  ac: 'Aire Acondicionado',
-  balcon: 'Balcón',
-  vista_bosque: 'Vista al Bosque',
-  arquitectura_sostenible: 'Arquitectura Sostenible',
-  orientacion_solar: 'Orientación Solar',
-  vista_bosque_premium: 'Vista Premium',
-  ducha_exterior: 'Ducha Exterior',
-  jardin_privado: 'Jardín Privado',
-  terra_privada: 'Terraza Privada',
-  tv: 'TV Pantalla Plana',
-  minibar: 'Minibar',
-  caja_fuerte: 'Caja Fuerte',
-};
+  const fechaDisponible = useMemo(() => calcularFechaDisponible(room), [room]);
+  const contacto = useMemo(() => generarContactoMock(room), [room]);
+  const totalConsumos = useMemo(() => calcularTotal(consumos), [consumos]);
 
-/** @typedef {{ onClose?: () => void }} RoomDetailProps */
+  const tarifaNoche = 80000;
+  let noches = 1;
+  if (room.checkIn && room.estado === 'ocupada') {
+    const checkInDate = new Date(room.checkIn);
+    const now = new Date();
+    noches = Math.max(1, Math.ceil((now - checkInDate) / (1000 * 60 * 60 * 24)));
+  }
+  const cargoHabitacion = tarifaNoche * noches;
+  const granTotal = cargoHabitacion + totalConsumos;
 
-export default function RoomDetail({ onClose }) {
-  const { id } = useParams();
-  const [room, setRoom] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const nochesEstadia = useMemo(() => {
+    if (!room.checkIn || room.estado !== 'ocupada') return null;
+    const checkIn = new Date(room.checkIn);
+    const now = new Date();
+    const diff = Math.ceil((now - checkIn) / (1000 * 60 * 60 * 24));
+    return Math.max(1, diff);
+  }, [room.checkIn, room.estado]);
 
   useEffect(() => {
-    fetchRooms()
-      .then((rooms) => {
-        const found = rooms.find((r) => r.id === id || r.numero === id);
-        setRoom(found);
+    let cancelled = false;
+    fetchConsumos(room.id)
+      .then((data) => {
+        if (!cancelled) {
+          if (data.length > 0) {
+            setConsumos(data);
+          } else {
+            setConsumos(generarConsumosMock(room));
+          }
+        }
       })
-      .catch(() => setRoom(null))
-      .finally(() => setLoading(false));
-  }, [id]);
+      .catch(() => {
+        if (!cancelled) setConsumos(generarConsumosMock(room));
+      })
+      .finally(() => {
+        if (!cancelled) setConsumosLoading(false);
+      });
+    return () => { cancelled = true; };
+  }, [room.id]);
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center p-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent"></div>
-      </div>
-    );
-  }
-
-  if (!room) {
-    return (
-      <div className="p-8 text-center">
-        <p className="text-red-600">Habitación no encontrada</p>
-        {onClose && (
-          <button onClick={onClose} className="mt-4 text-accent hover:underline">
-            Volver
-          </button>
-        )}
-      </div>
-    );
-  }
-
-  const { tipo, descripcion, capacidad, precio, amenidades, tarifa } = room;
-  const price = precio || tarifa || 0;
+  const showToast = useCallback((type, message) => {
+    setToast({ type, message });
+  }, []);
 
   return (
-    <section>
-      <div className="bg-room h-[300px] lg:h-[400px] relative flex justify-center items-center bg-cover bg-center">
-        <div className="absolute w-full h-full bg-black/60" />
-        <h1 className="text-4xl lg:text-6xl text-white z-20 font-primary text-center px-4">
-          {tipo}
-        </h1>
-        {onClose && (
-          <button
-            onClick={onClose}
-            className="absolute top-4 right-4 z-30 bg-white/20 hover:bg-white/40 text-white px-4 py-2 rounded backdrop-blur-sm"
-          >
-            ✕ Cerrar
-          </button>
-        )}
+    <div className="room-detail">
+      {toast && <Toast message={toast.message} type={toast.type} onDismiss={() => setToast(null)} />}
+
+      <div className={`rd-status-badge rd-status-${room.estado}`}>
+        {room.estado === 'disponible' && '✅ Disponible'}
+        {room.estado === 'ocupada' && '🔴 Ocupada'}
+        {room.estado === 'reservada' && '🟡 Reservada'}
+        {room.estado === 'limpieza' && '🧹 En limpieza'}
+        {room.estado === 'mantenimiento' && '🔧 Mantenimiento'}
       </div>
 
-      <div className="container mx-auto max-w-7xl px-4">
-        <div className="flex flex-col lg:flex-row lg:gap-x-8 py-8 lg:py-12">
-          <div className="w-full text-justify">
-            <h2 className="text-3xl lg:text-4xl font-primary mb-4">{tipo}</h2>
-            <p className="mb-6 text-gray-700 leading-relaxed">{descripcion}</p>
-
-            <div className="mb-8">
-              <h3 className="text-xl font-semibold mb-3">Capacidad</h3>
-              <p className="text-gray-600">{capacidad} personas</p>
-            </div>
-
-            {amenidades && amenidades.length > 0 && (
-              <div className="mb-8">
-                <h3 className="text-xl font-semibold mb-4">Amenidades</h3>
-                <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-                  {amenidades.map((amenidad, index) => (
-                    <div key={index} className="flex items-center gap-2">
-                      <FaCheck className="text-accent text-sm" />
-                      <span className="text-gray-700">
-                        {amenidadesLabels[amenidad] || amenidad}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+      {room.solicitudCheckout && room.estado === 'ocupada' && (
+        <div className="rd-checkout-request">
+          <div className="rd-cr-header">
+            <span className="rd-cr-icon">🔔</span>
+            <span className="rd-cr-title">El cliente desea retirarse</span>
           </div>
+          <p className="rd-cr-message">
+            El huésped ha solicitado check-out para el <strong>{FECHA(room.solicitudCheckout.fecha)}</strong> y se dirigirá a recepción.
+          </p>
+        </div>
+      )}
 
-          <div className="w-full lg:max-w-xs mt-8 lg:mt-0">
-            <div className="py-6 px-5 bg-amber-50 border border-amber-200 rounded-lg mb-6">
-              <h3 className="text-lg font-semibold mb-4">Resumen</h3>
-              <div className="space-y-3 mb-4">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Tipo:</span>
-                  <span className="font-medium">{tipo}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Número:</span>
-                  <span className="font-medium">{room.numero}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Camas:</span>
-                  <span className="font-medium">{room.camas}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Capacidad:</span>
-                  <span className="font-medium">{capacidad} personas</span>
-                </div>
+      <div className="rd-section">
+        <h4 className="rd-section-title">🌿 Datos del Huésped</h4>
+        <div className="rd-grid">
+          <div className="rd-field">
+            <span className="rd-label">Nombre</span>
+            <span className="rd-value">{room.huesped || '—'}</span>
+          </div>
+          {contacto && (
+            <>
+              <div className="rd-field">
+                <span className="rd-label">Documento</span>
+                <span className="rd-value">{contacto.documento}</span>
               </div>
-              <div className="border-t border-amber-300 pt-3 mb-4">
-                <div className="flex justify-between text-lg">
-                  <span className="font-semibold">Precio por noche:</span>
-                  <span className="font-bold text-accent">{COP(price)}</span>
-                </div>
+              <div className="rd-field">
+                <span className="rd-label">Teléfono</span>
+                <span className="rd-value">{contacto.telefono}</span>
               </div>
-              {room.estado && (
-                <div className="text-sm text-gray-500 mt-2">
-                  Estado: <span className="capitalize font-medium">{room.estado}</span>
-                </div>
-              )}
-            </div>
+              <div className="rd-field">
+                <span className="rd-label">Email</span>
+                <span className="rd-value rd-email">{contacto.email}</span>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
 
-            <div>
-              <h3 className="text-xl font-semibold mb-3">Normas del Hotel</h3>
-              <ul className="flex flex-col gap-y-3">
-                {hotelRules.map((rule, idx) => (
-                  <li key={idx} className="flex items-center gap-x-3 text-gray-700">
-                    <FaCheck className="text-accent text-sm" />
-                    {rule.rules}
-                  </li>
-                ))}
-              </ul>
+      {room.pin && (
+        <div className="rd-section rd-pin-section">
+          <h4 className="rd-section-title">🔐 PIN de Acceso <span className="rd-pin-admin-only">(solo admin)</span></h4>
+          <div className="rd-pin-display">
+            <span className="rd-pin-value">{room.pin}</span>
+            <button
+              className="rd-pin-copy-btn"
+              onClick={() => {
+                navigator.clipboard.writeText(room.pin);
+                showToast('success', 'PIN copiado al portapapeles');
+              }}
+              title="Copiar PIN"
+            >
+              📋 Copiar
+            </button>
+          </div>
+          <p className="rd-pin-hint">Entrega este PIN al huésped para consumos y check-out</p>
+        </div>
+      )}
+
+      <div className="rd-section">
+        <h4 className="rd-section-title">📅 Fechas</h4>
+        <div className="rd-grid">
+          <div className="rd-field">
+            <span className="rd-label">Check-in</span>
+            <span className="rd-value">{FECHA(room.checkIn)}</span>
+          </div>
+          {room.checkOut && (
+            <div className="rd-field">
+              <span className="rd-label">Check-out</span>
+              <span className="rd-value">{FECHA(room.checkOut)}</span>
             </div>
+          )}
+          {fechaDisponible && (
+            <div className="rd-field rd-highlight">
+              <span className="rd-label">Disponible desde</span>
+              <span className="rd-value">{FECHA(fechaDisponible.toISOString())}</span>
+            </div>
+          )}
+          {nochesEstadia && (
+            <div className="rd-field rd-highlight">
+              <span className="rd-label">Noches de estadía</span>
+              <span className="rd-value">{nochesEstadia} noche{nochesEstadia > 1 ? 's' : ''}</span>
+            </div>
+          )}
+          {room.estado === 'disponible' && (
+            <div className="rd-field rd-highlight">
+              <span className="rd-label">Estado</span>
+              <span className="rd-value rd-available">✅ Disponible ahora</span>
+            </div>
+          )}
+          {room.estado === 'limpieza' && (
+            <div className="rd-field rd-highlight" style={{ background: '#ede9fe', borderColor: '#c4b5fd' }}>
+              <span className="rd-label">Estado</span>
+              <span className="rd-value" style={{ color: '#7c3aed' }}>🧹 En limpieza</span>
+            </div>
+          )}
+          {room.estado === 'mantenimiento' && (
+            <div className="rd-field rd-highlight" style={{ background: '#fef3c7', borderColor: '#fcd34d' }}>
+              <span className="rd-label">Estado</span>
+              <span className="rd-value" style={{ color: '#b45309' }}>🔧 En mantenimiento</span>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="rd-section">
+        <h4 className="rd-section-title">🏨 Información de la Habitación</h4>
+        <div className="rd-grid">
+          <div className="rd-field">
+            <span className="rd-label">Tipo</span>
+            <span className="rd-value">{room.tipo}</span>
+          </div>
+          <div className="rd-field">
+            <span className="rd-label">Camas</span>
+            <span className="rd-value">{room.camas}</span>
+          </div>
+          <div className="rd-field">
+            <span className="rd-label">Capacidad</span>
+            <span className="rd-value">{room.capacidad} personas</span>
+          </div>
+          <div className="rd-field">
+            <span className="rd-label">Piso</span>
+            <span className="rd-value">{room.piso === 0 ? 'Cabañas' : `Piso ${room.piso}`}</span>
           </div>
         </div>
       </div>
-    </section>
+
+      {(room.estado === 'ocupada' || room.estado === 'reservada') && granTotal > 0 && (
+        <div className="rd-total-bar">
+          <div className="rd-total-breakdown">
+            {room.estado === 'ocupada' && (
+              <span>🛏️ Habitación × {noches} noche{noches > 1 ? 's' : ''}: {COP(cargoHabitacion)}</span>
+            )}
+            {totalConsumos > 0 && (
+              <span>🍽️ Consumos: {COP(totalConsumos)}</span>
+            )}
+          </div>
+          <strong>Total: {COP(granTotal)}</strong>
+        </div>
+      )}
+
+      {consumosLoading ? (
+        <div className="rd-section">
+          <p className="rd-empty">Cargando consumos...</p>
+        </div>
+      ) : consumos.length > 0 ? (
+        <div className="rd-section">
+          <div className="rd-consumos-header">
+            <h4 className="rd-section-title">🍽️ Consumos ({consumos.length})</h4>
+            <span className="rd-consumos-total">{COP(totalConsumos)}</span>
+          </div>
+          <div className="rd-consumos-list">
+            {consumos.map((c) => (
+              <div key={c.id} className="rd-consumo-item">
+                <span className="rdc-cat">{CAT_ICONS[c.categoria] || '📦'}</span>
+                <div className="rdc-info">
+                  <span className="rdc-desc">{c.descripcion}</span>
+                  <span className="rdc-fecha">{FECHA(c.fecha)}</span>
+                </div>
+                <span className="rdc-precio">{COP(c.precio)}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <div className="rd-section">
+          <p className="rd-empty">Sin consumos registrados aún</p>
+        </div>
+      )}
+
+      <RoomActions room={room} consumos={consumos} onAction={showToast} onRefresh={onRefresh} />
+    </div>
   );
 }

@@ -1,5 +1,4 @@
-import { useMemo, useCallback, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useMemo, useCallback, useState, useEffect } from 'react';
 import { useRooms } from '../hooks/useRooms';
 import { useRoomSync } from '../hooks/useRoomSync';
 import { useFilterSync } from '../hooks/useFilterSync';
@@ -32,8 +31,26 @@ import { Toast } from './RoomActions';
 export default function PantallaAdmin({ onSalir, onNav }) {
   const { rooms, loading, refresh } = useRooms();
   const { filtro, setFiltro, tipo, setTipo, buscar, setBuscar } = useFilterSync();
-  const [searchParams, setSearchParams] = useSearchParams();
   const [toast, setToast] = useState(null);
+
+  // Hash-based routing state
+  const [hashState, setHashState] = useState(() => {
+    const h = window.location.hash.slice(1) || '/admin';
+    const parts = h.split('/').filter(Boolean);
+    return { filtro: parts[1] || 'todos', room: parts[2] || null };
+  });
+
+  useEffect(() => {
+    const handler = () => {
+      const h = window.location.hash.slice(1) || '/admin';
+      const parts = h.split('/').filter(Boolean);
+      setHashState({ filtro: parts[1] || 'todos', room: parts[2] || null });
+    };
+    window.addEventListener('hashchange', handler);
+    return () => window.removeEventListener('hashchange', handler);
+  }, []);
+
+  const selectedRoomId = hashState.room;
 
   // Real-time sync: polls backend every 5s, shows toast on changes
   const showToast = useCallback((type, message) => {
@@ -56,41 +73,37 @@ export default function PantallaAdmin({ onSalir, onNav }) {
     },
   });
 
-  // Active view: 'rooms' or 'prices' — derived from URL
-  const activeView = searchParams.get('view') === 'prices' ? 'prices' : 'rooms';
+  // Active view: 'rooms' or 'prices' — derived from hash
+  const activeView = hashState.filtro === 'prices' ? 'prices' : 'rooms';
 
   const setView = (view) => {
-    setSearchParams((prev) => {
-      const next = new URLSearchParams(prev);
-      if (view === 'prices') {
-        next.set('view', 'prices');
-      } else {
-        next.delete('view');
-      }
-      return next;
-    }, { replace: true });
+    if (view === 'prices') {
+      window.location.hash = '/prices';
+    } else {
+      window.location.hash = '/admin';
+    }
   };
 
-  // selectedRoomId is derived from URL — no local state, no circular deps
-  const selectedRoomId = searchParams.get('room') || null;
+  const setFiltroUrl = (value) => {
+    const parts = ['/admin', value !== 'todos' ? value : '', hashState.room || ''].filter(Boolean);
+    window.location.hash = parts.join('/');
+  };
 
   /**
    * Select a room to show its detail panel on the right.
-   * Clicking the same room deselects it (closes the panel).
-   * Updates the URL ?room= param directly.
+   * Uses hash-based routing: #/admin/[filter]/[roomId]
    */
-  const selectRoom = (roomId) => {
-    setSearchParams((prev) => {
-      const next = new URLSearchParams(prev);
-      const current = prev.get('room');
-      if (current === roomId) {
-        next.delete('room');
-      } else {
-        next.set('room', roomId);
-      }
-      return next;
-    }, { replace: true });
-  };
+  const selectRoom = useCallback((roomId) => {
+    const currentRoom = hashState.room;
+    let newRoom;
+    if (currentRoom === roomId) {
+      newRoom = null;
+    } else {
+      newRoom = roomId;
+    }
+    const parts = ['/admin', hashState.filtro !== 'todos' ? hashState.filtro : '', newRoom || ''].filter(Boolean);
+    window.location.hash = parts.join('/');
+  }, [hashState]);
 
   /**
    * Callback passed to RoomDetail for refreshing data after actions

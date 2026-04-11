@@ -204,8 +204,8 @@ function StatusEditor({ room, onAction, onRefresh, onCancel }) {
             return (
               <button
                 key={s.key}
-                className={`ra-status-btn ${estado === s.key ? 'activo' : ''}`}
-                style={estado === s.key ? { borderColor: cfg?.dot, background: cfg?.bg, color: cfg?.color } : {}}
+                className={`ra-status-btn ${s.key} ${estado === s.key ? 'activo' : ''}`}
+                style={estado === s.key ? { borderColor: cfg?.dot, background: cfg?.bg } : {}}
                 onClick={() => setEstado(s.key)}
               >
                 {s.label}
@@ -511,6 +511,20 @@ export default function RoomActions({ room, consumos, onAction, onRefresh }) {
         </button>
         <button className="ra-btn ra-btn-secondary ra-btn-full" onClick={() => setActiveForm('edit-status')}>
           🔄 Modificar Estado
+        </button>
+      </div>
+    );
+  }
+
+  // ── LIMPIEZA/MANTENIMIENTO: Allow changing back to available
+  if (estado === 'limpieza' || estado === 'mantenimiento') {
+    if (activeForm === 'edit-status') {
+      return <StatusEditor room={room} onAction={onAction} onRefresh={onRefresh} onCancel={() => setActiveForm(null)} />;
+    }
+    return (
+      <div className="ra-section">
+        <button className="ra-btn ra-btn-primary ra-btn-full" onClick={() => setActiveForm('edit-status')}>
+          🔄 Cambiar Estado
         </button>
       </div>
     );

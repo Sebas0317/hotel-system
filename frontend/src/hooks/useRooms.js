@@ -1,9 +1,7 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { fetchRooms } from '../services/api';
 
 export function useRooms() {
-  const queryClient = useQueryClient();
-
   const { data: rooms = [], isLoading: loading, error, refetch: refresh } = useQuery({
     queryKey: ['rooms'],
     queryFn: fetchRooms,

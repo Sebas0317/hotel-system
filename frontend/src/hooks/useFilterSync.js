@@ -1,68 +1,76 @@
-import { useMemo } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useMemo, useEffect, useState, useCallback } from 'react';
 
 /**
- * Custom hook that synchronizes admin filter state with URL query parameters.
- *
- * URL params used:
- *   ?estado=ocupada   — filters by room status (ocupada/reservada/disponible)
- *   ?tipo=doble       — filters by room type (estándar/doble/deluxe/suite/etc.)
- *   ?buscar=101       — search term for room number or guest name
- *
- * Behavior:
- *   - On mount: reads current URL params and uses them as initial filter values
- *   - On filter change: updates the URL via useSearchParams (replace mode to avoid history bloat)
- *   - Browser back/forward buttons automatically restore previous filter states
- *   - Bookmarked or shared URLs with params will auto-apply filters on load
- *
- * @returns {{ filtro, setFiltro, tipo, setTipo, buscar, setBuscar }}
+ * Custom hook that synchronizes admin filter state with URL hash.
+ * Uses hash-based routing for cleaner URLs.
+ * 
+ * Hash format: #/admin/[filter]/[roomId]
+ * Examples:
+ *   #/admin - all rooms
+ *   #/admin/limpieza - filter by limpieza
+ *   #/admin/limpieza/sb-101 - room detail open
  */
 export function useFilterSync() {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [hashState, setHashState] = useState(() => {
+    const hash = window.location.hash.slice(1) || '/admin';
+    return parseHash(hash);
+  });
 
-  const filtro = searchParams.get('estado') || 'todos';
-  const tipo = searchParams.get('tipo') || 'todos';
-  const buscar = searchParams.get('buscar') || '';
+  function parseHash(hash) {
+    const parts = hash.split('/').filter(Boolean);
+    return {
+      filtro: parts[1] || 'todos',
+      room: parts[2] || null
+    };
+  }
 
-  const setFiltro = (value) => {
-    setSearchParams((prev) => {
-      const next = new URLSearchParams(prev);
-      if (value === 'todos') {
-        next.delete('estado');
-      } else {
-        next.set('estado', value);
-      }
-      return next;
-    }, { replace: true });
-  };
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.slice(1) || '/admin';
+      setHashState(parseHash(hash));
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
 
-  const setTipo = (value) => {
-    setSearchParams((prev) => {
-      const next = new URLSearchParams(prev);
-      if (value === 'todos') {
-        next.delete('tipo');
-      } else {
-        next.set('tipo', value);
-      }
-      return next;
-    }, { replace: true });
-  };
+  const updateHash = useCallback((updates) => {
+    setHashState(prev => {
+      const newParams = { ...prev, ...updates };
+      const parts = ['/admin', newParams.filtro !== 'todos' ? newParams.filtro : '', newParams.room || ''].filter(Boolean);
+      const newHash = parts.join('/');
+      window.location.hash = newHash;
+      return newParams;
+    });
+  }, []);
 
-  const setBuscar = (value) => {
-    setSearchParams((prev) => {
-      const next = new URLSearchParams(prev);
-      if (!value) {
-        next.delete('buscar');
-      } else {
-        next.set('buscar', value);
-      }
-      return next;
-    }, { replace: true });
-  };
+  const setFiltro = useCallback((value) => {
+    updateHash({ filtro: value });
+  }, [updateHash]);
+
+  const setRoom = useCallback((roomId) => {
+    if (roomId) {
+      updateHash({ room: roomId });
+    } else {
+      updateHash({ room: null });
+    }
+  }, [updateHash]);
+
+  const setTipo = useCallback(() => {}, []);
+  const setBuscar = useCallback(() => {}, []);
+  const tipo = 'todos';
+  const buscar = '';
 
   return useMemo(
-    () => ({ filtro, setFiltro, tipo, setTipo, buscar, setBuscar }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [filtro, tipo, buscar]
+    () => ({ 
+      filtro: hashState.filtro, 
+      setFiltro, 
+      tipo, 
+      setTipo, 
+      buscar, 
+      setBuscar,
+      room: hashState.room,
+      setRoom
+    }),
+    [hashState.filtro, hashState.room, setFiltro, setRoom]
   );
 }

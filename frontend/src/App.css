@@ -3672,6 +3672,18 @@ input, select { font-family: 'Barlow', inherit; }
   border: 1px solid #fcd34d;
 }
 
+.rd-status-limpieza {
+  background: #ede9fe;
+  color: #7c3aed;
+  border: 1px solid #c4b5fd;
+}
+
+.rd-status-mantenimiento {
+  background: #fef3c7;
+  color: #b45309;
+  border: 1px solid #fcd34d;
+}
+
 .rd-checkout-request {
   background: linear-gradient(135deg, #fef3c7, #fde68a);
   border: 1px solid #f59e0b;
@@ -4096,34 +4108,50 @@ input, select { font-family: 'Barlow', inherit; }
 
 /* Status editor options */
 .ra-status-options {
-  display: flex;
-  gap: 8px;
-  margin-top: 8px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-top: 12px;
 }
 
 .ra-status-btn {
-  flex: 1;
-  padding: 10px 12px;
+  padding: 14px 16px;
   border: 2px solid #e2e8f0;
-  border-radius: 8px;
-  background: #f8fafc;
+  border-radius: 12px;
+  background: #ffffff;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 .ra-status-btn:hover {
   border-color: #94a3b8;
-  background: #f1f5f9;
+  background: #f8fafc;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 .ra-status-btn.activo {
-  border-color: #5a8f6b;
-  background: #eff6ff;
-  color: #1e40af;
-  font-weight: 600;
+  border-width: 3px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: scale(1.02);
 }
+
+.ra-status-btn.disponible { color: #166534; }
+.ra-status-btn.disponible.activo { background: #dcfce7; border-color: #22c55e; }
+.ra-status-btn.reservada { color: #b45309; }
+.ra-status-btn.reservada.activo { background: #fef3c7; border-color: #f59e0b; }
+.ra-status-btn.limpieza { color: #7c3aed; }
+.ra-status-btn.limpieza.activo { background: #ede9fe; border-color: #8b5cf6; }
+.ra-status-btn.mantenimiento { color: #dc2626; }
+.ra-status-btn.mantenimiento.activo { background: #fee2e2; border-color: #ef4444; }
+.ra-status-btn.fuera-servicio { color: #64748b; }
+.ra-status-btn.fuera-servicio.activo { background: #f1f5f9; border-color: #94a3b8; }
 
 /* Checkout breakdown */
 .ra-breakdown {

@@ -6,7 +6,7 @@
     "camas": "1 cama king",
     "capacidad": 2,
     "piso": 1,
-    "estado": "disponible",
+    "estado": "limpieza",
     "huesped": null,
     "telefono": null,
     "email": null,
@@ -33,10 +33,10 @@
     "camas": "1 cama king",
     "capacidad": 2,
     "piso": 1,
-    "estado": "limpieza",
+    "estado": "disponible",
     "huesped": null,
-    "telefono": "3104567890",
-    "email": "carlos.mendoza@email.com",
+    "telefono": null,
+    "email": null,
     "pin": null,
     "checkIn": null,
     "checkOut": null,
@@ -139,7 +139,7 @@
     "camas": "1 cama king",
     "capacidad": 2,
     "piso": 3,
-    "estado": "limpieza",
+    "estado": "disponible",
     "huesped": null,
     "telefono": null,
     "email": null,
@@ -165,7 +165,7 @@
     "camas": "1 cama king",
     "capacidad": 2,
     "piso": 3,
-    "estado": "mantenimiento",
+    "estado": "disponible",
     "huesped": null,
     "telefono": null,
     "email": null,
@@ -420,7 +420,14 @@
     "checkOut": null,
     "noches": null,
     "mascotas": false,
-    "amenidades": ["jacuzzi_privado", "wifi", "ac", "balcon", "vista_bosque", "arquitectura_sostenible"],
+    "amenidades": [
+      "jacuzzi_privado",
+      "wifi",
+      "ac",
+      "balcon",
+      "vista_bosque",
+      "arquitectura_sostenible"
+    ],
     "descripcion": "Suite con jacuzzi privado y arquitectura en madera y bambú sostenible",
     "tarifa": 350000
   },
@@ -440,7 +447,14 @@
     "checkOut": null,
     "noches": null,
     "mascotas": false,
-    "amenidades": ["jacuzzi_privado", "wifi", "ac", "balcon", "vista_bosque", "arquitectura_sostenible"],
+    "amenidades": [
+      "jacuzzi_privado",
+      "wifi",
+      "ac",
+      "balcon",
+      "vista_bosque",
+      "arquitectura_sostenible"
+    ],
     "descripcion": "Suite con jacuzzi privado y arquitectura en madera y bambú sostenible",
     "tarifa": 350000
   },
@@ -460,7 +474,14 @@
     "checkOut": null,
     "noches": null,
     "mascotas": false,
-    "amenidades": ["jacuzzi_privado", "wifi", "ac", "balcon", "vista_bosque", "arquitectura_sostenible"],
+    "amenidades": [
+      "jacuzzi_privado",
+      "wifi",
+      "ac",
+      "balcon",
+      "vista_bosque",
+      "arquitectura_sostenible"
+    ],
     "descripcion": "Suite con jacuzzi privado y arquitectura en madera y bambú sostenible",
     "tarifa": 350000
   },
@@ -480,7 +501,13 @@
     "checkOut": null,
     "noches": null,
     "mascotas": false,
-    "amenidades": ["jacuzzi_privado", "wifi", "ac", "orientacion_solar", "vista_bosque_premium"],
+    "amenidades": [
+      "jacuzzi_privado",
+      "wifi",
+      "ac",
+      "orientacion_solar",
+      "vista_bosque_premium"
+    ],
     "descripcion": "Suite con orientación solar optimizada para vistas premium del bosque",
     "tarifa": 420000
   },
@@ -500,7 +527,13 @@
     "checkOut": null,
     "noches": null,
     "mascotas": false,
-    "amenidades": ["jacuzzi_privado", "wifi", "ac", "orientacion_solar", "vista_bosque_premium"],
+    "amenidades": [
+      "jacuzzi_privado",
+      "wifi",
+      "ac",
+      "orientacion_solar",
+      "vista_bosque_premium"
+    ],
     "descripcion": "Suite con orientación solar optimizada para vistas premium del bosque",
     "tarifa": 420000
   },
@@ -520,7 +553,13 @@
     "checkOut": null,
     "noches": null,
     "mascotas": false,
-    "amenidades": ["jacuzzi_privado", "wifi", "ac", "orientacion_solar", "vista_bosque_premium"],
+    "amenidades": [
+      "jacuzzi_privado",
+      "wifi",
+      "ac",
+      "orientacion_solar",
+      "vista_bosque_premium"
+    ],
     "descripcion": "Suite con orientación solar optimizada para vistas premium del bosque",
     "tarifa": 420000
   },
@@ -540,7 +579,13 @@
     "checkOut": null,
     "noches": null,
     "mascotas": false,
-    "amenidades": ["ducha_exterior", "wifi", "ac", "jardin_privado", "terraza"],
+    "amenidades": [
+      "ducha_exterior",
+      "wifi",
+      "ac",
+      "jardin_privado",
+      "terraza"
+    ],
     "descripcion": "Suite con ducha exterior y acceso a jardín privado",
     "tarifa": 480000
   },
@@ -560,7 +605,13 @@
     "checkOut": null,
     "noches": null,
     "mascotas": false,
-    "amenidades": ["ducha_exterior", "wifi", "ac", "jardin_privado", "terraza"],
+    "amenidades": [
+      "ducha_exterior",
+      "wifi",
+      "ac",
+      "jardin_privado",
+      "terraza"
+    ],
     "descripcion": "Suite con ducha exterior y acceso a jardín privado",
     "tarifa": 480000
   },
@@ -580,7 +631,13 @@
     "checkOut": null,
     "noches": null,
     "mascotas": false,
-    "amenidades": ["ducha_exterior", "wifi", "ac", "jardin_privado", "terraza"],
+    "amenidades": [
+      "ducha_exterior",
+      "wifi",
+      "ac",
+      "jardin_privado",
+      "terraza"
+    ],
     "descripcion": "Suite con ducha exterior y acceso a jardín privado",
     "tarifa": 480000
   },
@@ -600,7 +657,12 @@
     "checkOut": null,
     "noches": null,
     "mascotas": true,
-    "amenidades": ["wifi", "ac", "tv", "baño_privado"],
+    "amenidades": [
+      "wifi",
+      "ac",
+      "tv",
+      "baño_privado"
+    ],
     "descripcion": "Habitación para parejas con control climático e internet inalámbrico",
     "tarifa": 180000
   },
@@ -620,7 +682,12 @@
     "checkOut": null,
     "noches": null,
     "mascotas": true,
-    "amenidades": ["wifi", "ac", "tv", "baño_privado"],
+    "amenidades": [
+      "wifi",
+      "ac",
+      "tv",
+      "baño_privado"
+    ],
     "descripcion": "Habitación para parejas con control climático e internet inalámbrico",
     "tarifa": 180000
   },
@@ -640,7 +707,12 @@
     "checkOut": null,
     "noches": null,
     "mascotas": true,
-    "amenidades": ["wifi", "ac", "tv", "baño_privado"],
+    "amenidades": [
+      "wifi",
+      "ac",
+      "tv",
+      "baño_privado"
+    ],
     "descripcion": "Habitación para parejas con control climático e internet inalámbrico",
     "tarifa": 180000
   },
@@ -660,7 +732,12 @@
     "checkOut": null,
     "noches": null,
     "mascotas": false,
-    "amenidades": ["wifi", "ac", "tv", "baño_privado"],
+    "amenidades": [
+      "wifi",
+      "ac",
+      "tv",
+      "baño_privado"
+    ],
     "descripcion": "Habitación estándar con cama king, control climático, TV pantalla plana y baño privado",
     "tarifa": 160000
   },
@@ -680,7 +757,12 @@
     "checkOut": null,
     "noches": null,
     "mascotas": false,
-    "amenidades": ["wifi", "ac", "tv", "baño_privado"],
+    "amenidades": [
+      "wifi",
+      "ac",
+      "tv",
+      "baño_privado"
+    ],
     "descripcion": "Habitación estándar con cama king, control climático, TV pantalla plana y baño privado",
     "tarifa": 160000
   },
@@ -700,7 +782,12 @@
     "checkOut": null,
     "noches": null,
     "mascotas": false,
-    "amenidades": ["wifi", "ac", "tv", "baño_privado"],
+    "amenidades": [
+      "wifi",
+      "ac",
+      "tv",
+      "baño_privado"
+    ],
     "descripcion": "Habitación estándar con cama king, control climático, TV pantalla plana y baño privado",
     "tarifa": 160000
   },
@@ -720,7 +807,12 @@
     "checkOut": null,
     "noches": null,
     "mascotas": false,
-    "amenidades": ["wifi", "ac", "tv", "baño_privado"],
+    "amenidades": [
+      "wifi",
+      "ac",
+      "tv",
+      "baño_privado"
+    ],
     "descripcion": "Habitación familiar para 4 personas con control climático y televisión",
     "tarifa": 220000
   },
@@ -740,7 +832,12 @@
     "checkOut": null,
     "noches": null,
     "mascotas": false,
-    "amenidades": ["wifi", "ac", "tv", "baño_privado"],
+    "amenidades": [
+      "wifi",
+      "ac",
+      "tv",
+      "baño_privado"
+    ],
     "descripcion": "Habitación familiar para 4 personas con control climático y televisión",
     "tarifa": 220000
   },
@@ -760,7 +857,12 @@
     "checkOut": null,
     "noches": null,
     "mascotas": false,
-    "amenidades": ["wifi", "ac", "tv", "baño_privado"],
+    "amenidades": [
+      "wifi",
+      "ac",
+      "tv",
+      "baño_privado"
+    ],
     "descripcion": "Habitación familiar para 4 personas con control climático y televisión",
     "tarifa": 220000
   },
@@ -780,7 +882,12 @@
     "checkOut": null,
     "noches": null,
     "mascotas": false,
-    "amenidades": ["wifi", "vista_lago", "terraza", "hamacas"],
+    "amenidades": [
+      "wifi",
+      "vista_lago",
+      "terraza",
+      "hamacas"
+    ],
     "descripcion": "Estructura única sobre el agua con 3 literas, capacidad para 6 personas",
     "tarifa": 550000
   },
@@ -800,7 +907,12 @@
     "checkOut": null,
     "noches": null,
     "mascotas": false,
-    "amenidades": ["wifi", "vista_lago", "terraza", "hamacas"],
+    "amenidades": [
+      "wifi",
+      "vista_lago",
+      "terraza",
+      "hamacas"
+    ],
     "descripcion": "Estructura única sobre el agua con 3 literas, capacidad para 6 personas",
     "tarifa": 550000
   },
@@ -820,7 +932,12 @@
     "checkOut": null,
     "noches": null,
     "mascotas": false,
-    "amenidades": ["wifi", "vista_lago", "terraza", "hamacas"],
+    "amenidades": [
+      "wifi",
+      "vista_lago",
+      "terraza",
+      "hamacas"
+    ],
     "descripcion": "Estructura única sobre el agua con 3 literas, capacidad para 6 personas",
     "tarifa": 550000
   }
