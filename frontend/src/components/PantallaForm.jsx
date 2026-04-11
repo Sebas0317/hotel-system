@@ -24,8 +24,8 @@ export default function PantallaForm({ titulo, desc, onVolver, children }) {
         )}
       </header>
       <div className="form-content flex items-start justify-center p-4 sm:p-6">
-        <div className="form-card w-full max-w-[520px] p-4 sm:p-8">
-          <h2 className="form-titulo text-lg sm:text-xl md:text-2xl">{titulo}</h2>
+        <div className="form-card w-full max-w-[800px] p-6 sm:p-10">
+          <h2 className="form-titulo text-xl sm:text-2xl md:text-3xl mb-2">{titulo}</h2>
           {desc && <p className="form-desc text-sm sm:text-base">{desc}</p>}
           {children}
         </div>

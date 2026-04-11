@@ -1271,22 +1271,22 @@ input, select { font-family: 'Barlow', inherit; }
 .form-card {
   background: #fff;
   border-radius: 20px;
-  padding: 32px;
+  padding: 40px 32px;
   width: 100%;
-  max-width: 520px;
+  max-width: 800px;
   box-shadow: 0 4px 24px rgba(0,0,0,0.08);
 }
 
-.form-titulo { font-size: 22px; font-weight: 800; color: #1e2533; margin-bottom: 6px; }
-.form-desc   { font-size: 14px; color: #6b7280; margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid #f3f4f6; }
+.form-titulo { font-size: 26px; font-weight: 800; color: #1e2533; margin-bottom: 8px; }
+.form-desc   { font-size: 15px; color: #6b7280; margin-bottom: 28px; padding-bottom: 24px; border-bottom: 1px solid #f3f4f6; }
 
-.form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+.form-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
 
 .form-group label {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.6px;
+  letter-spacing: 0.8px;
   color: #9ca3af;
 }
 
