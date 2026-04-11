@@ -182,7 +182,7 @@ export default function PantallaAdmin({ onSalir, onNav }) {
         </button>
         <button
           className="admin-primary-btn admin-primary-btn-nav px-5 py-3.5 sm:px-6 text-sm sm:text-base font-medium"
-          onClick={() => window.location.hash = '/admin/reservations'
+          onClick={() => window.location.hash = '/admin/reservations'}
         >
           📅 Reservas
         </button>
