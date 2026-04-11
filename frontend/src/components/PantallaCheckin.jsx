@@ -9,7 +9,7 @@ import PantallaForm from './PantallaForm';
  * Selecting a room auto-fills its type.
  */
 export default function PantallaCheckin({ onNav }) {
-  const [form, setForm] = useState({ numero: '', huesped: '', tipo: 'estándar' });
+  const [form, setForm] = useState({ numero: '', huesped: '', tipo: 'estándar', numeroHabitacion: '' });
   const [rooms, setRooms] = useState([]);
   const [roomsLoading, setRoomsLoading] = useState(true);
   const [resultado, setResultado] = useState(null);
@@ -36,7 +36,7 @@ export default function PantallaCheckin({ onNav }) {
   const handleRoomSelect = useCallback((roomId) => {
     const room = rooms.find((r) => r.id === roomId);
     if (room) {
-      setForm({ numero: room.numero, huesped: form.huesped, tipo: room.tipo });
+      setForm({ numero: roomId, huesped: form.huesped, tipo: room.tipo, numeroHabitacion: room.numero });
     }
   }, [rooms, form.huesped]);
 
@@ -48,7 +48,7 @@ export default function PantallaCheckin({ onNav }) {
     setError('');
     try {
       const data = await checkIn({
-        numero: form.numero,
+        numero: form.numeroHabitacion || form.numero,
         huesped: form.huesped.trim(),
         tipo: form.tipo,
       });
@@ -105,7 +105,7 @@ export default function PantallaCheckin({ onNav }) {
           <button 
             type="button"
             className="mt-3 text-xs text-green-600 hover:text-green-800 underline"
-            onClick={() => setForm({ numero: '', huesped: '', tipo: 'estándar' })}
+            onClick={() => setForm({ numero: '', huesped: '', tipo: 'estándar', numeroHabitacion: '' })}
           >
             ✕ Cambiar habitación
           </button>
