@@ -32,12 +32,12 @@ export const PRODUCTOS = {
  * Room state configuration with visual styling
  */
 export const ESTADO_CFG = {
-  ocupada:        { label: 'Occupied',      color: '#d97706', bg: '#fef3c7', border: '#fcd34d', dot: '#d97706' },
-  reservada:      { label: 'Reserved',     color: '#059669', bg: '#d1fae5', border: '#6ee7b7', dot: '#059669' },
-  disponible:     { label: 'Available',    color: '#0891b2', bg: '#cffafe', border: '#a5f3fc', dot: '#0891b2' },
-  limpieza:       { label: 'Cleaning',     color: '#7c3aed', bg: '#ede9fe', border: '#c4b5fd', dot: '#7c3aed' },
-  mantenimiento:  { label: 'Maintenance',  color: '#dc2626', bg: '#fee2e2', border: '#fca5a5', dot: '#dc2626' },
-  'fuera-servicio': { label: 'Out of Service', color: '#6b7280', bg: '#f3f4f6', border: '#d1d5db', dot: '#6b7280' },
+  ocupada:        { label: 'Ocupada',     color: '#d97706', bg: '#fef3c7', border: '#fcd34d', dot: '#d97706' },
+  reservada:      { label: 'Reservada',  color: '#059669', bg: '#d1fae5', border: '#6ee7b7', dot: '#059669' },
+  disponible:     { label: 'Disponible', color: '#0891b2', bg: '#cffafe', border: '#a5f3fc', dot: '#0891b2' },
+  limpieza:       { label: 'Limpieza',  color: '#7c3aed', bg: '#ede9fe', border: '#c4b5fd', dot: '#7c3aed' },
+  mantenimiento:  { label: 'Mantenimiento', color: '#dc2626', bg: '#fee2e2', border: '#fca5a5', dot: '#dc2626' },
+  'fuera-servicio': { label: 'Fuera de servicio', color: '#6b7280', bg: '#f3f4f6', border: '#d1d5db', dot: '#6b7280' },
 };
 
 /**
@@ -57,18 +57,18 @@ export const TIPO_ICON = {
  * Valid payment methods
  */
 export const METODOS_PAGO = [
-  { key: 'efectivo',      icon: '\uD83D\uDCB5', label: 'Cash' },
-  { key: 'tarjeta',       icon: '\uD83D\uDCB3', label: 'Card' },
-  { key: 'transferencia', icon: '\uD83D\uDCF2', label: 'Transfer' },
+  { key: 'efectivo',      icon: '\uD83D\uDCB5', label: 'Efectivo' },
+  { key: 'tarjeta',       icon: '\uD83D\uDCB3', label: 'Tarjeta' },
+  { key: 'transferencia', icon: '\uD83D\uDCF2', label: 'Transferencia' },
 ];
 
 /**
  * Consumption category display config
  */
 export const CATEGORIAS_CONSUMO = [
-  { key: 'restaurante', label: 'Restaurant' },
+  { key: 'restaurante', label: 'Restaurante' },
   { key: 'bar',         label: 'Bar' },
-  { key: 'servicios',   label: 'Services' },
+  { key: 'servicios',   label: 'Servicios' },
 ];
 
 /**
@@ -84,21 +84,21 @@ export const CAT_ICONS = {
  * Amenity icons and labels for room display
  */
 export const AMENIDADES_CFG = {
-  jacuzzi_privado: { icon: '\uD83E\uDDBB', label: 'Private Jacuzzi' },
+  jacuzzi_privado: { icon: '\uD83E\uDDBB', label: 'Jacuzzi Privado' },
   wifi: { icon: '\uD83D\uDCF6', label: 'WiFi' },
-  ac: { icon: '\u2744\uFE0F', label: 'Air Conditioning' },
-  tv: { icon: '\uD83D\uDCFA', label: 'Television' },
-  bano_privado: { icon: '\uD83E\uDDBF', label: 'Private Bathroom' },
-  balcon: { icon: '\uD83C\uDF05', label: 'Balcony' },
-  terraza: { icon: '\uD83C\uDFE1', label: 'Terrace' },
-  vista_bosque: { icon: '\uD83C\uDF32', label: 'Forest View' },
-  vista_bosque_premium: { icon: '\uD83C\uDF04', label: 'Premium View' },
-  orientacion_solar: { icon: '\u2600\uFE0F', label: 'Sun Orientation' },
-  ducha_exterior: { icon: '\uD83E\uDDBF', label: 'Outdoor Shower' },
-  jardin_privado: { icon: '\uD83C\uDF31', label: 'Private Garden' },
-  arquitectura_sostenible: { icon: '\uD83E\uDDF4', label: 'Sustainable Architecture' },
-  vista_lago: { icon: '\uD83C\uDF0A', label: 'Lake View' },
-  hamacas: { icon: '\uD83C\uDF34', label: 'Hammocks' },
+  ac: { icon: '\u2744\uFE0F', label: 'Aire Acondicionado' },
+  tv: { icon: '\uD83D\uDCFA', label: 'Televisión' },
+  bano_privado: { icon: '\uD83E\uDDBF', label: 'Baño Privado' },
+  balcon: { icon: '\uD83C\uDF05', label: 'Balcón' },
+  terraza: { icon: '\uD83C\uDFE1', label: 'Terraza' },
+  vista_bosque: { icon: '\uD83C\uDF32', label: 'Vista al Bosque' },
+  vista_bosque_premium: { icon: '\uD83C\uDF04', label: 'Vista Premium' },
+  orientacion_solar: { icon: '\u2600\uFE0F', label: 'Orientación Solar' },
+  ducha_exterior: { icon: '\uD83E\uDDBF', label: 'Ducha Exterior' },
+  jardin_privado: { icon: '\uD83C\uDF31', label: 'Jardín Privado' },
+  arquitectura_sostenible: { icon: '\uD83E\uDDF4', label: 'Arquitectura Sostenible' },
+  vista_lago: { icon: '\uD83C\uDF0A', label: 'Vista al Lago' },
+  hamacas: { icon: '\uD83C\uDF34', label: 'Hamacas' },
 };
 
 /**
