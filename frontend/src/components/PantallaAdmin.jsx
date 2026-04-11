@@ -161,74 +161,74 @@ export default function PantallaAdmin({ onSalir, onNav }) {
   const roomListHeader = (
     <>
       {/* Primary action buttons */}
-      <div className="admin-primary-actions flex flex-col sm:flex-row gap-2 sm:gap-3 mb-4">
+      <div className="admin-primary-actions flex flex-col sm:flex-row gap-3 sm:gap-4 mb-6">
         <button
-          className={`admin-primary-btn px-4 py-3 sm:px-5 text-sm sm:text-base ${activeView === 'rooms' ? 'activo' : ''}`}
+          className={`admin-primary-btn px-5 py-3.5 sm:px-6 text-sm sm:text-base font-medium ${activeView === 'rooms' ? 'activo' : ''}`}
           onClick={() => setView('rooms')}
         >
-          Habitaciones
+          🏠 Habitaciones
         </button>
         <button
-          className="admin-primary-btn admin-primary-btn-nav px-4 py-3 sm:px-5 text-sm sm:text-base"
+          className="admin-primary-btn admin-primary-btn-nav px-5 py-3.5 sm:px-6 text-sm sm:text-base font-medium"
           onClick={() => window.location.hash = '/admin/register'}
         >
-          Registro de Huéspedes
+          📋 Registro de Huéspedes
         </button>
         <button
-          className="admin-primary-btn admin-primary-btn-nav px-4 py-3 sm:px-5 text-sm sm:text-base"
+          className="admin-primary-btn admin-primary-btn-nav px-5 py-3.5 sm:px-6 text-sm sm:text-base font-medium"
           onClick={() => window.location.hash = '/admin/transactions'}
         >
-          Registro de Transacciones
+          💳 Transacciones
         </button>
         <button
-          className="admin-primary-btn admin-primary-btn-nav px-4 py-3 sm:px-5 text-sm sm:text-base"
-          onClick={() => window.location.hash = '/admin/reservations'}
+          className="admin-primary-btn admin-primary-btn-nav px-5 py-3.5 sm:px-6 text-sm sm:text-base font-medium"
+          onClick={() => window.location.hash = '/admin/reservations'
         >
-          Reservas
+          📅 Reservas
         </button>
         <button
-          className={`admin-primary-btn px-4 py-3 sm:px-5 text-sm sm:text-base ${activeView === 'prices' ? 'activo' : ''}`}
+          className={`admin-primary-btn px-5 py-3.5 sm:px-6 text-sm sm:text-base font-medium ${activeView === 'prices' ? 'activo' : ''}`}
           onClick={() => setView('prices')}
         >
-          Tarifas y Precios
+          💰 Tarifas
         </button>
       </div>
 
       {/* Stats - clickable filters */}
-      <div className="admin-stats flex flex-wrap gap-2 sm:gap-3 mb-4">
-        <button className={`stat-pill total flex-1 min-w-[70px] sm:min-w-[90px] p-3 sm:p-4 ${filtro === 'todos' ? 'activo' : ''}`} onClick={() => setFiltro('todos')}>
-          <span className="sp-num text-xl sm:text-3xl">{stats.total}</span>
-          <span className="sp-lbl text-[10px] sm:text-xs">Total</span>
+      <div className="admin-stats flex flex-wrap gap-3 sm:gap-4 mb-6">
+        <button className={`stat-pill total flex-1 min-w-[80px] sm:min-w-[100px] p-4 sm:p-5 ${filtro === 'todos' ? 'activo' : ''}`} onClick={() => setFiltro('todos')}>
+          <span className="sp-num text-2xl sm:text-4xl font-bold">{stats.total}</span>
+          <span className="sp-lbl text-xs sm:text-sm">Total</span>
         </button>
-        <button className={`stat-pill ocupada flex-1 min-w-[70px] sm:min-w-[90px] p-3 sm:p-4 ${filtro === 'ocupada' ? 'activo' : ''}`} onClick={() => setFiltro('ocupada')}>
-          <span className="sp-num text-xl sm:text-3xl">{stats.ocupadas}</span>
-          <span className="sp-lbl text-[10px] sm:text-xs">Ocupadas</span>
+        <button className={`stat-pill ocupada flex-1 min-w-[80px] sm:min-w-[100px] p-4 sm:p-5 ${filtro === 'ocupada' ? 'activo' : ''}`} onClick={() => setFiltro('ocupada')}>
+          <span className="sp-num text-2xl sm:text-4xl font-bold">{stats.ocupadas}</span>
+          <span className="sp-lbl text-xs sm:text-sm">Ocupadas</span>
         </button>
-        <button className={`stat-pill reservada flex-1 min-w-[70px] sm:min-w-[90px] p-3 sm:p-4 ${filtro === 'reservada' ? 'activo' : ''}`} onClick={() => setFiltro('reservada')}>
-          <span className="sp-num text-xl sm:text-3xl">{stats.reservadas}</span>
-          <span className="sp-lbl text-[10px] sm:text-xs">Reservadas</span>
+        <button className={`stat-pill reservada flex-1 min-w-[80px] sm:min-w-[100px] p-4 sm:p-5 ${filtro === 'reservada' ? 'activo' : ''}`} onClick={() => setFiltro('reservada')}>
+          <span className="sp-num text-2xl sm:text-4xl font-bold">{stats.reservadas}</span>
+          <span className="sp-lbl text-xs sm:text-sm">Reservadas</span>
         </button>
-        <button className={`stat-pill disponible flex-1 min-w-[70px] sm:min-w-[90px] p-3 sm:p-4 ${filtro === 'disponible' ? 'activo' : ''}`} onClick={() => setFiltro('disponible')}>
-          <span className="sp-num text-xl sm:text-3xl">{stats.disponibles}</span>
-          <span className="sp-lbl text-[10px] sm:text-xs">Disponibles</span>
+        <button className={`stat-pill disponible flex-1 min-w-[80px] sm:min-w-[100px] p-4 sm:p-5 ${filtro === 'disponible' ? 'activo' : ''}`} onClick={() => setFiltro('disponible')}>
+          <span className="sp-num text-2xl sm:text-4xl font-bold">{stats.disponibles}</span>
+          <span className="sp-lbl text-xs sm:text-sm">Disponibles</span>
         </button>
-        <button className={`stat-pill operativa flex-1 min-w-[70px] sm:min-w-[90px] p-3 sm:p-4 ${filtro === 'limpieza' ? 'activo' : ''}`} onClick={() => setFiltro('limpieza')}>
-          <span className="sp-num text-xl sm:text-3xl">{stats.operativas}</span>
-          <span className="sp-lbl text-[10px] sm:text-xs">Limpieza</span>
+        <button className={`stat-pill operativa flex-1 min-w-[80px] sm:min-w-[100px] p-4 sm:p-5 ${filtro === 'limpieza' ? 'activo' : ''}`} onClick={() => setFiltro('limpieza')}>
+          <span className="sp-num text-2xl sm:text-4xl font-bold">{stats.operativas}</span>
+          <span className="sp-lbl text-xs sm:text-sm">Limpieza</span>
         </button>
       </div>
 
       {/* Filters */}
-      <div className="admin-filtros flex flex-col sm:flex-row gap-2 sm:gap-3 mb-4">
-        <input className="buscar-input flex-1 min-w-[200px] px-4 py-2 text-sm" placeholder="🔍 Buscar habitación o huésped..." value={buscar} onChange={(e) => setBuscar(e.target.value)} />
-        <div className="filtro-tabs flex flex-wrap gap-1">
+      <div className="admin-filtros flex flex-col sm:flex-row gap-3 sm:gap-4 mb-6">
+        <input className="buscar-input flex-1 min-w-[250px] px-5 py-3 text-sm rounded-lg" placeholder="🔍 Buscar habitación o huésped..." value={buscar} onChange={(e) => setBuscar(e.target.value)} />
+        <div className="filtro-tabs flex flex-wrap gap-2">
           {['todos', 'ocupada', 'reservada', 'disponible', 'limpieza', 'mantenimiento', 'fuera-servicio'].map((f) => (
-            <button key={f} className={`ftab px-2 sm:px-4 py-2 text-xs sm:text-sm ${filtro === f ? 'activo' : ''} ${f}`} onClick={() => setFiltro(f)}>
+            <button key={f} className={`ftab px-4 py-2.5 text-sm ${filtro === f ? 'activo' : ''} ${f}`} onClick={() => setFiltro(f)}>
               {f === 'todos' ? 'Todas' : ESTADO_CFG[f]?.label}
             </button>
           ))}
         </div>
-        <select className="filtro-tipo w-full sm:w-auto px-3 py-2 text-sm" value={tipo} onChange={(e) => setTipo(e.target.value)}>
+        <select className="filtro-tipo w-full sm:w-auto px-4 py-3 text-sm rounded-lg" value={tipo} onChange={(e) => setTipo(e.target.value)}>
           <option value="todos">Todos los tipos</option>
           {TIPOS_HABITACION.map((t) => (
             <option key={t.value} value={t.value}>{t.label}</option>
