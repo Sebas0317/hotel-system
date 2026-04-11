@@ -130,8 +130,8 @@ export default function UserCheckout({ onExit }) {
         <div className="admin-room-list w-full lg:w-2/5">
           <div className="piso-grupo">
             <div className="piso-titulo">
-              <span>Select Room</span>
-              <span className="piso-count">{rooms.length} occupied</span>
+              <span>Seleccionar Habitación</span>
+              <span className="piso-count">{rooms.length} ocupadas</span>
             </div>
             <div className="rooms-grid">
               {rooms.map((r) => {
@@ -177,7 +177,7 @@ export default function UserCheckout({ onExit }) {
                 );
               })}
               {rooms.length === 0 && (
-                <p className="text-gray-500 p-4">No occupied rooms</p>
+                <p className="text-gray-500 p-4">No hay habitaciones ocupadas</p>
               )}
             </div>
           </div>
@@ -188,7 +188,7 @@ export default function UserCheckout({ onExit }) {
             <div className="room-detail-panel">
               <div className="rdp-header">
                 <div>
-                  <h2 className="rdp-title">Room #{selectedRoom.numero}</h2>
+                  <h2 className="rdp-title">Habitación #{selectedRoom.numero}</h2>
                   <p className="rdp-subtitle">{selectedRoom.tipo}</p>
                 </div>
                 <div className="rdp-estado" style={{ color: cfg.color, background: cfg.bg, border: `1px solid ${cfg.border}` }}>
@@ -198,11 +198,11 @@ export default function UserCheckout({ onExit }) {
 
               <div className="rdp-info-grid">
                 <div className="rdp-info-item">
-                  <span className="rdp-info-label">Guest</span>
+                  <span className="rdp-info-label">Huésped</span>
                   <span className="rdp-info-value">{selectedRoom.huesped}</span>
                 </div>
                 <div className="rdp-info-item">
-                  <span className="rdp-info-label">Nights</span>
+                  <span className="rdp-info-label">Noches</span>
                   <span className="rdp-info-value">{selectedRoom.noches}</span>
                 </div>
                 <div className="rdp-info-item">
@@ -224,28 +224,28 @@ export default function UserCheckout({ onExit }) {
                     value={checkoutDate}
                     onChange={(e) => setCheckoutDate(e.target.value)}
                   />
-                  <p className="date-hint">Select or keep the original check-out date</p>
+                  <p className="date-hint">Selecciona o mantén la fecha de check-out original</p>
                 </div>
               </div>
 
               <div className="rdp-section">
-                <h3 className="rdp-section-title">Room</h3>
+                <h3 className="rdp-section-title">Habitación</h3>
                 <div className="rdp-room-charges">
                   <div className="rdp-charge-item">
-                    <span>Room rate ({selectedRoom.tarifa} x {nights} night{nights > 1 ? 's' : ''})</span>
+                    <span>Tarifa ({COP(selectedRoom.tarifa)} x {nights} noche{nights > 1 ? 's' : ''})</span>
                     <span>{COP(roomTotal)}</span>
                   </div>
                 </div>
                 <div className="rdp-subtotal">
-                  <span>Room Subtotal</span>
+                  <span>Subtotal Habitación</span>
                   <span>{COP(roomTotal)}</span>
                 </div>
               </div>
 
               <div className="rdp-section">
-                <h3 className="rdp-section-title">Consumptions ({consumos.length} item{consumos.length !== 1 ? 's' : ''})</h3>
+                <h3 className="rdp-section-title">Consumos ({consumos.length} artículo{consumos.length !== 1 ? 's' : ''})</h3>
                 {consumos.length === 0 ? (
-                  <p className="rdp-empty">No consumptions recorded</p>
+                  <p className="rdp-empty">Sin consumos registrados</p>
                 ) : (
                   <div className="rdp-consumos-list">
                     {consumos.map((c) => (
@@ -258,7 +258,7 @@ export default function UserCheckout({ onExit }) {
                 )}
                 {consumos.length > 0 && (
                   <div className="rdp-subtotal">
-                    <span>Consumptions Subtotal</span>
+                    <span>Subtotal Consumos</span>
                     <span>{COP(totalConsumos)}</span>
                   </div>
                 )}
@@ -266,11 +266,11 @@ export default function UserCheckout({ onExit }) {
 
               <div className="rdp-totals">
                 <div className="rdp-total-row rdp-total-grand">
-                  <span>Total to Pay</span>
+                  <span>Total a Pagar</span>
                   <span>{COP(totalAPagar)}</span>
                 </div>
                 <div className="rdp-total-row">
-                  <span>Already Paid</span>
+                  <span>Ya Pagado</span>
                   <span className="text-green-600">{COP(pagado)}</span>
                 </div>
                 <div className="rdp-total-row rdp-balance">
@@ -286,7 +286,7 @@ export default function UserCheckout({ onExit }) {
                 onClick={handleCheckout}
                 disabled={processing || !checkoutDate}
               >
-                {processing ? 'Processing...' : 'Confirm Check-out'}
+                {processing ? 'Procesando...' : 'Confirmar Check-out'}
               </button>
 
               {saldoPendiente > 0 && (
