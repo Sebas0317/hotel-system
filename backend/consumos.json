@@ -1,21 +1,5 @@
 [
   {
-    "id": "cons-005",
-    "roomId": "ss-202",
-    "descripcion": "Almuerzo regional",
-    "categoria": "restaurante",
-    "precio": 35000,
-    "fecha": "2026-04-07T13:00:00.000Z"
-  },
-  {
-    "id": "cons-006",
-    "roomId": "ss-202",
-    "descripcion": "Cerveza artesanal (3)",
-    "categoria": "bar",
-    "precio": 45000,
-    "fecha": "2026-04-07T17:30:00.000Z"
-  },
-  {
     "id": "cons-007",
     "roomId": "hd-502",
     "descripcion": "Bandeja paisa",

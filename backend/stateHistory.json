@@ -1,0 +1,114 @@
+{
+  "cambios": [
+    {
+      "id": "1775964723635-inyn6",
+      "roomId": "sb-101",
+      "numero": "101",
+      "reservationId": null,
+      "estadoAnterior": "limpieza",
+      "estadoNuevo": "disponible",
+      "huesped": "",
+      "timestamp": "2026-04-12T03:32:03.635Z"
+    },
+    {
+      "id": "1775964468995-19igs",
+      "roomId": "sb-102",
+      "numero": "102",
+      "reservationId": null,
+      "estadoAnterior": "disponible",
+      "estadoNuevo": "limpieza",
+      "huesped": "",
+      "timestamp": "2026-04-12T03:27:48.995Z"
+    },
+    {
+      "id": "1775964357351-12q57",
+      "roomId": "sb-102",
+      "numero": "102",
+      "reservationId": null,
+      "estadoAnterior": "mantenimiento",
+      "estadoNuevo": "disponible",
+      "huesped": "",
+      "timestamp": "2026-04-12T03:25:57.351Z"
+    },
+    {
+      "id": "1775964152835-vaxm8",
+      "roomId": "sb-102",
+      "numero": "102",
+      "reservationId": null,
+      "estadoAnterior": "disponible",
+      "estadoNuevo": "mantenimiento",
+      "huesped": "",
+      "timestamp": "2026-04-12T03:22:32.835Z"
+    },
+    {
+      "id": "1775964120509-hjsf6",
+      "roomId": "sb-102",
+      "numero": "102",
+      "reservationId": null,
+      "estadoAnterior": "limpieza",
+      "estadoNuevo": "disponible",
+      "huesped": "",
+      "timestamp": "2026-04-12T03:22:00.509Z"
+    },
+    {
+      "id": "1775963927830-dloim",
+      "roomId": "sb-102",
+      "numero": "102",
+      "reservationId": null,
+      "estadoAnterior": "disponible",
+      "estadoNuevo": "limpieza",
+      "huesped": "",
+      "timestamp": "2026-04-12T03:18:47.830Z"
+    },
+    {
+      "id": "1775963507832-af4wv",
+      "roomId": "sb-102",
+      "numero": "102",
+      "reservationId": null,
+      "estadoAnterior": "fuera_servicio",
+      "estadoNuevo": "disponible",
+      "huesped": "",
+      "timestamp": "2026-04-12T03:11:47.832Z"
+    },
+    {
+      "id": "1775961128685-2s13e",
+      "roomId": "sb-102",
+      "numero": "102",
+      "reservationId": null,
+      "estadoAnterior": "mantenimiento",
+      "estadoNuevo": "fuera_servicio",
+      "huesped": "Orval Johnson-Reilly",
+      "timestamp": "2026-04-12T02:32:08.685Z"
+    },
+    {
+      "id": "1775960143004-rhnau",
+      "roomId": "sb-102",
+      "numero": "102",
+      "reservationId": null,
+      "estadoAnterior": "disponible",
+      "estadoNuevo": "mantenimiento",
+      "huesped": "Orval Johnson-Reilly",
+      "timestamp": "2026-04-12T02:15:43.004Z"
+    },
+    {
+      "id": "1775959961724-hhb1n",
+      "roomId": "ss-202",
+      "numero": "202",
+      "reservationId": null,
+      "estadoAnterior": "limpieza",
+      "estadoNuevo": "disponible",
+      "huesped": "",
+      "timestamp": "2026-04-12T02:12:41.724Z"
+    },
+    {
+      "id": "1775959952837-zt6py",
+      "roomId": "ss-202",
+      "numero": "202",
+      "reservationId": null,
+      "estadoAnterior": "ocupada",
+      "estadoNuevo": "limpieza",
+      "huesped": "",
+      "timestamp": "2026-04-12T02:12:32.837Z"
+    }
+  ]
+}

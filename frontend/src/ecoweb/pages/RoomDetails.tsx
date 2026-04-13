@@ -6,6 +6,7 @@ import { ScrollToTop } from '../shared/ScrollToTop';
 import { AdultsDropdown, CheckIn, CheckOut, KidsDropdown } from '../components';
 import { hotelRules as originalHotelRules } from '../data';
 
+// Amenity icons for ecoweb - consolidated with main app constants
 const AMENIDADES = {
   jacuzzi_privado: { icono: '🛁', label: 'Jacuzzi Privado' },
   wifi: { icono: '📶', label: 'WiFi' },

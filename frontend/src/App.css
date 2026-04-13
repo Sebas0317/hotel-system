@@ -55,6 +55,9 @@ body { font-family: 'Barlow', 'Segoe UI', system-ui, -apple-system, sans-serif; 
 #root { min-height: 100svh; }
 button { cursor: pointer; font-family: 'Barlow', inherit; }
 input, select { font-family: 'Barlow', inherit; }
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+input[type=number] { -moz-appearance: textfield; }
 
 /* Admin filter select styling */
 .filtro-tipo {
@@ -1143,7 +1146,7 @@ input, select { font-family: 'Barlow', inherit; }
 .ftab.activo.disponible { background: #10b981; border-color: #10b981; }
 .ftab.activo.limpieza { background: #8b5cf6; border-color: #8b5cf6; }
 .ftab.activo.mantenimiento { background: #f97316; border-color: #f97316; }
-.ftab.activo.fuera-servicio { background: #6b7280; border-color: #6b7280; }
+.ftab.activo.fuera_servicio { background: #6b7280; border-color: #6b7280; }
 
 .piso-grupo { display: flex; flex-direction: column; gap: 12px; }
 
@@ -4150,8 +4153,8 @@ input, select { font-family: 'Barlow', inherit; }
 .ra-status-btn.limpieza.activo { background: #ede9fe; border-color: #8b5cf6; }
 .ra-status-btn.mantenimiento { color: #dc2626; }
 .ra-status-btn.mantenimiento.activo { background: #fee2e2; border-color: #ef4444; }
-.ra-status-btn.fuera-servicio { color: #64748b; }
-.ra-status-btn.fuera-servicio.activo { background: #f1f5f9; border-color: #94a3b8; }
+.ra-status-btn.fuera_servicio { color: #64748b; }
+.ra-status-btn.fuera_servicio.activo { background: #f1f5f9; border-color: #94a3b8; }
 
 /* Checkout breakdown */
 .ra-breakdown {

@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, memo } from 'react';
 
-export function ConfirmModal({ title, message, onConfirm, onCancel, confirmText = 'Confirmar', cancelText = 'Cancelar', type = 'warning' }) {
+export const ConfirmModal = memo(function ConfirmModal({ title, message, onConfirm, onCancel, confirmText = 'Confirmar', cancelText = 'Cancelar', type = 'warning' }) {
   const colors = {
     warning: { bg: 'bg-yellow-50', border: 'border-yellow-300', icon: '⚠️', btn: 'bg-yellow-500 hover:bg-yellow-600' },
     danger: { bg: 'bg-red-50', border: 'border-red-300', icon: '🗑️', btn: 'bg-red-500 hover:bg-red-600' },
@@ -36,7 +36,7 @@ export function ConfirmModal({ title, message, onConfirm, onCancel, confirmText 
       </div>
     </div>
   );
-}
+});
 
 export function useConfirm() {
   const [confirmConfig, setConfirmConfig] = useState(null);

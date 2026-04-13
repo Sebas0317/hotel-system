@@ -117,21 +117,6 @@ export async function fetchReservaciones() {
 }
 
 /**
- * Check in a guest
- * @param {Object} params - Check-in parameters
- * @param {string} params.numero - Room number
- * @param {string} params.huesped - Guest name
- * @param {string} [params.tipo] - Room type
- * @returns {Promise<Object>} Updated room object
- */
-export async function checkIn({ numero, huesped, tipo }) {
-  return apiFetch('/rooms/checkin', {
-    method: 'POST',
-    body: { numero, huesped, tipo },
-  });
-}
-
-/**
  * Validate room PIN
  * @param {string} numero - Room number
  * @param {string} pin - 4-digit PIN
@@ -267,8 +252,8 @@ export async function fetchPrices() {
 }
 
 /**
- * Update all prices
- * @param {Object} prices - { tarifas, productos }
+ * Update prices
+ * @param {Object} prices - Prices object with tarifas and productos
  * @returns {Promise<Object>} Updated prices
  */
 export async function updatePrices(prices) {
@@ -276,4 +261,48 @@ export async function updatePrices(prices) {
     method: 'PUT',
     body: prices,
   });
+}
+
+/**
+ * Check in a guest
+ * @param {Object} params - Check-in parameters
+ * @returns {Promise<Object>} Updated room object
+ */
+export async function checkIn({ numero, huesped, tipo, email, telefono, documento, noches, checkIn: checkInDate, checkOut, observaciones, adultos, ninos, tieneMascota, nombreMascota, personasAdicionales }) {
+  return apiFetch('/rooms/checkin', {
+    method: 'POST',
+    body: { 
+      numero, 
+      huesped, 
+      tipo, 
+      email, 
+      telefono, 
+      documento, 
+      noches, 
+      checkIn: checkInDate, 
+      checkOut, 
+      observaciones, 
+      adultos, 
+      ninos, 
+      tieneMascota, 
+      nombreMascota, 
+      personasAdicionales 
+    },
+  });
+}
+
+/**
+ * Get all history entries
+ * @returns {Promise<Array>} History array
+ */
+export async function fetchHistory() {
+  return apiFetch('/history', { method: 'GET' });
+}
+
+/**
+ * Get state history (room status changes)
+ * @returns {Promise<Array>} State history array
+ */
+export async function fetchStateHistory() {
+  return apiFetch('/state-history', { method: 'GET' });
 }

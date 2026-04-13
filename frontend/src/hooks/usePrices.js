@@ -1,33 +1,36 @@
-import { useState, useEffect, useCallback } from 'react';
-import { fetchPrices } from '../services/api';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { fetchPrices, updatePrices } from '../services/api';
 
 /**
- * Hook to fetch and manage live prices from the backend.
- * Returns current tariffs and product prices, plus a refresh function.
- * Falls back to empty objects if the API fails.
+ * Hook to fetch and manage live prices from the backend using React Query.
+ * Provides automatic caching, deduplication, and background refetching.
  *
- * @returns {{ tarifas, productos, loading, refresh }}
+ * @returns {{ tarifas, productos, isLoading, refresh, update }}
  */
 export function usePrices() {
-  const [tarifas, setTarifas] = useState({});
-  const [productos, setProductos] = useState({});
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
 
-  const refresh = useCallback(async () => {
-    try {
-      const data = await fetchPrices();
-      if (data?.tarifas) setTarifas(data.tarifas);
-      if (data?.productos) setProductos(data.productos);
-    } catch {
-      // Silently fail — components should have fallbacks
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const { data, isLoading } = useQuery({
+    queryKey: ['prices'],
+    queryFn: fetchPrices,
+    staleTime: 5 * 60 * 1000, // 5 minutes — prices change rarely
+    gcTime: 30 * 60 * 1000,   // Keep in cache for 30 minutes
+    retry: 1,
+  });
 
-  useEffect(() => {
-    refresh();
-  }, [refresh]);
+  const update = useMutation({
+    mutationFn: updatePrices,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['prices'] });
+    },
+  });
 
-  return { tarifas, productos, loading, refresh };
+  return {
+    tarifas: data?.tarifas || {},
+    productos: data?.productos || {},
+    isLoading,
+    refresh: () => queryClient.invalidateQueries({ queryKey: ['prices'] }),
+    update: update.mutateAsync,
+    isUpdating: update.isPending,
+  };
 }

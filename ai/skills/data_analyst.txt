@@ -18,4 +18,4 @@ Guest Registration
 Register new guest and assign room
 
 Transaction Entry
-Add charges to active room
+Add charges to active room  

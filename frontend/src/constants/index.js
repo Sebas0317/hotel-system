@@ -37,7 +37,7 @@ export const ESTADO_CFG = {
   ocupada:       { label: 'Ocupada',   color: '#ea580c', bg: '#ffedd5', border: '#fdba74', dot: '#ea580c' },
   limpieza:      { label: 'Limpieza',  color: '#9333ea', bg: '#f3e8ff', border: '#c4b5fd', dot: '#9333ea' },
   mantenimiento: { label: 'Mantenimiento', color: '#dc2626', bg: '#fee2e2', border: '#fca5a5', dot: '#dc2626' },
-  'fuera-servicio': { label: 'Fuera de servicio', color: '#6b7280', bg: '#f3f4f6', border: '#d1d5db', dot: '#6b7280' },
+  fuera_servicio: { label: 'Fuera de servicio', color: '#6b7280', bg: '#f3f4f6', border: '#d1d5db', dot: '#6b7280' },
 };
 
 /**
@@ -82,24 +82,44 @@ export const CAT_ICONS = {
 
 /**
  * Amenity icons and labels for room display
+ * Consolidated from PantallaCheckin.jsx and ecoweb/RoomDetails.tsx
  */
-export const AMENIDADES_CFG = {
-  jacuzzi_privado: { icon: '\uD83E\uDDBB', label: 'Jacuzzi Privado' },
-  wifi: { icon: '\uD83D\uDCF6', label: 'WiFi' },
-  ac: { icon: '\u2744\uFE0F', label: 'Aire Acondicionado' },
-  tv: { icon: '\uD83D\uDCFA', label: 'Televisión' },
-  bano_privado: { icon: '\uD83E\uDDBF', label: 'Baño Privado' },
-  balcon: { icon: '\uD83C\uDF05', label: 'Balcón' },
-  terraza: { icon: '\uD83C\uDFE1', label: 'Terraza' },
-  vista_bosque: { icon: '\uD83C\uDF32', label: 'Vista al Bosque' },
-  vista_bosque_premium: { icon: '\uD83C\uDF04', label: 'Vista Premium' },
-  orientacion_solar: { icon: '\u2600\uFE0F', label: 'Orientación Solar' },
-  ducha_exterior: { icon: '\uD83E\uDDBF', label: 'Ducha Exterior' },
-  jardin_privado: { icon: '\uD83C\uDF31', label: 'Jardín Privado' },
-  arquitectura_sostenible: { icon: '\uD83E\uDDF4', label: 'Arquitectura Sostenible' },
-  vista_lago: { icon: '\uD83C\uDF0A', label: 'Vista al Lago' },
-  hamacas: { icon: '\uD83C\uDF34', label: 'Hamacas' },
+export const AMENIDADES = {
+  jacuzzi_privado: { icono: '🛁', label: 'Jacuzzi Privado' },
+  wifi: { icono: '📶', label: 'WiFi' },
+  ac: { icono: '❄️', label: 'Aire Acondicionado' },
+  tv: { icono: '📺', label: 'TV' },
+  bano_privado: { icono: '🚿', label: 'Baño Privado' },
+  balcon: { icono: '🌅', label: 'Balcón' },
+  terraza: { icono: '☀️', label: 'Terraza' },
+  vista_bosque: { icono: '🌲', label: 'Vista al Bosque' },
+  vista_bosque_premium: { icono: '✨', label: 'Vista Premium' },
+  orientacion_solar: { icono: '🌅', label: 'Orientación Solar' },
+  ducha_exterior: { icono: '🚿', label: 'Ducha Exterior' },
+  jardin_privado: { icono: '🌸', label: 'Jardín Privado' },
+  arquitectura_sostenible: { icono: '🌿', label: 'Arquitectura Sostenible' },
+  vista_lago: { icono: '🌊', label: 'Vista al Lago' },
+  hamacas: { icono: '🌴', label: 'Hamacas' },
+  cocina: { icono: '🍳', label: 'Cocina Equipada' },
+  chimenea: { icono: '🔥', label: 'Chimenea' },
+  terra_privada: { icono: '☀️', label: 'Terraza Privada' },
+  minibar: { icono: '🍷', label: 'Minibar' },
+  caja_fuerte: { icono: '🔐', label: 'Caja Fuerte' },
+  room_service: { icono: '🛎️', label: 'Room Service' },
+  mascota: { icono: '🐕', label: 'Mascotas Bienvenidas' },
+  parking: { icono: '🅿️', label: 'Estacionamiento' },
+  piscina: { icono: '🏊', label: 'Piscina' },
+  spa: { icono: '💆', label: 'Spa' },
+  Restaurante: { icono: '🍽️', label: 'Restaurante' },
+  bar: { icono: '🍸', label: 'Bar' },
+  lavanderia: { icono: '👕', label: 'Lavandería' },
+  gym: { icono: '🏋️', label: 'Gimnasio' },
 };
+
+/**
+ * @deprecated Use AMENIDADES instead. Kept for backward compatibility.
+ */
+export const AMENIDADES_CFG = AMENIDADES;
 
 /**
  * Room type labels for display

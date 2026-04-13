@@ -12,6 +12,7 @@ const router = express.Router();
 const roomController = require('../controllers/roomController');
 const { requireFields, validateEnum } = require('../middleware/validation');
 const { requireAuth } = require('../middleware/auth');
+const { writeRateLimiter, pinRateLimiter } = require('../middleware/rateLimiters');
 
 const METODOS_PAGO = ['efectivo', 'tarjeta', 'transferencia'];
 
@@ -29,6 +30,7 @@ router.get('/reservaciones', requireAuth, roomController.getReservaciones);
 // POST /rooms/checkin - Check in a guest
 router.post(
   '/checkin',
+  writeRateLimiter,
   requireFields('numero', 'huesped'),
   roomController.checkIn
 );
@@ -37,6 +39,7 @@ router.post(
 // NOTE: Must be BEFORE /:id routes to prevent "validar" being matched as :id
 router.post(
   '/validar',
+  pinRateLimiter,
   requireFields('numero', 'pin'),
   roomController.validarPin
 );
@@ -47,6 +50,7 @@ router.post(
 router.post(
   '/:id/reservar',
   requireAuth,
+  writeRateLimiter,
   requireFields('huesped'),
   roomController.reservar
 );
@@ -55,6 +59,7 @@ router.post(
 router.post(
   '/:id/update-guest',
   requireAuth,
+  writeRateLimiter,
   roomController.actualizarHuesped
 );
 
@@ -62,6 +67,7 @@ router.post(
 router.patch(
   '/:id/status',
   requireAuth,
+  writeRateLimiter,
   roomController.actualizarEstado
 );
 
@@ -69,6 +75,7 @@ router.patch(
 router.post(
   '/:id/checkout',
   requireAuth,
+  writeRateLimiter,
   requireFields('metodoPago'),
   validateEnum('metodoPago', METODOS_PAGO, 'Método de pago inválido. Debe ser: efectivo, tarjeta o transferencia'),
   roomController.checkout
@@ -77,6 +84,7 @@ router.post(
 // POST /rooms/:id/solicitar-checkout - Guest requests checkout (no auth - public)
 router.post(
   '/:id/solicitar-checkout',
+  writeRateLimiter,
   roomController.solicitarCheckout
 );
 
@@ -84,6 +92,7 @@ router.post(
 router.post(
   '/:id/cancel',
   requireAuth,
+  writeRateLimiter,
   roomController.cancelarReserva
 );
 

@@ -1,34 +1,8 @@
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import { checkIn, fetchRooms } from '../services/api';
-import { TIPOS_HABITACION } from '../constants';
+import { TIPOS_HABITACION, AMENIDADES } from '../constants';
 import PantallaForm from './PantallaForm';
 import { ConfirmModal } from './ConfirmModal.jsx';
-
-const AMENIDADES = {
-  jacuzzi_privado: { icono: '🛁', label: 'Jacuzzi Privado' },
-  wifi: { icono: '📶', label: 'WiFi' },
-  ac: { icono: '❄️', label: 'Aire Acondicionado' },
-  balcon: { icono: '🌅', label: 'Balcón' },
-  vista_bosque: { icono: '🌲', label: 'Vista al Bosque' },
-  arquitectura_sostenible: { icono: '🌿', label: 'Arquitectura Sostenible' },
-  cocina: { icono: '🍳', label: 'Cocina Equipada' },
-  chimenea: { icono: '🔥', label: 'Chimenea' },
-  terraza: { icono: '☀️', label: 'Terraza' },
-  jardin_privado: { icono: '🌸', label: 'Jardín Privado' },
-  ducha_exterior: { icono: '🚿', label: 'Ducha Exterior' },
-  tv: { icono: '📺', label: 'TV' },
-  minibar: { icono: '🍷', label: 'Minibar' },
-  caja_fuerte: { icono: '🔐', label: 'Caja Fuerte' },
-  room_service: { icono: '🛎️', label: 'Room Service' },
-  mascota: { icono: '🐕', label: 'Mascotas Bienvenidas' },
-  parking: { icono: '🅿️', label: 'Estacionamiento' },
-  piscina: { icono: '🏊', label: 'Piscina' },
-  spa: { icono: '💆', label: 'Spa' },
-  Restaurante: { icono: '🍽️', label: 'Restaurante' },
-  bar: { icono: '🍸', label: 'Bar' },
-  lavanderia: { icono: '👕', label: 'Lavandería' },
-  gym: { icono: '🏋️', label: 'Gimnasio' },
-};
 
 /**
  * Check-in screen — Register a new guest and assign room.
@@ -131,7 +105,7 @@ export default function PantallaCheckin({ onNav }) {
     }
   }, [rooms]);
 
-  const agregarPersonaAdicional = () => {
+  const _agregarPersonaAdicional = () => {
     setForm(prev => ({
       ...prev,
       personasAdicionales: [
@@ -191,7 +165,7 @@ export default function PantallaCheckin({ onNav }) {
     }
   };
 
-  const handleKeyDown = (e) => {
+  const _handleKeyDown = (e) => {
     if (e.key === 'Enter' && !loading) handleSubmit();
   };
 

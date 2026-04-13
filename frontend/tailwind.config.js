@@ -3,7 +3,6 @@ export default {
   content: [
     './index.html',
     './src/**/*.{js,jsx,ts,tsx}',
-    './src/landing/**/*.{js,jsx}',
     './src/ecoweb/**/*.{js,jsx,ts,tsx}',
   ],
   theme: {
@@ -30,9 +29,6 @@ export default {
           DEFAULT: '#a37d4c',
           hover: '#967142',
         },
-      },
-      backgroundImage: {
-        room: "url('/src/landing/assets/img/room.jpg')",
       },
     },
   },

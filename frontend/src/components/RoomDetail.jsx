@@ -1,17 +1,27 @@
-import { useMemo, useState, useCallback, useEffect } from 'react';
+import { useMemo, useState, useCallback, useEffect, memo } from 'react';
 import { COP, FECHA, calcularTotal } from '../utils/helpers';
 import { CAT_ICONS } from '../constants';
 import { generarConsumosMock, calcularFechaDisponible, generarContactoMock } from '../utils/mockData';
-import { fetchConsumos } from '../services/api';
+import { fetchConsumos, fetchStateHistory } from '../services/api';
 import RoomActions, { Toast } from './RoomActions';
 
-export default function RoomDetail({ room, onRefresh }) {
+function RoomDetail({ room, onRefresh }) {
   const [toast, setToast] = useState(null);
   const [consumos, setConsumos] = useState([]);
   const [consumosLoading, setConsumosLoading] = useState(true);
+  const [stateHistory, setStateHistory] = useState([]);
 
   const fechaDisponible = useMemo(() => calcularFechaDisponible(room), [room]);
-  const contacto = useMemo(() => generarContactoMock(room), [room]);
+  const contacto = useMemo(() => {
+    if (room.email || room.telefono || room.documento) {
+      return {
+        documento: room.documento || '—',
+        telefono: room.telefono || '—',
+        email: room.email || '—',
+      };
+    }
+    return generarContactoMock(room);
+  }, [room]);
   const totalConsumos = useMemo(() => calcularTotal(consumos), [consumos]);
 
   const tarifaNoche = 80000;
@@ -50,6 +60,20 @@ export default function RoomDetail({ room, onRefresh }) {
       .finally(() => {
         if (!cancelled) setConsumosLoading(false);
       });
+    return () => { cancelled = true; };
+  }, [room.id]);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchStateHistory()
+      .then((data) => {
+        if (!cancelled) {
+          const roomHistory = data.filter(h => h.roomId === room.id).slice(0, 10);
+          setStateHistory(roomHistory);
+        }
+      })
+      .catch(() => {})
+      .finally(() => {});
     return () => { cancelled = true; };
   }, [room.id]);
 
@@ -108,55 +132,83 @@ export default function RoomDetail({ room, onRefresh }) {
       </div>
 
       {(room.estado === 'reservada' || room.estado === 'ocupada') && room.huesped && (
-        <div className="rd-section rd-guest-details">
-          <h4 className="rd-section-title">👤 Registro de Huéspedes</h4>
+        <div className="rd-section rd-guest-details" style={{ background: 'linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%)', borderRadius: '12px', padding: '16px', border: '1px solid #bbf7d0' }}>
+          <h4 className="rd-section-title" style={{ color: '#166534', fontSize: '14px', fontWeight: '700', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontSize: '18px' }}>👤</span> Registro de Huéspedes
+          </h4>
           
-          <div className="rd-guest-count">
-            <span className="rd-label">Número de personas:</span>
-            <span className="rd-value">{room.personas || 1} persona{room.personas > 1 ? 's' : ''}</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', padding: '10px', background: 'white', borderRadius: '8px', border: '1px solid #d1d5db' }}>
+            <span style={{ fontSize: '20px' }}>👥</span>
+            <div>
+              <span style={{ fontSize: '12px', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase' }}>Número de personas:</span>
+              <div style={{ fontSize: '16px', fontWeight: '700', color: '#1f2937' }}>
+                {(room.adultos || 1) + (room.ninos || 0)} persona{(room.adultos + room.ninos > 1) ? 's' : ''}
+                <span style={{ fontSize: '13px', fontWeight: '400', color: '#6b7280', marginLeft: '4px' }}>
+                  ({room.adultos || 1} adulto{(room.adultos > 1) ? 's' : ''}{room.ninos ? `, ${room.ninos} niño${room.ninos > 1 ? 's' : ''}` : ''})
+                </span>
+              </div>
+            </div>
           </div>
 
+          {room.tieneMascota && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', padding: '10px', background: '#fef3c7', borderRadius: '8px', border: '1px solid #fcd34d' }}>
+              <span style={{ fontSize: '20px' }}>🐾</span>
+              <div>
+                <span style={{ fontSize: '12px', color: '#92400e', fontWeight: '600', textTransform: 'uppercase' }}>Mascota</span>
+                <div style={{ fontSize: '14px', fontWeight: '600', color: '#78350f' }}>{room.nombreMascota || 'Sin nombre'}</div>
+              </div>
+            </div>
+          )}
+
           <div className="rd-guest-list">
-            <div className="rd-guest-item rd-guest-main">
-              <span className="rd-guest-type">👤 Huesped Principal {room.estado === 'reservada' && '(Reserva)'}</span>
+            <div className="rd-guest-item rd-guest-main" style={{ background: 'white', borderRadius: '10px', padding: '14px', border: '2px solid #22c55e', marginBottom: '10px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                <span style={{ fontSize: '16px' }}>👤</span>
+                <span style={{ fontSize: '13px', fontWeight: '700', color: '#166534', textTransform: 'uppercase' }}>Huésped Principal {room.estado === 'reservada' && '(Reserva)'}</span>
+              </div>
               
-              <div className="rd-guest-form">
-                <div className="rd-field">
-                  <span className="rd-label">Nombre completo</span>
-                  <span className="rd-value">{room.huesped || '—'}</span>
+              <div className="rd-guest-form" style={{ display: 'grid', gap: '8px' }}>
+                <div className="rd-field" style={{ display: 'flex', justifyContent: 'space-between', padding: '8px', background: '#f9fafb', borderRadius: '6px' }}>
+                  <span className="rd-label" style={{ fontSize: '12px', color: '#6b7280' }}>Nombre completo</span>
+                  <span className="rd-value" style={{ fontSize: '13px', fontWeight: '600', color: '#111827' }}>{room.huesped || '—'}</span>
                 </div>
-                <div className="rd-field">
-                  <span className="rd-label">Documento</span>
-                  <span className="rd-value">{contacto?.documento || '—'}</span>
+                <div className="rd-field" style={{ display: 'flex', justifyContent: 'space-between', padding: '8px', background: '#f9fafb', borderRadius: '6px' }}>
+                  <span className="rd-label" style={{ fontSize: '12px', color: '#6b7280' }}>Documento</span>
+                  <span className="rd-value" style={{ fontSize: '13px', fontWeight: '600', color: '#111827' }}>{contacto?.documento || '—'}</span>
                 </div>
-                <div className="rd-field">
-                  <span className="rd-label">Teléfono</span>
-                  <span className="rd-value">{contacto?.telefono || '—'}</span>
+                <div className="rd-field" style={{ display: 'flex', justifyContent: 'space-between', padding: '8px', background: '#f9fafb', borderRadius: '6px' }}>
+                  <span className="rd-label" style={{ fontSize: '12px', color: '#6b7280' }}>Teléfono</span>
+                  <span className="rd-value" style={{ fontSize: '13px', fontWeight: '600', color: '#111827' }}>{contacto?.telefono || '—'}</span>
                 </div>
-                <div className="rd-field">
-                  <span className="rd-label">Correo electrónico</span>
-                  <span className="rd-value">{contacto?.email || '—'}</span>
+                <div className="rd-field" style={{ display: 'flex', justifyContent: 'space-between', padding: '8px', background: '#f9fafb', borderRadius: '6px' }}>
+                  <span className="rd-label" style={{ fontSize: '12px', color: '#6b7280' }}>Correo electrónico</span>
+                  <span className="rd-value" style={{ fontSize: '13px', fontWeight: '600', color: '#111827' }}>{contacto?.email || '—'}</span>
                 </div>
                 {room.observaciones && (
-                  <div className="rd-field">
-                    <span className="rd-label">Observaciones</span>
-                    <span className="rd-value">{room.observaciones}</span>
+                  <div className="rd-field" style={{ padding: '8px', background: '#fef3c7', borderRadius: '6px', border: '1px solid #fcd34d' }}>
+                    <span className="rd-label" style={{ fontSize: '12px', color: '#92400e' }}>📝 Observaciones</span>
+                    <span className="rd-value" style={{ fontSize: '13px', color: '#78350f', display: 'block', marginTop: '4px' }}>{room.observaciones}</span>
                   </div>
                 )}
               </div>
             </div>
 
             {room.personasAdicionales && room.personasAdicionales.length > 0 && room.personasAdicionales.map((p, i) => (
-              <div key={i} className="rd-guest-item">
-                <span className="rd-guest-type">👥 Persona adicional #{i + 1}</span>
-                <div className="rd-guest-form">
-                  <div className="rd-field">
-                    <span className="rd-label">Nombre</span>
-                    <span className="rd-value">{p.nombre || '—'}</span>
+              <div key={i} className="rd-guest-item" style={{ background: 'white', borderRadius: '10px', padding: '14px', border: '1px solid #e5e7eb', marginBottom: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+                  <span style={{ fontSize: '16px' }}>👥</span>
+                  <span style={{ fontSize: '13px', fontWeight: '700', color: '#4b5563', textTransform: 'uppercase' }}>
+                    {room.ninos && i < room.ninos ? `Niño ${i + 1} (menor)` : `Persona adicional #${i + 1}`}
+                  </span>
+                </div>
+                <div className="rd-guest-form" style={{ display: 'grid', gap: '6px' }}>
+                  <div className="rd-field" style={{ display: 'flex', justifyContent: 'space-between', padding: '6px', background: '#f9fafb', borderRadius: '6px' }}>
+                    <span className="rd-label" style={{ fontSize: '11px', color: '#6b7280' }}>Nombre</span>
+                    <span className="rd-value" style={{ fontSize: '13px', fontWeight: '600', color: '#111827' }}>{p.nombre || '—'}</span>
                   </div>
-                  <div className="rd-field">
-                    <span className="rd-label">Documento</span>
-                    <span className="rd-value">{p.documento || '—'}</span>
+                  <div className="rd-field" style={{ display: 'flex', justifyContent: 'space-between', padding: '6px', background: '#f9fafb', borderRadius: '6px' }}>
+                    <span className="rd-label" style={{ fontSize: '11px', color: '#6b7280' }}>Documento</span>
+                    <span className="rd-value" style={{ fontSize: '13px', fontWeight: '600', color: '#111827' }}>{p.documento || '—'}</span>
                   </div>
                 </div>
               </div>
@@ -296,7 +348,35 @@ export default function RoomDetail({ room, onRefresh }) {
         </div>
       )}
 
+      {stateHistory.length > 0 && (
+        <div className="rd-section" style={{ background: '#f8fafc', borderRadius: '12px', padding: '16px', border: '1px solid #e2e8f0' }}>
+          <h4 className="rd-section-title" style={{ color: '#475569', fontSize: '14px', fontWeight: '700', marginBottom: '12px' }}>
+            📋 Historial de Estado ({stateHistory.length})
+          </h4>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {stateHistory.map((h, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 12px', background: 'white', borderRadius: '8px', border: '1px solid #e5e7eb', fontSize: '12px' }}>
+                <span style={{ 
+                  padding: '4px 8px', 
+                  borderRadius: '4px', 
+                  fontWeight: '600',
+                  background: h.estadoNuevo === 'disponible' ? '#dcfce7' : h.estadoNuevo === 'ocupada' ? '#fee2e2' : h.estadoNuevo === 'reservada' ? '#fef9c3' : '#f3f4f6',
+                  color: h.estadoNuevo === 'disponible' ? '#166534' : h.estadoNuevo === 'ocupada' ? '#991b1b' : h.estadoNuevo === 'reservada' ? '#854d0e' : '#374151'
+                }}>
+                  {h.estadoNuevo}
+                </span>
+                {h.reservationId && <span style={{ fontFamily: 'monospace', fontSize: '10px', color: '#6b7280' }}>{h.reservationId}</span>}
+                <span style={{ color: '#6b7280' }}>{FECHA(h.timestamp)}</span>
+                {h.huesped && <span style={{ color: '#111827', fontWeight: '500' }}>{h.huesped}</span>}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <RoomActions room={room} consumos={consumos} onAction={showToast} onRefresh={onRefresh} />
     </div>
   );
 }
+
+export default memo(RoomDetail);

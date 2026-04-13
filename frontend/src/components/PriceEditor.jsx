@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, memo } from 'react';
 import { fetchPrices, updatePrices } from '../services/api';
 import { COP } from '../utils/helpers';
 import { CATEGORIAS_CONSUMO } from '../constants';
@@ -51,7 +51,9 @@ function ConfirmModal({ tarifas, productos, onConfirm, onCancel }) {
  * @param {Function} props.onUpdate - Callback called after successful save
  * @param {Function} props.onNotify - Callback(type, message) for toast notifications
  */
-export default function PriceEditor({ onUpdate, onNotify }) {
+export default memo(PriceEditor);
+
+function PriceEditor({ onUpdate, onNotify }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);

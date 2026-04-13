@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, memo } from 'react';
 import { checkIn, checkout, cancelReservation, createConsumo, reservar, updateGuest, updateRoomStatus } from '../services/api';
 import { PRODUCTOS, CATEGORIAS_CONSUMO, CAT_ICONS, METODOS_PAGO, ESTADO_CFG } from '../constants';
 import { COP, FECHA } from '../utils/helpers';
@@ -185,13 +185,27 @@ function StatusEditor({ room, onAction, onRefresh, onCancel }) {
     }
   };
 
-  const OPERATIONAL_STATES = [
+  const ALL_STATES = [
     { key: 'disponible', label: '✅ Disponible' },
     { key: 'reservada', label: '📋 Reservada' },
     { key: 'limpieza', label: '🧹 En limpieza' },
     { key: 'mantenimiento', label: '🔧 Mantenimiento' },
-    { key: 'fuera-servicio', label: '🚫 Fuera de servicio' },
+    { key: 'fuera_servicio', label: '🚫 Fuera de servicio' },
   ];
+
+  const ALLOWED_FROM_CURRENT = {
+    disponible: ['reservada', 'limpieza', 'mantenimiento', 'fuera_servicio'],
+    reservada: ['disponible', 'limpieza', 'mantenimiento', 'fuera_servicio'],
+    limpieza: ['disponible', 'mantenimiento', 'fuera_servicio'],
+    mantenimiento: ['disponible', 'limpieza', 'fuera_servicio'],
+    fuera_servicio: ['disponible', 'limpieza', 'mantenimiento'],
+    ocupada: ['disponible', 'limpieza', 'mantenimiento', 'reservada'],
+  };
+
+  const OPERATIONAL_STATES = (ALLOWED_FROM_CURRENT[room.estado] || ['disponible']).map(key => {
+    const state = ALL_STATES.find(s => s.key === key);
+    return state || { key, label: key };
+  });
 
   return (
     <div className="ra-form">
@@ -379,7 +393,16 @@ function CheckoutPanel({ room, consumos, onAction, onRefresh }) {
       {metodoPago === 'efectivo' && (
         <div className="ra-field">
           <label>Valor recibido (COP)</label>
-          <input type="number" placeholder={`Mín. ${totals.total.toLocaleString('es-CO')}`} value={valorRecibido} onChange={(e) => setValorRecibido(e.target.value)} min={0} />
+          <label>Valor recibido (COP)</label>
+          <input 
+            type="number" 
+            step="1" 
+            min="0" 
+            placeholder={`Mín. ${totals.total.toLocaleString('es-CO')}`} 
+            value={valorRecibido} 
+            onChange={(e) => setValorRecibido(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'ArrowUp' || e.key === 'ArrowDown') e.preventDefault(); }}
+          />
           {valorRecibido && (
             <div className={`ra-cambio ${cambio >= 0 ? 'positivo' : 'negativo'}`}>
               {cambio > 0 && `💰 Cambio: ${COP(cambio)}`}
@@ -408,7 +431,7 @@ function CheckoutPanel({ room, consumos, onAction, onRefresh }) {
  * @param {Function} props.onAction - Callback (type, message) for toast notifications
  * @param {Function} props.onRefresh - Callback to refresh room data after actions
  */
-export default function RoomActions({ room, consumos, onAction, onRefresh }) {
+function RoomActions({ room, consumos, onAction, onRefresh }) {
   // Track which action form is currently active
   const [activeForm, setActiveForm] = useState(null);
 
@@ -516,8 +539,8 @@ export default function RoomActions({ room, consumos, onAction, onRefresh }) {
     );
   }
 
-  // ── LIMPIEZA/MANTENIMIENTO: Allow changing back to available
-  if (estado === 'limpieza' || estado === 'mantenimiento') {
+  // ── LIMPIEZA/MANTENIMIENTO/FUERA DE SERVICIO: Allow changing state
+  if (estado === 'limpieza' || estado === 'mantenimiento' || estado === 'fuera_servicio') {
     if (activeForm === 'edit-status') {
       return <StatusEditor room={room} onAction={onAction} onRefresh={onRefresh} onCancel={() => setActiveForm(null)} />;
     }
@@ -530,8 +553,22 @@ export default function RoomActions({ room, consumos, onAction, onRefresh }) {
     );
   }
 
-  return null;
+  // Default: show status change button for all states
+  if (activeForm === 'edit-status') {
+    return <StatusEditor room={room} onAction={onAction} onRefresh={onRefresh} onCancel={() => setActiveForm(null)} />;
+  }
+  
+  return (
+    <div className="ra-section">
+      <button className="ra-btn ra-btn-primary ra-btn-full" onClick={() => setActiveForm('edit-status')}>
+        🔄 Cambiar Estado
+      </button>
+    </div>
+  );
 }
 
 // Export Toast for use in parent component
 export { Toast };
+
+// Export memoized component
+export default memo(RoomActions);

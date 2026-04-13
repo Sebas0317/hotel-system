@@ -1,23 +1,42 @@
 import { Routes, Route, useNavigate, Navigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, Suspense, lazy } from 'react';
 import { getAuthToken, setAuthToken } from './services/api';
 import './App.css';
 
-// Extracted components
-import LoginScreen from './components/LoginScreen';
-import PantallaAdmin from './components/PantallaAdmin';
-import UserView from './components/UserView';
-import UserCheckout from './components/UserCheckout';
-import PantallaCheckin from './components/PantallaCheckin';
-import PantallaConsumo from './components/PantallaConsumo';
-import PantallaVer from './components/PantallaVer';
-import PantallaCheckout from './components/PantallaCheckout';
-import PantallaReservaciones from './components/PantallaReservaciones';
+// Lazy-loaded route components for code splitting
+const LoginScreen = lazy(() => import('./components/LoginScreen'));
+const PantallaAdmin = lazy(() => import('./components/PantallaAdmin'));
+const UserView = lazy(() => import('./components/UserView'));
+const UserCheckout = lazy(() => import('./components/UserCheckout'));
+const PantallaCheckin = lazy(() => import('./components/PantallaCheckin'));
+const PantallaConsumo = lazy(() => import('./components/PantallaConsumo'));
+const PantallaVer = lazy(() => import('./components/PantallaVer'));
+const PantallaCheckout = lazy(() => import('./components/PantallaCheckout'));
+const PantallaReservaciones = lazy(() => import('./components/PantallaReservaciones'));
 
-// EcoWeb landing page
+// EcoWeb landing page — eagerly loaded (small, public-facing)
 import EcoWeb from './ecoweb/App';
 import './ecoweb/style/index.css';
 import './ecoweb/style/fonts.css';
+
+// Loading fallback component
+function LoadingFallback() {
+  return (
+    <div className="loading-fallback" style={{
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      minHeight: '100vh',
+      fontSize: '18px',
+      color: '#6b7280',
+    }}>
+      <div style={{ textAlign: 'center' }}>
+        <div style={{ fontSize: '32px', marginBottom: '12px' }}>🌿</div>
+        Cargando...
+      </div>
+    </div>
+  );
+}
 
 /**
  * App root — now driven by URL routes instead of local state.
@@ -60,137 +79,161 @@ export default function App() {
   };
 
   return (
-    <Routes>
-      <Route
-        path="/"
-        element={
-          !rol ? (
-            <LoginScreen onRole={handleRol} />
-          ) : (
-            <Navigate to={rol === 'admin' ? '/admin' : '/user'} replace />
-          )
-        }
-      />
+    <Suspense fallback={<LoadingFallback />}>
+      <Routes>
+        <Route
+          path="/"
+          element={
+            !rol ? (
+              <LoginScreen onRole={handleRol} />
+            ) : (
+              <Navigate to={rol === 'admin' ? '/admin' : '/user'} replace />
+            )
+          }
+        />
 
-      <Route
-        path="/admin"
-        element={
-          rol === 'admin' ? (
-            <PantallaAdmin onSalir={handleExit} onNav={(path) => navigate(path)} />
-          ) : (
-            <Navigate to="/" replace />
-          )
-        }
-      />
+        <Route
+          path="/admin"
+          element={
+            rol === 'admin' ? (
+              <PantallaAdmin onSalir={handleExit} onNav={(path) => navigate(path)} />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
 
-      <Route
-        path="/admin/register"
-        element={
-          rol === 'admin' ? (
-            <PantallaCheckin onSalir={handleExit} onNav={(path) => navigate(path)} />
-          ) : (
-            <Navigate to="/" replace />
-          )
-        }
-      />
+        <Route
+          path="/admin/room/:roomId"
+          element={
+            rol === 'admin' ? (
+              <PantallaAdmin onSalir={handleExit} onNav={(path) => navigate(path)} />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
 
-      <Route
-        path="/admin/transactions"
-        element={
-          rol === 'admin' ? (
-            <PantallaConsumo onSalir={handleExit} onNav={(path) => navigate(path)} />
-          ) : (
-            <Navigate to="/" replace />
-          )
-        }
-      />
+        <Route
+          path="/admin/register"
+          element={
+            rol === 'admin' ? (
+              <PantallaCheckin onSalir={handleExit} onNav={(path) => navigate(path)} />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
 
-      <Route
-        path="/admin/reservations"
-        element={
-          rol === 'admin' ? (
-            <PantallaReservaciones onSalir={handleExit} onNav={(path) => navigate(path)} />
-          ) : (
-            <Navigate to="/" replace />
-          )
-        }
-      />
+        <Route
+          path="/admin/transactions"
+          element={
+            rol === 'admin' ? (
+              <PantallaConsumo onSalir={handleExit} onNav={(path) => navigate(path)} />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
 
-      <Route
-        path="/admin/prices"
-        element={
-          rol === 'admin' ? (
-            <PantallaAdmin onSalir={handleExit} onNav={(path) => navigate(path)} />
-          ) : (
-            <Navigate to="/" replace />
-          )
-        }
-      />
+        <Route
+          path="/admin/reservations"
+          element={
+            rol === 'admin' ? (
+              <PantallaReservaciones onSalir={handleExit} onNav={(path) => navigate(path)} />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
 
-      <Route
-        path="/admin/reservaciones"
-        element={
-          rol === 'admin' ? (
-            <PantallaReservaciones onSalir={handleExit} />
-          ) : (
-            <Navigate to="/" replace />
-          )
-        }
-      />
+        <Route
+          path="/admin/prices"
+          element={
+            rol === 'admin' ? (
+              <PantallaAdmin onSalir={handleExit} onNav={(path) => navigate(path)} />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
 
-      <Route
-        path="/user"
-        element={
-          rol === 'user' ? (
-            <UserView onExit={handleExit} />
-          ) : (
-            <Navigate to="/" replace />
-          )
-        }
-      />
-      <Route
-        path="/user/register"
-        element={
-          rol === 'user' ? (
-            <PantallaCheckin onNav={(screen) => navigate(`/user/${screen}`)} />
-          ) : (
-            <Navigate to="/" replace />
-          )
-        }
-      />
-      <Route
-        path="/user/transactions"
-        element={
-          rol === 'user' ? (
-            <PantallaConsumo onNav={(screen) => navigate(`/user/${screen}`)} />
-          ) : (
-            <Navigate to="/" replace />
-          )
-        }
-      />
-      <Route
-        path="/user/ver"
-        element={
-          rol === 'user' ? (
-            <PantallaVer onNav={(screen) => navigate(`/user/${screen}`)} />
-          ) : (
-            <Navigate to="/" replace />
-          )
-        }
-      />
-      <Route
-        path="/user/checkout"
-        element={
-          rol === 'user' ? (
-            <UserCheckout onExit={handleExit} />
-          ) : (
-            <Navigate to="/" replace />
-          )
-        }
-      />
+        <Route
+          path="/admin/history"
+          element={
+            rol === 'admin' ? (
+              <PantallaAdmin onSalir={handleExit} onNav={(path) => navigate(path)} initialView="history" />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
 
-      <Route path="/landing/*" element={<EcoWeb />} />
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+        <Route
+          path="/admin/reservaciones"
+          element={
+            rol === 'admin' ? (
+              <PantallaReservaciones onSalir={handleExit} />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
+
+        <Route
+          path="/user"
+          element={
+            rol === 'user' ? (
+              <UserView onExit={handleExit} />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
+        <Route
+          path="/user/register"
+          element={
+            rol === 'user' ? (
+              <PantallaCheckin onNav={(screen) => navigate(`/user/${screen}`)} />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
+        <Route
+          path="/user/transactions"
+          element={
+            rol === 'user' ? (
+              <PantallaConsumo onNav={(screen) => navigate(`/user/${screen}`)} />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
+        <Route
+          path="/user/ver"
+          element={
+            rol === 'user' ? (
+              <PantallaVer onNav={(screen) => navigate(`/user/${screen}`)} />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
+        <Route
+          path="/user/checkout"
+          element={
+            rol === 'user' ? (
+              <UserCheckout onExit={handleExit} />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
+
+        <Route path="/landing/*" element={<EcoWeb />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Suspense>
   );
 }

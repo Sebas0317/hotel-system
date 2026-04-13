@@ -171,10 +171,12 @@ export default function PantallaCheckout({ onNav }) {
               <label>Valor recibido (COP)</label>
               <input
                 type="number"
+                step="1"
+                min="0"
                 placeholder={`Mín. ${totals.total.toLocaleString('es-CO')}`}
                 value={valorRecibido}
                 onChange={(e) => setValorRecibido(e.target.value)}
-                min={0}
+                onKeyDown={(e) => { if (e.key === 'ArrowUp' || e.key === 'ArrowDown') e.preventDefault(); }}
               />
               {valorRecibido && (
                 <div className={`cambio-preview ${cambio >= 0 ? 'positivo' : 'negativo'}`}>

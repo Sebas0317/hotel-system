@@ -6,7 +6,7 @@
     "camas": "1 cama king",
     "capacidad": 2,
     "piso": 1,
-    "estado": "limpieza",
+    "estado": "disponible",
     "huesped": null,
     "telefono": null,
     "email": null,
@@ -24,7 +24,14 @@
       "arquitectura_sostenible"
     ],
     "descripcion": "Suite con jacuzzi privado y arquitectura en madera y bambú sostenible",
-    "tarifa": 350000
+    "tarifa": 350000,
+    "documento": "4664518728",
+    "observaciones": "",
+    "adultos": 1,
+    "ninos": 0,
+    "tieneMascota": false,
+    "nombreMascota": "",
+    "reservationId": null
   },
   {
     "id": "sb-102",
@@ -33,7 +40,7 @@
     "camas": "1 cama king",
     "capacidad": 2,
     "piso": 1,
-    "estado": "disponible",
+    "estado": "limpieza",
     "huesped": null,
     "telefono": null,
     "email": null,
@@ -48,15 +55,15 @@
     "mascotas": false,
     "pago": {
       "metodoPago": "efectivo",
-      "valorRecibido": 32292659,
-      "total": 3229660,
-      "subtotal": 2714000,
-      "iva": 515660,
-      "cargoHabitacion": 2450000,
-      "totalConsumos": 264000,
-      "noches": 7,
+      "valorRecibido": 446250,
+      "total": 416500,
+      "subtotal": 350000,
+      "iva": 66500,
+      "cargoHabitacion": 350000,
+      "totalConsumos": 0,
+      "noches": 1,
       "tarifaNoche": 350000,
-      "cambio": 29062999
+      "cambio": 29750
     },
     "amenidades": [
       "jacuzzi_privado",
@@ -68,7 +75,14 @@
     ],
     "descripcion": "Suite con jacuzzi privado y arquitectura en madera y bambú sostenible",
     "tarifa": 350000,
-    "checkOutAt": "2026-04-11T19:12:31.849Z"
+    "checkOutAt": "2026-04-11T21:28:31.226Z",
+    "documento": "1216107879",
+    "observaciones": "",
+    "adultos": 1,
+    "ninos": 0,
+    "tieneMascota": false,
+    "nombreMascota": "",
+    "reservationId": null
   },
   {
     "id": "ss-201",
@@ -78,13 +92,13 @@
     "capacidad": 2,
     "piso": 2,
     "estado": "reservada",
-    "huesped": "Laura Sánchez",
-    "telefono": "3201234567",
-    "email": "laura.sanchez@email.com",
+    "huesped": "Delores Hane",
+    "telefono": "1-355-475-5232",
+    "email": "delores_hane@hotmail.com",
     "pin": null,
-    "checkIn": "2026-04-10T15:00:00.000Z",
-    "checkOut": "2026-04-12T12:00:00.000Z",
-    "noches": 2,
+    "checkIn": "2026-04-07T00:43:01.620Z",
+    "checkOut": "2026-04-10T00:43:01.620Z",
+    "noches": 3,
     "mascotas": true,
     "pago": {
       "metodo": "transferencia",
@@ -99,7 +113,14 @@
       "vista_bosque_premium"
     ],
     "descripcion": "Suite con orientación solar optimizada para vistas premium del bosque",
-    "tarifa": 420000
+    "tarifa": 420000,
+    "documento": "5044095254",
+    "observaciones": "",
+    "adultos": 2,
+    "ninos": 0,
+    "tieneMascota": false,
+    "nombreMascota": "",
+    "personasAdicionales": []
   },
   {
     "id": "ss-202",
@@ -108,19 +129,26 @@
     "camas": "1 cama king",
     "capacidad": 2,
     "piso": 2,
-    "estado": "ocupada",
-    "huesped": "Andrés Ramírez",
-    "telefono": "3019876543",
-    "email": "andres.ramirez@email.com",
-    "pin": "9156",
-    "checkIn": "2026-04-06T16:00:00.000Z",
-    "checkOut": "2026-04-08T12:00:00.000Z",
-    "noches": 2,
+    "estado": "disponible",
+    "huesped": null,
+    "telefono": null,
+    "email": null,
+    "pin": null,
+    "checkIn": null,
+    "checkOut": null,
+    "noches": null,
     "mascotas": false,
     "pago": {
-      "metodo": "efectivo",
-      "total": 840000,
-      "pagado": 840000
+      "metodoPago": "efectivo",
+      "valorRecibido": 5093200,
+      "total": 5093200,
+      "subtotal": 4280000,
+      "iva": 813200,
+      "cargoHabitacion": 4200000,
+      "totalConsumos": 80000,
+      "noches": 10,
+      "tarifaNoche": 420000,
+      "cambio": 0
     },
     "amenidades": [
       "jacuzzi_privado",
@@ -130,7 +158,21 @@
       "vista_bosque_premium"
     ],
     "descripcion": "Suite con orientación solar optimizada para vistas premium del bosque",
-    "tarifa": 420000
+    "tarifa": 420000,
+    "documento": "2469023570",
+    "observaciones": "Victus stabilis subiungo.",
+    "adultos": 1,
+    "ninos": 1,
+    "tieneMascota": false,
+    "nombreMascota": "",
+    "personasAdicionales": [
+      {
+        "nombre": "Brian",
+        "documento": "8263179681"
+      }
+    ],
+    "checkOutAt": "2026-04-12T02:12:32.835Z",
+    "reservationId": null
   },
   {
     "id": "se-301",
@@ -139,14 +181,14 @@
     "camas": "1 cama king",
     "capacidad": 2,
     "piso": 3,
-    "estado": "disponible",
-    "huesped": null,
-    "telefono": null,
-    "email": null,
-    "pin": null,
-    "checkIn": null,
-    "checkOut": null,
-    "noches": null,
+    "estado": "ocupada",
+    "huesped": "Hank Block",
+    "telefono": "610.872.0736 x8843",
+    "email": "hank.block@gmail.com",
+    "pin": "9294",
+    "checkIn": "2026-04-03T00:43:01.620Z",
+    "checkOut": "2026-04-04T00:43:01.620Z",
+    "noches": 10,
     "mascotas": false,
     "amenidades": [
       "ducha_exterior",
@@ -156,7 +198,19 @@
       "terraza"
     ],
     "descripcion": "Suite con ducha exterior y acceso a jardín privado",
-    "tarifa": 480000
+    "tarifa": 480000,
+    "documento": "0748173588",
+    "observaciones": "",
+    "adultos": 1,
+    "ninos": 1,
+    "tieneMascota": true,
+    "nombreMascota": "Alaskan Klee Kai",
+    "personasAdicionales": [
+      {
+        "nombre": "Rosemarie",
+        "documento": "4380279998"
+      }
+    ]
   },
   {
     "id": "se-302",
@@ -166,13 +220,13 @@
     "capacidad": 2,
     "piso": 3,
     "estado": "disponible",
-    "huesped": null,
-    "telefono": null,
-    "email": null,
+    "huesped": "Cameron Marquardt",
+    "telefono": "754.699.0345 x37220",
+    "email": "cameron.marquardt@hotmail.com",
     "pin": null,
-    "checkIn": null,
-    "checkOut": null,
-    "noches": null,
+    "checkIn": "2026-04-04T00:38:17.657Z",
+    "checkOut": "2026-04-09T00:38:17.657Z",
+    "noches": 5,
     "mascotas": false,
     "amenidades": [
       "ducha_exterior",
@@ -182,7 +236,13 @@
       "terraza"
     ],
     "descripcion": "Suite con ducha exterior y acceso a jardín privado",
-    "tarifa": 480000
+    "tarifa": 480000,
+    "documento": "7546416970",
+    "observaciones": "",
+    "adultos": 2,
+    "ninos": 1,
+    "tieneMascota": false,
+    "nombreMascota": ""
   },
   {
     "id": "hp-401",
@@ -192,13 +252,13 @@
     "capacidad": 2,
     "piso": 4,
     "estado": "disponible",
-    "huesped": null,
-    "telefono": null,
-    "email": null,
+    "huesped": "Hannah Wyman",
+    "telefono": "(430) 773-3867 x749",
+    "email": "hannah.wyman@yahoo.com",
     "pin": null,
-    "checkIn": null,
-    "checkOut": null,
-    "noches": null,
+    "checkIn": "2026-04-07T00:38:17.657Z",
+    "checkOut": "2026-04-10T00:38:17.657Z",
+    "noches": 5,
     "mascotas": true,
     "amenidades": [
       "wifi",
@@ -207,7 +267,13 @@
       "baño_privado"
     ],
     "descripcion": "Habitación para parejas con control climático e internet inalámbrico",
-    "tarifa": 180000
+    "tarifa": 180000,
+    "documento": "1647511769",
+    "observaciones": "",
+    "adultos": 2,
+    "ninos": 1,
+    "tieneMascota": false,
+    "nombreMascota": ""
   },
   {
     "id": "hp-402",
@@ -217,12 +283,12 @@
     "capacidad": 2,
     "piso": 4,
     "estado": "reservada",
-    "huesped": "María José Díaz",
-    "telefono": "3156789012",
-    "email": "mj.diaz@email.com",
+    "huesped": "Jamey Lueilwitz",
+    "telefono": "429-402-1646 x1633",
+    "email": "jamey_lueilwitz40@gmail.com",
     "pin": null,
-    "checkIn": "2026-04-12T15:00:00.000Z",
-    "checkOut": "2026-04-14T12:00:00.000Z",
+    "checkIn": "2026-04-07T00:43:01.620Z",
+    "checkOut": "2026-04-09T00:43:01.620Z",
     "noches": 2,
     "mascotas": false,
     "pago": {
@@ -237,7 +303,19 @@
       "baño_privado"
     ],
     "descripcion": "Habitación para parejas con control climático e internet inalámbrico",
-    "tarifa": 180000
+    "tarifa": 180000,
+    "documento": "4817038385",
+    "observaciones": "",
+    "adultos": 1,
+    "ninos": 1,
+    "tieneMascota": false,
+    "nombreMascota": "",
+    "personasAdicionales": [
+      {
+        "nombre": "Hollis",
+        "documento": "6208035919"
+      }
+    ]
   },
   {
     "id": "hd-501",
@@ -272,13 +350,13 @@
     "capacidad": 2,
     "piso": 5,
     "estado": "ocupada",
-    "huesped": "Fernando Gómez",
-    "telefono": "3001234567",
-    "email": "fer.gomez@email.com",
+    "huesped": "Lori Schamberger",
+    "telefono": "1-936-825-8273 x40297",
+    "email": "lori_schamberger@gmail.com",
     "pin": "2739",
-    "checkIn": "2026-04-07T14:00:00.000Z",
-    "checkOut": "2026-04-09T12:00:00.000Z",
-    "noches": 2,
+    "checkIn": "2026-04-03T00:43:01.620Z",
+    "checkOut": "2026-04-08T00:43:01.620Z",
+    "noches": 10,
     "mascotas": true,
     "pago": {
       "metodo": "efectivo",
@@ -292,7 +370,14 @@
       "baño_privado"
     ],
     "descripcion": "Habitación estándar con cama king, control climático, TV pantalla plana y baño privado",
-    "tarifa": 160000
+    "tarifa": 160000,
+    "documento": "4837273632",
+    "observaciones": "",
+    "adultos": 2,
+    "ninos": 0,
+    "tieneMascota": false,
+    "nombreMascota": "",
+    "personasAdicionales": []
   },
   {
     "id": "hc-601",
@@ -327,13 +412,13 @@
     "capacidad": 4,
     "piso": 6,
     "estado": "reservada",
-    "huesped": "Familia Torres",
-    "telefono": "3123456789",
-    "email": "familia.torres@email.com",
+    "huesped": "Eloise Feil",
+    "telefono": "(660) 332-6026 x5106",
+    "email": "eloise_feil28@hotmail.com",
     "pin": null,
-    "checkIn": "2026-04-15T15:00:00.000Z",
-    "checkOut": "2026-04-18T12:00:00.000Z",
-    "noches": 3,
+    "checkIn": "2026-04-06T00:43:01.620Z",
+    "checkOut": "2026-04-10T00:43:01.620Z",
+    "noches": 4,
     "mascotas": true,
     "pago": {
       "metodo": "transferencia",
@@ -347,7 +432,19 @@
       "baño_privado"
     ],
     "descripcion": "Habitación familiar para 4 personas con control climático y televisión",
-    "tarifa": 220000
+    "tarifa": 220000,
+    "documento": "6736169199",
+    "observaciones": "",
+    "adultos": 3,
+    "ninos": 1,
+    "tieneMascota": false,
+    "nombreMascota": "",
+    "personasAdicionales": [
+      {
+        "nombre": "Green",
+        "documento": "6986337005"
+      }
+    ]
   },
   {
     "id": "cb-01",
@@ -357,13 +454,13 @@
     "capacidad": 6,
     "piso": 0,
     "estado": "ocupada",
-    "huesped": "Familia López",
-    "telefono": "3109876543",
-    "email": "familia.lopez@email.com",
+    "huesped": "Jasper Kuvalis",
+    "telefono": "874-642-9068 x104",
+    "email": "jasper_kuvalis@yahoo.com",
     "pin": "6048",
-    "checkIn": "2026-04-04T15:00:00.000Z",
-    "checkOut": "2026-04-06T12:00:00.000Z",
-    "noches": 2,
+    "checkIn": "2026-04-04T00:43:01.620Z",
+    "checkOut": "2026-04-06T00:43:01.620Z",
+    "noches": 9,
     "mascotas": false,
     "pago": {
       "metodo": "tarjeta",
@@ -377,7 +474,23 @@
       "hamacas"
     ],
     "descripcion": "Estructura única sobre el agua con 3 literas, capacidad para 6 personas",
-    "tarifa": 550000
+    "tarifa": 550000,
+    "documento": "9274178794",
+    "observaciones": "",
+    "adultos": 4,
+    "ninos": 2,
+    "tieneMascota": false,
+    "nombreMascota": "",
+    "personasAdicionales": [
+      {
+        "nombre": "Carolyne",
+        "documento": "6375477944"
+      },
+      {
+        "nombre": "Jay",
+        "documento": "0510085742"
+      }
+    ]
   },
   {
     "id": "cb-02",
@@ -923,14 +1036,14 @@
     "camas": "3 literas",
     "capacidad": 6,
     "piso": 0,
-    "estado": "disponible",
-    "huesped": null,
-    "telefono": null,
-    "email": null,
-    "pin": null,
-    "checkIn": null,
-    "checkOut": null,
-    "noches": null,
+    "estado": "ocupada",
+    "huesped": "Kelvin Lakin",
+    "telefono": "1-552-896-2150",
+    "email": "kelvin.lakin13@yahoo.com",
+    "pin": "8393",
+    "checkIn": "2026-04-03T00:43:01.620Z",
+    "checkOut": "2026-04-07T00:43:01.620Z",
+    "noches": 10,
     "mascotas": false,
     "amenidades": [
       "wifi",
@@ -939,6 +1052,18 @@
       "hamacas"
     ],
     "descripcion": "Estructura única sobre el agua con 3 literas, capacidad para 6 personas",
-    "tarifa": 550000
+    "tarifa": 550000,
+    "documento": "4417424359",
+    "observaciones": "",
+    "adultos": 5,
+    "ninos": 1,
+    "tieneMascota": false,
+    "nombreMascota": "",
+    "personasAdicionales": [
+      {
+        "nombre": "Andre",
+        "documento": "5902428973"
+      }
+    ]
   }
 ]

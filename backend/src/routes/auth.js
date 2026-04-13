@@ -7,7 +7,9 @@ const authController = require('../controllers/authController');
 // POST /auth/login - Authenticate admin
 router.post('/login', authController.login);
 
-// POST /auth/hash-password - Generate password hash (setup utility)
-router.post('/hash-password', authController.hashPassword);
+// POST /auth/hash-password - Generate password hash (disabled in production)
+if (process.env.NODE_ENV !== 'production') {
+  router.post('/hash-password', authController.hashPassword);
+}
 
 module.exports = router;

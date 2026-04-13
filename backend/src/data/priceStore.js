@@ -1,16 +1,17 @@
 'use strict';
 
-const fs = require('fs');
+const fs = require('fs').promises;
 const path = require('path');
 const logger = require('../utils/logger');
 
 const PRICES_FILE = path.join(__dirname, '..', '..', 'prices.json');
 
+// ── Async file locking ──
 let fileLock = false;
 
-function acquireLock() {
-  if (fileLock) {
-    throw new Error('prices.json is currently being written to, please retry');
+async function acquireLock() {
+  while (fileLock) {
+    await new Promise((resolve) => setTimeout(resolve, 10));
   }
   fileLock = true;
 }
@@ -19,23 +20,52 @@ function releaseLock() {
   fileLock = false;
 }
 
-function getPrices() {
+// ── In-memory cache ──
+let cachedPrices = null;
+let cacheExpiry = 0;
+const CACHE_TTL = 30000; // Prices change rarely, cache longer
+
+function getFromCache() {
+  if (cachedPrices && Date.now() < cacheExpiry) {
+    return cachedPrices;
+  }
+  return null;
+}
+
+function setInCache(data) {
+  cachedPrices = data;
+  cacheExpiry = Date.now() + CACHE_TTL;
+}
+
+function invalidateCache() {
+  cachedPrices = null;
+  cacheExpiry = 0;
+}
+
+// ── Async read/write ──
+async function getPrices() {
+  const cached = getFromCache();
+  if (cached !== null) return cached;
+
   try {
-    const data = fs.readFileSync(PRICES_FILE, 'utf-8');
-    return data ? JSON.parse(data) : null;
+    const data = await fs.readFile(PRICES_FILE, 'utf-8');
+    const prices = data ? JSON.parse(data) : null;
+    if (prices) setInCache(prices);
+    return prices;
   } catch (err) {
     logger.error('Failed to read prices file', { file: PRICES_FILE, error: err.message });
     return null;
   }
 }
 
-function savePrices(data) {
-  acquireLock();
+async function savePrices(data) {
+  await acquireLock();
   try {
-    fs.writeFileSync(PRICES_FILE, JSON.stringify(data, null, 2), 'utf-8');
+    await fs.writeFile(PRICES_FILE, JSON.stringify(data, null, 2), 'utf-8');
+    invalidateCache();
   } finally {
     releaseLock();
   }
 }
 
-module.exports = { getPrices, savePrices };
+module.exports = { getPrices, savePrices, invalidateCache };

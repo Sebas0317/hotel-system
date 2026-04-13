@@ -1,5 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 
 /**
  * Hook that polls the backend for room changes and triggers a callback.
@@ -17,33 +17,52 @@ export function useRoomSync({ interval = 5000, onChange, enabled = true } = {}) 
 
   const fetchAndCompare = async () => {
     try {
-      const data = await queryClient.fetchQuery({ queryKey: ['rooms'] });
-      const snapshot = JSON.stringify(data.map(r => ({ id: r.id, estado: r.estado, huesped: r.huesped, checkIn: r.checkIn })));
+      const data = await queryClient.fetchQuery({ 
+        queryKey: ['rooms'],
+        staleTime: 30000,
+        gcTime: 60000,
+        retry: 1,
+      });
+      
+      if (!data) {
+        return;
+      }
+      
+      const roomsData = Array.isArray(data) ? data : [];
+      if (roomsData.length === 0) {
+        return;
+      }
+      
+      const snapshot = JSON.stringify(roomsData.map(r => ({ id: r.id, estado: r.estado, huesped: r.huesped, checkIn: r.checkIn })));
 
       if (prevSnapshot.current && snapshot !== prevSnapshot.current && onChange) {
-        const prev = JSON.parse(prevSnapshot.current);
-        const curr = data.map(r => ({ id: r.id, estado: r.estado, huesped: r.huesped, checkIn: r.checkIn }));
+        try {
+          const prev = JSON.parse(prevSnapshot.current);
+          const curr = roomsData.map(r => ({ id: r.id, estado: r.estado, huesped: r.huesped, checkIn: r.checkIn }));
 
-        const changes = [];
-        curr.forEach((room) => {
-          const prevRoom = prev.find(p => p.id === room.id);
-          if (!prevRoom) {
-            changes.push({ type: 'added', room });
-          } else if (prevRoom.estado !== room.estado) {
-            changes.push({ type: 'status', room, from: prevRoom.estado, to: room.estado });
-          } else if (prevRoom.huesped !== room.huesped) {
-            changes.push({ type: 'guest', room });
+          const changes = [];
+          curr.forEach((room) => {
+            const prevRoom = prev.find(p => p.id === room.id);
+            if (!prevRoom) {
+              changes.push({ type: 'added', room });
+            } else if (prevRoom.estado !== room.estado) {
+              changes.push({ type: 'status', room, from: prevRoom.estado, to: room.estado });
+            } else if (prevRoom.huesped !== room.huesped) {
+              changes.push({ type: 'guest', room });
+            }
+          });
+
+          if (changes.length > 0) {
+            onChange(changes);
           }
-        });
-
-        if (changes.length > 0) {
-          onChange(changes);
+        } catch {
+          // Ignore parse errors
         }
       }
 
       prevSnapshot.current = snapshot;
-    } catch (err) {
-      console.error('Sync error:', err.message);
+    } catch {
+      // Silently ignore sync errors
     }
   };
 
