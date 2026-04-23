@@ -1,10 +1,12 @@
 import { useMemo, useCallback, useState, useEffect, memo } from 'react';
 import { motion } from 'framer-motion';
+import { useQuery } from '@tanstack/react-query';
 import { useRooms } from '../hooks/useRooms';
 import { useRoomSync } from '../hooks/useRoomSync';
+import { queryKeys } from '../hooks/useQueryKeys';
 import { ESTADO_CFG, TIPO_ICON, TIPOS_HABITACION, CATEGORIAS_CONSUMO } from '../constants';
 import { FECHA, filtrarRooms, agruparPorPiso, COP } from '../utils/helpers';
-import { fetchHistory, fetchRooms, createConsumo, checkIn, fetchLastLogin, fetchLoginLogs, fetchAccountingSummary, fetchStateHistory } from '../services/api';
+import { fetchHistory, fetchRooms, createConsumo, checkIn, fetchLastLogin, fetchLoginLogs, fetchStateHistory } from '../services/api';
 import RoomDetail from './RoomDetail';
 import HotelTitle from './HotelTitle';
 import PriceEditor from './PriceEditor';
@@ -746,10 +748,7 @@ export default function PantallaAdmin({ onSalir, onNav }) {
   const [resFilter, setResFilter] = useState({ numero: '', huesped: '' });
   const [histFilter, setHistFilter] = useState({ room: '', estado: 'todos' });
 
-  // Accounting state
-  const [accData, setAccData] = useState(null);
-  const [accLoading, setAccLoading] = useState(true);
-  const [accError, setAccError] = useState('');
+  // Excel export state
   const [exporting, setExporting] = useState(false);
 
   // Grouped transaction state — single setState instead of 6 separate ones
@@ -779,46 +778,35 @@ export default function PantallaAdmin({ onSalir, onNav }) {
     },
   });
 
-  // History loading — fetch state history + reservation history when history view is active
-  useEffect(() => {
-    if (activeView !== 'history') return;
-    let cancelled = false;
-    Promise.all([fetchStateHistory(), fetchRooms(), fetchHistory()])
-      .then(([stateHistoryData, roomsData, historyData]) => {
-        if (!cancelled) {
-          setHistory(stateHistoryData || []);
-          setAllRooms(roomsData);
-          setReservationHistory(historyData?.reservas || historyData || []);
-        }
-      })
-      .catch(err => {
-        if (!cancelled) console.error('Error loading history:', err);
-      })
-      .finally(() => {
-        if (!cancelled) setHistoryLoading(false);
-      });
-    return () => { cancelled = true; };
-  }, [activeView]);
+  // Accounting data - using TanStack Query for automatic caching
+  const { data: accData, isLoading: accLoading, error: accError } = useQuery({
+    queryKey: queryKeys.accounting,
+    queryFn: fetchAccountingSummary,
+    staleTime: 1000 * 60, // 1 minute
+    enabled: activeView === 'accounting', // Only fetch when on accounting view
+  });
 
-  // Fetch accounting data
+  // Compute derived state from query data
+  const accountingData = accData || accData;
+
+  // History loading — using TanStack Query
+  const { data: historyData } = useQuery({
+    queryKey: queryKeys.history,
+    queryFn: () => Promise.all([fetchStateHistory(), fetchRooms(), fetchHistory()]),
+    staleTime: 1000 * 60 * 10, // 10 minutes
+    enabled: activeView === 'history',
+  });
+
+  // Extract history data when available
   useEffect(() => {
-    if (activeView !== 'accounting') return;
-    let cancelled = false;
-    setAccLoading(true);
-    setAccError('');
-    
-    fetchAccountingSummary()
-      .then(result => { 
-        console.log('📊 Accounting data received:', result);
-        if (!cancelled) setAccData(result); 
-      })
-      .catch(err => { 
-        console.error('Accounting error:', err);
-        if (!cancelled) setAccError(err.message || 'Error al cargar datos contables'); 
-      })
-      .finally(() => { if (!cancelled) setAccLoading(false); });
-    return () => { cancelled = true; };
-  }, [activeView]);
+    if (historyData && activeView === 'history') {
+      const [stateHistoryData, roomsData, resData] = historyData;
+      setHistory(stateHistoryData || []);
+      setAllRooms(roomsData);
+      setReservationHistory(resData?.reservas || resData || []);
+      setHistoryLoading(false);
+    }
+  }, [historyData, activeView]);
 
   const selectRoom = useCallback((roomId) => {
     setSelectedRoomId(prev => prev === roomId ? null : roomId);
@@ -1638,9 +1626,9 @@ export default function PantallaAdmin({ onSalir, onNav }) {
           </div>
 
           {accLoading ? (
-            <div className="text-center py-12 text-gray-400">Cargando datos contables... Loading: {String(accLoading)}, Error: {accError}, Data: {accData ? 'YES' : 'NO'}</div>
+            <div className="text-center py-12 text-gray-400">Cargando datos contables...</div>
           ) : accError ? (
-            <div className="text-center py-12 text-red-600">Error: {accError}</div>
+            <div className="text-center py-12 text-red-600">Error: {accError?.message || accError}</div>
           ) : accData ? (
             <>
               {/* Summary Cards */}
