@@ -4,7 +4,7 @@ import { useRooms } from '../hooks/useRooms';
 import { useRoomSync } from '../hooks/useRoomSync';
 import { ESTADO_CFG, TIPO_ICON, TIPOS_HABITACION, CATEGORIAS_CONSUMO } from '../constants';
 import { FECHA, filtrarRooms, agruparPorPiso, COP } from '../utils/helpers';
-import { fetchHistory, fetchRooms, createConsumo, checkIn, fetchLastLogin, fetchLoginLogs, fetchAccountingSummary } from '../services/api';
+import { fetchHistory, fetchRooms, createConsumo, checkIn, fetchLastLogin, fetchLoginLogs, fetchAccountingSummary, fetchStateHistory } from '../services/api';
 import RoomDetail from './RoomDetail';
 import HotelTitle from './HotelTitle';
 import PriceEditor from './PriceEditor';
@@ -720,7 +720,7 @@ export default function PantallaAdmin({ onSalir, onNav }) {
 
   // Listen to browser back/forward (hash changes)
   useEffect(() => {
-    const handleHashChange = () => {
+    const handleHashSync = () => {
       const state = getInitialState();
       setActiveView(state.activeView);
       setSelectedRoomId(state.selectedRoomId);
@@ -729,9 +729,12 @@ export default function PantallaAdmin({ onSalir, onNav }) {
       setTipo(state.tipo);
       setViewMode(state.viewMode);
     };
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
+
+    handleHashSync(); // Run on mount to sync initial URL state
+    window.addEventListener('hashchange', handleHashSync);
+    return () => window.removeEventListener('hashchange', handleHashSync);
   }, []);
+
   const [history, setHistory] = useState([]);
   const [reservationHistory, setReservationHistory] = useState([]);
   const [historyLoading, setHistoryLoading] = useState(false);
@@ -775,29 +778,6 @@ export default function PantallaAdmin({ onSalir, onNav }) {
       });
     },
   });
-
-  // Single hash-change effect (merged two redundant effects)
-  useEffect(() => {
-    const handleHashChange = () => {
-      const hash = window.location.hash.slice(1) || '';
-      if (hash.includes('/admin/room/')) {
-        const match = hash.match(/\/admin\/room\/(.+)/);
-        if (match) setSelectedRoomId(match[1]);
-      } else {
-        setSelectedRoomId(null);
-      }
-      if (hash.includes('dashboard')) setActiveView('dashboard');
-      else if (hash.includes('register')) setActiveView('register');
-      else if (hash.includes('transactions')) setActiveView('transactions');
-      else if (hash.includes('reservations')) { setActiveView('reservations'); setSelectedRoomId(null); }
-      else if (hash.includes('prices')) setActiveView('prices');
-      else if (hash.includes('history')) { setActiveView('history'); setSelectedRoomId(null); }
-      else setActiveView('rooms');
-    };
-    handleHashChange(); // Run on mount
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
-  }, []);
 
   // History loading — fetch state history + reservation history when history view is active
   useEffect(() => {
