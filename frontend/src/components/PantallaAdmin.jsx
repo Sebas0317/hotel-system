@@ -1591,6 +1591,178 @@ export default function PantallaAdmin({ onSalir, onNav }) {
             </>
           ) : null}
         </div>
+</div>
+    );
+  }
+
+  // ── Accounting view ──
+  if (activeView === 'accounting') {
+    const handleExport = () => {
+      setExporting(true);
+      downloadAccountingReport();
+      setTimeout(() => setExporting(false), 2000);
+    };
+
+    const formatM = (v) => {
+      if (!v) return '$0';
+      if (v >= 1000000) return `$${(v / 1000000).toFixed(1)}M`;
+      if (v >= 1000) return `$${(v / 1000).toFixed(0)}k`;
+      return `$${v}`;
+    };
+
+    const statusData = accData ? [
+      { name: 'Ocupadas', value: accData.summary.occupied, color: '#f59e0b' },
+      { name: 'Disponibles', value: accData.summary.available, color: '#22c55e' },
+      { name: 'Reservadas', value: accData.summary.reserved, color: '#3b82f6' },
+    ].filter(d => d.value > 0) : [];
+
+    const serviceData = accData?.revenueByService?.map(s => ({
+      name: s.categoria === 'restaurante' ? 'Restaurante' : s.categoria === 'bar' ? 'Bar' : 'Servicios',
+      value: s.total,
+      count: s.count,
+    })) || [];
+
+    const totalRevenue = (accData?.summary?.currentRevenue || 0) + (accData?.summary?.historicalRevenue || 0);
+    const avgConsumo = accData?.revenueByService?.reduce((sum, s) => sum + s.total, 0) / (accData?.revenueByService?.reduce((sum, s) => sum + s.count, 0) || 1) || 0;
+
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <AdminTopbar onSalir={onSalir} onNavigate={handleNavigate} />
+        <AdminNav activeView={activeView} onNavigate={handleNavigate} />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">🧾 Contabilidad</h1>
+              <p className="text-sm text-gray-500 mt-1">Resumen financiero del hotel</p>
+            </div>
+            <button
+              onClick={handleExport}
+              disabled={exporting}
+              className="flex items-center gap-2 px-5 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium transition-colors disabled:bg-gray-400"
+            >
+              {exporting ? <span>⏳ Generando...</span> : <span>📥 Descargar Excel</span>}
+            </button>
+          </div>
+
+          {accLoading ? (
+            <div className="flex items-center justify-center py-20">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
+            </div>
+          ) : accError ? (
+            <div className="text-center py-12 text-red-600 bg-red-50 rounded-xl">⚠️ Error: {accError?.message || accError}</div>
+          ) : accData ? (
+            <>
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-md p-4 text-white">
+                  <div className="flex items-center justify-between">
+                    <div><p className="text-green-100 text-sm">Revenue Total</p><p className="text-2xl font-bold">{COP(totalRevenue)}</p></div>
+                    <span className="text-3xl">💰</span>
+                  </div>
+                </div>
+                <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-md p-4 text-white">
+                  <div className="flex items-center justify-between">
+                    <div><p className="text-blue-100 text-sm">Ocupación</p><p className="text-2xl font-bold">{accData.summary.occupancyRate}%</p></div>
+                    <span className="text-3xl">📊</span>
+                  </div>
+                </div>
+                <div className="bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-xl shadow-md p-4 text-white">
+                  <div className="flex items-center justify-between">
+                    <div><p className="text-yellow-100 text-sm">Tarifa Promedio</p><p className="text-2xl font-bold">{COP(accData.summary.avgDailyRate)}</p></div>
+                    <span className="text-3xl">🏷️</span>
+                  </div>
+                </div>
+                <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-md p-4 text-white">
+                  <div className="flex items-center justify-between">
+                    <div><p className="text-purple-100 text-sm">Estadías</p><p className="text-2xl font-bold">{accData.completedStays || 0}</p></div>
+                    <span className="text-3xl">🏨</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+                  <p className="text-sm text-gray-500">Revenue Actual</p>
+                  <p className="text-xl font-bold text-green-600">{COP(accData.summary.currentRevenue)}</p>
+                </div>
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+                  <p className="text-sm text-gray-500">Revenue Histórico</p>
+                  <p className="text-xl font-bold text-blue-600">{COP(accData.summary.historicalRevenue)}</p>
+                </div>
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+                  <p className="text-sm text-gray-500">Ingreso/Servicio</p>
+                  <p className="text-xl font-bold text-yellow-600">{COP(avgConsumo)}</p>
+                </div>
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+                  <p className="text-sm text-gray-500">Total Habitaciones</p>
+                  <p className="text-xl font-bold text-gray-900">{accData.summary.totalRooms}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                {statusData.length > 0 && (
+                  <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                    <h3 className="text-lg font-bold text-gray-900 mb-4">🏠 Distribución</h3>
+                    <ResponsiveContainer width="100%" height={280}>
+                      <PieChart>
+                        <Pie data={statusData} cx="50%" cy="50%" innerRadius={70} outerRadius={100} paddingAngle={3} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`} labelLine={false}>
+                          {statusData.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.color} />)}
+                        </Pie>
+                        <Tooltip />
+                        <Legend />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                )}
+                {serviceData.length > 0 && (
+                  <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                    <h3 className="text-lg font-bold text-gray-900 mb-4">🍽️ Servicios</h3>
+                    <ResponsiveContainer width="100%" height={280}>
+                      <PieChart>
+                        <Pie data={serviceData} cx="50%" cy="50%" innerRadius={70} outerRadius={100} paddingAngle={3} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`} labelLine={false}>
+                          <Cell fill="#3b82f6" /><Cell fill="#f59e0b" /><Cell fill="#8b5cf6" />
+                        </Pie>
+                        <Tooltip formatter={(v) => COP(v)} />
+                        <Legend />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                )}
+              </div>
+
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+                <h3 className="text-lg font-bold text-gray-900 mb-4">💰 Revenue por Tipo</h3>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={accData.revenueByType || []} layout="vertical" margin={{ left: 30, right: 30 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                    <XAxis type="number" stroke="#6b7280" fontSize={11} tickFormatter={(v) => `$${v/1000}k`} />
+                    <YAxis type="category" dataKey="tipo" stroke="#6b7280" fontSize={10} width={120} />
+                    <Tooltip formatter={(v) => COP(v)} />
+                    <Bar dataKey="revenue" fill="#3b82f6" radius={[0, 6, 6, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <h3 className="text-lg font-bold text-gray-900 mb-4">📊 Habitaciones</h3>
+                <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+                  {[
+                    { label: 'Total', value: accData.summary.totalRooms, bg: 'bg-gray-100', color: 'text-gray-900', icon: '🏨' },
+                    { label: 'Ocupadas', value: accData.summary.occupied, bg: 'bg-yellow-100', color: 'text-yellow-700', icon: '🔴' },
+                    { label: 'Disponibles', value: accData.summary.available, bg: 'bg-green-100', color: 'text-green-700', icon: '✅' },
+                    { label: 'Reservadas', value: accData.summary.reserved, bg: 'bg-blue-100', color: 'text-blue-700', icon: '📅' },
+                    { label: 'Tarifa/Día', value: COP(accData.summary.avgDailyRate), bg: 'bg-purple-100', color: 'text-purple-700', icon: '💵' },
+                  ].map((item, i) => (
+                    <div key={i} className={`${item.bg} rounded-lg p-4 text-center`}>
+                      <span className="text-2xl block mb-1">{item.icon}</span>
+                      <span className={`text-lg font-bold ${item.color} block`}>{item.value}</span>
+                      <span className="text-xs text-gray-600">{item.label}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </>
+          ) : null}
+        </div>
       </div>
     );
   }
