@@ -824,9 +824,17 @@ export default function PantallaAdmin({ onSalir, onNav }) {
   useEffect(() => {
     if (activeView !== 'accounting') return;
     let cancelled = false;
+    setAccLoading(true);
+    setAccError('');
+    
     fetchAccountingSummary()
-      .then(result => { if (!cancelled) setAccData(result); })
-      .catch(err => { if (!cancelled) setAccError(err.message); })
+      .then(result => { 
+        if (!cancelled) setAccData(result); 
+      })
+      .catch(err => { 
+        console.error('Accounting error:', err);
+        if (!cancelled) setAccError(err.message || 'Error al cargar datos contables'); 
+      })
       .finally(() => { if (!cancelled) setAccLoading(false); });
     return () => { cancelled = true; };
   }, [activeView]);
