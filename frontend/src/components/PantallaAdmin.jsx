@@ -10,7 +10,7 @@ import { useRoomSync } from '../hooks/useRoomSync';
 import { queryKeys } from '../hooks/useQueryKeys';
 import { ESTADO_CFG, TIPO_ICON, TIPOS_HABITACION, CATEGORIAS_CONSUMO } from '../constants';
 import { FECHA, filtrarRooms, agruparPorPiso, COP } from '../utils/helpers';
-import { fetchHistory, fetchRooms, createConsumo, checkIn, fetchLastLogin, fetchLoginLogs, fetchStateHistory } from '../services/api';
+import { fetchHistory, fetchRooms, createConsumo, checkIn, fetchLastLogin, fetchLoginLogs, fetchStateHistory, fetchAccountingSummary, downloadAccountingReport } from '../services/api';
 import RoomDetail from './RoomDetail';
 import HotelTitle from './HotelTitle';
 import PriceEditor from './PriceEditor';
