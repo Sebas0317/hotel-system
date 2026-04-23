@@ -4,22 +4,22 @@
  */
 export const queryKeys = {
   // Rooms
-  rooms: ['rooms'] as const,
-  room: (id: string) => ['room', id] as const,
+  rooms: ['rooms'],
+  room: (id) => ['room', id],
   
   // History
-  history: ['history'] as const,
-  reservationHistory: ['reservationHistory'] as const,
+  history: ['history'],
+  reservationHistory: ['reservationHistory'],
   
   // Accounting
-  accounting: ['accounting'] as const,
+  accounting: ['accounting'],
   
   // Consumos
-  consumos: (roomId: string) => ['consumos', roomId] as const,
+  consumos: (roomId) => ['consumos', roomId],
   
   // Auth
-  lastLogin: ['lastLogin'] as const,
-  loginLogs: ['loginLogs'] as const,
+  lastLogin: ['lastLogin'],
+  loginLogs: ['loginLogs'],
 };
 
 /**
@@ -27,8 +27,8 @@ export const queryKeys = {
  * Adjust based on how often data changes
  */
 export const staleTimes = {
-  rooms: 1000 * 60 * 5,      // 5 minutes - rooms change often
-  history: 1000 * 60 * 10,   // 10 minutes - history rarely changes
-  accounting: 1000 * 60,   // 1 minute - accounting should be fresh
+  rooms: 1000 * 60 * 5,      // 5 minutes
+  history: 1000 * 60 * 10,  // 10 minutes
+  accounting: 1000 * 60,   // 1 minute
   consumos: 1000 * 60 * 2,  // 2 minutes
 };
