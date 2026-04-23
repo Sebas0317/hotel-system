@@ -1,0 +1,28 @@
+{
+  "name": "hotel-system",
+  "version": "1.0.0",
+  "description": "A full-stack hotel management system built with Node.js/Express (backend) and React + Vite (frontend). Features room management, reservations, check-in/check-out, consumption tracking, and a public landing page.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lighthouse:audit": "lhci autorun",
+    "lighthouse:desktop": "lhci autorun --collect.settings.preset=desktop",
+    "audit": "node run-audits.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Sebas0317/hotel-system.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Sebas0317/hotel-system/issues"
+  },
+  "homepage": "https://github.com/Sebas0317/hotel-system#readme",
+  "devDependencies": {
+    "@lhci/cli": "^0.15.1",
+    "lighthouse": "^13.1.0"
+  }
+}

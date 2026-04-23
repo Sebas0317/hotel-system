@@ -5,6 +5,14 @@
  * Modular architecture with separated routes, controllers, and data layer
  *
  * Entry point: Express app that wires together middleware and route modules
+ *
+ * IMPROVEMENTS IMPLEMENTED:
+ * - Pino structured logging (replaces console.log)
+ * - Zod validation schemas
+ * - NodeCache in-memory caching
+ * - Automated daily backups with node-cron
+ * - Swagger/OpenAPI documentation
+ * - Advanced health checks and metrics
  */
 
 require('dotenv').config();
@@ -13,6 +21,19 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const compression = require('compression');
+const swaggerUi = require('swagger-ui-express');
+
+// Import logging
+const { logger, httpLogger } = require('./src/utils/logger');
+
+// Import caching
+const { invalidateCache } = require('./src/middleware/cache');
+
+// Import backups
+const { createBackup } = require('./src/utils/backup');
+
+// Import Swagger config
+const swaggerSpecs = require('./src/config/swagger');
 
 // Import middleware
 const { requestLogger, errorHandler, notFoundHandler } = require('./src/middleware/errorHandler');
@@ -36,6 +57,8 @@ const pricesRoutes = require('./src/routes/prices');
 const authRoutes = require('./src/routes/auth');
 const historyRoutes = require('./src/routes/history');
 const stateHistoryRoutes = require('./src/routes/stateHistory');
+const healthRoutes = require('./src/routes/health');
+const accountingRoutes = require('./src/routes/accounting');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -124,18 +147,30 @@ app.use(sanitizeBody);
 // Global rate limiter (applied to all routes)
 app.use(globalRateLimiter);
 
-// ── REQUEST LOGGING ──
-app.use(requestLogger);
+// ── REQUEST LOGGING (Pino) ──
+// Skip pino-http during tests to avoid Supertest conflicts
+if (process.env.NODE_ENV !== 'test') {
+  app.use(httpLogger);
+}
+
+// ── SWAGGER API DOCUMENTATION ──
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs, {
+  explorer: true,
+  customCss: '.swagger-ui .topbar { display: none }',
+  customSiteTitle: 'EcoBosque Hotel API Docs',
+}));
 
 // ── HEALTH CHECKS ──
-app.get('/', (_req, res) => res.json({ service: 'EcoBosque API', status: 'running' }));
-app.get('/health', (_req, res) => {
-  res.json({
-    status: 'healthy',
-    uptime: Math.floor((Date.now() - startTime) / 1000) + 's',
-    timestamp: new Date().toISOString(),
-  });
-});
+app.use('/health', healthRoutes);
+
+// Root endpoint
+app.get('/', (_req, res) => res.json({
+  service: 'EcoBosque API',
+  version: '1.0.0',
+  status: 'running',
+  docs: '/api-docs',
+  health: '/health/detailed',
+}));
 
 // ── ROUTES ──
 // Auth routes (strict rate limiting)
@@ -151,14 +186,46 @@ app.use('/consumos', writeRateLimiter, consumosRoutes);
 app.use('/history', requireAuth, historyRoutes);
 app.use('/state-history', requireAuth, stateHistoryRoutes);
 app.use('/prices', requireAuth, pricesRoutes);
+app.use('/accounting', accountingRoutes);
+
+// ── BACKUP MANAGEMENT (admin only) ──
+app.post('/admin/backup', requireAuth, async (_req, res) => {
+  try {
+    const result = await createBackup();
+    res.json({ message: 'Backup created successfully', ...result });
+  } catch (error) {
+    res.status(500).json({ error: 'Backup failed', message: error.message });
+  }
+});
 
 // ── FALLBACK HANDLERS ──
 app.use(notFoundHandler);
 app.use(errorHandler);
 
 // ── START SERVER ──
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`✅ EcoBosque API running on http://localhost:${PORT}`);
+const server = app.listen(PORT, '0.0.0.0', () => {
+  logger.info(`EcoBosque API running on http://localhost:${PORT}`);
+  logger.info(`API Documentation: http://localhost:${PORT}/api-docs`);
+  logger.info(`Health Check: http://localhost:${PORT}/health/detailed`);
+
+  // Run JSON integrity check on startup
+  const { startupValidation } = require('./src/utils/jsonValidator');
+  startupValidation().then(report => {
+    if (report.overall) {
+      logger.info('JSON integrity check passed');
+    } else {
+      logger.warn('JSON integrity check found issues');
+    }
+  }).catch(err => {
+    logger.warn({ err }, 'JSON integrity check failed (non-critical)');
+  });
+
+  // Create initial backup on startup
+  createBackup().then(() => {
+    logger.info('Initial backup created successfully');
+  }).catch(err => {
+    logger.warn({ err }, 'Initial backup failed (non-critical)');
+  });
 });
 
-module.exports = app; // Export for testing
+module.exports = { app, server }; // Export for testing

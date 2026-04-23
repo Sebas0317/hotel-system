@@ -1,70 +1,43 @@
+/**
+ * Zod validation schemas for all API endpoints.
+ * Provides type-safe validation with detailed error messages.
+ * Replaces ad-hoc if (!req.body.foo) checks.
+ * 
+ * Also includes legacy helper functions for backward compatibility.
+ */
 'use strict';
 
-/**
- * Validation middleware for request bodies
- * Provides reusable validators for common request patterns
- * Security-enhanced with length limits and type checking
- */
+const { z } = require('zod');
 
-// Maximum allowed lengths for string inputs
-const MAX_STRING_LENGTH = 500; // General string limit
-const MAX_NAME_LENGTH = 100;   // Names, emails
-const MAX_PHONE_LENGTH = 20;   // Phone numbers
-const MAX_MESSAGE_LENGTH = 1000; // Descriptions, observations
+// ── Legacy helper functions (for backward compatibility) ──────────
 
 /**
- * Validates string length and content
- * @param {string} value - The string to validate
- * @param {number} maxLength - Maximum allowed length
- * @returns {boolean} - True if valid
- */
-function isValidString(value, maxLength = MAX_STRING_LENGTH) {
-  if (typeof value !== 'string') return false;
-  if (value.length === 0 || value.length > maxLength) return false;
-  // Reject strings with only whitespace
-  if (value.trim().length === 0) return false;
-  return true;
-}
-
-/**
- * Validates that required fields exist in the request body
- * Also validates string lengths
- * @param {string[]} fields - Array of required field names
- * @returns {Function} Express middleware
+ * Middleware: require certain fields in request body
+ * @param  {...string} fields - Field names to require
  */
 function requireFields(...fields) {
   return (req, res, next) => {
-    const missing = fields.filter(field => {
-      const value = req.body[field];
-      if (value === undefined || value === null) return true;
-      // For string fields, check empty/whitespace
-      if (typeof value === 'string' && value.trim() === '') return true;
-      return false;
-    });
-
+    const missing = fields.filter(f => !req.body[f]);
     if (missing.length > 0) {
-      return res.status(400).json({
-        error: `Campos requeridos: ${missing.join(', ')}`
+      return res.status(400).json({ 
+        error: `Missing required fields: ${missing.join(', ')}` 
       });
     }
-
     next();
   };
 }
 
 /**
- * Validates that a field matches one of the allowed values
- * @param {string} field - Field name in request body
- * @param {string[]} allowedValues - Array of allowed values
- * @param {string} [errorMessage] - Custom error message
- * @returns {Function} Express middleware
+ * Middleware: validate enum value
+ * @param {string} field - Field name
+ * @param {string[]} values - Allowed values
  */
-function validateEnum(field, allowedValues, errorMessage) {
+function validateEnum(field, values) {
   return (req, res, next) => {
-    const value = req.body[field];
-    if (value && !allowedValues.includes(value)) {
-      return res.status(400).json({
-        error: errorMessage || `${field} debe ser uno de: ${allowedValues.join(', ')}`
+    const val = req.body[field];
+    if (val && !values.includes(val)) {
+      return res.status(400).json({ 
+        error: `Invalid value for ${field}. Must be one of: ${values.join(', ')}` 
       });
     }
     next();
@@ -72,130 +45,218 @@ function validateEnum(field, allowedValues, errorMessage) {
 }
 
 /**
- * Validates that a numeric field is a valid positive number
- * @param {string} field - Field name in request body
- * @returns {Function} Express middleware
+ * Middleware: validate positive number
+ * @param {string} field - Field name
  */
 function validatePositiveNumber(field) {
   return (req, res, next) => {
-    const value = req.body[field];
-    if (value !== undefined && value !== null) {
-      const num = parseFloat(value);
-      if (isNaN(num) || num < 0 || num > 1000000000) { // Cap at 1 billion COP
-        return res.status(400).json({
-          error: `${field} debe ser un numero positivo valido`
-        });
-      }
-      // Normalize to number
-      req.body[field] = num;
+    const val = req.body[field];
+    if (val && (typeof val !== 'number' || val <= 0)) {
+      return res.status(400).json({ 
+        error: `${field} must be a positive number` 
+      });
     }
     next();
   };
 }
 
+// ── Zod schemas ───────────────────────────────────────────────────
+
+// ── Common schemas ────────────────────────────────────────────────
+
+/** Guest information schema */
+const guestSchema = z.object({
+  nombre: z.string()
+    .min(2, 'Nombre debe tener al menos 2 caracteres')
+    .max(100, 'Nombre demasiado largo')
+    .regex(/^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s-]+$/, 'Nombre contiene caracteres inválidos'),
+  
+  documento: z.string()
+    .min(5, 'Documento debe tener al menos 5 caracteres')
+    .max(20, 'Documento demasiado largo'),
+  
+  telefono: z.string()
+    .max(20, 'Teléfono demasiado largo')
+    .regex(/^[\d\s\-\+\(\)]*$/, 'Teléfono contiene caracteres inválidos')
+    .optional()
+    .or(z.literal('')),
+  
+  email: z.string()
+    .email('Email inválido')
+    .max(100, 'Email demasiado largo')
+    .optional()
+    .or(z.literal('')),
+});
+
+/** Date validation schema */
+const dateSchema = z.string().datetime({
+  message: 'Fecha debe ser formato ISO 8601',
+}).or(z.string().date());
+
+/** Payment schema */
+const paymentSchema = z.object({
+  metodo: z.enum(['efectivo', 'tarjeta', 'transferencia', 'otro'], {
+    message: 'Método de pago inválido',
+  }),
+  monto: z.number()
+    .positive('Monto debe ser positivo')
+    .max(100000000, 'Monto excede límite máximo'),
+  fecha: dateSchema,
+});
+
+// ── Endpoint-specific schemas ─────────────────────────────────────
+
+/** POST /auth/login */
+const loginSchema = z.object({
+  body: z.object({
+    password: z.string()
+      .min(1, 'Contraseña requerida')
+      .max(128, 'Contraseña demasiado larga'),
+  }),
+});
+
+/** POST /rooms/checkin */
+const checkinSchema = z.object({
+  body: guestSchema.extend({
+    roomId: z.string().min(1, 'Room ID requerido'),
+    checkIn: dateSchema,
+    checkOut: dateSchema.optional(),
+    pago: paymentSchema.optional(),
+  }),
+});
+
+/** POST /rooms/:id/reservar */
+const reservarSchema = z.object({
+  body: guestSchema.extend({
+    checkIn: dateSchema,
+    checkOut: dateSchema,
+    pago: paymentSchema.optional(),
+  }),
+});
+
+/** POST /rooms/:id/checkout */
+const checkoutSchema = z.object({
+  body: z.object({
+    motivo: z.string().max(500).optional(),
+  }),
+});
+
+/** POST /consumos */
+const consumoSchema = z.object({
+  body: z.object({
+    roomId: z.string().min(1, 'Room ID requerido'),
+    descripcion: z.string()
+      .min(1, 'Descripción requerida')
+      .max(500, 'Descripción demasiado larga'),
+    categoria: z.enum(['restaurante', 'bar', 'servicios', 'tienda', 'otro'], {
+      message: 'Categoría inválida',
+    }),
+    precio: z.number()
+      .positive('Precio debe ser positivo')
+      .max(10000000, 'Precio excede límite máximo'),
+  }),
+});
+
+/** PUT /prices */
+const pricesSchema = z.object({
+  body: z.object({
+    tarifas: z.record(z.string(), z.object({
+      precio: z.number().positive().max(10000000),
+      descripcion: z.string().max(500).optional(),
+    })).optional(),
+    productos: z.object({
+      restaurante: z.array(z.object({
+        nombre: z.string().max(100),
+        precio: z.number().positive().max(1000000),
+      })).optional(),
+      bar: z.array(z.object({
+        nombre: z.string().max(100),
+        precio: z.number().positive().max(1000000),
+      })).optional(),
+      servicios: z.array(z.object({
+        nombre: z.string().max(100),
+        precio: z.number().positive().max(1000000),
+      })).optional(),
+    }).optional(),
+  }),
+});
+
+/** PATCH /rooms/:id/status */
+const roomStatusSchema = z.object({
+  body: z.object({
+    estado: z.enum([
+      'disponible',
+      'reservada',
+      'ocupada',
+      'limpieza',
+      'mantenimiento',
+      'fuera_servicio',
+    ], {
+      message: 'Estado de habitación inválido',
+    }),
+  }),
+});
+
+// ── Validation middleware factory ─────────────────────────────────
+
 /**
- * Validates email format
- * @param {string} field - Field name in request body
- * @returns {Function} Express middleware
+ * Creates Express middleware from Zod schema.
+ * Validates req.body, req.query, or req.params.
+ *
+ * Usage:
+ *   router.post('/login', validate(loginSchema), loginHandler);
  */
-function validateEmail(field) {
+function validate(schema, source = 'body') {
   return (req, res, next) => {
-    const value = req.body[field];
-    if (value !== undefined && value !== null && value !== '') {
-      if (typeof value !== 'string' || value.length > MAX_NAME_LENGTH) {
+    try {
+      const dataToValidate = req[source];
+      const validated = schema.parse({ [source]: dataToValidate });
+      
+      // Replace request data with validated/cleaned version
+      req[source] = validated[source];
+      
+      next();
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const errors = error.errors.map(err => ({
+          field: err.path.join('.'),
+          message: err.message,
+          code: err.code,
+        }));
+        
         return res.status(400).json({
-          error: `${field} debe ser un email valido con maximo ${MAX_NAME_LENGTH} caracteres`
+          error: 'Datos de entrada inválidos',
+          details: errors,
         });
       }
-      // Basic email regex - allow frontend to do stricter validation
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(value)) {
-        return res.status(400).json({
-          error: `${field} no tiene formato de email valido`
-        });
-      }
+      
+      next(error);
     }
-    next();
   };
 }
 
-/**
- * Validates phone number format (Colombian format)
- * @param {string} field - Field name in request body
- * @returns {Function} Express middleware
- */
-function validatePhone(field) {
-  return (req, res, next) => {
-    const value = req.body[field];
-    if (value !== undefined && value !== null && value !== '') {
-      if (typeof value !== 'string' || value.length > MAX_PHONE_LENGTH) {
-        return res.status(400).json({
-          error: `${field} debe ser un telefono valido con maximo ${MAX_PHONE_LENGTH} caracteres`
-        });
-      }
-      // Allow digits, spaces, hyphens, parentheses, plus sign
-      const phoneRegex = /^[\d\s\-()+]+$/;
-      if (!phoneRegex.test(value)) {
-        return res.status(400).json({
-          error: `${field} no tiene formato de telefono valido`
-        });
-      }
-    }
-    next();
-  };
-}
-
-/**
- * Validates string length for a specific field
- * @param {string} field - Field name
- * @param {number} maxLength - Maximum length
- * @returns {Function} Express middleware
- */
-function validateMaxLength(field, maxLength) {
-  return (req, res, next) => {
-    const value = req.body[field];
-    if (value !== undefined && value !== null && typeof value === 'string') {
-      if (value.length > maxLength) {
-        return res.status(400).json({
-          error: `${field} excede el largo maximo de ${maxLength} caracteres`
-        });
-      }
-    }
-    next();
-  };
-}
-
-/**
- * Validates that a field does not contain HTML or script tags
- * @param {string} field - Field name
- * @returns {Function} Express middleware
- */
-function validateNoScript(field) {
-  return (req, res, next) => {
-    const value = req.body[field];
-    if (value !== undefined && value !== null && typeof value === 'string') {
-      const scriptRegex = /<script|<\/script|javascript:|on\w+\s*=/gi;
-      if (scriptRegex.test(value)) {
-        return res.status(400).json({
-          error: `${field} contiene contenido no permitido`
-        });
-      }
-    }
-    next();
-  };
-}
+// ── Export all schemas and middleware ─────────────────────────────
 
 module.exports = {
+  // Legacy helper functions (for backward compatibility)
   requireFields,
   validateEnum,
   validatePositiveNumber,
-  validateEmail,
-  validatePhone,
-  validateMaxLength,
-  validateNoScript,
-  isValidString,
-  MAX_STRING_LENGTH,
-  MAX_NAME_LENGTH,
-  MAX_PHONE_LENGTH,
-  MAX_MESSAGE_LENGTH,
+
+  // Zod schemas
+  loginSchema,
+  checkinSchema,
+  reservarSchema,
+  checkoutSchema,
+  consumoSchema,
+  pricesSchema,
+  roomStatusSchema,
+  guestSchema,
+  paymentSchema,
+
+  // Middleware factory
+  validate,
+
+  // Raw Zod for custom validation
+  z,
 };

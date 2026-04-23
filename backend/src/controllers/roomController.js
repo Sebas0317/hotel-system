@@ -36,6 +36,21 @@ async function recordStateChange(room, estadoAnterior, estadoNuevo) {
     estadoNuevo,
     huesped: room.huesped || '',
     timestamp: new Date().toISOString(),
+    // ── Complete reservation data for "ocupada" state ──
+    reserva: (estadoAnterior === 'ocupada' || estadoNuevo === 'ocupada') ? {
+      checkIn: room.checkIn || null,
+      checkOut: room.checkOut || null,
+      noches: room.noches || 1,
+      tarifa: room.tarifa || 0,
+      documento: room.documento || '',
+      email: room.email || '',
+      telefono: room.telefono || '',
+      adultos: room.adultos || 1,
+      ninos: room.ninos || 0,
+      tieneMascota: room.tieneMascota || false,
+      nombreMascota: room.nombreMascota || '',
+      pago: room.pago || null,
+    } : null,
   };
   cambios.unshift(entry);
   await saveStateHistory(cambios);

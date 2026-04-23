@@ -306,3 +306,75 @@ export async function fetchHistory() {
 export async function fetchStateHistory() {
   return apiFetch('/state-history', { method: 'GET' });
 }
+
+/**
+ * Get accounting summary
+ * @returns {Promise<Object>} Accounting data
+ */
+export async function fetchAccountingSummary() {
+  return apiFetch('/accounting/summary', { method: 'GET' });
+}
+
+/**
+ * Download accounting Excel report
+ */
+export function downloadAccountingReport() {
+  const token = localStorage.getItem('authToken');
+  const url = `/accounting/export`;
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `ecobosque_contabilidad_${new Date().toISOString().split('T')[0]}.xlsx`;
+  fetch(url, {
+    method: 'GET',
+    headers: { 'Authorization': `Bearer ${token}` },
+  })
+    .then(res => res.blob())
+    .then(blob => {
+      const url = window.URL.createObjectURL(blob);
+      a.href = url;
+      a.download = `ecobosque_contabilidad_${new Date().toISOString().split('T')[0]}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    })
+    .catch(err => console.error('Error downloading report:', err));
+}
+
+/**
+ * Get last login info
+ */
+export async function fetchLastLogin() {
+  return apiFetch('/auth/last-login', { method: 'GET' });
+}
+
+/**
+ * Get login audit logs
+ */
+export async function fetchLoginLogs(limit = 50) {
+  return apiFetch(`/auth/login-logs?limit=${limit}`, { method: 'GET' });
+}
+
+/**
+ * Download login logs as CSV
+ */
+export function downloadLoginLogsCSV(logs) {
+  if (!logs || logs.length === 0) return;
+  const headers = ['Fecha/Hora', 'IP', 'User Agent', 'País'];
+  const rows = logs.map(l => [
+    l.timestamp ? new Date(l.timestamp).toLocaleString('es-CO') : '',
+    l.ip || '',
+    l.userAgent || '',
+    l.country || '',
+  ]);
+  const csv = [headers, ...rows].map(r => r.join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `ecobosque_login_logs_${new Date().toISOString().split('T')[0]}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  window.URL.revokeObjectURL(url);
+  document.body.removeChild(a);
+}

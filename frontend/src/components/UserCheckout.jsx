@@ -160,7 +160,7 @@ export default function UserCheckout({ onExit }) {
                     }}
                   >
                     <div className="rc-top">
-                      <span className="rc-numero">#{r.numero}</span>
+                      <span className="rc-numero">{r.numero}</span>
                       <span className="rc-dot" style={{ background: roomCfg.dot }} />
                     </div>
                     <div className="rc-tipo">{r.tipo}</div>

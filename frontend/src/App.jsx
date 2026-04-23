@@ -1,5 +1,7 @@
-import { Routes, Route, useNavigate, Navigate } from 'react-router-dom';
+import { Routes, Route, useNavigate, Navigate, useLocation } from 'react-router-dom';
 import { useState, Suspense, lazy } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Toaster } from 'react-hot-toast';
 import { getAuthToken, setAuthToken } from './services/api';
 import './App.css';
 
@@ -14,12 +16,12 @@ const PantallaVer = lazy(() => import('./components/PantallaVer'));
 const PantallaCheckout = lazy(() => import('./components/PantallaCheckout'));
 const PantallaReservaciones = lazy(() => import('./components/PantallaReservaciones'));
 
-// EcoWeb landing page — eagerly loaded (small, public-facing)
-import EcoWeb from './ecoweb/App';
+// EcoWeb landing page — converted to lazy for performance
+const EcoWeb = lazy(() => import('./ecoweb/App'));
 import './ecoweb/style/index.css';
 import './ecoweb/style/fonts.css';
 
-// Loading fallback component
+// Loading fallback component with skeleton animation
 function LoadingFallback() {
   return (
     <div className="loading-fallback" style={{
@@ -35,6 +37,20 @@ function LoadingFallback() {
         Cargando...
       </div>
     </div>
+  );
+}
+
+// Page transition wrapper component
+function PageTransition({ children }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -10 }}
+      transition={{ duration: 0.2, ease: 'easeInOut' }}
+    >
+      {children}
+    </motion.div>
   );
 }
 
@@ -78,9 +94,39 @@ export default function App() {
     navigate('/', { replace: true });
   };
 
+  const location = useLocation();
+
   return (
-    <Suspense fallback={<LoadingFallback />}>
-      <Routes>
+    <>
+      {/* Toast notifications provider */}
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 4000,
+          style: {
+            background: '#363636',
+            color: '#fff',
+            borderRadius: '8px',
+            padding: '12px 16px',
+          },
+          success: {
+            iconTheme: {
+              primary: '#22c55e',
+              secondary: '#fff',
+            },
+          },
+          error: {
+            iconTheme: {
+              primary: '#ef4444',
+              secondary: '#fff',
+            },
+          },
+        }}
+      />
+
+      <Suspense fallback={<LoadingFallback />}>
+        <AnimatePresence mode="wait" initial={false}>
+          <Routes location={location} key={location.pathname}>
         <Route
           path="/"
           element={
@@ -94,6 +140,17 @@ export default function App() {
 
         <Route
           path="/admin"
+          element={
+            rol === 'admin' ? (
+              <PantallaAdmin onSalir={handleExit} onNav={(path) => navigate(path)} />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
+
+        <Route
+          path="/admin/dashboard"
           element={
             rol === 'admin' ? (
               <PantallaAdmin onSalir={handleExit} onNav={(path) => navigate(path)} />
@@ -118,7 +175,7 @@ export default function App() {
           path="/admin/register"
           element={
             rol === 'admin' ? (
-              <PantallaCheckin onSalir={handleExit} onNav={(path) => navigate(path)} />
+              <PantallaAdmin onSalir={handleExit} onNav={(path) => navigate(path)} />
             ) : (
               <Navigate to="/" replace />
             )
@@ -129,7 +186,7 @@ export default function App() {
           path="/admin/transactions"
           element={
             rol === 'admin' ? (
-              <PantallaConsumo onSalir={handleExit} onNav={(path) => navigate(path)} />
+              <PantallaAdmin onSalir={handleExit} onNav={(path) => navigate(path)} />
             ) : (
               <Navigate to="/" replace />
             )
@@ -140,7 +197,18 @@ export default function App() {
           path="/admin/reservations"
           element={
             rol === 'admin' ? (
-              <PantallaReservaciones onSalir={handleExit} onNav={(path) => navigate(path)} />
+              <PantallaAdmin onSalir={handleExit} onNav={(path) => navigate(path)} />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
+
+        <Route
+          path="/admin/accounting"
+          element={
+            rol === 'admin' ? (
+              <PantallaAdmin onSalir={handleExit} onNav={(path) => navigate(path)} />
             ) : (
               <Navigate to="/" replace />
             )
@@ -162,7 +230,7 @@ export default function App() {
           path="/admin/history"
           element={
             rol === 'admin' ? (
-              <PantallaAdmin onSalir={handleExit} onNav={(path) => navigate(path)} initialView="history" />
+              <PantallaAdmin onSalir={handleExit} onNav={(path) => navigate(path)} />
             ) : (
               <Navigate to="/" replace />
             )
@@ -173,7 +241,7 @@ export default function App() {
           path="/admin/reservaciones"
           element={
             rol === 'admin' ? (
-              <PantallaReservaciones onSalir={handleExit} />
+              <PantallaAdmin onSalir={handleExit} onNav={(path) => navigate(path)} />
             ) : (
               <Navigate to="/" replace />
             )
@@ -234,6 +302,8 @@ export default function App() {
         <Route path="/landing/*" element={<EcoWeb />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-    </Suspense>
+        </AnimatePresence>
+      </Suspense>
+    </>
   );
 }

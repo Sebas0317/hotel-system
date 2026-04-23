@@ -11,6 +11,10 @@ const MAX_ATTEMPTS = 5;
 const LOCKOUT_MS = 15 * 60 * 1000; // 15 minutes
 const CLEANUP_INTERVAL = 10 * 60 * 1000; // 10 minutes
 
+// Login logs: stores successful login attempts for audit
+const loginLogs = [];
+const MAX_LOGIN_LOGS = 500; // Keep last 500 entries
+
 // Periodic cleanup of expired lockout entries
 const cleanupTimer = setInterval(() => {
   const now = Date.now();
@@ -126,6 +130,17 @@ async function login(req, res) {
   // Reset failed attempts on success
   failedAttempts.delete(ip);
 
+  // Log successful login for audit
+  const loginEntry = {
+    id: crypto.randomBytes(8).toString('hex'),
+    timestamp: new Date().toISOString(),
+    ip: ip,
+    userAgent: req.headers['user-agent'] || 'Unknown',
+    country: req.headers['cf-ipcountry'] || 'Unknown',
+  };
+  loginLogs.unshift(loginEntry);
+  if (loginLogs.length > MAX_LOGIN_LOGS) loginLogs.pop();
+
   // Generate JWT with secure configuration
   const token = jwt.sign(
     { role: 'admin', iat: Math.floor(Date.now() / 1000) },
@@ -140,7 +155,7 @@ async function login(req, res) {
   logger.info('Successful admin login', { ip });
 
   // Do not expose token expiration in response
-  res.json({ token });
+  res.json({ token, lastLogin: loginLogs.length > 1 ? loginLogs[1] : null });
 }
 
 /**
@@ -161,4 +176,20 @@ function hashPassword(req, res) {
   res.json({ hash });
 }
 
-module.exports = { login, hashPassword };
+/**
+ * GET /auth/login-logs - Get login audit logs (admin only)
+ */
+function getLoginLogs(req, res) {
+  const limit = Math.min(parseInt(req.query.limit) || 50, 200);
+  res.json(loginLogs.slice(0, limit));
+}
+
+/**
+ * GET /auth/last-login - Get the most recent login before the current session
+ */
+function getLastLogin(req, res) {
+  const lastLogin = loginLogs.length > 1 ? loginLogs[1] : null;
+  res.json({ lastLogin });
+}
+
+module.exports = { login, hashPassword, getLoginLogs, getLastLogin };

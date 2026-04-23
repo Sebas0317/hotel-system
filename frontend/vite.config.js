@@ -1,5 +1,5 @@
 import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react-swc'
+import react from '@vitejs/plugin-react'
 import svgr from 'vite-plugin-svgr'
 import compression from 'vite-plugin-compression'
 import { visualizer } from 'rollup-plugin-visualizer'
@@ -29,31 +29,35 @@ export default defineConfig({
     }
   },
   build: {
-    target: 'es2015', // Ensure compatibility with older browsers
-    sourcemap: false, // Don't ship source maps to production
+    target: 'esnext', // Use modern JS for smaller, faster bundles
+    sourcemap: false,
     minify: 'terser',
     terserOptions: {
       compress: {
-        drop_console: true, // Remove console.log in production
+        drop_console: true,
         drop_debugger: true,
+        pure_funcs: ['console.info', 'console.debug', 'console.warn'], // More aggressive console removal
       },
     },
     rollupOptions: {
       output: {
         manualChunks(id) {
           if (id.includes('node_modules')) {
-            // React core + router — keep together (stable, rarely changes)
-            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) {
-              return 'vendor-react';
-            }
-            // UI libraries — can update independently
-            if (id.includes('swiper') || id.includes('datepicker') || id.includes('icons')) {
-              return 'vendor-ui';
-            }
-            // Data fetching layer
-            if (id.includes('@tanstack')) {
-              return 'vendor-query';
-            }
+            // Split core libraries into their own chunks
+            if (id.includes('react-dom')) return 'vendor-react-dom';
+            if (id.includes('react-router')) return 'vendor-router';
+            if (id.includes('react/')) return 'vendor-react-core';
+            
+            // UI libraries
+            if (id.includes('framer-motion')) return 'vendor-animation';
+            if (id.includes('swiper')) return 'vendor-ui-swiper';
+            if (id.includes('icons')) return 'vendor-ui-icons';
+            
+            // Data fetching
+            if (id.includes('@tanstack')) return 'vendor-query';
+            
+            // Default vendor chunk for other small libs
+            return 'vendor-others';
           }
         }
       }

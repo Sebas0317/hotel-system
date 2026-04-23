@@ -34,13 +34,18 @@ export const calcularTotal = (items) =>
  * @returns {Object} Groups by floor
  */
 export const agruparPorPiso = (rooms) => {
+  if (!Array.isArray(rooms)) return {};
   const grupos = {};
   rooms.forEach((room) => {
-    const piso = room.piso === 0 ? 'Cabañas' : `Piso ${room.piso}`;
-    if (!grupos[piso]) {
-      grupos[piso] = [];
+    // Robust check for floor 0 (Cabañas) using loose equality or explicit check
+    const isCabana = room.piso === 0 || room.piso === '0' || room.tipo?.toLowerCase().includes('cabana');
+    const piso = isCabana ? '0' : (room.piso || '1');
+    const label = piso === '0' ? '0' : String(piso);
+    
+    if (!grupos[label]) {
+      grupos[label] = [];
     }
-    grupos[piso].push(room);
+    grupos[label].push(room);
   });
   return grupos;
 };

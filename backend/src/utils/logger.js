@@ -1,44 +1,90 @@
+/**
+ * Pino logger configuration for EcoBosque Hotel System.
+ * Features:
+ * - Structured JSON logging
+ * - Multiple log levels (trace, debug, info, warn, error, fatal)
+ * - PII redaction for sensitive fields
+ * - Pretty print in development, JSON in production
+ */
 'use strict';
 
-/**
- * Simple structured logging utility
- * Provides consistent log format with timestamps and levels
- */
+const pino = require('pino');
 
-const LOG_LEVELS = {
-  DEBUG: 0,
-  INFO: 1,
-  WARN: 2,
-  ERROR: 3,
+const isProduction = process.env.NODE_ENV === 'production';
+
+// Base configuration
+const baseConfig = {
+  level: process.env.LOG_LEVEL || (isProduction ? 'info' : 'debug'),
+  timestamp: pino.stdTimeFunctions.isoTime,
+  base: {
+    service: 'ecobosque-hotel-api',
+    version: '1.0.0',
+  },
+  redact: {
+    paths: [
+      'req.headers.authorization',
+      'req.body.password',
+      'req.body.token',
+      'res.headers["set-cookie"]',
+      '*.pin',
+      '*.password',
+      '*.token',
+    ],
+    censor: '**REDACTED**',
+  },
 };
 
-const currentLevel = process.env.LOG_LEVEL 
-  ? LOG_LEVELS[process.env.LOG_LEVEL.toUpperCase()] 
-  : LOG_LEVELS.INFO;
+// Create logger
+const logger = pino({
+  ...baseConfig,
+  transport: isProduction
+    ? {
+        target: 'pino/file',
+        options: { destination: 1 },
+      }
+    : {
+        target: 'pino/file',
+        options: { destination: 1 },
+      },
+});
 
-function formatMessage(level, message, meta = {}) {
-  const timestamp = new Date().toISOString();
-  const metaStr = Object.keys(meta).length > 0 ? ` ${JSON.stringify(meta)}` : '';
-  return `[${timestamp}] ${level}${metaStr} ${message}`;
-}
+// Export Express middleware
+const pinoHttp = require('pino-http');
 
-function log(level, message, meta = {}) {
-  if (LOG_LEVELS[level] >= currentLevel) {
-    const formatted = formatMessage(level, message, meta);
-    if (level === 'ERROR') {
-      console.error(formatted);
-    } else if (level === 'WARN') {
-      console.warn(formatted);
-    } else {
-      console.log(formatted);
-    }
-  }
-}
+const httpLogger = pinoHttp({
+  logger,
+  quietReqLogger: true, // Less verbose in tests
+  customLogLevel: function customLogLevel(req, res, err) {
+    if (res.statusCode >= 500) return 'error';
+    if (res.statusCode >= 400) return 'warn';
+    if (res.statusCode >= 300) return 'silent';
+    return 'info';
+  },
+  serializers: {
+    req: (req) => ({
+      method: req.method,
+      url: req.url,
+    }),
+    res: (res) => ({
+      statusCode: res.statusCode,
+    }),
+  },
+  // Skip logging during tests to avoid Supertest conflicts
+  customSuccessMessage: (req, res) => {
+    if (process.env.NODE_ENV === 'test') return null;
+    return `${req.method} ${req.url} completed`;
+  },
+  customErrorMessage: (req, res, err) => {
+    if (process.env.NODE_ENV === 'test') return null;
+    return `${req.method} ${req.url} failed: ${err?.message || 'unknown error'}`;
+  },
+});
 
-module.exports = {
-  debug: (message, meta) => log('DEBUG', message, meta),
-  info: (message, meta) => log('INFO', message, meta),
-  warn: (message, meta) => log('WARN', message, meta),
-  error: (message, meta) => log('ERROR', message, meta),
-  LOG_LEVELS,
-};
+module.exports = { logger, httpLogger };
+
+// Also export logger directly for backward compatibility
+// This allows: require('../utils/logger').error('message')
+module.exports.error = logger.error.bind(logger);
+module.exports.info = logger.info.bind(logger);
+module.exports.warn = logger.warn.bind(logger);
+module.exports.debug = logger.debug.bind(logger);

@@ -7,8 +7,12 @@
     "node": ">=18.0.0"
   },
   "scripts": {
-    "dev": "nodemon server.js",
-    "start": "node server.js"
+    "dev": "nodemon --ignore backups/ --ignore *.json server.js",
+    "start": "node server.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "backup": "node -e \"require('./src/utils/backup').createBackup().then(console.log).catch(console.error)\""
   },
   "keywords": [],
   "author": "",
@@ -23,9 +27,20 @@
     "express": "^5.2.1",
     "express-rate-limit": "^8.3.2",
     "helmet": "^8.1.0",
-    "jsonwebtoken": "^9.0.3"
+    "jsonwebtoken": "^9.0.3",
+    "node-cache": "^5.1.2",
+    "node-cron": "^4.2.1",
+    "pino": "^10.3.1",
+    "pino-http": "^11.0.0",
+    "pino-roll": "^4.0.0",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
+    "xlsx": "^0.18.5",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
-    "nodemon": "^3.1.14"
+    "nodemon": "^3.1.14",
+    "supertest": "^7.2.2",
+    "vitest": "^4.1.4"
   }
 }

@@ -9,3 +9,15 @@ ngrok.exe
 cloudflared.exe
 *.zip
 .aider*
+
+# Backend
+backend/backups/
+backend/logs/*.log
+backend/backups/*
+!backend/backups/.gitkeep
+
+# Test coverage
+backend/coverage/
+
+# Swagger
+backend/swagger.json

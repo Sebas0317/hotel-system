@@ -1,6 +1,29 @@
 {
   "reservas": [
     {
+      "id": "1776123415616-ac0kl",
+      "reservationId": null,
+      "tipo": "cambio_estado",
+      "roomId": "sb-102",
+      "numero": "102",
+      "huesped": "",
+      "email": "",
+      "telefono": "",
+      "documento": "1216107879",
+      "adultos": 1,
+      "ninos": 0,
+      "tieneMascota": false,
+      "nombreMascota": "",
+      "estadoAnterior": "limpieza",
+      "estadoNuevo": "disponible",
+      "estado": "disponible",
+      "createdAt": "2026-04-13T23:36:55.616Z",
+      "checkIn": null,
+      "checkOut": null,
+      "noches": 1,
+      "tarifa": 350000
+    },
+    {
       "id": "1775964723636-ieazs",
       "reservationId": null,
       "tipo": "cambio_estado",

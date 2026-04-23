@@ -190,7 +190,7 @@ export default function PantallaCheckin({ onNav }) {
                   onClick={() => handleRoomSelect(r.id)}
                 >
                   <div className="flex justify-between items-start mb-2">
-                    <span className="text-3xl font-extrabold text-gray-900">#{r.numero}</span>
+                    <span className="text-3xl font-extrabold text-gray-900">{r.numero}</span>
                     <span className="px-2 py-1 text-xs bg-green-100 text-green-700 rounded-full">Disponible</span>
                   </div>
                   <p className="font-bold text-lg text-gray-800">{r.tipo}</p>
@@ -524,7 +524,7 @@ export default function PantallaCheckin({ onNav }) {
           <div className="exito-icon text-6xl mb-4">✅</div>
           <h3 className="text-xl font-bold text-green-700 mb-4">¡Huésped registrado!</h3>
           <div className="info-table bg-white rounded-xl p-4 mb-4">
-            <div className="it-row"><span>Habitación</span><strong>#{resultado.numero}</strong></div>
+            <div className="it-row"><span>Habitación</span><strong>{resultado.numero}</strong></div>
             <div className="it-row"><span>Huésped</span><strong>{resultado.huesped}</strong></div>
             <div className="it-row"><span>Personas</span><strong>{form.personas}</strong></div>
             <div className="it-row"><span>Check-in</span><strong>{form.checkIn}</strong></div>

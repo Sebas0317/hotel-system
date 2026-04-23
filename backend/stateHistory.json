@@ -1,6 +1,16 @@
 {
   "cambios": [
     {
+      "id": "1776123415609-wd2fd",
+      "roomId": "sb-102",
+      "numero": "102",
+      "reservationId": null,
+      "estadoAnterior": "limpieza",
+      "estadoNuevo": "disponible",
+      "huesped": "",
+      "timestamp": "2026-04-13T23:36:55.609Z"
+    },
+    {
       "id": "1775964723635-inyn6",
       "roomId": "sb-101",
       "numero": "101",

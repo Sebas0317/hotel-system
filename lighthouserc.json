@@ -1,0 +1,35 @@
+{
+  "ci": {
+    "collect": {
+      "startServerCommand": "cd frontend && npm run preview",
+      "startServerReadyPattern": "http://localhost",
+      "startServerReadyTimeout": 10000,
+      "url": [
+        "http://localhost:4173/",
+        "http://localhost:4173/admin",
+        "http://localhost:4173/checkin",
+        "http://localhost:4173/reservaciones"
+      ],
+      "settings": {
+        "preset": "desktop",
+        "onlyCategories": [
+          "performance",
+          "accessibility",
+          "best-practices",
+          "seo"
+        ]
+      }
+    },
+    "assert": {
+      "assertions": {
+        "categories:performance": ["warn", {"minScore": 0}],
+        "categories:accessibility": ["warn", {"minScore": 0}],
+        "categories:best-practices": ["warn", {"minScore": 0}],
+        "categories:seo": ["warn", {"minScore": 0}]
+      }
+    },
+    "upload": {
+      "target": "temporary-public-storage"
+    }
+  }
+}

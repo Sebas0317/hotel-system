@@ -92,7 +92,7 @@ export default function UserView({ onExit }) {
                     onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setSelectedRoom(r); }}
                   >
                     <div className="rc-top">
-                      <span className="rc-numero">#{r.numero}</span>
+                      <span className="rc-numero">{r.numero}</span>
                       <span className="rc-dot" style={{ background: roomCfg.dot }} />
                     </div>
                     <div className="rc-tipo">{r.tipo}</div>

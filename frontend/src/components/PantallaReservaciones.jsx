@@ -130,7 +130,7 @@ export default function PantallaReservaciones({ onNav }) {
                   <tbody>
                     {upcoming.map((r) => (
                       <tr key={r.id} className="res-row res-row-reservada">
-                        <td className="res-cell-num"><strong>#{r.numero}</strong></td>
+                        <td className="res-cell-num"><strong>{r.numero}</strong></td>
                         <td>
                           <div className="res-guest-name">{r.huesped}</div>
                           {r.telefono && <div className="res-guest-contact">📞 {r.telefono}</div>}
@@ -176,7 +176,7 @@ export default function PantallaReservaciones({ onNav }) {
                   <tbody>
                     {occupied.map((r) => (
                       <tr key={r.id} className="res-row res-row-ocupada">
-                        <td className="res-cell-num"><strong>#{r.numero}</strong></td>
+                        <td className="res-cell-num"><strong>{r.numero}</strong></td>
                         <td>
                           <div className="res-guest-name">{r.huesped}</div>
                           {r.telefono && <div className="res-guest-contact">📞 {r.telefono}</div>}
@@ -213,7 +213,7 @@ export default function PantallaReservaciones({ onNav }) {
                 <div className="res-cal-events">
                   {day.reservs.map((r) => (
                     <div key={r.id} className={`res-cal-event ${r.estado}`}>
-                      <span className="res-cal-event-room">#{r.numero}</span>
+                      <span className="res-cal-event-room">{r.numero}</span>
                       <span className="res-cal-event-guest">{r.huesped}</span>
                       <span className={`res-cal-event-status ${r.estado}`}>
                         {r.estado === 'reservada' ? '📋' : '🔴'}
