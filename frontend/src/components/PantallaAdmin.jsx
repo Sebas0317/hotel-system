@@ -1590,7 +1590,6 @@ export default function PantallaAdmin({ onSalir, onNav }) {
             </>
           ) : null}
         </div>
-</div>
     );
   }
 
