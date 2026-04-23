@@ -1,6 +1,10 @@
 import { useMemo, useCallback, useState, useEffect, memo } from 'react';
 import { motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
+import {
+  BarChart, Bar, PieChart, Pie, Cell,
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
+} from 'recharts';
 import { useRooms } from '../hooks/useRooms';
 import { useRoomSync } from '../hooks/useRoomSync';
 import { queryKeys } from '../hooks/useQueryKeys';
@@ -1606,6 +1610,23 @@ export default function PantallaAdmin({ onSalir, onNav }) {
       return `$${v}`;
     };
 
+    // Chart colors for accounting
+    const ACC_COLORS = ['#22c55e', '#3b82f6', '#f59e0b', '#8b5cf6', '#ef4444', '#06b6d4'];
+    const STATUS_COLORS = {
+      disponible: '#22c55e',
+      ocupda: '#f59e0b',
+      reservada: '#3b82f6',
+      limpieza: '#8b5cf6',
+      mantenimiento: '#ef4444',
+    };
+
+    // Prepare pie chart data for room status
+    const statusData = accData ? [
+      { name: 'Ocupadas', value: accData.summary.occupied, color: '#f59e0b' },
+      { name: 'Disponibles', value: accData.summary.available, color: '#22c55e' },
+      { name: 'Reservadas', value: accData.summary.reserved, color: '#3b82f6' },
+    ].filter(d => d.value > 0) : [];
+
     return (
       <div className="min-h-screen bg-gray-50">
         <AdminTopbar onSalir={onSalir} onNavigate={handleNavigate} />
@@ -1671,18 +1692,45 @@ export default function PantallaAdmin({ onSalir, onNav }) {
                   </div>
                 </div>
 
-                {/* Revenue by Room Type */}
+                {/* Revenue by Room Type - Bar Chart */}
                 {accData.revenueByType && accData.revenueByType.length > 0 && (
                   <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                     <h3 className="text-lg font-bold text-gray-900 mb-4">💰 Revenue por Habitación</h3>
-                    <div className="space-y-2">
-                      {accData.revenueByType.map((r, i) => (
-                        <div key={i} className="flex justify-between text-sm p-2 bg-gray-50 rounded-lg">
-                          <span className="text-gray-700">{r.tipo}</span>
-                          <span className="font-bold text-gray-900">{COP(r.revenue)}</span>
-                        </div>
-                      ))}
-                    </div>
+                    <ResponsiveContainer width="100%" height={250}>
+                      <BarChart data={accData.revenueByType} layout="vertical" margin={{ left: 20, right: 20 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                        <XAxis type="number" stroke="#6b7280" fontSize={11} tickFormatter={(v) => `$${v/1000}k`} />
+                        <YAxis type="category" dataKey="tipo" stroke="#6b7280" fontSize={10} width={100} />
+                        <Tooltip formatter={(v) => COP(v)} />
+                        <Bar dataKey="revenue" fill="#3b82f6" radius={[0, 4, 4, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                )}
+
+                {/* Room Status Pie Chart */}
+                {statusData.length > 0 && (
+                  <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                    <h3 className="text-lg font-bold text-gray-900 mb-4">🏠 Estado de Habitaciones</h3>
+                    <ResponsiveContainer width="100%" height={250}>
+                      <PieChart>
+                        <Pie
+                          data={statusData}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={60}
+                          outerRadius={80}
+                          paddingAngle={5}
+                          dataKey="value"
+                          label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                        >
+                          {statusData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} />
+                          ))}
+                        </Pie>
+                        <Tooltip />
+                      </PieChart>
+                    </ResponsiveContainer>
                   </div>
                 )}
               </div>
