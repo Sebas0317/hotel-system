@@ -26,6 +26,7 @@ export default defineConfig({
       '/auth': 'http://localhost:3001',
       '/history': 'http://localhost:3001',
       '/state-history': 'http://localhost:3001',
+      '/accounting': 'http://localhost:3001',
     }
   },
   build: {
