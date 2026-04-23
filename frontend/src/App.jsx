@@ -2,8 +2,20 @@ import { Routes, Route, useNavigate, Navigate, useLocation } from 'react-router-
 import { useState, Suspense, lazy } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Toaster } from 'react-hot-toast';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { getAuthToken, setAuthToken } from './services/api';
 import './App.css';
+
+// Create query client with default options
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 // Lazy-loaded route components for code splitting
 const LoginScreen = lazy(() => import('./components/LoginScreen'));
@@ -97,8 +109,9 @@ export default function App() {
   const location = useLocation();
 
   return (
-    <>
-      {/* Toast notifications provider */}
+    <QueryClientProvider client={queryClient}>
+      <div>
+        {/* Toast notifications provider */}
       <Toaster
         position="top-right"
         toastOptions={{
@@ -304,6 +317,7 @@ export default function App() {
       </Routes>
         </AnimatePresence>
       </Suspense>
-    </>
+      </div>
+    </QueryClientProvider>
   );
 }
