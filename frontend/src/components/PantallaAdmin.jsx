@@ -1624,6 +1624,7 @@ export default function PantallaAdmin({ onSalir, onNav }) {
 
   // ── Accounting view ──
   if (activeView === 'accounting') {
+    console.log('>>> Rendering accounting view, accData:', accData);
     const handleExport = () => {
       setExporting(true);
       downloadAccountingReport();
