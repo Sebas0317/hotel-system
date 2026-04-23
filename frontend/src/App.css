@@ -1652,14 +1652,14 @@ input[type=number] { -moz-appearance: textfield; }
 .admin-primary-btn {
   flex: 1;
   padding: 12px 16px;
-  border: 2px solid #e2e8f0;
+  border: 2px solid #B8D4B8;
   border-radius: 10px;
-  background: #fff;
+  background: #F8FAF8;
   font-size: 14px;
   font-weight: 600;
-  color: #475569;
+  color: #2D5A3D;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1667,26 +1667,26 @@ input[type=number] { -moz-appearance: textfield; }
 }
 
 .admin-primary-btn:hover {
-  border-color: #94a3b8;
-  background: #f8fafc;
+  border-color: #2D5A3D;
+  background: #E8F0E8;
 }
 
 .admin-primary-btn.activo {
-  border-color: #2563eb;
-  background: #eff6ff;
-  color: #1e40af;
-  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.12);
+  border-color: #2D5A3D;
+  background: #2D5A3D;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(45, 90, 61, 0.2);
 }
 
 .admin-primary-btn-nav {
-  background: #7c3aed;
+  background: #5B7FA3;
   color: #fff;
-  border-color: #7c3aed;
+  border-color: #5B7FA3;
 }
 
 .admin-primary-btn-nav:hover {
-  background: #6d28d9;
-  border-color: #6d28d9;
+  background: #4A6E8C;
+  border-color: #4A6E8C;
 }
 
 /* Prices view layout */

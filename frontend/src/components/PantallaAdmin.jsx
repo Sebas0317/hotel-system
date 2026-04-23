@@ -184,21 +184,27 @@ const AdminNav = memo(function AdminNav({ activeView, onNavigate }) {
 /** Memoized stat pills with URL-sync via onFilter callback */
 const StatPills = memo(function StatPills({ stats, filtro, onFilter }) {
   const pills = [
-    { key: 'todos', label: `Todas (${stats.total})`, icon: '📊', color: 'bg-gray-50 border-gray-200 text-gray-700', activeColor: 'bg-green-600 border-green-600 text-white' },
-    { key: 'disponible', label: `Disponibles (${stats.disponible})`, icon: '✅', cfg: ESTADO_CFG.disponible, color: 'bg-green-50 border-green-200 text-green-700', activeColor: 'bg-green-600 border-green-600 text-white' },
-    { key: 'ocupada', label: `Ocupadas (${stats.ocupada})`, icon: '🔴', cfg: ESTADO_CFG.ocupada, color: 'bg-orange-50 border-orange-200 text-orange-700', activeColor: 'bg-orange-600 border-orange-600 text-white' },
-    { key: 'reservada', label: `Reservadas (${stats.reservada})`, icon: '🟡', cfg: ESTADO_CFG.reservada, color: 'bg-blue-50 border-blue-200 text-blue-700', activeColor: 'bg-blue-600 border-blue-600 text-white' },
-    { key: 'limpieza', label: `Limpieza (${stats.limpieza})`, icon: '🧹', cfg: ESTADO_CFG.limpieza, color: 'bg-purple-50 border-purple-200 text-purple-700', activeColor: 'bg-purple-600 border-purple-600 text-white' },
+    { key: 'todos', label: `Todas (${stats.total})`, icon: '📊', cfg: null },
+    { key: 'disponible', label: `Disponibles (${stats.disponible})`, icon: '✅', cfg: ESTADO_CFG.disponible },
+    { key: 'ocupada', label: `Ocupadas (${stats.ocupada})`, icon: '🛏️', cfg: ESTADO_CFG.ocupada },
+    { key: 'reservada', label: `Reservadas (${stats.reservada})`, icon: '📅', cfg: ESTADO_CFG.reservada },
+    { key: 'limpieza', label: `Limpieza (${stats.limpieza})`, icon: '🧹', cfg: ESTADO_CFG.limpieza },
   ];
   return (
     <div className="flex flex-wrap items-center gap-2 w-full">
       {pills.map(p => (
         <button
           key={p.key}
-          className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold border-2 transition-all duration-200 hover:shadow-md whitespace-nowrap min-w-0 ${
-            filtro === p.key ? p.activeColor : p.color
-          }`}
-          style={filtro === p.key && p.cfg ? { background: p.cfg.bg, borderColor: p.cfg.border, color: p.cfg.color } : filtro !== p.key && p.cfg ? { background: p.cfg.bg + '80', borderColor: p.cfg.border, color: p.cfg.color } : undefined}
+          className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold border-2 transition-all duration-200 hover:shadow-md whitespace-nowrap min-w-0"
+          style={p.cfg ? (
+            filtro === p.key 
+              ? { background: p.cfg.bg, borderColor: p.cfg.border, color: p.cfg.color }
+              : { background: 'transparent', borderColor: p.cfg.border, color: p.cfg.color }
+          ) : (
+            filtro === p.key
+              ? { background: '#2D5A3D', borderColor: '#2D5A3D', color: 'white' }
+              : { background: 'transparent', borderColor: '#d1d5db', color: '#374151' }
+          )}
           onClick={() => onFilter(p.key)}
         >
           <span className="text-base">{p.icon}</span>

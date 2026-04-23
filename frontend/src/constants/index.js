@@ -30,14 +30,15 @@ export const PRODUCTOS = {
 
 /**
  * Room state configuration with visual styling
+ * Eco-tourism hotel color palette: organic, forest greens, warm neutrals
  */
 export const ESTADO_CFG = {
-  disponible:     { label: 'Disponible', color: '#16a34a', bg: '#dcfce7', border: '#86efac', dot: '#16a34a' },
-  reservada:     { label: 'Reservada', color: '#2563eb', bg: '#dbeafe', border: '#93c5fd', dot: '#2563eb' },
-  ocupada:       { label: 'Ocupada',   color: '#ea580c', bg: '#ffedd5', border: '#fdba74', dot: '#ea580c' },
-  limpieza:      { label: 'Limpieza',  color: '#9333ea', bg: '#f3e8ff', border: '#c4b5fd', dot: '#9333ea' },
-  mantenimiento: { label: 'Mantenimiento', color: '#dc2626', bg: '#fee2e2', border: '#fca5a5', dot: '#dc2626' },
-  fuera_servicio: { label: 'Fuera de servicio', color: '#6b7280', bg: '#f3f4f6', border: '#d1d5db', dot: '#6b7280' },
+  disponible:     { label: 'Disponible', color: '#2D5A3D', bg: '#E8F0E8', border: '#B8D4B8', dot: '#2D5A3D' },
+  reservada:     { label: 'Reservada', color: '#5B7FA3', bg: '#E6EDF5', border: '#B8C8E0', dot: '#5B7FA3' },
+  ocupada:       { label: 'Ocupada',   color: '#B8860B', bg: '#FDF6E3', border: '#E8D4A8', dot: '#B8860B' },
+  limpieza:      { label: 'Limpieza',  color: '#6B8E6B', bg: '#F0F5F0', border: '#C8D8C8', dot: '#6B8E6B' },
+  mantenimiento: { label: 'Mantenimiento', color: '#A0522D', bg: '#F5EBE6', border: '#E0D0C8', dot: '#A0522D' },
+  fuera_servicio: { label: 'Fuera de servicio', color: '#8B8378', bg: '#F5F4F2', border: '#E0DDD8', dot: '#8B8378' },
 };
 
 /**
@@ -66,9 +67,9 @@ export const METODOS_PAGO = [
  * Consumption category display config
  */
 export const CATEGORIAS_CONSUMO = [
-  { key: 'restaurante', label: 'Restaurante' },
-  { key: 'bar',         label: 'Bar' },
-  { key: 'servicios',   label: 'Servicios' },
+  { key: 'restaurante', label: 'Restaurante', icon: '🍽️' },
+  { key: 'bar',         label: 'Bar', icon: '🍸' },
+  { key: 'servicios',   label: 'Servicios', icon: '🛎️' },
 ];
 
 /**
