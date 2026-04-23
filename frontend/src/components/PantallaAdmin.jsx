@@ -829,6 +829,7 @@ export default function PantallaAdmin({ onSalir, onNav }) {
     
     fetchAccountingSummary()
       .then(result => { 
+        console.log('📊 Accounting data received:', result);
         if (!cancelled) setAccData(result); 
       })
       .catch(err => { 
