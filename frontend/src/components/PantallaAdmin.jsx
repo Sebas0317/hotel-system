@@ -1504,7 +1504,8 @@ export default function PantallaAdmin({ onSalir, onNav }) {
                   {txn.loading ? 'Registrando...' : 'Registrar Consumo'}
                 </button>
                 <button className="px-4 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-medium" onClick={handleResetTxn}>Cancelar</button>
-</div>
+              </div>
+            </div>
           )}
         </div>
       </div>
