@@ -1657,7 +1657,7 @@ export default function PantallaAdmin({ onSalir, onNav }) {
           </div>
 
           {accLoading ? (
-            <div className="text-center py-12 text-gray-400">Cargando datos contables...</div>
+            <div className="text-center py-12 text-gray-400">Cargando datos contables... Loading: {String(accLoading)}, Error: {accError}, Data: {accData ? 'YES' : 'NO'}</div>
           ) : accError ? (
             <div className="text-center py-12 text-red-600">Error: {accError}</div>
           ) : accData ? (
