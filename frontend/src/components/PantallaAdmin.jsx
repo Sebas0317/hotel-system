@@ -1515,11 +1515,10 @@ export default function PantallaAdmin({ onSalir, onNav }) {
 
   // ── Register view ──
   if (activeView === 'register') {
-    // Check if a room is selected via URL param
     const urlParams = new URLSearchParams(window.location.hash.split('?')[1] || '');
     const selectedRoomIdForRegister = urlParams.get('room');
     const roomToRegister = rooms.find(r => r.id === selectedRoomIdForRegister);
-
+    
     return (
       <div className="min-h-screen bg-gray-50">
         <AdminTopbar onSalir={onSalir} onNavigate={handleNavigate} />
