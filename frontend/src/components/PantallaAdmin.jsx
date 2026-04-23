@@ -1526,7 +1526,7 @@ export default function PantallaAdmin({ onSalir, onNav }) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <h2 className="text-xl font-bold mb-6">📝 Registrar Huésped</h2>
 
-          {!roomToRegister ? (
+          <>{!roomToRegister ? (
             // Room selection
             disponibles.length === 0 ? (
               <div className="text-center text-gray-400 py-12">
@@ -1590,6 +1590,9 @@ export default function PantallaAdmin({ onSalir, onNav }) {
             </>
           ) : null}
         </div>
+          )}</>
+        </div>
+      </div>
     );
   }
 
