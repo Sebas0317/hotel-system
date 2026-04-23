@@ -4,6 +4,10 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
   AreaChart, Area
 } from 'recharts';
+import {
+  Building2, TrendingUp, CheckCircle, DollarSign, CircleDot,
+  Calendar, Sparkles, Wrench, BarChart3, Search, TrendingDown, Tag, UtensilsCrossed, ClipboardList
+} from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from './ui/Card';
 
 // ── Theme colors ──
@@ -49,7 +53,7 @@ function FilterBar({ filters, onFilterChange, roomTypes }) {
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-6">
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-sm font-semibold text-gray-700">🔍 Filtros del Dashboard</h3>
+        <h3 className="text-sm font-semibold text-gray-700"><Search className="w-4 h-4 inline mr-1" /> Filtros del Dashboard</h3>
         {activeCount > 0 && (
           <button onClick={clearAll} className="text-xs text-red-600 hover:text-red-700 font-medium">
             Limpiar ({activeCount})
@@ -89,14 +93,14 @@ function FilterBar({ filters, onFilterChange, roomTypes }) {
 // ── Stat Cards ──
 function StatCards({ stats }) {
   const cards = [
-    { label: 'Total Habitaciones', value: stats.total, icon: '🏨', color: 'from-gray-500 to-gray-600', change: '' },
-    { label: 'Ocupación', value: `${stats.ocupacionPct}%`, icon: '📊', color: 'from-green-500 to-green-600', change: stats.ocupacionChange },
-    { label: 'Disponibles', value: stats.disponibles, icon: '✅', color: 'from-blue-500 to-blue-600', change: '' },
-    { label: 'Revenue Estimado', value: formatCOP(stats.revenue), icon: '💰', color: 'from-yellow-500 to-yellow-600', change: stats.revenueChange },
-    { label: 'Ocupadas', value: stats.ocupadas, icon: '🔴', color: 'from-orange-500 to-orange-600', change: '' },
-    { label: 'Reservadas', value: stats.reservadas, icon: '📅', color: 'from-purple-500 to-purple-600', change: '' },
-    { label: 'En Limpieza', value: stats.limpieza, icon: '🧹', color: 'from-pink-500 to-pink-600', change: '' },
-    { label: 'Mantenimiento', value: stats.mantenimiento, icon: '🔧', color: 'from-red-500 to-red-600', change: '' },
+    { label: 'Total Habitaciones', value: stats.total, icon: Building2, color: 'from-gray-500 to-gray-600', change: '' },
+    { label: 'Ocupación', value: `${stats.ocupacionPct}%`, icon: TrendingUp, color: 'from-green-500 to-green-600', change: stats.ocupacionChange },
+    { label: 'Disponibles', value: stats.disponibles, icon: CheckCircle, color: 'from-blue-500 to-blue-600', change: '' },
+    { label: 'Revenue Estimado', value: formatCOP(stats.revenue), icon: DollarSign, color: 'from-yellow-500 to-yellow-600', change: stats.revenueChange },
+    { label: 'Ocupadas', value: stats.ocupadas, icon: CircleDot, color: 'from-orange-500 to-orange-600', change: '' },
+    { label: 'Reservadas', value: stats.reservadas, icon: Calendar, color: 'from-purple-500 to-purple-600', change: '' },
+    { label: 'En Limpieza', value: stats.limpieza, icon: Sparkles, color: 'from-pink-500 to-pink-600', change: '' },
+    { label: 'Mantenimiento', value: stats.mantenimiento, icon: Wrench, color: 'from-red-500 to-red-600', change: '' },
   ];
 
   return (
@@ -105,7 +109,7 @@ function StatCards({ stats }) {
         <div key={i} className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">{c.label}</span>
-            <span className="text-lg">{c.icon}</span>
+            {c.icon && <c.icon className="text-lg text-gray-400" />}
           </div>
           <p className={`text-2xl font-bold bg-gradient-to-r ${c.color} bg-clip-text text-transparent`}>{c.value}</p>
           {c.change && <p className="text-xs text-gray-500 mt-1">{c.change}</p>}
@@ -122,7 +126,7 @@ function OccupancyAreaChart({ data, onBarClick }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>📈 Ocupación Mensual</CardTitle>
+        <CardTitle><TrendingUp className="w-4 h-4 inline mr-1" /> Ocupación Mensual</CardTitle>
         <p className="text-xs text-gray-500 font-normal mt-1">Click en un mes para filtrar</p>
       </CardHeader>
       <CardContent>
@@ -200,7 +204,7 @@ function RevenueBarChart({ data, onBarClick }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>💰 Revenue por Tipo de Habitación</CardTitle>
+        <CardTitle><DollarSign className="w-4 h-4 inline mr-1" /> Revenue por Tipo de Habitacion</CardTitle>
         <p className="text-xs text-gray-500 font-normal mt-1">Click en una barra para filtrar</p>
       </CardHeader>
       <CardContent>
@@ -283,7 +287,7 @@ function StatusDonut({ data, onBarClick }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>🏷️ Estado de Habitaciones</CardTitle>
+        <CardTitle><Tag className="w-4 h-4 inline mr-1" /> Estado de Habitaciones</CardTitle>
         <p className="text-xs text-gray-500 font-normal mt-1">Click para filtrar por estado</p>
       </CardHeader>
       <CardContent className="flex flex-col items-center">
@@ -337,7 +341,7 @@ function ConsumosPieChart({ data, onBarClick }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>🍽️ Consumos por Categoría</CardTitle>
+        <CardTitle><UtensilsCrossed className="w-4 h-4 inline mr-1" /> Consumos por Categoría</CardTitle>
         <p className="text-xs text-gray-500 font-normal mt-1">Click en una categoría para filtrar</p>
       </CardHeader>
       <CardContent className="flex flex-col items-center">
@@ -534,10 +538,10 @@ export function AdminDashboard({ rooms = [], stateHistory = [], consumos = [] })
       {filters.month !== 'all' || filters.roomType !== 'all' || filters.status !== 'all' || filters.consumoCat !== 'all' ? (
         <div className="bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 text-sm text-blue-700">
           <span className="font-medium">Filtros activos:</span>
-          {filters.month !== 'all' && <span className="ml-2">📅 {filters.month}</span>}
-          {filters.roomType !== 'all' && <span className="ml-2">🏨 {filters.roomType}</span>}
-          {filters.status !== 'all' && <span className="ml-2">📋 {filters.status}</span>}
-          {filters.consumoCat !== 'all' && <span className="ml-2">🍽️ {filters.consumoCat}</span>}
+          {filters.month !== 'all' && <span className="ml-2"><Calendar className="w-4 h-4 inline mr-1" /> {filters.month}</span>}
+          {filters.roomType !== 'all' && <span className="ml-2"><Building2 className="w-4 h-4 inline mr-1" /> {filters.roomType}</span>}
+          {filters.status !== 'all' && <span className="ml-2"><ClipboardList className="w-4 h-4 inline mr-1" /> {filters.status}</span>}
+          {filters.consumoCat !== 'all' && <span className="ml-2"><UtensilsCrossed className="w-4 h-4 inline mr-1" /> {filters.consumoCat}</span>}
         </div>
       ) : null}
     </div>

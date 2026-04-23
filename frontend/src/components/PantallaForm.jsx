@@ -1,4 +1,5 @@
 import HotelTitle from './HotelTitle';
+import { Building2 } from 'lucide-react';
 
 /**
  * PantallaForm — Shared layout wrapper for all reception sub-screens.
@@ -16,7 +17,7 @@ export default function PantallaForm({ titulo, desc, onVolver, children }) {
     <div className="app-shell">
       <header className="topbar flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0 px-3 sm:px-6 py-3">
         <div className="topbar-left flex items-center gap-2">
-          <span className="topbar-logo text-xl">🏨</span>
+          <Building2 className="w-6 h-6 text-green-700" />
           <HotelTitle />
         </div>
         {onVolver && (

@@ -5,6 +5,15 @@ import {
   BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
 } from 'recharts';
+import {
+  LayoutDashboard, Home, ClipboardPen, CreditCard, Receipt, DollarSign,
+  Check, Bed, Calendar, Clock, ChevronDown, Download, FileText,
+  Search, DoorOpen, ClipboardList, Building2, Grid3X3, List,
+  Users, Baby, Dog, X, Plus, Minus, ChevronRight,
+  ChevronUp, ArrowRight, Filter, MapPin, TrendingDown, TrendingUp,
+  BarChart3, UtensilsCrossed, Trash2, Tag, AlertTriangle, Loader,
+  ChevronLeft, History, Package, Inbox
+} from 'lucide-react';
 import { useRooms } from '../hooks/useRooms';
 import { useRoomSync } from '../hooks/useRoomSync';
 import { queryKeys } from '../hooks/useQueryKeys';
@@ -19,12 +28,12 @@ import { AdminDashboard } from './AdminDashboard';
 import { Card, CardContent } from './ui/Card';
 
 const NAV_ITEMS = [
-  { key: 'dashboard', label: 'Dashboard', icon: '📊' },
-  { key: 'rooms', label: 'Habitaciones', icon: '🏠' },
-  { key: 'register', label: 'Registrar', icon: '📝' },
-  { key: 'transactions', label: 'Transacciones', icon: '💰' },
-  { key: 'accounting', label: 'Contabilidad', icon: '🧾' },
-  { key: 'prices', label: 'Precios', icon: '💲' },
+  { key: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { key: 'rooms', label: 'Habitaciones', icon: Home },
+  { key: 'register', label: 'Registrar', icon: ClipboardPen },
+  { key: 'transactions', label: 'Transacciones', icon: CreditCard },
+  { key: 'accounting', label: 'Contabilidad', icon: Receipt },
+  { key: 'prices', label: 'Precios', icon: DollarSign },
 ];
 
 /** Memoized topbar with last login and logs dropdown */
@@ -86,9 +95,9 @@ const AdminTopbar = memo(function AdminTopbar({ onSalir, onNavigate }) {
             onClick={() => setLogsOpen(!logsOpen)}
             className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
           >
-            <span>📋</span>
+            <ClipboardList className="w-4 h-4" />
             <span className="hidden sm:inline">Logs</span>
-            <span className={`text-xs transition-transform ${logsOpen ? 'rotate-180' : ''}`}>▼</span>
+            <ChevronDown className={`w-3 h-3 transition-transform ${logsOpen ? 'rotate-180' : ''}`} />
           </button>
 
           {logsOpen && (
@@ -102,7 +111,7 @@ const AdminTopbar = memo(function AdminTopbar({ onSalir, onNavigate }) {
                       onClick={() => downloadLoginLogsCSV(logs)}
                       className="text-xs text-green-600 hover:text-green-700 font-medium"
                     >
-                      📥 CSV
+                      <Download className="w-4 h-4 inline mr-1" /> CSV
                     </button>
                   )}
                 </div>
@@ -134,13 +143,13 @@ const AdminTopbar = memo(function AdminTopbar({ onSalir, onNavigate }) {
                     onClick={() => { setLogsOpen(false); onNavigate('history'); }}
                     className="text-xs px-2 py-1.5 text-gray-600 hover:bg-gray-100 rounded text-center"
                   >
-                    📋 Historial
+                    <ClipboardList className="w-3 h-3 inline" /> Historial
                   </button>
                   <button
                     onClick={() => { setLogsOpen(false); onNavigate('reservations'); }}
                     className="text-xs px-2 py-1.5 text-gray-600 hover:bg-gray-100 rounded text-center"
                   >
-                    📅 Reservaciones
+                    <Calendar className="w-3 h-3 inline" /> Reservaciones
                   </button>
                 </div>
               </div>
@@ -153,7 +162,7 @@ const AdminTopbar = memo(function AdminTopbar({ onSalir, onNavigate }) {
           className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors text-sm font-medium"
           aria-label="Salir"
         >
-          <span>🚪</span>
+          <DoorOpen className="w-4 h-4" />
           <span className="hidden sm:inline">Salir</span>
         </button>
       </div>
@@ -177,8 +186,8 @@ const AdminNav = memo(function AdminNav({ activeView, onNavigate }) {
               }`}
               onClick={() => onNavigate(item.key)}
             >
-              <span className="text-lg">{item.icon}</span>
-              <span className="hidden sm:inline">{item.label}</span>
+                {item.icon && <item.icon className="text-lg" />}
+                <span className="hidden sm:inline">{item.label}</span>
             </button>
           ))}
         </div>
@@ -190,11 +199,11 @@ const AdminNav = memo(function AdminNav({ activeView, onNavigate }) {
 /** Memoized stat pills with URL-sync via onFilter callback */
 const StatPills = memo(function StatPills({ stats, filtro, onFilter }) {
   const pills = [
-    { key: 'todos', label: `Todas (${stats.total})`, icon: '📊', cfg: null },
-    { key: 'disponible', label: `Disponibles (${stats.disponible})`, icon: '✅', cfg: ESTADO_CFG.disponible },
-    { key: 'ocupada', label: `Ocupadas (${stats.ocupada})`, icon: '🛏️', cfg: ESTADO_CFG.ocupada },
-    { key: 'reservada', label: `Reservadas (${stats.reservada})`, icon: '📅', cfg: ESTADO_CFG.reservada },
-    { key: 'limpieza', label: `Limpieza (${stats.limpieza})`, icon: '🧹', cfg: ESTADO_CFG.limpieza },
+    { key: 'todos', label: `Todas (${stats.total})`, icon: LayoutDashboard, cfg: null },
+    { key: 'disponible', label: `Disponibles (${stats.disponible})`, icon: Check, cfg: ESTADO_CFG.disponible },
+    { key: 'ocupada', label: `Ocupadas (${stats.ocupada})`, icon: Bed, cfg: ESTADO_CFG.ocupada },
+    { key: 'reservada', label: `Reservadas (${stats.reservada})`, icon: Calendar, cfg: ESTADO_CFG.reservada },
+    { key: 'limpieza', label: `Limpieza (${stats.limpieza})`, icon: Clock, cfg: ESTADO_CFG.limpieza },
   ];
   return (
     <div className="flex flex-wrap items-center gap-2 w-full">
@@ -213,7 +222,7 @@ const StatPills = memo(function StatPills({ stats, filtro, onFilter }) {
           )}
           onClick={() => onFilter(p.key)}
         >
-          <span className="text-base">{p.icon}</span>
+          {p.icon && <p.icon className="text-base" />}
           <span className="truncate">{p.label}</span>
         </button>
       ))}
@@ -229,13 +238,13 @@ const ViewModeToggle = memo(function ViewModeToggle({ viewMode, onChange }) {
         className={`px-3 py-1.5 text-sm ${viewMode === 'grid' ? 'bg-green-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
         onClick={() => onChange('grid')}
       >
-        ▦ Grid
+        <Grid3X3 className="w-4 h-4" />
       </button>
       <button
         className={`px-3 py-1.5 text-sm ${viewMode === 'list' ? 'bg-green-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
         onClick={() => onChange('list')}
       >
-        ☰ Lista
+        <List className="w-4 h-4" />
       </button>
     </div>
   );
@@ -297,10 +306,10 @@ const RoomCard = memo(function RoomCard({ room, isSelected, onSelect }) {
       <div className="space-y-1.5 text-sm">
         <p className="text-gray-700 font-medium truncate">{room.tipo}</p>
         <div className="flex items-center gap-3 text-xs text-gray-500">
-          <span>{room.camas}</span>
-          <span>·</span>
+          <span>{room.camas} camas</span>
+          <span className="text-gray-300">|</span>
           <span>{room.capacidad} personas</span>
-          <span>·</span>
+          <span className="text-gray-300">|</span>
           <span>Piso {room.piso}</span>
         </div>
 
@@ -439,18 +448,18 @@ function CheckinForm({ room, onSuccess, onCancel }) {
           </div>
           <div className="bg-white/60 rounded-lg p-3 space-y-1">
             <div className="flex justify-between text-sm">
-              <span className="text-green-700">👨 Adultos × {form.noches} noche{form.noches > 1 ? 's' : ''}</span>
+              <span className="text-green-700">Adultos x {form.noches} noche{form.noches > 1 ? 's' : ''}</span>
               <span className="text-green-800 font-medium">{precioTotal.toLocaleString('es-CO')} COP</span>
             </div>
             {form.ninos > 0 && (
               <div className="flex justify-between text-sm">
-                <span className="text-green-700">👶 Niños × {form.noches} noche{form.noches > 1 ? 's' : ''}</span>
+                <span className="text-green-700">Ninos x {form.noches} noche{form.noches > 1 ? 's' : ''}</span>
                 <span className="text-green-800 font-medium">{precioNinos.toLocaleString('es-CO')} COP</span>
               </div>
             )}
             {form.tieneMascota && (
               <div className="flex justify-between text-sm">
-                <span className="text-green-700">🐾 Mascota</span>
+                <span className="text-green-700"><Dog className="w-4 h-4 inline mr-1" /> Mascota</span>
                 <span className="text-green-800 font-medium">{precioMascota.toLocaleString('es-CO')} COP</span>
               </div>
             )}
@@ -464,7 +473,7 @@ function CheckinForm({ room, onSuccess, onCancel }) {
             onClick={onCancel}
             className="flex items-center gap-2 px-4 py-2 rounded-lg bg-red-50 border border-red-200 text-red-600 hover:bg-red-100 hover:border-red-300 transition-all text-sm font-medium"
           >
-            <span>✕</span>
+            <X className="w-4 h-4" />
             <span>Cancelar</span>
           </button>
         </div>
@@ -474,7 +483,7 @@ function CheckinForm({ room, onSuccess, onCancel }) {
           <label className="text-xs uppercase font-semibold text-green-700 tracking-wide block mb-3">Huéspedes</label>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="text-xs text-green-600 font-medium">👨 Adultos</label>
+              <label className="text-xs text-green-600 font-medium">Adultos</label>
               <select
                 value={form.adultos}
                 onChange={e => updateField('adultos', parseInt(e.target.value))}
@@ -486,7 +495,7 @@ function CheckinForm({ room, onSuccess, onCancel }) {
               </select>
             </div>
             <div>
-              <label className="text-xs text-green-600 font-medium">👶 Niños (0-12 años)</label>
+              <label className="text-xs text-green-600 font-medium">Ninos (0-12 anos)</label>
               <select
                 value={form.ninos}
                 onChange={e => updateField('ninos', parseInt(e.target.value))}
@@ -514,7 +523,7 @@ function CheckinForm({ room, onSuccess, onCancel }) {
               onChange={e => updateField('tieneMascota', e.target.checked)}
               className="w-5 h-5 text-green-600 rounded border-gray-300 focus:ring-green-500"
             />
-            <span className="text-sm text-green-700 font-medium">🐾 Traer mascota (perro o gato)</span>
+            <Dog className="w-4 h-4 inline mr-1" /> Traer mascota (perro o gato)
           </label>
           {form.tieneMascota && (
             <div className="mt-3 ml-8">
@@ -532,7 +541,7 @@ function CheckinForm({ room, onSuccess, onCancel }) {
 
         {/* Main Guest Info */}
         <div className="mt-5 bg-white p-4 rounded-xl border border-green-200">
-          <p className="text-sm font-bold text-green-800 mb-3">👤 Huésped Principal (Reserva)</p>
+          <p className="text-sm font-bold text-green-800 mb-3"><User className="w-4 h-4 inline mr-1" /> Huesped Principal (Reserva)</p>
 
           <div className="form-group">
             <label className="text-xs uppercase font-semibold text-green-600 block mb-1">Nombre completo</label>
@@ -597,7 +606,7 @@ function CheckinForm({ room, onSuccess, onCancel }) {
         <div className="mt-6 pt-4 border-t border-green-200">
           {error && (
             <div className="mb-3 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
-              ❌ {error}
+              <XCircle className="w-4 h-4 inline mr-1" /> {error}
             </div>
           )}
           <button
@@ -606,7 +615,7 @@ function CheckinForm({ room, onSuccess, onCancel }) {
             disabled={loading}
             className="w-full py-4 px-6 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl transition-colors disabled:opacity-50"
           >
-            {loading ? 'Registrando...' : '✅ Confirmar Check-in'}
+            {loading ? 'Registrando...' : 'Confirmar Check-in'}
           </button>
         </div>
 
@@ -865,21 +874,21 @@ export default function PantallaAdmin({ onSalir, onNav }) {
     const room = rooms.find(r => r.id === txn.roomId);
     if (!room || room.pin !== txn.pin) {
       setTxn(prev => ({ ...prev, error: 'PIN incorrecto' }));
-      toast.error('❌ PIN incorrecto');
+      toast.error('PIN incorrecto');
       return;
     }
     setTxn(prev => ({ ...prev, room, error: '' }));
-    toast.success('✅ Habitación encontrada');
+    toast.success('Habitacion encontrada');
   }, [rooms, txn.roomId, txn.pin]);
 
   const handleRegisterConsumo = useCallback(async () => {
     if (!txn.form.descripcion.trim() || !txn.form.precio) {
       setTxn(prev => ({ ...prev, error: 'Completa todos los campos' }));
-      toast.error('⚠️ Completa todos los campos');
+      toast.error('Completa todos los campos');
       return;
     }
     setTxn(prev => ({ ...prev, loading: true, error: '' }));
-    const loadingToast = toast.loading('📝 Registrando consumo...');
+    const loadingToast = toast.loading('Registrando consumo...');
     
     try {
       await createConsumo({
@@ -890,7 +899,7 @@ export default function PantallaAdmin({ onSalir, onNav }) {
       });
       
       toast.dismiss(loadingToast);
-      toast.success('✅ Consumo registrado exitosamente', {
+      toast.success('Consumo registrado exitosamente', {
         duration: 3000,
       });
       
@@ -903,7 +912,7 @@ export default function PantallaAdmin({ onSalir, onNav }) {
       setTimeout(() => setTxn(prev => ({ ...prev, exito: false })), 2000);
     } catch (error) {
       toast.dismiss(loadingToast);
-      toast.error('❌ Error al registrar consumo');
+      toast.error('Error al registrar consumo');
       setTxn(prev => ({ ...prev, loading: false, error: 'Error al registrar consumo' }));
     }
   }, [txn.room, txn.form, txn.cat]);
@@ -955,13 +964,13 @@ export default function PantallaAdmin({ onSalir, onNav }) {
       <div className="px-4 py-3 bg-gray-50 border-b border-gray-200 flex flex-wrap gap-2">
         <input
           className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500"
-          placeholder="🔍 Número..."
+          placeholder="Numero..."
           value={listFilter.numero}
           onChange={e => setListFilter(f => ({ ...f, numero: e.target.value }))}
         />
         <input
           className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500"
-          placeholder="🔍 Huésped..."
+          placeholder="Huesped..."
           value={listFilter.huesped}
           onChange={e => setListFilter(f => ({ ...f, huesped: e.target.value }))}
         />
@@ -1024,7 +1033,7 @@ export default function PantallaAdmin({ onSalir, onNav }) {
         <div key={piso} className="mb-8">
           <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wider mb-4 flex items-center gap-2">
             <span className="w-8 h-0.5 bg-gray-300 inline-block"></span>
-            {piso === '0' ? '🏡 Cabañas' : `🏢 Piso ${piso}`}
+            {piso === '0' ? <><Home className="w-4 h-4 inline mr-1" /> Cabañas</> : <><Building2 className="w-4 h-4 inline mr-1" /> Piso {piso}</>}
             <span className="w-8 h-0.5 bg-gray-300 inline-block"></span>
             <span className="text-xs text-gray-400 font-normal">({roomsInPiso.length})</span>
           </h3>
@@ -1098,7 +1107,7 @@ export default function PantallaAdmin({ onSalir, onNav }) {
         <AdminNav activeView={activeView} onNavigate={handleNavigate} />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold">📋 Historial de Estados</h2>
+            <h2 className="text-xl font-bold"><ClipboardList className="w-5 h-5 inline mr-2" /> Historial de Estados</h2>
             <span className="text-sm text-gray-500">{filteredRoomsHistory.length} de {roomsWithHistory.length} habitaciones</span>
           </div>
 
@@ -1106,7 +1115,7 @@ export default function PantallaAdmin({ onSalir, onNav }) {
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-3 mb-4 flex flex-wrap gap-2">
             <input
               className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500"
-              placeholder="🔍 Habitación..."
+              placeholder="Habitacion..."
               value={histFilter.room}
               onChange={e => setHistFilter(f => ({ ...f, room: e.target.value }))}
             />
@@ -1196,7 +1205,7 @@ export default function PantallaAdmin({ onSalir, onNav }) {
                                 )}
                                 {/* Timeline dot */}
                                 <div className={`relative z-10 w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 border-2`} style={{ borderColor: cfg.border, background: cfg.bg }}>
-                                  <span className="text-sm">{cfg.icon || '📍'}</span>
+                                  <span className="text-sm">{cfg.label?.charAt(0) || 'D'}</span>
                                 </div>
                                 {/* Content */}
                                 <div className="flex-1 bg-gray-50 rounded-lg p-3">
@@ -1206,7 +1215,7 @@ export default function PantallaAdmin({ onSalir, onNav }) {
                                         {entry.estadoAnterior}
                                       </span>
                                     )}
-                                    <span className="text-gray-400">→</span>
+                                    <ArrowRight className="w-4 h-4" />
                                     <span className="px-2 py-1 rounded-full text-xs font-semibold" style={{ background: cfg.bg, color: cfg.color }}>
                                       {entry.estadoNuevo}
                                     </span>
@@ -1224,7 +1233,7 @@ export default function PantallaAdmin({ onSalir, onNav }) {
                                   {reservation && (
                                     <div className="mt-3 p-3 bg-white rounded-lg border border-gray-200">
                                       <div className="flex items-center gap-2 mb-2">
-                                        <span className="text-xs font-semibold text-gray-600 uppercase tracking-wider">📋 Datos de la Reservación</span>
+                                        <span className="text-xs font-semibold text-gray-600 uppercase tracking-wider"><FileText className="w-3 h-3 inline mr-1" /> Datos de la Reservacion</span>
                                       </div>
                                       <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-2 text-xs">
                                         {reservation.huesped && (
@@ -1286,7 +1295,7 @@ export default function PantallaAdmin({ onSalir, onNav }) {
                                         {reservation.tieneMascota && (
                                           <div>
                                             <span className="text-gray-500">Mascota:</span>
-                                            <p className="font-medium text-gray-900">🐾 {reservation.nombreMascota || 'Sí'}</p>
+                                            <p className="font-medium text-gray-900"><Dog className="w-4 h-4" /> {reservation.nombreMascota || 'Si'}</p>
                                           </div>
                                         )}
                                       </div>
@@ -1362,7 +1371,7 @@ export default function PantallaAdmin({ onSalir, onNav }) {
         <AdminNav activeView={activeView} onNavigate={handleNavigate} />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold">📅 Reservaciones</h2>
+            <h2 className="text-xl font-bold"><Calendar className="w-5 h-5 inline mr-2" /> Reservaciones</h2>
             <span className="text-sm text-gray-500">{filteredReservations.length} de {allReservations.length} registros</span>
           </div>
           {allReservations.length === 0 ? (
@@ -1376,13 +1385,13 @@ export default function PantallaAdmin({ onSalir, onNav }) {
               <div className="px-4 py-3 bg-gray-50 border-b border-gray-200 flex flex-wrap gap-2">
                 <input
                   className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                  placeholder="🔍 Habitación..."
+                  placeholder="Habitacion..."
                   value={resFilter.numero}
                   onChange={e => setResFilter(f => ({ ...f, numero: e.target.value }))}
                 />
                 <input
                   className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                  placeholder="🔍 Huésped..."
+                  placeholder="Huesped..."
                   value={resFilter.huesped}
                   onChange={e => setResFilter(f => ({ ...f, huesped: e.target.value }))}
                 />
@@ -1441,10 +1450,10 @@ export default function PantallaAdmin({ onSalir, onNav }) {
         <AdminTopbar onSalir={onSalir} onNavigate={handleNavigate} />
         <AdminNav activeView={activeView} onNavigate={handleNavigate} />
         <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <h2 className="text-xl font-bold mb-4">💰 Registrar Consumo</h2>
+          <h2 className="text-xl font-bold"><CreditCard className="w-5 h-5 inline mr-2" /> Registrar Consumo</h2>
           {txn.exito && (
             <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg text-green-700">
-              ✅ Consumo registrado exitosamente
+              <CheckCircle className="w-5 h-5 inline mr-1" /> Consumo registrado exitosamente
             </div>
           )}
           {!txn.room ? (
@@ -1549,7 +1558,9 @@ export default function PantallaAdmin({ onSalir, onNav }) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">🧾 Contabilidad</h1>
+              <h1 className="text-2xl font-bold text-gray-900 flex items-center">
+                <Receipt className="w-6 h-6 inline mr-2" /> Contabilidad
+              </h1>
               <p className="text-sm text-gray-500 mt-1">Resumen financiero del hotel</p>
             </div>
             <button
@@ -1557,7 +1568,7 @@ export default function PantallaAdmin({ onSalir, onNav }) {
               disabled={exporting}
               className="flex items-center gap-2 px-5 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium transition-colors disabled:bg-gray-400"
             >
-              {exporting ? <span>⏳ Generando...</span> : <span>📥 Descargar Excel</span>}
+              {exporting ? <><Loader className="w-4 h-4 animate-spin inline mr-1" /> Generando...</> : <><Download className="w-4 h-4 inline mr-1" /> Descargar Excel</>}
             </button>
           </div>
 
@@ -1566,32 +1577,34 @@ export default function PantallaAdmin({ onSalir, onNav }) {
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
             </div>
           ) : accError ? (
-            <div className="text-center py-12 text-red-600 bg-red-50 rounded-xl">⚠️ Error: {accError?.message || accError}</div>
+            <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+              <AlertTriangle className="w-4 h-4 inline mr-1" /> Error: {accError?.message || accError}
+            </div>
           ) : accData ? (
             <>
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                 <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-md p-4 text-white">
                   <div className="flex items-center justify-between">
                     <div><p className="text-green-100 text-sm">Revenue Total</p><p className="text-2xl font-bold">{COP(totalRevenue)}</p></div>
-                    <span className="text-3xl">💰</span>
+                    <DollarSign className="w-8 h-8 text-yellow-500" />
                   </div>
                 </div>
                 <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-md p-4 text-white">
                   <div className="flex items-center justify-between">
                     <div><p className="text-blue-100 text-sm">Ocupación</p><p className="text-2xl font-bold">{accData.summary.occupancyRate}%</p></div>
-                    <span className="text-3xl">📊</span>
+                    <BarChart3 className="w-8 h-8 text-blue-500" />
                   </div>
                 </div>
                 <div className="bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-xl shadow-md p-4 text-white">
                   <div className="flex items-center justify-between">
                     <div><p className="text-yellow-100 text-sm">Tarifa Promedio</p><p className="text-2xl font-bold">{COP(accData.summary.avgDailyRate)}</p></div>
-                    <span className="text-3xl">🏷️</span>
+                    <Tag className="w-8 h-8 text-yellow-500" />
                   </div>
                 </div>
                 <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-md p-4 text-white">
                   <div className="flex items-center justify-between">
                     <div><p className="text-purple-100 text-sm">Estadías</p><p className="text-2xl font-bold">{accData.completedStays || 0}</p></div>
-                    <span className="text-3xl">🏨</span>
+                    <Building2 className="w-8 h-8 text-purple-500" />
                   </div>
                 </div>
               </div>
@@ -1618,7 +1631,7 @@ export default function PantallaAdmin({ onSalir, onNav }) {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                 {statusData.length > 0 && (
                   <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                    <h3 className="text-lg font-bold text-gray-900 mb-4">🏠 Distribución</h3>
+                    <h3 className="text-lg font-bold text-gray-900 mb-4"><Home className="w-5 h-5 inline mr-2" /> Distribucion</h3>
                     <ResponsiveContainer width="100%" height={280}>
                       <PieChart>
                         <Pie data={statusData} cx="50%" cy="50%" innerRadius={70} outerRadius={100} paddingAngle={3} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`} labelLine={false}>
@@ -1632,7 +1645,7 @@ export default function PantallaAdmin({ onSalir, onNav }) {
                 )}
                 {serviceData.length > 0 && (
                   <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                    <h3 className="text-lg font-bold text-gray-900 mb-4">🍽️ Servicios</h3>
+                    <h3 className="text-lg font-bold text-gray-900 mb-4"><UtensilsCrossed className="w-5 h-5 inline mr-2" /> Servicios</h3>
                     <ResponsiveContainer width="100%" height={280}>
                       <PieChart>
                         <Pie data={serviceData} cx="50%" cy="50%" innerRadius={70} outerRadius={100} paddingAngle={3} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`} labelLine={false}>
@@ -1647,7 +1660,7 @@ export default function PantallaAdmin({ onSalir, onNav }) {
               </div>
 
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-                <h3 className="text-lg font-bold text-gray-900 mb-4">💰 Revenue por Tipo</h3>
+                <h3 className="text-lg font-bold text-gray-900 mb-4"><DollarSign className="w-5 h-5 inline mr-2" /> Revenue por Tipo</h3>
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart data={accData.revenueByType || []} layout="vertical" margin={{ left: 30, right: 30 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
@@ -1660,14 +1673,14 @@ export default function PantallaAdmin({ onSalir, onNav }) {
               </div>
 
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                <h3 className="text-lg font-bold text-gray-900 mb-4">📊 Habitaciones</h3>
+                <h3><BarChart3 className="w-5 h-5 inline mr-2" /> Habitaciones</h3>
                 <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
                   {[
-                    { label: 'Total', value: accData.summary.totalRooms, bg: 'bg-gray-100', color: 'text-gray-900', icon: '🏨' },
-                    { label: 'Ocupadas', value: accData.summary.occupied, bg: 'bg-yellow-100', color: 'text-yellow-700', icon: '🔴' },
-                    { label: 'Disponibles', value: accData.summary.available, bg: 'bg-green-100', color: 'text-green-700', icon: '✅' },
-                    { label: 'Reservadas', value: accData.summary.reserved, bg: 'bg-blue-100', color: 'text-blue-700', icon: '📅' },
-                    { label: 'Tarifa/Día', value: COP(accData.summary.avgDailyRate), bg: 'bg-purple-100', color: 'text-purple-700', icon: '💵' },
+{ label: 'Total', value: accData.summary.totalRooms, bg: 'bg-gray-100', color: 'text-gray-900', icon: Building2 },
+    { label: 'Ocupadas', value: accData.summary.occupied, bg: 'bg-yellow-100', color: 'text-yellow-700', icon: CircleDot },
+    { label: 'Disponibles', value: accData.summary.available, bg: 'bg-green-100', color: 'text-green-700', icon: CheckCircle },
+    { label: 'Reservadas', value: accData.summary.reserved, bg: 'bg-blue-100', color: 'text-blue-700', icon: Calendar },
+    { label: 'Tarifa/Dia', value: COP(accData.summary.avgDailyRate), bg: 'bg-purple-100', color: 'text-purple-700', icon: DollarSign },
                   ].map((item, i) => (
                     <div key={i} className={`${item.bg} rounded-lg p-4 text-center`}>
                       <span className="text-2xl block mb-1">{item.icon}</span>
@@ -1709,7 +1722,7 @@ export default function PantallaAdmin({ onSalir, onNav }) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-sm text-gray-500 mb-4">
-          <button onClick={() => handleNavigate('dashboard')} className="text-gray-500 hover:text-gray-900 bg-transparent border-none cursor-pointer">🏠 Admin</button>
+          <span className="flex items-center"><Home className="w-4 h-4 inline mr-1" /> Admin</span>
           <span>›</span>
           <span className="text-gray-900 font-medium">Habitaciones</span>
           {filtro !== 'todos' && (
@@ -1739,7 +1752,7 @@ export default function PantallaAdmin({ onSalir, onNav }) {
           <div className="px-4 py-3 flex flex-col sm:flex-row items-start sm:items-center gap-3">
             {/* Search */}
             <div className="relative flex-1 max-w-md w-full">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">🔍</span>
+              <Search className="w-4 h-4" />
               <input
                 className="w-full pl-10 pr-10 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                 type="text"
@@ -1763,7 +1776,7 @@ export default function PantallaAdmin({ onSalir, onNav }) {
               value={tipo}
               onChange={e => setTipo(e.target.value)}
             >
-              <option value="todos">🏨 Todos los tipos</option>
+              <option value="todos"><span><Building2 className="w-4 h-4 inline mr-1" /></span> Todos los tipos</option>
               {TIPOS_HABITACION.map(t => (
                 <option key={t.value} value={t.value}>{t.label}</option>
               ))}

@@ -1,32 +1,41 @@
+import { useCallback, useRef } from 'react';
+import { useReactToPrint } from 'react-to-print';
+import { Printer, Building2, Package, CheckCircle } from 'lucide-react';
 import { COP, FECHA } from '../utils/helpers';
 import { METODOS_PAGO, CAT_ICONS } from '../constants';
 
 /**
  * FacturaImprimible — Printable invoice component.
  * Renders a clean, print-optimized receipt with all checkout details.
+ * Uses react-to-print for professional printing.
  *
  * @param {Object} props
  * @param {Object} props.factura - Invoice data from backend checkout response
  */
 export default function FacturaImprimible({ factura }) {
   const metodoLabel = METODOS_PAGO.find((m) => m.key === factura.metodoPago);
+  const printRef = useRef(null);
 
-  const handlePrint = () => {
-    window.print();
-  };
+  const { handlePrint } = useReactToPrint({
+    contentRef: printRef,
+    content: () => document.getElementById('factura-print'),
+  });
 
   return (
     <div className="factura-container">
       <div className="factura-print-btn-wrap">
         <button className="factura-print-btn" onClick={handlePrint}>
-          🖨️ Imprimir Factura
+          <Printer className="w-4 h-4 mr-2" />
+          Imprimir Factura
         </button>
       </div>
 
-      <div className="factura" id="factura-print">
+      <div ref={printRef} className="factura" id="factura-print">
         {/* Header */}
         <div className="factura-header">
-          <div className="factura-logo">🏨</div>
+          <div className="factura-logo">
+            <Building2 className="w-8 h-8" />
+          </div>
           <h2 className="factura-hotel">EcoBosque</h2>
           <p className="factura-subtitle">Factura de Hospedaje</p>
           <p className="factura-fecha">{FECHA(factura.fecha)}</p>
@@ -107,7 +116,7 @@ export default function FacturaImprimible({ factura }) {
                 {factura.consumos.map((c) => (
                   <tr key={c.id}>
                     <td>{FECHA(c.fecha)}</td>
-                    <td>{CAT_ICONS[c.categoria] || '📦'} {c.categoria}</td>
+                    <td>{CAT_ICONS[c.categoria] || <Package className="w-3 h-3" />} {c.categoria}</td>
                     <td>{c.descripcion}</td>
                     <td>{COP(c.precio)}</td>
                   </tr>
@@ -153,7 +162,7 @@ export default function FacturaImprimible({ factura }) {
 
         {/* Footer */}
         <div className="factura-footer">
-          <p>✅ Cuenta cerrada — Habitación disponible para nuevos huéspedes</p>
+          <p><CheckCircle className="w-4 h-4 inline mr-1" /> Cuenta cerrada — Habitación disponible para nuevos huéspedes</p>
           <p className="factura-gracias">¡Gracias por su estadía en EcoBosque!</p>
         </div>
       </div>

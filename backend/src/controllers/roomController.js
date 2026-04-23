@@ -9,6 +9,7 @@ const { getPrices } = require('../data/priceStore');
 const { generateId, generateReservationId } = require('../utils/idGenerator');
 const { generarPin } = require('../utils/pinGenerator');
 const { calcularCheckout } = require('../utils/checkoutCalc');
+const { parseISO, formatISO, differenceInDays, addDays } = require('date-fns');
 
 const pinAttempts = new Map();
 const PIN_MAX_ATTEMPTS = 5;

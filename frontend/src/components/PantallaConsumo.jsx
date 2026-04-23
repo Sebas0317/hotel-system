@@ -3,6 +3,7 @@ import { validarPin, createConsumo } from '../services/api';
 import { PRODUCTOS, CATEGORIAS_CONSUMO } from '../constants';
 import { COP } from '../utils/helpers';
 import PantallaForm from './PantallaForm';
+import { AlertTriangle, CheckCircle, CreditCard } from 'lucide-react';
 
 /**
  * Consumption registration screen - Two-step flow:
@@ -70,9 +71,9 @@ export default function PantallaConsumo({ onNav }) {
   // Success view
   if (exito) {
     return (
-      <PantallaForm titulo="🍽️ Consumo" onVolver={() => onNav('menu')}>
+      <PantallaForm titulo="Consumo" onVolver={() => onNav('menu')}>
         <div className="exito-box">
-          <div className="exito-icon">✅</div>
+          <CheckCircle className="w-16 h-16 text-green-600 mb-4" />
           <h3>Consumo registrado</h3>
           <p className="exito-sub">Habitación #{room.numero} · {room.huesped}</p>
           <div className="consumo-chip"><strong>{form.descripcion}</strong><span>{COP(parseFloat(form.precio))}</span></div>
@@ -87,7 +88,7 @@ export default function PantallaConsumo({ onNav }) {
 
   return (
     <PantallaForm
-      titulo="🍽️ Registrar Consumo"
+      titulo="Registrar Consumo"
       desc={step === 1 ? 'Verifica la habitación con el PIN' : `Habitación #${room?.numero} · ${room?.huesped}`}
       onVolver={() => (step === 2 ? setStep(1) : onNav('menu'))}
     >
@@ -101,7 +102,7 @@ export default function PantallaConsumo({ onNav }) {
             <label>PIN de la habitación</label>
             <input type="password" placeholder="4 dígitos" value={pin} onChange={(e) => setPin(e.target.value)} maxLength={4} />
           </div>
-          {error && <div className="error-msg">⚠️ {error}</div>}
+          {error && <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm mb-4"><AlertTriangle className="w-4 h-4 inline mr-1" /> {error}</div>}
           <button className="btn-main-action" onClick={validar} disabled={loading}>
             {loading ? 'Verificando...' : 'Verificar con PIN'}
           </button>
@@ -150,13 +151,13 @@ export default function PantallaConsumo({ onNav }) {
             <label>Precio (COP)</label>
             <input type="number" placeholder="Ej: 25000" value={form.precio} onChange={(e) => setForm({ ...form, precio: e.target.value })} min="0" />
           </div>
-          {error && <div className="error-msg">⚠️ {error}</div>}
+          {error && <div className="error-message"><AlertTriangle className="w-4 h-4" /> {error}</div>}
           <button
             className="btn-main-action"
             onClick={registrar}
             disabled={loading || !form.descripcion || !form.precio}
           >
-            {loading ? 'Guardando...' : `✅ Registrar ${form.descripcion ? `"${form.descripcion}"` : 'consumo'}`}
+            {loading ? 'Guardando...' : <>Registrar {form.descripcion ? `"${form.descripcion}"` : 'consumo'}</>}
           </button>
         </>
       )}

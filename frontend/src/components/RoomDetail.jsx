@@ -4,6 +4,11 @@ import { CAT_ICONS } from '../constants';
 import { generarConsumosMock, calcularFechaDisponible, generarContactoMock } from '../utils/mockData';
 import { fetchConsumos, fetchStateHistory } from '../services/api';
 import RoomActions, { Toast } from './RoomActions';
+import {
+  CheckCircle, CircleDot, Circle, Sparkles, Wrench, Bell, User, Users, Dog,
+  FileText, ClipboardList, Calendar, MapPin, Home, Bed, UtensilsCrossed,
+  Package, Copy, Clock, Plus, Leaf
+} from 'lucide-react';
 
 function RoomDetail({ room, onRefresh }) {
   const [toast, setToast] = useState(null);
@@ -86,17 +91,17 @@ function RoomDetail({ room, onRefresh }) {
       {toast && <Toast message={toast.message} type={toast.type} onDismiss={() => setToast(null)} />}
 
       <div className={`rd-status-badge rd-status-${room.estado}`}>
-        {room.estado === 'disponible' && '✅ Disponible'}
-        {room.estado === 'ocupada' && '🔴 Ocupada'}
-        {room.estado === 'reservada' && '🟡 Reservada'}
-        {room.estado === 'limpieza' && '🧹 En limpieza'}
-        {room.estado === 'mantenimiento' && '🔧 Mantenimiento'}
+        {room.estado === 'disponible' && <><CheckCircle className="w-4 h-4" /> Disponible</>}
+        {room.estado === 'ocupada' && <><CircleDot className="w-4 h-4" /> Ocupada</>}
+        {room.estado === 'reservada' && <><Calendar className="w-4 h-4" /> Reservada</>}
+        {room.estado === 'limpieza' && <><Sparkles className="w-4 h-4" /> En limpieza</>}
+        {room.estado === 'mantenimiento' && <><Wrench className="w-4 h-4" /> Mantenimiento</>}
       </div>
 
       {room.solicitudCheckout && room.estado === 'ocupada' && (
         <div className="rd-checkout-request">
           <div className="rd-cr-header">
-            <span className="rd-cr-icon">🔔</span>
+            <span className="rd-cr-icon"><Bell className="w-4 h-4" /></span>
             <span className="rd-cr-title">El cliente desea retirarse</span>
           </div>
           <p className="rd-cr-message">
@@ -106,7 +111,7 @@ function RoomDetail({ room, onRefresh }) {
       )}
 
       <div className="rd-section">
-        <h4 className="rd-section-title">🌿 Datos del Huésped</h4>
+        <h4 className="rd-section-title"><Leaf className="w-4 h-4 inline mr-1" /> Datos del Huésped</h4>
         <div className="rd-grid">
           <div className="rd-field">
             <span className="rd-label">Nombre</span>
@@ -134,11 +139,11 @@ function RoomDetail({ room, onRefresh }) {
       {(room.estado === 'reservada' || room.estado === 'ocupada') && room.huesped && (
         <div className="rd-section rd-guest-details" style={{ background: 'linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%)', borderRadius: '12px', padding: '16px', border: '1px solid #bbf7d0' }}>
           <h4 className="rd-section-title" style={{ color: '#166534', fontSize: '14px', fontWeight: '700', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontSize: '18px' }}>👤</span> Registro de Huéspedes
+            <User className="w-4 h-4" /> Registro de Huéspedes
           </h4>
           
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', padding: '10px', background: 'white', borderRadius: '8px', border: '1px solid #d1d5db' }}>
-            <span style={{ fontSize: '20px' }}>👥</span>
+            <Users className="w-5 h-5" />
             <div>
               <span style={{ fontSize: '12px', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase' }}>Número de personas:</span>
               <div style={{ fontSize: '16px', fontWeight: '700', color: '#1f2937' }}>
@@ -152,7 +157,7 @@ function RoomDetail({ room, onRefresh }) {
 
           {room.tieneMascota && (
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', padding: '10px', background: '#fef3c7', borderRadius: '8px', border: '1px solid #fcd34d' }}>
-              <span style={{ fontSize: '20px' }}>🐾</span>
+              <Dog className="w-5 h-5" />
               <div>
                 <span style={{ fontSize: '12px', color: '#92400e', fontWeight: '600', textTransform: 'uppercase' }}>Mascota</span>
                 <div style={{ fontSize: '14px', fontWeight: '600', color: '#78350f' }}>{room.nombreMascota || 'Sin nombre'}</div>
@@ -163,7 +168,7 @@ function RoomDetail({ room, onRefresh }) {
           <div className="rd-guest-list">
             <div className="rd-guest-item rd-guest-main" style={{ background: 'white', borderRadius: '10px', padding: '14px', border: '2px solid #22c55e', marginBottom: '10px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-                <span style={{ fontSize: '16px' }}>👤</span>
+                <User className="w-4 h-4" />
                 <span style={{ fontSize: '13px', fontWeight: '700', color: '#166534', textTransform: 'uppercase' }}>Huésped Principal {room.estado === 'reservada' && '(Reserva)'}</span>
               </div>
               
@@ -186,7 +191,7 @@ function RoomDetail({ room, onRefresh }) {
                 </div>
                 {room.observaciones && (
                   <div className="rd-field" style={{ padding: '8px', background: '#fef3c7', borderRadius: '6px', border: '1px solid #fcd34d' }}>
-                    <span className="rd-label" style={{ fontSize: '12px', color: '#92400e' }}>📝 Observaciones</span>
+                    <span className="rd-label" style={{ fontSize: '12px', color: '#92400e' }}><FileText className="w-3 h-3 inline mr-1" /> Observaciones</span>
                     <span className="rd-value" style={{ fontSize: '13px', color: '#78350f', display: 'block', marginTop: '4px' }}>{room.observaciones}</span>
                   </div>
                 )}
@@ -196,7 +201,7 @@ function RoomDetail({ room, onRefresh }) {
             {room.personasAdicionales && room.personasAdicionales.length > 0 && room.personasAdicionales.map((p, i) => (
               <div key={i} className="rd-guest-item" style={{ background: 'white', borderRadius: '10px', padding: '14px', border: '1px solid #e5e7eb', marginBottom: '8px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
-                  <span style={{ fontSize: '16px' }}>👥</span>
+                  <Users className="w-4 h-4" />
                   <span style={{ fontSize: '13px', fontWeight: '700', color: '#4b5563', textTransform: 'uppercase' }}>
                     {room.ninos && i < room.ninos ? `Niño ${i + 1} (menor)` : `Persona adicional #${i + 1}`}
                   </span>
@@ -219,7 +224,7 @@ function RoomDetail({ room, onRefresh }) {
 
       {room.pin && (
         <div className="rd-section rd-pin-section">
-          <h4 className="rd-section-title">🔐 PIN de Acceso <span className="rd-pin-admin-only">(solo admin)</span></h4>
+          <h4 className="rd-section-title"><KeyRound className="w-4 h-4 inline mr-1" /> PIN de Acceso <span className="rd-pin-admin-only">(solo admin)</span></h4>
           <div className="rd-pin-display">
             <span className="rd-pin-value">{room.pin}</span>
             <button
@@ -230,7 +235,7 @@ function RoomDetail({ room, onRefresh }) {
               }}
               title="Copiar PIN"
             >
-              📋 Copiar
+              <Copy className="w-4 h-4 inline mr-1" /> Copiar
             </button>
           </div>
           <p className="rd-pin-hint">Entrega este PIN al huésped para consumos y check-out</p>
@@ -238,7 +243,7 @@ function RoomDetail({ room, onRefresh }) {
       )}
 
       <div className="rd-section">
-        <h4 className="rd-section-title">📅 Fechas</h4>
+        <h4 className="rd-section-title"><Calendar className="w-4 h-4 inline mr-1" /> Fechas</h4>
         <div className="rd-grid">
           <div className="rd-field">
             <span className="rd-label">Check-in</span>
@@ -265,26 +270,26 @@ function RoomDetail({ room, onRefresh }) {
           {room.estado === 'disponible' && (
             <div className="rd-field rd-highlight">
               <span className="rd-label">Estado</span>
-              <span className="rd-value rd-available">✅ Disponible ahora</span>
+              <span className="rd-value"><CheckCircle className="w-4 h-4" /> Disponible ahora</span>
             </div>
           )}
           {room.estado === 'limpieza' && (
             <div className="rd-field rd-highlight" style={{ background: '#ede9fe', borderColor: '#c4b5fd' }}>
               <span className="rd-label">Estado</span>
-              <span className="rd-value" style={{ color: '#7c3aed' }}>🧹 En limpieza</span>
+              <span className="rd-value"><Sparkles className="w-4 h-4" /> En limpieza</span>
             </div>
           )}
           {room.estado === 'mantenimiento' && (
             <div className="rd-field rd-highlight" style={{ background: '#fef3c7', borderColor: '#fcd34d' }}>
               <span className="rd-label">Estado</span>
-              <span className="rd-value" style={{ color: '#b45309' }}>🔧 En mantenimiento</span>
+              <span className="rd-value"><Wrench className="w-4 h-4" /> En mantenimiento</span>
             </div>
           )}
         </div>
       </div>
 
       <div className="rd-section">
-        <h4 className="rd-section-title">🏨 Información de la Habitación</h4>
+        <h4 className="rd-section-title"><Building2 className="w-4 h-4 inline mr-1" /> Informacion de la Habitacion</h4>
         <div className="rd-grid">
           <div className="rd-field">
             <span className="rd-label">Tipo</span>
@@ -309,10 +314,10 @@ function RoomDetail({ room, onRefresh }) {
         <div className="rd-total-bar">
           <div className="rd-total-breakdown">
             {room.estado === 'ocupada' && (
-              <span>🛏️ Habitación × {noches} noche{noches > 1 ? 's' : ''}: {COP(cargoHabitacion)}</span>
+              <span><Bed className="w-4 h-4 inline mr-1" /> Habitación × {noches} noche{noches > 1 ? 's' : ''}: {COP(cargoHabitacion)}</span>
             )}
             {totalConsumos > 0 && (
-              <span>🍽️ Consumos: {COP(totalConsumos)}</span>
+              <span><UtensilsCrossed className="w-4 h-4 inline mr-1" /> Consumos: {COP(totalConsumos)}</span>
             )}
           </div>
           <strong>Total: {COP(granTotal)}</strong>
@@ -326,13 +331,13 @@ function RoomDetail({ room, onRefresh }) {
       ) : consumos.length > 0 ? (
         <div className="rd-section">
           <div className="rd-consumos-header">
-            <h4 className="rd-section-title">🍽️ Consumos ({consumos.length})</h4>
+            <h4 className="rd-section-title"><UtensilsCrossed className="w-4 h-4 inline mr-1" /> Consumos ({consumos.length})</h4>
             <span className="rd-consumos-total">{COP(totalConsumos)}</span>
           </div>
           <div className="rd-consumos-list">
             {consumos.map((c) => (
               <div key={c.id} className="rd-consumo-item">
-                <span className="rdc-cat">{CAT_ICONS[c.categoria] || '📦'}</span>
+                <Package className="w-3 h-3" />
                 <div className="rdc-info">
                   <span className="rdc-desc">{c.descripcion}</span>
                   <span className="rdc-fecha">{FECHA(c.fecha)}</span>
@@ -351,7 +356,7 @@ function RoomDetail({ room, onRefresh }) {
       {stateHistory.length > 0 && (
         <div className="rd-section" style={{ background: '#f8fafc', borderRadius: '12px', padding: '16px', border: '1px solid #e2e8f0' }}>
           <h4 className="rd-section-title" style={{ color: '#475569', fontSize: '14px', fontWeight: '700', marginBottom: '12px' }}>
-            📋 Historial de Estado ({stateHistory.length})
+            <ClipboardList className="w-4 h-4 inline mr-1" /> Historial de Estado ({stateHistory.length})
           </h4>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {stateHistory.map((h, i) => (

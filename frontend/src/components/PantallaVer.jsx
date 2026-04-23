@@ -3,6 +3,7 @@ import { validarPin, fetchConsumos } from '../services/api';
 import { COP, FECHA } from '../utils/helpers';
 import { CAT_ICONS } from '../constants';
 import PantallaForm from './PantallaForm';
+import { AlertTriangle, Package } from 'lucide-react';
 
 /**
  * View room details screen - Shows room info and all consumos
@@ -44,7 +45,7 @@ export default function PantallaVer({ onNav }) {
 
   return (
     <PantallaForm
-      titulo="🔍 Ver Habitación"
+      titulo="Ver Habitacion"
       desc={room ? `Habitación #${room.numero} · ${room.huesped}` : 'Ingresa el número y PIN para consultar'}
       onVolver={() => (room ? resetView() : onNav('menu'))}
     >
@@ -58,7 +59,7 @@ export default function PantallaVer({ onNav }) {
             <label>PIN</label>
             <input type="password" placeholder="4 dígitos" value={pin} onChange={(e) => setPin(e.target.value)} maxLength={4} />
           </div>
-          {error && <div className="error-msg">⚠️ {error}</div>}
+          {error && <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm mb-4"><AlertTriangle className="w-4 h-4 inline mr-1" /> {error}</div>}
           <button className="btn-main-action" onClick={consultar} disabled={loading}>
             {loading ? 'Consultando...' : 'Consultar'}
           </button>
@@ -78,7 +79,7 @@ export default function PantallaVer({ onNav }) {
               ? <p className="empty-msg">Sin consumos registrados aún</p>
               : consumos.map((c) => (
                   <div key={c.id} className="consumo-row">
-                    <span className="cr-cat">{CAT_ICONS[c.categoria] || '📦'}</span>
+                    <Package className="w-4 h-4" />
                     <span className="cr-desc">{c.descripcion}</span>
                     <span className="cr-fecha">{FECHA(c.fecha)}</span>
                     <span className="cr-precio">{COP(c.precio)}</span>

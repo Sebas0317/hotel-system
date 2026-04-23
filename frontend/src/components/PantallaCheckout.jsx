@@ -6,6 +6,7 @@ import { calcularCheckout } from '../utils/checkoutCalc';
 import { usePrices } from '../hooks/usePrices';
 import PantallaForm from './PantallaForm';
 import FacturaImprimible from './FacturaImprimible';
+import { AlertTriangle, CheckCircle, Wallet } from 'lucide-react';
 
 /**
  * Checkout screen - Three-step flow:
@@ -78,7 +79,7 @@ export default function PantallaCheckout({ onNav }) {
 
   return (
     <PantallaForm
-      titulo="💳 Check-out"
+      titulo="Check-out"
       desc={step === 1 ? 'Ingresa habitación y PIN' : step === 2 ? `Habitación #${room?.numero} · ${room?.huesped}` : 'Checkout completado'}
       onVolver={step === 3 ? undefined : () => {
         if (step === 1) onNav('menu');
@@ -95,7 +96,7 @@ export default function PantallaCheckout({ onNav }) {
             <label>PIN</label>
             <input type="password" placeholder="4 dígitos" value={pin} onChange={(e) => setPin(e.target.value)} maxLength={4} />
           </div>
-          {error && <div className="error-msg">⚠️ {error}</div>}
+          {error && <div className="error-message"><AlertTriangle className="w-4 h-4" /> {error}</div>}
           <button className="btn-main-action" onClick={validar} disabled={loading}>
             {loading ? 'Verificando...' : 'Verificar habitación'}
           </button>
@@ -112,7 +113,7 @@ export default function PantallaCheckout({ onNav }) {
           {/* Cost breakdown */}
           <div className="checkout-breakdown">
             <div className="cb-row">
-              <span>🛏️ Habitación × {totals.noches} noche{totals.noches > 1 ? 's' : ''}</span>
+              <span className="flex items-center gap-1"><Bed className="w-4 h-4" /> Habitacion x {totals.noches} noche{totals.noches > 1 ? 's' : ''}</span>
               <strong>{COP(totals.cargoHabitacion)}</strong>
             </div>
             {totals.totalConsumos > 0 && (
@@ -121,7 +122,7 @@ export default function PantallaCheckout({ onNav }) {
                   <div className="cs-header"><span>Consumos ({consumos.length})</span></div>
                   {consumos.map((c) => (
                     <div key={c.id} className="consumo-row">
-                      <span className="cr-cat">{CAT_ICONS[c.categoria] || '📦'}</span>
+                      <Package className="w-4 h-4" />
                       <span className="cr-desc">{c.descripcion}</span>
                       <span className="cr-precio">{COP(c.precio)}</span>
                     </div>
@@ -180,21 +181,21 @@ export default function PantallaCheckout({ onNav }) {
               />
               {valorRecibido && (
                 <div className={`cambio-preview ${cambio >= 0 ? 'positivo' : 'negativo'}`}>
-                  {cambio > 0 && `💰 Cambio a devolver: ${COP(cambio)}`}
-                  {cambio < 0 && `⚠️ Falta: ${COP(Math.abs(cambio))}`}
-                  {cambio === 0 && `✅ Pago exacto`}
+                  {cambio > 0 && `Cambio a devolver: ${COP(cambio)}`}
+                  {cambio < 0 && `Falta: ${COP(Math.abs(cambio))}`}
+                  {cambio === 0 && `Pago exacto`}
                 </div>
               )}
             </div>
           )}
 
-          {error && <div className="error-msg">⚠️ {error}</div>}
+          {error && <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm mb-4"><AlertTriangle className="w-4 h-4 inline mr-1" /> {error}</div>}
           <button
             className="btn-danger-action"
             onClick={confirmarCheckout}
             disabled={loading || (metodoPago === 'efectivo' && (recibido < totals.total || !valorRecibido))}
           >
-            {loading ? 'Procesando...' : '✅ Confirmar checkout y cobrar'}
+            {loading ? 'Procesando...' : 'Confirmar checkout y cobrar'}
           </button>
         </>
       )}

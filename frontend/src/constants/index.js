@@ -42,79 +42,79 @@ export const ESTADO_CFG = {
 };
 
 /**
- * Room type icons mapping (using Unicode symbols)
+ * Room type icons mapping - using Lucide icon names
  */
 export const TIPO_ICON = {
-  'Suite Bosque': '\uD83C\uDF32',
-  'Suite Sunset': '\uD83C\uDF05',
-  'Suite Edén': '\uD83C\uDF3F',
-  'Habitación Pareja': '\uD83D\uDC91',
-  'Habitación Doble Estándar': '\uD83D\uDECF',
-  'Habitación Cuádruple Estándar': '\uD83D\uDC66\uD83D\uDC67',
-  'Cabana Familiar en Bote': '\u26F5',
+  'Suite Bosque': 'Trees',
+  'Suite Sunset': 'Sunset',
+  'Suite Eden': 'Flower',
+  'Habitacion Pareja': 'Heart',
+  'Habitacion Doble Estandar': 'BedDouble',
+  'Habitacion Cuadruple Estandar': 'Bed',
+  'Cabana Familiar en Bote': 'Ship',
 };
 
 /**
  * Valid payment methods
  */
 export const METODOS_PAGO = [
-  { key: 'efectivo',      icon: '\uD83D\uDCB5', label: 'Efectivo' },
-  { key: 'tarjeta',       icon: '\uD83D\uDCB3', label: 'Tarjeta' },
-  { key: 'transferencia', icon: '\uD83D\uDCF2', label: 'Transferencia' },
+  { key: 'efectivo',      icon: 'Wallet', label: 'Efectivo' },
+  { key: 'tarjeta',       icon: 'CreditCard', label: 'Tarjeta' },
+  { key: 'transferencia', icon: 'Banknote', label: 'Transferencia' },
 ];
 
 /**
  * Consumption category display config
  */
 export const CATEGORIAS_CONSUMO = [
-  { key: 'restaurante', label: 'Restaurante', icon: '🍽️' },
-  { key: 'bar',         label: 'Bar', icon: '🍸' },
-  { key: 'servicios',   label: 'Servicios', icon: '🛎️' },
+  { key: 'restaurante', label: 'Restaurante', icon: 'Utensils' },
+  { key: 'bar',         label: 'Bar', icon: 'Wine' },
+  { key: 'servicios',   label: 'Servicios', icon: 'Bell' },
 ];
 
 /**
- * Category icons for display
+ * Category icons for display - using Lucide icon names
  */
 export const CAT_ICONS = {
-  restaurante: '\uD83C\uDF7D\uFE0F',
-  bar: '\uD83C\uDF79',
-  servicios: '\uD83D\uDD0E',
+  restaurante: 'UtensilsCrossed',
+  bar: 'Wine',
+  servicios: 'Bell',
 };
 
 /**
  * Amenity icons and labels for room display
- * Consolidated from PantallaCheckin.jsx and ecoweb/RoomDetails.tsx
+ * Using Lucide icon names
  */
 export const AMENIDADES = {
-  jacuzzi_privado: { icono: '🛁', label: 'Jacuzzi Privado' },
-  wifi: { icono: '📶', label: 'WiFi' },
-  ac: { icono: '❄️', label: 'Aire Acondicionado' },
-  tv: { icono: '📺', label: 'TV' },
-  bano_privado: { icono: '🚿', label: 'Baño Privado' },
-  balcon: { icono: '🌅', label: 'Balcón' },
-  terraza: { icono: '☀️', label: 'Terraza' },
-  vista_bosque: { icono: '🌲', label: 'Vista al Bosque' },
-  vista_bosque_premium: { icono: '✨', label: 'Vista Premium' },
-  orientacion_solar: { icono: '🌅', label: 'Orientación Solar' },
-  ducha_exterior: { icono: '🚿', label: 'Ducha Exterior' },
-  jardin_privado: { icono: '🌸', label: 'Jardín Privado' },
-  arquitectura_sostenible: { icono: '🌿', label: 'Arquitectura Sostenible' },
-  vista_lago: { icono: '🌊', label: 'Vista al Lago' },
-  hamacas: { icono: '🌴', label: 'Hamacas' },
-  cocina: { icono: '🍳', label: 'Cocina Equipada' },
-  chimenea: { icono: '🔥', label: 'Chimenea' },
-  terra_privada: { icono: '☀️', label: 'Terraza Privada' },
-  minibar: { icono: '🍷', label: 'Minibar' },
-  caja_fuerte: { icono: '🔐', label: 'Caja Fuerte' },
-  room_service: { icono: '🛎️', label: 'Room Service' },
-  mascota: { icono: '🐕', label: 'Mascotas Bienvenidas' },
-  parking: { icono: '🅿️', label: 'Estacionamiento' },
-  piscina: { icono: '🏊', label: 'Piscina' },
-  spa: { icono: '💆', label: 'Spa' },
-  Restaurante: { icono: '🍽️', label: 'Restaurante' },
-  bar: { icono: '🍸', label: 'Bar' },
-  lavanderia: { icono: '👕', label: 'Lavandería' },
-  gym: { icono: '🏋️', label: 'Gimnasio' },
+  jacuzzi_privado: { icono: 'Bath', label: 'Jacuzzi Privado' },
+  wifi: { icono: 'Wifi', label: 'WiFi' },
+  ac: { icono: 'Wind', label: 'Aire Acondicionado' },
+  tv: { icono: 'Tv', label: 'TV' },
+  bano_privado: { icono: 'Shower', label: 'Bano Privado' },
+  balcon: { icono: 'Sunrise', label: 'Balcon' },
+  terraza: { icono: 'Sun', label: 'Terraza' },
+  vista_bosque: { icono: 'Trees', label: 'Vista al Bosque' },
+  vista_bosque_premium: { icono: 'Sparkles', label: 'Vista Premium' },
+  orientacion_solar: { icono: 'Sunrise', label: 'Orientacion Solar' },
+  ducha_exterior: { icono: 'Shower', label: 'Ducha Exterior' },
+  jardin_privado: { icono: 'Flower', label: 'Jardin Privado' },
+  arquitectura_sostenible: { icono: 'Leaf', label: 'Arquitectura Sostenible' },
+  vista_lago: { icono: 'Waves', label: 'Vista al Lago' },
+  hamacas: { icono: 'Umbrella', label: 'Hamacas' },
+  cocina: { icono: 'ChefHat', label: 'Cocina Equipada' },
+  chimenea: { icono: 'Flame', label: 'Chimenea' },
+  terra_privada: { icono: 'Sun', label: 'Terraza Privada' },
+  minibar: { icono: 'Wine', label: 'Minibar' },
+  caja_fuerte: { icono: 'Lock', label: 'Caja Fuerte' },
+  room_service: { icono: 'Bell', label: 'Room Service' },
+  mascota: { icono: 'Dog', label: 'Mascotas Bienvenidas' },
+  parking: { icono: 'Parking', label: 'Estacionamiento' },
+  piscina: { icono: 'Waves', label: 'Piscina' },
+  spa: { icono: 'Heart', label: 'Spa' },
+  Restaurante: { icono: 'UtensilsCrossed', label: 'Restaurante' },
+  bar: { icono: 'Wine', label: 'Bar' },
+  lavanderia: { icono: 'Shirt', label: 'Lavanderia' },
+  gym: { icono: 'Dumbbell', label: 'Gimnasio' },
 };
 
 /**

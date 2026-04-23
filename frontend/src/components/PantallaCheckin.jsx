@@ -3,6 +3,10 @@ import { checkIn, fetchRooms } from '../services/api';
 import { TIPOS_HABITACION, AMENIDADES } from '../constants';
 import PantallaForm from './PantallaForm';
 import { ConfirmModal } from './ConfirmModal.jsx';
+import {
+  Leaf, AlertTriangle, Bed, Users, Dog, User, X, CheckCircle,
+  KeyRound, Bell, ArrowLeft
+} from 'lucide-react';
 
 /**
  * Check-in screen — Register a new guest and assign room.
@@ -172,14 +176,14 @@ export default function PantallaCheckin({ onNav }) {
   // Step 1: Room Selection
   if (step === 1) {
     return (
-      <PantallaForm titulo="🌿 Registrar Huésped" desc="Selecciona una habitación disponible" onVolver={() => onNav('menu')}>
+      <PantallaForm titulo="Registrar Huesped" desc="Selecciona una habitacion disponible" onVolver={() => onNav('menu')}>
         <div className="form-group">
           <label className="text-xs uppercase font-semibold text-gray-400 tracking-wide mb-3 block">Selecciona una habitación</label>
           {roomsLoading ? (
             <p className="room-select-loading text-sm text-gray-400 p-3">Cargando...</p>
           ) : disponibles.length === 0 ? (
             <div className="text-sm p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-center">
-              ⚠️ No hay habitaciones disponibles
+              <AlertTriangle className="w-4 h-4 inline mr-1" /> No hay habitaciones disponibles
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[500px] overflow-y-auto p-1">
@@ -195,7 +199,7 @@ export default function PantallaCheckin({ onNav }) {
                   </div>
                   <p className="font-bold text-lg text-gray-800">{r.tipo}</p>
                   <div className="text-sm text-gray-500 mt-2">
-                    🛏️ {r.camas} · 👥 {r.capacidad} personas
+                    <Bed className="w-4 h-4" /> {r.camas} &middot; <Users className="w-4 h-4" /> {r.capacidad} personas
                   </div>
                   <p className="text-2xl font-extrabold text-green-600 mt-2">
                     {r.tarifa?.toLocaleString('es-CO')} <span className="text-sm font-normal">COP/noche</span>
@@ -212,7 +216,7 @@ export default function PantallaCheckin({ onNav }) {
   // Step 2: Guest Information Form
   if (step === 2) {
     return (
-      <PantallaForm titulo="🌿 Registrar Huésped" desc="Completa los datos del huésped y la estadía" onVolver={() => setStep(1)}>
+      <PantallaForm titulo="Registrar Huesped" desc="Completa los datos del huesped y la estadia" onVolver={() => setStep(1)}>
         <form onSubmit={(e) => { e.preventDefault(); }}>
           {/* Room Info Card - Contains ALL the form */}
           <div className="mb-6 p-5 bg-gradient-to-r from-green-50 to-green-100 border-2 border-green-500 rounded-2xl">
@@ -267,18 +271,18 @@ export default function PantallaCheckin({ onNav }) {
               {/* Price Details */}
               <div className="bg-white/60 rounded-lg p-3 mt-2 space-y-1">
                 <div className="flex justify-between text-sm">
-                  <span className="text-green-700">👨 adults × {form.noches} noche{form.noches > 1 ? 's' : ''}</span>
+                  <span className="text-green-700">Adultos x {form.noches} noche{form.noches > 1 ? 's' : ''}</span>
                   <span className="text-green-800 font-medium">{precioAdultos.toLocaleString('es-CO')} COP</span>
                 </div>
                 {form.ninos > 0 && (
                   <div className="flex justify-between text-sm">
-                    <span className="text-green-700">👶 Niños × {form.noches} noche{form.noches > 1 ? 's' : ''}</span>
+                    <span className="text-green-700">Ninos x {form.noches} noche{form.noches > 1 ? 's' : ''}</span>
                     <span className="text-green-800 font-medium">{precioNinos.toLocaleString('es-CO')} COP</span>
                   </div>
                 )}
                 {form.tieneMascota && (
                   <div className="flex justify-between text-sm">
-                    <span className="text-green-700">🐾 Mascota × {form.noches} noche{form.noches > 1 ? 's' : ''}</span>
+                    <span className="text-green-700"><Dog className="w-4 h-4 inline mr-1" /> Mascota x {form.noches} noche{form.noches > 1 ? 's' : ''}</span>
                     <span className="text-green-800 font-medium">Gratis</span>
                   </div>
                 )}
@@ -304,7 +308,7 @@ export default function PantallaCheckin({ onNav }) {
                         key={i} 
                         className="inline-flex items-center gap-1.5 text-xs bg-white/80 backdrop-blur text-green-700 px-3 py-1.5 rounded-full border border-green-200 shadow-sm"
                       >
-                        <span className="text-base">{amenidad?.icono || '✓'}</span>
+                        <span className="text-base"><CheckCircle className="w-4 h-4" /></span>
                         <span className="font-medium">{amenidad?.label || a.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</span>
                       </span>
                     );
@@ -320,7 +324,7 @@ export default function PantallaCheckin({ onNav }) {
                 className="flex items-center gap-2 px-4 py-2 rounded-lg bg-red-50 border border-red-200 text-red-600 hover:bg-red-100 hover:border-red-300 transition-all text-sm font-medium"
                 onClick={() => setShowChangeRoomModal(true)}
               >
-                <span>✕</span>
+                <X className="w-4 h-4" />
                 <span>Cambiar habitación</span>
               </button>
             </div>
@@ -345,7 +349,7 @@ export default function PantallaCheckin({ onNav }) {
               <label className="text-xs uppercase font-semibold text-green-700 tracking-wide block mb-3">Huéspedes</label>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs text-green-600 font-medium">👨‍adultos</label>
+                  <label className="text-xs text-green-600 font-medium">Adultos</label>
                   <select
                     value={form.adultos}
                     onChange={(e) => updateField('adultos', parseInt(e.target.value))}
@@ -357,7 +361,7 @@ export default function PantallaCheckin({ onNav }) {
                   </select>
                 </div>
                 <div>
-                  <label className="text-xs text-green-600 font-medium">👶 Niños (0-12 años)</label>
+                  <label className="text-xs text-green-600 font-medium">Ninos (0-12 anos)</label>
                   <select
                     value={form.ninos}
                     onChange={(e) => updateField('ninos', parseInt(e.target.value))}
@@ -385,7 +389,7 @@ export default function PantallaCheckin({ onNav }) {
                   onChange={(e) => updateField('tieneMascota', e.target.checked)}
                   className="w-5 h-5 text-green-600 rounded border-gray-300 focus:ring-green-500"
                 />
-                <span className="text-sm text-green-700 font-medium">🐾 Traer mascota (perro o gato)</span>
+                <span className="flex items-center"><Dog className="w-4 h-4 inline mr-1" /> Traer mascota (perro o gato)</span>
               </label>
               {form.tieneMascota && (
                 <div className="mt-3 ml-8">
@@ -403,7 +407,7 @@ export default function PantallaCheckin({ onNav }) {
 
             {/* Main Guest Info */}
             <div className="mt-5 bg-white p-4 rounded-xl border border-green-200">
-              <p className="text-sm font-bold text-green-800 mb-3">👤 Huesped Principal (Reserva)</p>
+              <p className="font-semibold text-green-700 mb-2"><User className="w-4 h-4 inline mr-1" /> Huesped Principal (Reserva)</p>
               
               <div className="form-group">
                 <label className="text-xs uppercase font-semibold text-green-600">Nombre completo</label>
@@ -506,7 +510,7 @@ export default function PantallaCheckin({ onNav }) {
                 disabled={loading}
                 className="w-full py-4 px-6 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl transition-colors disabled:opacity-50"
               >
-                {loading ? 'Registrando...' : '✅ Confirmar Check-in'}
+                {loading ? 'Registrando...' : 'Confirmar Check-in'}
               </button>
             </div>
 
@@ -519,9 +523,9 @@ export default function PantallaCheckin({ onNav }) {
   // Success Screen
   if (resultado) {
     return (
-      <PantallaForm titulo="🛎️ Check-in" onVolver={() => onNav('menu')}>
+      <PantallaForm titulo="Check-in" onVolver={() => onNav('menu')}>
         <div className="exito-box">
-          <div className="exito-icon text-6xl mb-4">✅</div>
+          <CheckCircle className="w-16 h-16 text-green-600 mb-4" />
           <h3 className="text-xl font-bold text-green-700 mb-4">¡Huésped registrado!</h3>
           <div className="info-table bg-white rounded-xl p-4 mb-4">
             <div className="it-row"><span>Habitación</span><strong>{resultado.numero}</strong></div>
@@ -531,7 +535,7 @@ export default function PantallaCheckin({ onNav }) {
             <div className="it-row"><span>Check-out</span><strong>{form.checkOut}</strong></div>
             <div className="it-row pin-row"><span>🔐 PIN</span><strong className="pin-grande text-2xl">{resultado.pin}</strong></div>
           </div>
-          <p className="pin-aviso text-sm text-gray-600 mb-4">⚠️ Entrega este PIN al huésped — lo necesitará para consumos y checkout</p>
+          <p className="pin-aviso text-sm text-gray-600 mb-4"><AlertTriangle className="w-4 h-4 inline mr-1" /> Entrega este PIN al huesped - lo necesitara para consumos y checkout</p>
           <button className="btn-main-action w-full" onClick={() => onNav('menu')}>← Volver al menú</button>
         </div>
       </PantallaForm>

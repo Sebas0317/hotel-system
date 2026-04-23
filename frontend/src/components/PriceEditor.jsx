@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, memo } from 'react';
 import { fetchPrices, updatePrices } from '../services/api';
 import { COP } from '../utils/helpers';
 import { CATEGORIAS_CONSUMO } from '../constants';
+import { AlertTriangle, CheckCircle, Settings, Leaf, Trash2, Save, Plus, Bed, X } from 'lucide-react';
 
 /**
  * Confirmation modal for saving price changes.
@@ -13,14 +14,14 @@ function ConfirmModal({ tarifas, productos, onConfirm, onCancel }) {
   return (
     <div className="pe-modal-overlay" onClick={onCancel}>
       <div className="pe-modal" onClick={(e) => e.stopPropagation()}>
-        <h4 className="pe-modal-title">⚠️ Confirmar Cambios de Precios</h4>
+        <h4 className="pe-modal-title"><AlertTriangle className="w-5 h-5 inline mr-2" /> Confirmar Cambios de Precios</h4>
         <p className="pe-modal-desc">
           Estás a punto de actualizar <strong>{tarifaCount} tarifas</strong> y <strong>{productCount} productos</strong>.
           Estos cambios se aplicarán a todas las habitaciones y nuevos consumos.
         </p>
         <div className="pe-modal-summary">
           <div className="pe-modal-section">
-            <h5>🛏️ Tarifas por Noche</h5>
+            <h5 className="pe-modal-subtitle"><Bed className="w-4 h-4 inline mr-1" /> Tarifas por Noche</h5>
             {Object.entries(tarifas).map(([tipo, precio]) => (
               <div key={tipo} className="pe-modal-row">
                 <span>{tipo}</span>
@@ -31,7 +32,7 @@ function ConfirmModal({ tarifas, productos, onConfirm, onCancel }) {
         </div>
         <div className="pe-modal-btns">
           <button className="pe-modal-btn pe-modal-btn-confirm" onClick={onConfirm}>
-            ✅ Sí, Guardar Cambios
+            <CheckCircle className="w-4 h-4 inline mr-1" /> Si, Guardar Cambios
           </button>
           <button className="pe-modal-btn pe-modal-btn-cancel" onClick={onCancel}>
             Cancelar
@@ -164,19 +165,19 @@ function PriceEditor({ onUpdate, onNotify }) {
     <div className="pe-container">
       <div className="pe-header">
         <div>
-          <h4 className="pe-title">⚙️ Gestión de Precios</h4>
+          <h4 className="pe-title"><Settings className="w-5 h-5 inline mr-2 text-green-600" /> Gestión de Precios</h4>
           <p className="pe-subtitle">Edita tarifas, nombres y precios de consumibles. Los cambios se aplican a todas las habitaciones.</p>
         </div>
         <button className="pe-save-btn" onClick={handleSave} disabled={saving}>
-          {saving ? 'Guardando...' : '💾 Guardar Cambios'}
+          {saving ? 'Guardando...' : <><Save className="w-4 h-4 inline mr-1" /> Guardar Cambios</>}
         </button>
       </div>
 
-      {error && <div className="pe-error-msg">⚠️ {error}</div>}
+      {error && <div className="pe-error"><AlertTriangle className="w-4 h-4" /> {error}</div>}
 
       {/* Room Rates Section */}
       <div className="pe-section">
-        <h5 className="pe-section-title">🌿 Tarifas por Noche</h5>
+        <h5 className="pe-section-title"><Leaf className="w-4 h-4 inline mr-1 text-green-500" /> Tarifas por Noche</h5>
         <p className="pe-section-desc">Precio por noche para cada tipo de habitación. Todas las tarifas incluyen desayuno.</p>
         <div className="pe-grid">
           {Object.entries(data.tarifas).map(([tipo, tarifa]) => {
@@ -211,7 +212,7 @@ function PriceEditor({ onUpdate, onNotify }) {
               <p className="pe-section-desc">Precios de productos y servicios. Se muestran al registrar nuevos consumos.</p>
             </div>
             <button className="pe-add-btn" onClick={() => addProducto(cat.key)}>
-              ➕ Agregar Producto
+              <Plus className="w-4 h-4 inline mr-1" /> Agregar Producto
             </button>
           </div>
           <div className="pe-list">
@@ -240,7 +241,7 @@ function PriceEditor({ onUpdate, onNotify }) {
                   onClick={() => removeProducto(cat.key, i)}
                   title="Eliminar producto"
                 >
-                  🗑️
+                  <Trash2 className="w-4 h-4" />
                 </button>
               </div>
             ))}

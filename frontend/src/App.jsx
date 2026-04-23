@@ -1,7 +1,7 @@
 import { Routes, Route, useNavigate, Navigate, useLocation } from 'react-router-dom';
 import { useState, Suspense, lazy } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Toaster } from 'react-hot-toast';
+import { Toaster, toast } from 'sonner';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { getAuthToken, setAuthToken } from './services/api';
 import './App.css';

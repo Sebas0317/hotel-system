@@ -7,6 +7,26 @@
 const XLSX = require('xlsx');
 const { getRooms } = require('../data/jsonStore');
 const { getHistory } = require('../data/jsonStore');
+const { format, parseISO, formatISO } = require('date-fns');
+const { es } = require('date-fns/locale');
+
+function formatDate(date, formatStr = 'PP') {
+  const d = typeof date === 'string' ? parseISO(date) : date;
+  if (!d || isNaN(d.getTime())) return '';
+  return format(d, formatStr, { locale: es });
+}
+
+function formatDateTime(date) {
+  return formatDate(date, 'PPp');
+}
+
+function formatShortDate(date) {
+  return formatDate(date, 'P');
+}
+
+function formatFileDate(date) {
+  return format(date, 'yyyy-MM-dd');
+}
 
 function getStatusLabel(status) {
   const labels = {
@@ -115,17 +135,14 @@ async function exportReport(req, res) {
     const historicalRevenue = completedStays.reduce((sum, h) => sum + (h.tarifa || 0) * (h.noches || 1), 0);
     const occupancyRate = rooms.length > 0 ? Math.round((occupied.length / rooms.length) * 100) : 0;
 
-    const executiveSummary = [
-      ['📊 RESUMEN EJECUTIVO - ECO BOSQUE HOTEL BOUTIQUE'],
-      [`Fecha de Generación: ${new Date().toLocaleDateString('es-CO', { 
-        year: 'numeric', month: 'long', day: 'numeric', 
-        hour: '2-digit', minute: '2-digit' 
-      })}`],
+const executiveSummary = [
+      ['RESUMEN EJECUTIVO - ECO BOSQUE HOTEL BOUTIQUE'],
+      [`Fecha de Generacion: ${formatDate(new Date(), 'PPpp')}`],
       [],
-      ['📈 KPIs PRINCIPALES'],
-      ['Métrica', 'Valor', 'Descripción'],
-      ['🏨 Total Habitaciones', rooms.length, 'Capacidad total del hotel'],
-      ['📊 Tasa de Ocupación', `${occupancyRate}%`, `${occupied.length} de ${rooms.length} habitaciones`],
+      ['KPIs PRINCIPALES'],
+      ['Metrica', 'Valor', 'Descripcion'],
+      ['Total Habitaciones', rooms.length, 'Capacidad total del hotel'],
+      ['Tasa de Ocupacion', `${occupancyRate}%`, `${occupied.length} de ${rooms.length} habitaciones`],
       ['💰 Revenue Actual', `$${totalRevenue.toLocaleString('es-CO')}`, 'Revenue de habitaciones ocupadas'],
       ['📈 Revenue Histórico', `$${historicalRevenue.toLocaleString('es-CO')}`, 'Revenue de estadías completadas'],
       ['💵 Revenue Total', `$${(totalRevenue + historicalRevenue).toLocaleString('es-CO')}`, 'Revenue actual + histórico'],
@@ -147,10 +164,10 @@ async function exportReport(req, res) {
 
     // Sheet 2: Habitaciones Detallado
     const allRoomsDetailed = [
-      ['📋 DETALLE COMPLETO DE HABITACIONES'],
-      [`Generado: ${new Date().toLocaleDateString('es-CO')}`],
+      ['DETALLE COMPLETO DE HABITACIONES'],
+      [`Generado: ${formatDate(new Date())}`],
       [],
-      ['#', 'Tipo', 'Estado', 'Huésped', 'Documento', 'Check-in', 'Check-out', 'Noches', 'Tarifa/Noche', 'Total'],
+      ['#', 'Tipo', 'Estado', 'Huesped', 'Documento', 'Check-in', 'Check-out', 'Noches', 'Tarifa/Noche', 'Total'],
       ...rooms.map(r => [
         r.numero,
         r.tipo,
@@ -289,7 +306,7 @@ async function exportReport(req, res) {
     // Generate Excel
     const buffer = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
 
-    const fileName = `EcoBosque_Reporte_Contable_${new Date().toISOString().split('T')[0]}.xlsx`;
+    const fileName = `EcoBosque_Reporte_Contable_${formatFileDate(new Date())}.xlsx`;
     
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);

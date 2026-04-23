@@ -4,6 +4,11 @@ import { fetchAccountingSummary, downloadAccountingReport } from '../services/ap
 import { COP, FECHA } from '../utils/helpers';
 import { Card, CardHeader, CardTitle, CardContent } from './ui/Card';
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import {
+  Receipt, XCircle, Loader, Download, TrendingUp,
+  Percent, DollarSign, TrendingBar, CheckCircle2,
+  Home, Building2, Utensils, FileSpreadsheet
+} from 'lucide-react';
 
 const SERVICE_COLORS = ['#22c55e', '#3b82f6', '#f59e0b', '#8b5cf6', '#ef4444'];
 
@@ -38,7 +43,7 @@ export default function AccountingView() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="text-4xl mb-2">🧾</div>
+          <Receipt className="w-12 h-12 mx-auto mb-2 text-green-600" />
           <p className="text-gray-500">Cargando datos contables...</p>
         </div>
       </div>
@@ -49,7 +54,7 @@ export default function AccountingView() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center text-red-600">
-          <div className="text-4xl mb-2">❌</div>
+          <XCircle className="w-12 h-12 mx-auto mb-2" />
           <p>{error}</p>
         </div>
       </div>
@@ -72,7 +77,7 @@ export default function AccountingView() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">🧾 Contabilidad</h1>
+            <Receipt className="w-8 h-8 inline mr-2" /> Contabilidad</h1>
             <p className="text-sm text-gray-500 mt-1">Resumen financiero y reportes descargables</p>
           </div>
           <button
@@ -82,12 +87,12 @@ export default function AccountingView() {
           >
             {exporting ? (
               <>
-                <span className="animate-spin">⏳</span>
+                <Loader className="w-6 h-6 animate-spin" />
                 <span>Generando...</span>
               </>
             ) : (
               <>
-                <span>📥</span>
+                <Download className="w-5 h-5" />
                 <span>Descargar Excel</span>
               </>
             )}
@@ -103,7 +108,7 @@ export default function AccountingView() {
                   <p className="text-sm text-gray-500">Tasa de Ocupación</p>
                   <p className="text-2xl font-bold text-green-600">{summary.occupancyRate}%</p>
                 </div>
-                <div className="bg-green-100 p-3 rounded-full text-xl">📊</div>
+                <TrendingUp className="w-6 h-6" />
               </div>
             </CardContent>
           </Card>
@@ -115,7 +120,7 @@ export default function AccountingView() {
                   <p className="text-sm text-gray-500">Revenue Actual</p>
                   <p className="text-xl font-bold text-blue-600">{formatM(summary.currentRevenue)}</p>
                 </div>
-                <div className="bg-blue-100 p-3 rounded-full text-xl">💰</div>
+                <DollarSign className="w-6 h-6" />
               </div>
             </CardContent>
           </Card>
@@ -127,7 +132,7 @@ export default function AccountingView() {
                   <p className="text-sm text-gray-500">Revenue Histórico</p>
                   <p className="text-xl font-bold text-yellow-600">{formatM(summary.historicalRevenue)}</p>
                 </div>
-                <div className="bg-yellow-100 p-3 rounded-full text-xl">📈</div>
+                <TrendingBar className="w-6 h-6" />
               </div>
             </CardContent>
           </Card>
@@ -139,7 +144,7 @@ export default function AccountingView() {
                   <p className="text-sm text-gray-500">Estadías Completadas</p>
                   <p className="text-2xl font-bold text-purple-600">{completedStays || 0}</p>
                 </div>
-                <div className="bg-purple-100 p-3 rounded-full text-xl">🏨</div>
+                <CheckCircle2 className="w-6 h-6" />
               </div>
             </CardContent>
           </Card>
@@ -149,7 +154,7 @@ export default function AccountingView() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
           <Card>
             <CardHeader>
-              <CardTitle>🏠 Habitaciones Actuales</CardTitle>
+              <Home className="w-4 h-4 inline mr-1" /> Habitaciones Actuales</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
@@ -182,7 +187,7 @@ export default function AccountingView() {
           {/* Revenue by Room Type Chart */}
           <Card>
             <CardHeader>
-              <CardTitle>💰 Revenue por Tipo de Habitación</CardTitle>
+              <DollarSign className="w-4 h-4 inline mr-1" /> Revenue por Tipo de Habitacion</CardTitle>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={250}>
@@ -202,7 +207,7 @@ export default function AccountingView() {
         {revenueByService && revenueByService.length > 0 && (
           <Card className="mb-6">
             <CardHeader>
-              <CardTitle>🍽️ Ingresos por Servicio</CardTitle>
+              <UtensilsCrossed className="w-4 h-4 inline mr-1" /> Ingresos por Servicio</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -248,7 +253,7 @@ export default function AccountingView() {
         {/* Download info */}
         <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
           <div className="flex items-start gap-3">
-            <span className="text-xl">📥</span>
+            <Download className="w-5 h-5" />
             <div>
               <p className="text-sm font-medium text-blue-900">Reporte Descargable</p>
               <p className="text-xs text-blue-700 mt-1">
