@@ -116,6 +116,50 @@ export async function fetchReservaciones() {
   return apiFetch('/rooms/reservaciones');
 }
 
+export async function fetchReservas() {
+  return apiFetch('/reservas');
+}
+
+export async function fetchReservasByRoom(roomId) {
+  return apiFetch(`/reservas/room/${roomId}`);
+}
+
+export async function fetchReservasByDateRange(start, end) {
+  return apiFetch(`/reservas/availability?start=${start}&end=${end}`);
+}
+
+export async function createReserva(data) {
+  return apiFetch('/reservas', {
+    method: 'POST',
+    body: data,
+  });
+}
+
+export async function updateReserva(id, data) {
+  return apiFetch(`/reservas/${id}`, {
+    method: 'PUT',
+    body: data,
+  });
+}
+
+export async function cancelReserva(id) {
+  return apiFetch(`/reservas/${id}/cancel`, {
+    method: 'PATCH',
+  });
+}
+
+export async function checkInReserva(id) {
+  return apiFetch(`/reservas/${id}/checkin`, {
+    method: 'PATCH',
+  });
+}
+
+export async function checkOutReserva(id) {
+  return apiFetch(`/reservas/${id}/checkout`, {
+    method: 'PATCH',
+  });
+}
+
 /**
  * Validate room PIN
  * @param {string} numero - Room number

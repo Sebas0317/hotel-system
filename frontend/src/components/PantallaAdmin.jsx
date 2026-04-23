@@ -12,7 +12,7 @@ import {
   Users, Baby, Dog, X, Plus, Minus, ChevronRight,
   ChevronUp, ArrowRight, Filter, MapPin, TrendingDown, TrendingUp,
   BarChart3, UtensilsCrossed, Trash2, Tag, AlertTriangle, Loader,
-  ChevronLeft, History, Package, Inbox
+  ChevronLeft, History, Package, Inbox, CircleDot, Circle, CheckCircle
 } from 'lucide-react';
 import { useRooms } from '../hooks/useRooms';
 import { useRoomSync } from '../hooks/useRoomSync';
@@ -26,6 +26,7 @@ import PriceEditor from './PriceEditor';
 import { Toast } from './RoomActions';
 import { AdminDashboard } from './AdminDashboard';
 import { Card, CardContent } from './ui/Card';
+import PantallaCheckin from './PantallaCheckin';
 
 const NAV_ITEMS = [
   { key: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -1578,7 +1579,7 @@ export default function PantallaAdmin({ onSalir, onNav }) {
             </div>
           ) : accError ? (
             <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
-              <AlertTriangle className="w-4 h-4 inline mr-1" /> Error: {accError?.message || accError}
+              <AlertTriangle className="w-5 h-5 inline mr-2" />{accError.message || 'Error loading accounting data'}
             </div>
           ) : accData ? (
             <>
@@ -1683,7 +1684,7 @@ export default function PantallaAdmin({ onSalir, onNav }) {
     { label: 'Tarifa/Dia', value: COP(accData.summary.avgDailyRate), bg: 'bg-purple-100', color: 'text-purple-700', icon: DollarSign },
                   ].map((item, i) => (
                     <div key={i} className={`${item.bg} rounded-lg p-4 text-center`}>
-                      <span className="text-2xl block mb-1">{item.icon}</span>
+                      <span className="text-2xl block mb-1 flex justify-center">{item.icon && <item.icon className="w-6 h-6" />}</span>
                       <span className={`text-lg font-bold ${item.color} block`}>{item.value}</span>
                       <span className="text-xs text-gray-600">{item.label}</span>
                     </div>
@@ -1692,6 +1693,28 @@ export default function PantallaAdmin({ onSalir, onNav }) {
               </div>
             </>
           ) : null}
+        </div>
+      </div>
+    );
+  }
+
+  // ── Register view (check-in form) - show check-in flow with calendar
+  if (activeView === 'register') {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <AdminTopbar onSalir={onSalir} onNavigate={handleNavigate} />
+        <AdminNav activeView={activeView} onNavigate={handleNavigate} />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex items-center gap-2 text-sm text-gray-500 mb-4">
+            <span className="flex items-center"><Home className="w-4 h-4 inline mr-1" /> Admin</span>
+            <span>›</span>
+            <span className="text-green-600 font-medium">Nueva Reserva / Check-in</span>
+          </div>
+          <PantallaCheckin onNav={(action) => {
+            if (action === 'menu' || action === 'volver') {
+              setActiveView('rooms');
+            }
+          }} />
         </div>
       </div>
     );
@@ -1776,7 +1799,7 @@ export default function PantallaAdmin({ onSalir, onNav }) {
               value={tipo}
               onChange={e => setTipo(e.target.value)}
             >
-              <option value="todos"><span><Building2 className="w-4 h-4 inline mr-1" /></span> Todos los tipos</option>
+              <option value="todos">Todos los tipos</option>
               {TIPOS_HABITACION.map(t => (
                 <option key={t.value} value={t.value}>{t.label}</option>
               ))}

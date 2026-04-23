@@ -5,8 +5,8 @@ import {
   AreaChart, Area
 } from 'recharts';
 import {
-  Building2, TrendingUp, CheckCircle, DollarSign, CircleDot,
-  Calendar, Sparkles, Wrench, BarChart3, Search, TrendingDown, Tag, UtensilsCrossed, ClipboardList
+  Home, Building2, TrendingUp, CheckCircle, DollarSign, CircleDot,
+  Calendar, Sparkles, Wrench, BarChart3, Search, TrendingDown, Tag, UtensilsCrossed, ClipboardList, ChevronDown
 } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from './ui/Card';
 
@@ -52,39 +52,51 @@ function FilterBar({ filters, onFilterChange, roomTypes }) {
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-6">
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center justify-between mb-4">
         <h3 className="text-sm font-semibold text-gray-700"><Search className="w-4 h-4 inline mr-1" /> Filtros del Dashboard</h3>
         {activeCount > 0 && (
-          <button onClick={clearAll} className="text-xs text-red-600 hover:text-red-700 font-medium">
+          <button onClick={clearAll} className="px-3 py-1.5 text-xs bg-red-50 text-red-600 hover:bg-red-100 rounded-lg font-medium transition-colors border border-red-200">
             Limpiar ({activeCount})
           </button>
         )}
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <select
-          value={filters.month}
-          onChange={e => setFilter('month', e.target.value)}
-          className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-white"
-        >
-          {months.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
-        </select>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="relative">
+          <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+          <select
+            value={filters.month}
+            onChange={e => setFilter('month', e.target.value)}
+            className="w-full pl-10 pr-8 py-2.5 border border-gray-200 rounded-lg text-sm bg-gray-50 hover:bg-white focus:bg-white focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all appearance-none cursor-pointer"
+          >
+            {months.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
+          </select>
+          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+        </div>
 
-        <select
-          value={filters.roomType}
-          onChange={e => setFilter('roomType', e.target.value)}
-          className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-white"
-        >
-          <option value="all">Todos los tipos</option>
-          {roomTypes.map(t => <option key={t} value={t}>{t}</option>)}
-        </select>
+        <div className="relative">
+          <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+          <select
+            value={filters.roomType}
+            onChange={e => setFilter('roomType', e.target.value)}
+            className="w-full pl-10 pr-8 py-2.5 border border-gray-200 rounded-lg text-sm bg-gray-50 hover:bg-white focus:bg-white focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all appearance-none cursor-pointer"
+          >
+            <option value="all">Todos los tipos</option>
+            {roomTypes.map(t => <option key={t} value={t}>{t}</option>)}
+          </select>
+          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+        </div>
 
-        <select
-          value={filters.status}
-          onChange={e => setFilter('status', e.target.value)}
-          className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-white"
-        >
-          {statuses.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
-        </select>
+        <div className="relative">
+          <CircleDot className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+          <select
+            value={filters.status}
+            onChange={e => setFilter('status', e.target.value)}
+            className="w-full pl-10 pr-8 py-2.5 border border-gray-200 rounded-lg text-sm bg-gray-50 hover:bg-white focus:bg-white focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all appearance-none cursor-pointer"
+          >
+            {statuses.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+          </select>
+          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+        </div>
       </div>
     </div>
   );
@@ -93,27 +105,30 @@ function FilterBar({ filters, onFilterChange, roomTypes }) {
 // ── Stat Cards ──
 function StatCards({ stats }) {
   const cards = [
-    { label: 'Total Habitaciones', value: stats.total, icon: Building2, color: 'from-gray-500 to-gray-600', change: '' },
-    { label: 'Ocupación', value: `${stats.ocupacionPct}%`, icon: TrendingUp, color: 'from-green-500 to-green-600', change: stats.ocupacionChange },
-    { label: 'Disponibles', value: stats.disponibles, icon: CheckCircle, color: 'from-blue-500 to-blue-600', change: '' },
-    { label: 'Revenue Estimado', value: formatCOP(stats.revenue), icon: DollarSign, color: 'from-yellow-500 to-yellow-600', change: stats.revenueChange },
-    { label: 'Ocupadas', value: stats.ocupadas, icon: CircleDot, color: 'from-orange-500 to-orange-600', change: '' },
-    { label: 'Reservadas', value: stats.reservadas, icon: Calendar, color: 'from-purple-500 to-purple-600', change: '' },
-    { label: 'En Limpieza', value: stats.limpieza, icon: Sparkles, color: 'from-pink-500 to-pink-600', change: '' },
-    { label: 'Mantenimiento', value: stats.mantenimiento, icon: Wrench, color: 'from-red-500 to-red-600', change: '' },
+    { label: 'Total Habitaciones', value: stats.total, icon: Building2, color: 'text-gray-600' },
+    { label: 'Ocupación', value: `${stats.ocupacionPct}%`, icon: TrendingUp, color: 'text-green-600' },
+    { label: 'Disponibles', value: stats.disponibles, icon: CheckCircle, color: 'text-blue-600' },
+    { label: 'Revenue Estimado', value: formatCOP(stats.revenue), icon: DollarSign, color: 'text-yellow-600' },
+    { label: 'Ocupadas', value: stats.ocupadas, icon: CircleDot, color: 'text-orange-600' },
+    { label: 'Reservadas', value: stats.reservadas, icon: Calendar, color: 'text-purple-600' },
+    { label: 'En Limpieza', value: stats.limpieza, icon: Sparkles, color: 'text-pink-600' },
+    { label: 'Mantenimiento', value: stats.mantenimiento, icon: Wrench, color: 'text-red-600' },
   ];
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
       {cards.map((c, i) => (
-        <div key={i} className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">{c.label}</span>
-            {c.icon && <c.icon className="text-lg text-gray-400" />}
-          </div>
-          <p className={`text-2xl font-bold bg-gradient-to-r ${c.color} bg-clip-text text-transparent`}>{c.value}</p>
-          {c.change && <p className="text-xs text-gray-500 mt-1">{c.change}</p>}
-        </div>
+        <Card key={i}>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-500">{c.label}</p>
+                <p className={`text-2xl font-bold ${c.color}`}>{c.value}</p>
+              </div>
+              <c.icon className="w-6 h-6 text-gray-400" />
+            </div>
+          </CardContent>
+        </Card>
       ))}
     </div>
   );
@@ -529,10 +544,37 @@ export function AdminDashboard({ rooms = [], stateHistory = [], consumos = [] })
       </div>
 
       {/* Charts Grid - Row 2 */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         <StatusDonut data={statusData} onBarClick={handleFilterFromChart} />
         <ConsumosPieChart data={consumosData} onBarClick={handleFilterFromChart} />
       </div>
+
+      {/* Habitaciones Detalle */}
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle><Home className="w-4 h-4 inline mr-1" /> Estado de Habitaciones</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="text-sm">
+              <span className="text-gray-600">Total</span>
+              <p className="text-xl font-bold text-gray-900">{stats.total}</p>
+            </div>
+            <div className="text-sm">
+              <span className="text-orange-600">Ocupadas</span>
+              <p className="text-xl font-bold text-orange-600">{stats.ocupadas}</p>
+            </div>
+            <div className="text-sm">
+              <span className="text-blue-600">Disponibles</span>
+              <p className="text-xl font-bold text-blue-600">{stats.disponibles}</p>
+            </div>
+            <div className="text-sm">
+              <span className="text-purple-600">Reservadas</span>
+              <p className="text-xl font-bold text-purple-600">{stats.reservadas}</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Active filter indicator */}
       {filters.month !== 'all' || filters.roomType !== 'all' || filters.status !== 'all' || filters.consumoCat !== 'all' ? (

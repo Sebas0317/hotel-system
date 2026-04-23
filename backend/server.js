@@ -59,6 +59,7 @@ const historyRoutes = require('./src/routes/history');
 const stateHistoryRoutes = require('./src/routes/stateHistory');
 const healthRoutes = require('./src/routes/health');
 const accountingRoutes = require('./src/routes/accounting');
+const reservasRoutes = require('./src/routes/reservas');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -187,6 +188,7 @@ app.use('/history', requireAuth, historyRoutes);
 app.use('/state-history', requireAuth, stateHistoryRoutes);
 app.use('/prices', requireAuth, pricesRoutes);
 app.use('/accounting', accountingRoutes);
+app.use('/reservas', reservasRoutes);
 
 // ── BACKUP MANAGEMENT (admin only) ──
 app.post('/admin/backup', requireAuth, async (_req, res) => {

@@ -2,6 +2,18 @@
  * Hotel product catalog organized by category
  * Prices are in COP (Colombian Pesos) as integers
  */
+import {
+  Trees, Sunset, Flower, Heart, BedDouble, Bed, Ship,
+  Utensils, UtensilsCrossed, Wine, Bell,
+  Wallet, CreditCard, Banknote,
+  AlertTriangle, BadgeDollarSign, Bath, Coffee, PartyPopper,
+  Wifi, Car, PawPrint, TreeDeciduous, Mountain, Waves,
+  CalendarDays, Clock, User, Users, MapPin, Star,
+  CircleDot, CheckCircle,
+  Wind, Tv, Droplets, Sunrise, Sun, Sparkles,
+  Leaf, Umbrella, ChefHat, Flame, Lock, Shirt
+} from 'lucide-react';
+
 export const PRODUCTOS = {
   restaurante: [
     { nombre: 'Desayuno americano',     precio: 28000 },
@@ -32,89 +44,91 @@ export const PRODUCTOS = {
  * Room state configuration with visual styling
  * Eco-tourism hotel color palette: organic, forest greens, warm neutrals
  */
+/**
+ * Room state configuration with visual styling
+ * Eco-tourism hotel color palette: organic, forest greens, warm neutrals
+ */
 export const ESTADO_CFG = {
   disponible:     { label: 'Disponible', color: '#2D5A3D', bg: '#E8F0E8', border: '#B8D4B8', dot: '#2D5A3D' },
-  reservada:     { label: 'Reservada', color: '#5B7FA3', bg: '#E6EDF5', border: '#B8C8E0', dot: '#5B7FA3' },
-  ocupada:       { label: 'Ocupada',   color: '#B8860B', bg: '#FDF6E3', border: '#E8D4A8', dot: '#B8860B' },
-  limpieza:      { label: 'Limpieza',  color: '#6B8E6B', bg: '#F0F5F0', border: '#C8D8C8', dot: '#6B8E6B' },
-  mantenimiento: { label: 'Mantenimiento', color: '#A0522D', bg: '#F5EBE6', border: '#E0D0C8', dot: '#A0522D' },
-  fuera_servicio: { label: 'Fuera de servicio', color: '#8B8378', bg: '#F5F4F2', border: '#E0DDD8', dot: '#8B8378' },
+  reservada:       { label: 'Reservada', color: '#5B7FA3', bg: '#E6EDF5', border: '#B8C8E0', dot: '#5B7FA3' },
+  ocupada:        { label: 'Ocupada',   color: '#B8860B', bg: '#FDF6E3', border: '#E8D4A8', dot: '#B8860B' },
+  limpieza:       { label: 'Limpieza',  color: '#6B8E6B', bg: '#F0F5F0', border: '#C8D8C8', dot: '#6B8E6B' },
+  mantenimiento:    { label: 'Mantenimiento', color: '#A0522D', bg: '#F5EBE6', border: '#E0D0C8', dot: '#A0522D' },
+  fuera_servicio:   { label: 'Fuera de servicio', color: '#8B8378', bg: '#F5F4F2', border: '#E0DDD8', dot: '#8B8378' },
 };
 
 /**
- * Room type icons mapping - using Lucide icon names
+ * Room type icons mapping
  */
 export const TIPO_ICON = {
-  'Suite Bosque': 'Trees',
-  'Suite Sunset': 'Sunset',
-  'Suite Eden': 'Flower',
-  'Habitacion Pareja': 'Heart',
-  'Habitacion Doble Estandar': 'BedDouble',
-  'Habitacion Cuadruple Estandar': 'Bed',
-  'Cabana Familiar en Bote': 'Ship',
+  'Suite Bosque': Trees,
+  'Suite Sunset': Sunset,
+  'Suite Eden': Flower,
+  'Habitacion Pareja': Heart,
+  'Habitacion Doble Estandar': BedDouble,
+  'Habitacion Cuadruple Estandar': Bed,
+  'Cabana Familiar en Bote': Ship,
 };
 
 /**
  * Valid payment methods
  */
 export const METODOS_PAGO = [
-  { key: 'efectivo',      icon: 'Wallet', label: 'Efectivo' },
-  { key: 'tarjeta',       icon: 'CreditCard', label: 'Tarjeta' },
-  { key: 'transferencia', icon: 'Banknote', label: 'Transferencia' },
+  { key: 'efectivo',      icon: Wallet, label: 'Efectivo' },
+  { key: 'tarjeta',       icon: CreditCard, label: 'Tarjeta' },
+  { key: 'transferencia', icon: Banknote, label: 'Transferencia' },
 ];
 
 /**
  * Consumption category display config
  */
 export const CATEGORIAS_CONSUMO = [
-  { key: 'restaurante', label: 'Restaurante', icon: 'Utensils' },
-  { key: 'bar',         label: 'Bar', icon: 'Wine' },
-  { key: 'servicios',   label: 'Servicios', icon: 'Bell' },
+  { key: 'restaurante', label: 'Restaurante', icon: Utensils },
+  { key: 'bar',         label: 'Bar', icon: Wine },
+  { key: 'servicios',   label: 'Servicios', icon: Bell },
 ];
 
 /**
- * Category icons for display - using Lucide icon names
+ * Category icons for display
  */
 export const CAT_ICONS = {
-  restaurante: 'UtensilsCrossed',
-  bar: 'Wine',
-  servicios: 'Bell',
+  restaurante: UtensilsCrossed,
+  bar: Wine,
+  servicios: Bell,
 };
 
 /**
  * Amenity icons and labels for room display
- * Using Lucide icon names
  */
 export const AMENIDADES = {
-  jacuzzi_privado: { icono: 'Bath', label: 'Jacuzzi Privado' },
-  wifi: { icono: 'Wifi', label: 'WiFi' },
-  ac: { icono: 'Wind', label: 'Aire Acondicionado' },
-  tv: { icono: 'Tv', label: 'TV' },
-  bano_privado: { icono: 'Shower', label: 'Bano Privado' },
-  balcon: { icono: 'Sunrise', label: 'Balcon' },
-  terraza: { icono: 'Sun', label: 'Terraza' },
-  vista_bosque: { icono: 'Trees', label: 'Vista al Bosque' },
-  vista_bosque_premium: { icono: 'Sparkles', label: 'Vista Premium' },
-  orientacion_solar: { icono: 'Sunrise', label: 'Orientacion Solar' },
-  ducha_exterior: { icono: 'Shower', label: 'Ducha Exterior' },
-  jardin_privado: { icono: 'Flower', label: 'Jardin Privado' },
-  arquitectura_sostenible: { icono: 'Leaf', label: 'Arquitectura Sostenible' },
-  vista_lago: { icono: 'Waves', label: 'Vista al Lago' },
-  hamacas: { icono: 'Umbrella', label: 'Hamacas' },
-  cocina: { icono: 'ChefHat', label: 'Cocina Equipada' },
-  chimenea: { icono: 'Flame', label: 'Chimenea' },
-  terra_privada: { icono: 'Sun', label: 'Terraza Privada' },
-  minibar: { icono: 'Wine', label: 'Minibar' },
-  caja_fuerte: { icono: 'Lock', label: 'Caja Fuerte' },
-  room_service: { icono: 'Bell', label: 'Room Service' },
-  mascota: { icono: 'Dog', label: 'Mascotas Bienvenidas' },
-  parking: { icono: 'Parking', label: 'Estacionamiento' },
-  piscina: { icono: 'Waves', label: 'Piscina' },
-  spa: { icono: 'Heart', label: 'Spa' },
-  Restaurante: { icono: 'UtensilsCrossed', label: 'Restaurante' },
-  bar: { icono: 'Wine', label: 'Bar' },
-  lavanderia: { icono: 'Shirt', label: 'Lavanderia' },
-  gym: { icono: 'Dumbbell', label: 'Gimnasio' },
+  jacuzzi_privado: { icono: Bath, label: 'Jacuzzi Privado' },
+  wifi: { icono: Wifi, label: 'WiFi' },
+  ac: { icono: Wind, label: 'Aire Acondicionado' },
+  tv: { icono: Tv, label: 'TV' },
+  bano_privado: { icono: Droplets, label: 'Bano Privado' },
+  balcon: { icono: Sunrise, label: 'Balcon' },
+  terraza: { icono: Sun, label: 'Terraza' },
+  vista_bosque: { icono: Trees, label: 'Vista al Bosque' },
+  vista_bosque_premium: { icono: Sparkles, label: 'Vista Premium' },
+  orientacion_solar: { icono: Sunrise, label: 'Orientacion Solar' },
+  ducha_exterior: { icono: Droplets, label: 'Ducha Exterior' },
+  jardin_privado: { icono: Flower, label: 'Jardin Privado' },
+  arquitectura_sostenible: { icono: Leaf, label: 'Arquitectura Sostenible' },
+  vista_lago: { icono: Waves, label: 'Vista al Lago' },
+  hamacas: { icono: Umbrella, label: 'Hamacas' },
+  cocina: { icono: ChefHat, label: 'Cocina Equipada' },
+  chimenea: { icono: Flame, label: 'Chimenea' },
+  terra_privada: { icono: Sun, label: 'Terraza Privada' },
+  minibar: { icono: Wine, label: 'Minibar' },
+  caja_fuerte: { icono: Lock, label: 'Caja Fuerte' },
+  room_service: { icono: Bell, label: 'Room Service' },
+  mascota: { icono: PawPrint, label: 'Mascotas Bienvenidas' },
+  parking: { icono: Car, label: 'Estacionamiento' },
+  piscina: { icono: Waves, label: 'Piscina' },
+  spa: { icono: Heart, label: 'Spa' },
+  Restaurante: { icono: UtensilsCrossed, label: 'Restaurante' },
+  bar: { icono: Wine, label: 'Bar' },
+  lavanderia: { icono: Shirt, label: 'Lavanderia' },
 };
 
 /**

@@ -7,7 +7,7 @@ import { usePrices } from '../hooks/usePrices';
 import {
   CheckCircle, XCircle, Info, AlertTriangle, Search, Calendar, User, Phone, Mail,
   DollarSign, CreditCard, Building2, Clock, Package, UtensilsCrossed, MapPin, Edit2,
-  Trash2, X, RefreshCw, Plus, Save, Bed, Utensils, Wallet, Bell, KeyRound, Ban
+  Trash2, X, RefreshCw, Plus, Save, Bed, Utensils, Wallet, Bell, KeyRound, Ban, ClipboardList
 } from 'lucide-react';
 
 /**
@@ -389,7 +389,7 @@ function CheckoutPanel({ room, consumos, onAction, onRefresh }) {
       <div className="ra-metodos">
         {METODOS_PAGO.map((m) => (
           <button key={m.key} className={`ra-metodo-btn ${metodoPago === m.key ? 'activo' : ''}`} onClick={() => { setMetodoPago(m.key); setValorRecibido(''); }}>
-            <span>{m.icon}</span><span>{m.label}</span>
+            <span className="flex items-center justify-center">{m.icon && <m.icon className="w-4 h-4" />}</span><span>{m.label}</span>
           </button>
         ))}
       </div>

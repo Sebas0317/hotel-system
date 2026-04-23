@@ -7,7 +7,7 @@ import RoomActions, { Toast } from './RoomActions';
 import {
   CheckCircle, CircleDot, Circle, Sparkles, Wrench, Bell, User, Users, Dog,
   FileText, ClipboardList, Calendar, MapPin, Home, Bed, UtensilsCrossed,
-  Package, Copy, Clock, Plus, Leaf
+  Package, Copy, Clock, Plus, Leaf, Building2
 } from 'lucide-react';
 
 function RoomDetail({ room, onRefresh }) {
