@@ -1,0 +1,24 @@
+[
+  {
+    "id": "1781229789492-d237df59",
+    "userId": "1781220905883-dbe9ddc1",
+    "type": "login",
+    "codeHash": "989f0c6fda0dc619b126d01933b925709da33c64e2902774f9e760fd3fd3f2b5",
+    "expiresAt": 1781230089492,
+    "attempts": 0,
+    "maxAttempts": 5,
+    "used": false,
+    "createdAt": "2026-06-12T02:03:09.492Z"
+  },
+  {
+    "id": "1781229997244-98d03e6f",
+    "userId": "1781220905883-dbe9ddc1",
+    "type": "login",
+    "codeHash": "af3066e34c77419f8fb450cc8ba66be4963819b17af2047e1063b87a4f51796f",
+    "expiresAt": 1781230297244,
+    "attempts": 0,
+    "maxAttempts": 5,
+    "used": false,
+    "createdAt": "2026-06-12T02:06:37.244Z"
+  }
+]

@@ -136,6 +136,36 @@ describe('EcoBosque Hotel API', () => {
     });
   });
 
+  describe('GET /reservas (protected)', () => {
+    it('should reject without token', async () => {
+      const res = await request(app).get('/reservas');
+      expect(res.statusCode).toBe(401);
+    });
+
+    it('should accept with valid token', async () => {
+      const res = await request(app)
+        .get('/reservas')
+        .set('Authorization', `Bearer ${authToken}`);
+      expect(res.statusCode).toBe(200);
+      expect(Array.isArray(res.body)).toBe(true);
+    });
+  });
+
+  describe('GET /reservas/room/:roomId (protected)', () => {
+    it('should reject without token', async () => {
+      const res = await request(app).get('/reservas/room/test-room');
+      expect(res.statusCode).toBe(401);
+    });
+
+    it('should accept with valid token', async () => {
+      const res = await request(app)
+        .get('/reservas/room/test-room')
+        .set('Authorization', `Bearer ${authToken}`);
+      expect(res.statusCode).toBe(200);
+      expect(Array.isArray(res.body)).toBe(true);
+    });
+  });
+
   // ── Consumos Tests ──
   describe('GET /consumos/:roomId', () => {
     it('should return empty array for non-existent room', async () => {

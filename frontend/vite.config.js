@@ -19,11 +19,17 @@ export default defineConfig({
     }),
   ],
   server: {
+    hmr: {
+      clientPort: 5173,
+    },
     proxy: {
+      '/health': 'http://localhost:3001',
       '/rooms': 'http://localhost:3001',
+      '/reservas': 'http://localhost:3001',
       '/consumos': 'http://localhost:3001',
       '/prices': 'http://localhost:3001',
       '/auth': 'http://localhost:3001',
+      '/users': 'http://localhost:3001',
       '/history': 'http://localhost:3001',
       '/state-history': 'http://localhost:3001',
       '/accounting': 'http://localhost:3001',

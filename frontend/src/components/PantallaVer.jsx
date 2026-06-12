@@ -16,6 +16,26 @@ export default function PantallaVer({ onNav }) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const safeText = (value, fallback = '—') => {
+    if (value === null || value === undefined) return fallback;
+    if (typeof value === 'string') return value;
+    if (typeof value === 'number' || typeof value === 'boolean' || typeof value === 'bigint') return String(value);
+    try {
+      const serialized = JSON.stringify(value);
+      return serialized && serialized !== '{}' ? serialized : fallback;
+    } catch {
+      return fallback;
+    }
+  };
+
+  const safeErrorMessage = (e, fallback = 'Error al consultar habitación') => {
+    if (!e) return fallback;
+    if (typeof e === 'string') return e;
+    if (typeof e.message === 'string') return e.message;
+    if (typeof e.error === 'string') return e.error;
+    return safeText(e, fallback);
+  };
+
   const consultar = async () => {
     if (!numero.trim() || !pin.trim()) {
       return setError('Ingresa número de habitación y PIN');
@@ -28,7 +48,7 @@ export default function PantallaVer({ onNav }) {
       const consumosData = await fetchConsumos(data.id);
       setConsumos(consumosData);
     } catch (e) {
-      setError(e.message);
+      setError(safeErrorMessage(e));
     } finally {
       setLoading(false);
     }
@@ -46,7 +66,7 @@ export default function PantallaVer({ onNav }) {
   return (
     <PantallaForm
       titulo="Ver Habitacion"
-      desc={room ? `Habitación #${room.numero} · ${room.huesped}` : 'Ingresa el número y PIN para consultar'}
+      desc={room ? `Habitación #${safeText(room.numero)} · ${safeText(room.huesped, 'Sin huésped')}` : 'Ingresa el número y PIN para consultar'}
       onVolver={() => (room ? resetView() : onNav('menu'))}
     >
       {!room ? (

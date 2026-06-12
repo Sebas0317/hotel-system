@@ -1,5 +1,5 @@
-import { useState, createContext, useContext } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { createContext, useContext } from 'react';
+import { AnimatePresence } from 'framer-motion';
 
 const DialogContext = createContext({
   open: false,
@@ -36,23 +36,16 @@ export function DialogContent({ className = '', children }) {
       {open && (
         <>
           {/* Backdrop */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+          <div
             className="fixed inset-0 z-50 bg-black/50"
             onClick={() => onOpenChange(false)}
           />
           
           {/* Dialog */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            transition={{ duration: 0.2 }}
-            className="fixed left-[50%] top-[50%] z-50 translate-x-[-50%] translate-y-[-50%] 
+          <div
+            className={`fixed left-[50%] top-[50%] z-50 translate-x-[-50%] translate-y-[-50%] 
                        w-full max-w-lg max-h-[85vh] overflow-y-auto rounded-lg border border-gray-200 
-                       bg-white p-6 shadow-lg duration-200 sm:max-w-xl"
+                       bg-white p-6 shadow-lg duration-200 sm:max-w-xl ${className}`.trim()}
             role="dialog"
             aria-modal="true"
           >
@@ -67,7 +60,7 @@ export function DialogContent({ className = '', children }) {
               </svg>
             </button>
             {children}
-          </motion.div>
+          </div>
         </>
       )}
     </AnimatePresence>

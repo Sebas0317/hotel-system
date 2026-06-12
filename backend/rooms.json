@@ -40,12 +40,12 @@
     "camas": "1 cama king",
     "capacidad": 2,
     "piso": 1,
-    "estado": "disponible",
-    "huesped": null,
+    "estado": "ocupada",
+    "huesped": "Juan Pérez García",
     "telefono": null,
     "email": null,
-    "pin": null,
-    "checkIn": null,
+    "pin": "2995",
+    "checkIn": "2026-04-24T01:49:09.146Z",
     "checkOut": null,
     "noches": null,
     "solicitudCheckout": {
@@ -82,7 +82,7 @@
     "ninos": 0,
     "tieneMascota": false,
     "nombreMascota": "",
-    "reservationId": null
+    "reservationId": "RES-202604-B8S1"
   },
   {
     "id": "ss-201",

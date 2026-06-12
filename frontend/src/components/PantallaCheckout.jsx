@@ -26,6 +26,26 @@ export default function PantallaCheckout({ onNav }) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const safeText = (value, fallback = '—') => {
+    if (value === null || value === undefined) return fallback;
+    if (typeof value === 'string') return value;
+    if (typeof value === 'number' || typeof value === 'boolean' || typeof value === 'bigint') return String(value);
+    try {
+      const serialized = JSON.stringify(value);
+      return serialized && serialized !== '{}' ? serialized : fallback;
+    } catch {
+      return fallback;
+    }
+  };
+
+  const safeErrorMessage = (e, fallback = 'Error procesando checkout') => {
+    if (!e) return fallback;
+    if (typeof e === 'string') return e;
+    if (typeof e.message === 'string') return e.message;
+    if (typeof e.error === 'string') return e.error;
+    return safeText(e, fallback);
+  };
+
   const validar = async () => {
     if (!numero.trim() || !pin.trim()) {
       return setError('Ingresa número de habitación y PIN');
@@ -39,7 +59,7 @@ export default function PantallaCheckout({ onNav }) {
       setConsumos(consumosData);
       setStep(2);
     } catch (e) {
-      setError(e.message);
+      setError(safeErrorMessage(e));
     } finally {
       setLoading(false);
     }
@@ -60,7 +80,7 @@ export default function PantallaCheckout({ onNav }) {
       setFactura(data);
       setStep(3);
     } catch (e) {
-      setError(e.message);
+      setError(safeErrorMessage(e));
     } finally {
       setLoading(false);
     }
@@ -80,7 +100,13 @@ export default function PantallaCheckout({ onNav }) {
   return (
     <PantallaForm
       titulo="Check-out"
-      desc={step === 1 ? 'Ingresa habitación y PIN' : step === 2 ? `Habitación #${room?.numero} · ${room?.huesped}` : 'Checkout completado'}
+      desc={
+        step === 1
+          ? 'Ingresa habitación y PIN'
+          : step === 2
+            ? `Habitación #${safeText(room?.numero)} · ${safeText(room?.huesped, 'Sin huésped')}`
+            : 'Checkout completado'
+      }
       onVolver={step === 3 ? undefined : () => {
         if (step === 1) onNav('menu');
         else if (step === 2) resetToStep1();
@@ -161,7 +187,7 @@ export default function PantallaCheckout({ onNav }) {
                     setValorRecibido('');
                   }}
                 >
-                  <span>{m.icon}</span><span>{m.label}</span>
+                  <span className="flex items-center justify-center">{m.icon && <m.icon className="w-4 h-4" />}</span><span>{m.label}</span>
                 </button>
               ))}
             </div>

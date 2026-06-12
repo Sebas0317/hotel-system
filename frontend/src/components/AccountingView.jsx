@@ -1,13 +1,12 @@
-import { useState, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import { fetchAccountingSummary, downloadAccountingReport } from '../services/api';
-import { COP, FECHA } from '../utils/helpers';
+import { COP } from '../utils/helpers';
 import { Card, CardHeader, CardTitle, CardContent } from './ui/Card';
-import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import {
   Receipt, XCircle, Loader, Download, TrendingUp,
-  Percent, DollarSign, TrendingBar, CheckCircle2,
-  Home, Building2, Utensils, FileSpreadsheet
+  DollarSign, TrendingBar, CheckCircle2,
+  Home, UtensilsCrossed
 } from 'lucide-react';
 
 const SERVICE_COLORS = ['#22c55e', '#3b82f6', '#f59e0b', '#8b5cf6', '#ef4444'];
@@ -33,10 +32,15 @@ export default function AccountingView() {
     return () => { cancelled = true; };
   }, []);
 
-  const handleExport = () => {
+  const handleExport = async () => {
     setExporting(true);
-    downloadAccountingReport();
-    setTimeout(() => setExporting(false), 2000);
+    try {
+      await downloadAccountingReport();
+    } catch (err) {
+      setError(err.message || 'No se pudo descargar el reporte');
+    } finally {
+      setExporting(false);
+    }
   };
 
   if (loading) {
@@ -77,7 +81,9 @@ export default function AccountingView() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <Receipt className="w-8 h-8 inline mr-2" /> Contabilidad</h1>
+            <h1 className="text-2xl font-bold text-gray-900">
+              <Receipt className="w-8 h-8 inline mr-2" /> Contabilidad
+            </h1>
             <p className="text-sm text-gray-500 mt-1">Resumen financiero y reportes descargables</p>
           </div>
           <button
@@ -154,7 +160,9 @@ export default function AccountingView() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
           <Card>
             <CardHeader>
-              <Home className="w-4 h-4 inline mr-1" /> Habitaciones Actuales</CardTitle>
+              <CardTitle>
+                <Home className="w-4 h-4 inline mr-1" /> Habitaciones Actuales
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
@@ -187,7 +195,9 @@ export default function AccountingView() {
           {/* Revenue by Room Type Chart */}
           <Card>
             <CardHeader>
-              <DollarSign className="w-4 h-4 inline mr-1" /> Revenue por Tipo de Habitacion</CardTitle>
+              <CardTitle>
+                <DollarSign className="w-4 h-4 inline mr-1" /> Revenue por Tipo de Habitacion
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={250}>
@@ -207,7 +217,9 @@ export default function AccountingView() {
         {revenueByService && revenueByService.length > 0 && (
           <Card className="mb-6">
             <CardHeader>
-              <UtensilsCrossed className="w-4 h-4 inline mr-1" /> Ingresos por Servicio</CardTitle>
+              <CardTitle>
+                <UtensilsCrossed className="w-4 h-4 inline mr-1" /> Ingresos por Servicio
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

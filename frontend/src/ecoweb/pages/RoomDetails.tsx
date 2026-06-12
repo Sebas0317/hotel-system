@@ -5,6 +5,7 @@ import { COP } from '../../utils/helpers';
 import { ScrollToTop } from '../shared/ScrollToTop';
 import { AdultsDropdown, CheckIn, CheckOut, KidsDropdown } from '../components';
 import { hotelRules as originalHotelRules } from '../data';
+import { FaCheck } from 'react-icons/fa';
 
 // Amenity icons for ecoweb - consolidated with main app constants
 const AMENIDADES = {

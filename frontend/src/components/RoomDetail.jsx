@@ -7,7 +7,7 @@ import RoomActions, { Toast } from './RoomActions';
 import {
   CheckCircle, CircleDot, Circle, Sparkles, Wrench, Bell, User, Users, Dog,
   FileText, ClipboardList, Calendar, MapPin, Home, Bed, UtensilsCrossed,
-  Package, Copy, Clock, Plus, Leaf, Building2
+  Package, Copy, Clock, Plus, Leaf, Building2, KeyRound
 } from 'lucide-react';
 
 function RoomDetail({ room, onRefresh }) {
@@ -66,7 +66,7 @@ function RoomDetail({ room, onRefresh }) {
         if (!cancelled) setConsumosLoading(false);
       });
     return () => { cancelled = true; };
-  }, [room.id]);
+  }, [room]);
 
   useEffect(() => {
     let cancelled = false;

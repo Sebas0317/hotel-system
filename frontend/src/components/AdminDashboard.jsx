@@ -425,7 +425,7 @@ function ConsumosPieChart({ data, onBarClick }) {
 }
 
 // ── Main Dashboard ──
-export function AdminDashboard({ rooms = [], stateHistory = [], consumos = [] }) {
+export function AdminDashboard({ rooms = [], consumos = [] }) {
   const [filters, setFilters] = useState({ month: 'all', roomType: 'all', status: 'all', consumoCat: 'all' });
 
   // Extract unique room types
@@ -473,7 +473,7 @@ export function AdminDashboard({ rooms = [], stateHistory = [], consumos = [] })
 
     return months.map((mes, i) => ({
       mes,
-      ocupacion: Math.min(100, Math.max(20, base + Math.sin(i * 0.6) * 12 + (Math.random() * 8 - 4))),
+      ocupacion: Math.min(100, Math.max(20, base + Math.sin(i * 0.6) * 12)),
     })).map(d => ({ ...d, ocupacion: Math.round(d.ocupacion) }));
   }, [stats.ocupacionPct]);
 

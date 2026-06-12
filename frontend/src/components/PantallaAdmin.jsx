@@ -1,6 +1,7 @@
 import { useMemo, useCallback, useState, useEffect, memo } from 'react';
-import { motion } from 'framer-motion';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import { toast as sonnerToast } from 'sonner';
 import {
   BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
@@ -19,7 +20,7 @@ import { useRoomSync } from '../hooks/useRoomSync';
 import { queryKeys } from '../hooks/useQueryKeys';
 import { ESTADO_CFG, TIPO_ICON, TIPOS_HABITACION, CATEGORIAS_CONSUMO } from '../constants';
 import { FECHA, filtrarRooms, agruparPorPiso, COP } from '../utils/helpers';
-import { fetchHistory, fetchRooms, createConsumo, checkIn, fetchLastLogin, fetchLoginLogs, fetchStateHistory, fetchAccountingSummary, downloadAccountingReport } from '../services/api';
+import { fetchHistory, fetchRooms, createConsumo, checkIn, fetchLastLogin, fetchLoginLogs, fetchStateHistory, fetchAccountingSummary, downloadAccountingReport, downloadLoginLogsCSV } from '../services/api';
 import RoomDetail from './RoomDetail';
 import HotelTitle from './HotelTitle';
 import PriceEditor from './PriceEditor';
@@ -27,6 +28,7 @@ import { Toast } from './RoomActions';
 import { AdminDashboard } from './AdminDashboard';
 import { Card, CardContent } from './ui/Card';
 import PantallaCheckin from './PantallaCheckin';
+import PantallaUsuarios from './PantallaUsuarios';
 
 const NAV_ITEMS = [
   { key: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -35,6 +37,7 @@ const NAV_ITEMS = [
   { key: 'transactions', label: 'Transacciones', icon: CreditCard },
   { key: 'accounting', label: 'Contabilidad', icon: Receipt },
   { key: 'prices', label: 'Precios', icon: DollarSign },
+  { key: 'users', label: 'Usuarios', icon: Users },
 ];
 
 /** Memoized topbar with last login and logs dropdown */
@@ -43,6 +46,7 @@ const AdminTopbar = memo(function AdminTopbar({ onSalir, onNavigate }) {
   const [logsOpen, setLogsOpen] = useState(false);
   const [logs, setLogs] = useState([]);
   const [logsLoading, setLogsLoading] = useState(false);
+  const [nowMs, setNowMs] = useState(0);
 
   // Fetch last login info
   useEffect(() => {
@@ -51,19 +55,28 @@ const AdminTopbar = memo(function AdminTopbar({ onSalir, onNavigate }) {
     }).catch(() => {});
   }, []);
 
-  // Fetch logs when dropdown opens
   useEffect(() => {
-    if (logsOpen && logs.length === 0) {
+    const updateNow = () => setNowMs(new Date().getTime());
+    updateNow();
+    const timer = setInterval(updateNow, 60000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const handleToggleLogs = useCallback(() => {
+    const opening = !logsOpen;
+    setLogsOpen(opening);
+    if (opening && logs.length === 0) {
       setLogsLoading(true);
-      fetchLoginLogs(50).then(data => {
-        setLogs(data || []);
-      }).catch(() => {}).finally(() => setLogsLoading(false));
+      fetchLoginLogs(50)
+        .then(data => setLogs(data || []))
+        .catch(() => {})
+        .finally(() => setLogsLoading(false));
     }
-  }, [logsOpen]);
+  }, [logsOpen, logs.length]);
 
   const formatTimeAgo = (ts) => {
     if (!ts) return '';
-    const diff = Date.now() - new Date(ts).getTime();
+    const diff = nowMs - new Date(ts).getTime();
     const mins = Math.floor(diff / 60000);
     if (mins < 1) return 'Ahora mismo';
     if (mins < 60) return `Hace ${mins}m`;
@@ -93,7 +106,7 @@ const AdminTopbar = memo(function AdminTopbar({ onSalir, onNavigate }) {
         {/* Logs Dropdown */}
         <div className="relative">
           <button
-            onClick={() => setLogsOpen(!logsOpen)}
+            onClick={handleToggleLogs}
             className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
           >
             <ClipboardList className="w-4 h-4" />
@@ -281,16 +294,12 @@ const RoomCard = memo(function RoomCard({ room, isSelected, onSelect }) {
   const cfg = ESTADO_CFG[room.estado] || ESTADO_CFG.disponible;
 
   return (
-    <motion.button
+    <button
       className={`w-full text-left cursor-pointer rounded-xl border-2 p-4 transition-all bg-white ${
         isSelected ? 'ring-2 ring-green-500 ring-offset-2 shadow-lg' : 'hover:shadow-lg'
       }`}
       style={{ borderColor: cfg.border }}
       onClick={() => onSelect(room.id)}
-      whileHover={{ scale: 1.02, y: -4, boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)' }}
-      whileTap={{ scale: 0.98 }}
-      transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-      layout
     >
       {/* Header: Room number + Status */}
       <div className="flex items-center justify-between mb-3">
@@ -331,7 +340,7 @@ const RoomCard = memo(function RoomCard({ room, isSelected, onSelect }) {
           </div>
         )}
       </div>
-    </motion.button>
+    </button>
   );
 });
 
@@ -627,75 +636,43 @@ function CheckinForm({ room, onSuccess, onCancel }) {
 
 export default function PantallaAdmin({ onSalir, onNav }) {
   const { rooms, loading, refresh } = useRooms();
-  const [toast, setToast] = useState(null);
+  const [inlineToast, setInlineToast] = useState(null);
 
-  // ── Initialize all state from URL hash ──────────────────
-  const getInitialState = () => {
-    const hash = window.location.hash || '';
-    // Extract path from hash (everything after #)
-    const hashPath = hash.startsWith('#') ? hash.slice(1) : hash;
-    // Remove query string for path matching
-    const pathOnly = hashPath.split('?')[0] || '';
-    const queryString = hashPath.includes('?') ? hashPath.split('?')[1] : '';
-    const params = new URLSearchParams(queryString);
+  // ── Derive view state from React Router pathname ──
+  function getViewFromPath(pathname) {
+    const path = pathname.split('?')[0];
+    if (path.includes('/admin/dashboard')) return 'dashboard';
+    if (path === '/admin' || path === '/admin/' || path === '') return 'rooms';
+    if (path.includes('/admin/room/')) return 'rooms';
+    if (path.includes('/admin/register')) return 'register';
+    if (path.includes('/admin/transactions')) return 'transactions';
+    if (path.includes('/admin/reservations') || path.includes('/admin/reservaciones')) return 'reservations';
+    if (path.includes('/admin/accounting')) return 'accounting';
+    if (path.includes('/admin/prices')) return 'prices';
+    if (path.includes('/admin/users')) return 'users';
+    if (path.includes('/admin/history')) return 'history';
+    if (path.includes('/admin')) return 'rooms';
+    return 'dashboard';
+  }
 
-    // Determine view from hash path
-    let view = 'dashboard';
-    if (pathOnly.includes('/admin/dashboard')) view = 'dashboard';
-    else if (pathOnly === '/admin' || pathOnly === '/admin/' || pathOnly === '') view = 'rooms';
-    else if (pathOnly.includes('/admin/room/')) view = 'rooms';
-    else if (pathOnly.includes('/admin/register')) view = 'register';
-    else if (pathOnly.includes('/admin/transactions')) view = 'transactions';
-    else if (pathOnly.includes('/admin/reservations') || pathOnly.includes('/admin/reservaciones')) view = 'reservations';
-    else if (pathOnly.includes('/admin/accounting')) view = 'accounting';
-    else if (pathOnly.includes('/admin/prices')) view = 'prices';
-    else if (pathOnly.includes('/admin/history')) view = 'history';
-    else if (pathOnly.includes('/admin')) view = 'rooms';
+  function getRoomIdFromPath(pathname) {
+    const m = pathname.match(/\/admin\/room\/(.+?)(?:\/|$)/);
+    return m ? m[1] : null;
+  }
 
-    // Extract room ID from hash path
-    const roomMatch = pathOnly.match(/\/admin\/room\/(.+?)(?:\?|$)/);
-    const selectedRoomId = roomMatch ? roomMatch[1] : null;
+  const location = useLocation();
+  const routerNavigate = useNavigate();
+  const navigateFn = onNav || routerNavigate;
+  const activeView = getViewFromPath(location.pathname);
+  const selectedRoomId = getRoomIdFromPath(location.pathname);
 
-    return {
-      activeView: view,
-      selectedRoomId,
-      filtro: params.get('filtro') || 'todos',
-      buscar: params.get('buscar') || '',
-      tipo: params.get('tipo') || 'todos',
-      viewMode: params.get('viewMode') || 'grid',
-    };
-  };
+  const [filtro, setFiltro] = useState('todos');
+  const [buscar, setBuscar] = useState('');
+  const [tipo, setTipo] = useState('todos');
+  const [viewMode, setViewMode] = useState('grid');
 
-  const initial = getInitialState();
-  const [activeView, setActiveView] = useState(initial.activeView);
-  const [selectedRoomId, setSelectedRoomId] = useState(initial.selectedRoomId);
-  const [filtro, setFiltro] = useState(initial.filtro);
-  const [buscar, setBuscar] = useState(initial.buscar);
-  const [tipo, setTipo] = useState(initial.tipo);
-  const [viewMode, setViewMode] = useState(initial.viewMode);
-
-  /** Update URL hash with current state */
-  const updateUrl = useCallback((updates = {}) => {
-    const currentHash = window.location.hash.slice(1) || '';
-    const basePath = currentHash.split('?')[0] || '/admin';
-    const params = new URLSearchParams(currentHash.includes('?') ? currentHash.split('?')[1] : '');
-
-    // Apply updates
-    Object.entries(updates).forEach(([key, value]) => {
-      if (value && value !== 'todos' && value !== 'grid') {
-        params.set(key, value);
-      } else {
-        params.delete(key);
-      }
-    });
-
-    const queryString = params.toString();
-    const newHash = queryString ? `${basePath}?${queryString}` : basePath;
-    window.location.hash = newHash;
-  }, []);
-
-  /** Navigate to a different view using React Router */
-  const navigateTo = useCallback((view, extraParams = {}) => {
+  /** Navigate to a different admin view */
+  const navigateTo = useCallback((view) => {
     const paths = {
       dashboard: '/admin/dashboard',
       rooms: '/admin',
@@ -704,57 +681,64 @@ export default function PantallaAdmin({ onSalir, onNav }) {
       reservations: '/admin/reservations',
       accounting: '/admin/accounting',
       prices: '/admin/prices',
+      users: '/admin/users',
       history: '/admin/history',
     };
+    navigateFn(paths[view] || '/admin');
+  }, [navigateFn]);
 
-    const basePath = paths[view] || '/admin';
-    const params = new URLSearchParams();
-
-    Object.entries(extraParams).forEach(([key, value]) => {
-      if (value && value !== 'todos' && value !== 'grid') {
-        params.set(key, value);
-      }
-    });
-
-    const queryString = params.toString();
-    const fullPath = queryString ? `${basePath}?${queryString}` : basePath;
-    
-    // Use React Router navigate if available, fallback to hash
-    if (onNav) {
-      onNav(fullPath);
-    } else {
-      window.location.hash = fullPath;
-    }
-  }, [onNav]);
-
-  // Sync state to URL whenever it changes
+  // ── Document title sync ──
+  const VIEW_TITLES = {
+    dashboard: 'Dashboard',
+    rooms: 'Habitaciones',
+    register: 'Registro',
+    transactions: 'Transacciones',
+    reservations: 'Reservaciones',
+    accounting: 'Contabilidad',
+    prices: 'Precios',
+    users: 'Usuarios',
+    history: 'Historial',
+  };
   useEffect(() => {
-    if (activeView === 'rooms') {
-      updateUrl({ filtro, buscar, tipo, viewMode });
-    }
-  }, [filtro, buscar, tipo, viewMode, activeView, updateUrl]);
+    document.title = `${VIEW_TITLES[activeView] || 'Admin'} | EcoBosque Hotel`;
+  }, [activeView]);
 
-  // Listen to browser back/forward (hash changes)
-  useEffect(() => {
-    const handleHashSync = () => {
-      const state = getInitialState();
-      setActiveView(state.activeView);
-      setSelectedRoomId(state.selectedRoomId);
-      setFiltro(state.filtro);
-      setBuscar(state.buscar);
-      setTipo(state.tipo);
-      setViewMode(state.viewMode);
-    };
+  // ── Breadcrumbs ──
+  const breadcrumbs = useMemo(() => {
+    const items = [{ label: 'Admin', path: '/admin' }];
+    if (activeView === 'dashboard') items.push({ label: 'Dashboard', path: '/admin/dashboard' });
+    else if (activeView === 'rooms') items.push({ label: 'Habitaciones', path: '/admin' });
+    else if (activeView === 'register') items.push({ label: 'Registro', path: '/admin/register' });
+    else if (activeView === 'transactions') items.push({ label: 'Transacciones', path: '/admin/transactions' });
+    else if (activeView === 'reservations') items.push({ label: 'Reservaciones', path: '/admin/reservations' });
+    else if (activeView === 'accounting') items.push({ label: 'Contabilidad', path: '/admin/accounting' });
+    else if (activeView === 'prices') items.push({ label: 'Precios', path: '/admin/prices' });
+    else if (activeView === 'users') items.push({ label: 'Usuarios', path: '/admin/users' });
+    else if (activeView === 'history') items.push({ label: 'Historial', path: '/admin/history' });
+    if (selectedRoomId) items.push({ label: `Habitacion #${selectedRoomId}`, path: `/admin/room/${selectedRoomId}` });
+    return items;
+  }, [activeView, selectedRoomId]);
 
-    handleHashSync(); // Run on mount to sync initial URL state
-    window.addEventListener('hashchange', handleHashSync);
-    return () => window.removeEventListener('hashchange', handleHashSync);
-  }, []);
+  const renderBreadcrumbs = () => (
+    <div className="flex items-center gap-2 text-xs text-gray-500 mb-4 px-1">
+      {breadcrumbs.map((crumb, i) => (
+        <span key={crumb.path + '-' + i} className="flex items-center gap-1.5">
+          {i > 0 && <ChevronRight className="w-3 h-3 text-gray-300" />}
+          {i < breadcrumbs.length - 1 ? (
+            <button
+              onClick={() => navigateFn(crumb.path)}
+              className="hover:text-green-600 transition-colors cursor-pointer bg-transparent border-none p-0"
+            >
+              {crumb.label}
+            </button>
+          ) : (
+            <span className="text-gray-900 font-medium">{crumb.label}</span>
+          )}
+        </span>
+      ))}
+    </div>
+  );
 
-  const [history, setHistory] = useState([]);
-  const [reservationHistory, setReservationHistory] = useState([]);
-  const [historyLoading, setHistoryLoading] = useState(false);
-  const [allRooms, setAllRooms] = useState([]);
   const [expandedRoomId, setExpandedRoomId] = useState(null);
 
   // Table filter states
@@ -772,7 +756,7 @@ export default function PantallaAdmin({ onSalir, onNav }) {
   });
 
   const showToast = useCallback((type, message) => {
-    setToast({ type, message });
+    setInlineToast({ type, message });
   }, []);
 
   useRoomSync({
@@ -800,31 +784,17 @@ export default function PantallaAdmin({ onSalir, onNav }) {
     enabled: activeView === 'accounting', // Only fetch when on accounting view
   });
 
-  // Compute derived state from query data
-  const accountingData = accData || accData;
-
   // History loading — using TanStack Query
-  const { data: historyData } = useQuery({
+  const { data: historyData, isLoading: historyLoading } = useQuery({
     queryKey: queryKeys.history,
     queryFn: () => Promise.all([fetchStateHistory(), fetchRooms(), fetchHistory()]),
     staleTime: 1000 * 60 * 10, // 10 minutes
-    enabled: activeView === 'history',
+    enabled: activeView === 'history' || activeView === 'reservations',
   });
 
-  // Extract history data when available
-  useEffect(() => {
-    if (historyData && activeView === 'history') {
-      const [stateHistoryData, roomsData, resData] = historyData;
-      setHistory(stateHistoryData || []);
-      setAllRooms(roomsData);
-      setReservationHistory(resData?.reservas || resData || []);
-      setHistoryLoading(false);
-    }
-  }, [historyData, activeView]);
-
-  const selectRoom = useCallback((roomId) => {
-    setSelectedRoomId(prev => prev === roomId ? null : roomId);
-  }, []);
+  const history = historyData?.[0] || [];
+  const allRooms = historyData?.[1] || [];
+  const reservationHistory = historyData?.[2]?.reservas || historyData?.[2] || [];
 
   const handleRefresh = useCallback(() => {
     refresh();
@@ -865,31 +835,26 @@ export default function PantallaAdmin({ onSalir, onNav }) {
     [rooms, selectedRoomId]
   );
 
-  const disponibles = useMemo(
-    () => rooms.filter(r => r.estado === 'disponible'),
-    [rooms]
-  );
-
   // Transaction handlers — always called, not conditionally
   const handleValidatePin = useCallback(() => {
     const room = rooms.find(r => r.id === txn.roomId);
     if (!room || room.pin !== txn.pin) {
       setTxn(prev => ({ ...prev, error: 'PIN incorrecto' }));
-      toast.error('PIN incorrecto');
+      sonnerToast.error('PIN incorrecto');
       return;
     }
     setTxn(prev => ({ ...prev, room, error: '' }));
-    toast.success('Habitacion encontrada');
+    sonnerToast.success('Habitacion encontrada');
   }, [rooms, txn.roomId, txn.pin]);
 
   const handleRegisterConsumo = useCallback(async () => {
     if (!txn.form.descripcion.trim() || !txn.form.precio) {
       setTxn(prev => ({ ...prev, error: 'Completa todos los campos' }));
-      toast.error('Completa todos los campos');
+      sonnerToast.error('Completa todos los campos');
       return;
     }
     setTxn(prev => ({ ...prev, loading: true, error: '' }));
-    const loadingToast = toast.loading('Registrando consumo...');
+    const loadingToast = sonnerToast.loading('Registrando consumo...');
     
     try {
       await createConsumo({
@@ -899,8 +864,8 @@ export default function PantallaAdmin({ onSalir, onNav }) {
         categoria: txn.cat,
       });
       
-      toast.dismiss(loadingToast);
-      toast.success('Consumo registrado exitosamente', {
+      sonnerToast.dismiss(loadingToast);
+      sonnerToast.success('Consumo registrado exitosamente', {
         duration: 3000,
       });
       
@@ -911,9 +876,9 @@ export default function PantallaAdmin({ onSalir, onNav }) {
         form: { descripcion: '', precio: '' },
       }));
       setTimeout(() => setTxn(prev => ({ ...prev, exito: false })), 2000);
-    } catch (error) {
-      toast.dismiss(loadingToast);
-      toast.error('Error al registrar consumo');
+    } catch {
+      sonnerToast.dismiss(loadingToast);
+      sonnerToast.error('Error al registrar consumo');
       setTxn(prev => ({ ...prev, loading: false, error: 'Error al registrar consumo' }));
     }
   }, [txn.room, txn.form, txn.cat]);
@@ -936,17 +901,15 @@ export default function PantallaAdmin({ onSalir, onNav }) {
   }, []);
 
   const handleSelectRoom = useCallback((roomId) => {
-    setSelectedRoomId(prev => prev === roomId ? null : roomId);
-  }, []);
+    const current = getRoomIdFromPath(window.location.pathname);
+    navigateFn(current === roomId ? '/admin' : `/admin/room/${roomId}`);
+  }, [navigateFn]);
 
   const handleClearFilters = useCallback(() => {
     setFiltro('todos');
     setBuscar('');
     setTipo('todos');
   }, []);
-
-  // Memoize large JSX subtrees
-  const roomListHeader = useMemo(() => null, []);
 
   // Filtered list view data
   const filteredListView = useMemo(() => {
@@ -1026,7 +989,7 @@ export default function PantallaAdmin({ onSalir, onNav }) {
         </table>
       </div>
     </div>
-  ), [reservadasUOcupadas, selectedRoomId, handleSelectRoom]);
+  ), [filteredListView, listFilter, selectedRoomId, handleSelectRoom]);
 
   const roomGrid = useMemo(() => (
     <div>
@@ -1106,6 +1069,7 @@ export default function PantallaAdmin({ onSalir, onNav }) {
       <div className="min-h-screen bg-gray-50">
         <AdminTopbar onSalir={onSalir} onNavigate={handleNavigate} />
         <AdminNav activeView={activeView} onNavigate={handleNavigate} />
+          {renderBreadcrumbs()}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-bold"><ClipboardList className="w-5 h-5 inline mr-2" /> Historial de Estados</h2>
@@ -1194,9 +1158,6 @@ export default function PantallaAdmin({ onSalir, onNav }) {
                                 r.huesped !== ''
                               );
                             }
-
-                            // Also check if entry has huesped data directly
-                            const hasGuestData = reservation?.huesped || entry.huesped;
 
                             return (
                               <div key={entry.id} className="relative flex gap-4 pb-4">
@@ -1320,11 +1281,23 @@ export default function PantallaAdmin({ onSalir, onNav }) {
   }
 
   // ── Prices view ──
+  if (activeView === 'users') {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <AdminTopbar onSalir={onSalir} onNavigate={handleNavigate} />
+        <AdminNav activeView={activeView} onNavigate={handleNavigate} />
+          {renderBreadcrumbs()}
+        <PantallaUsuarios />
+      </div>
+    );
+  }
+
   if (activeView === 'prices') {
     return (
       <div className="min-h-screen bg-gray-50">
         <AdminTopbar onSalir={onSalir} onNavigate={handleNavigate} />
         <AdminNav activeView={activeView} onNavigate={handleNavigate} />
+          {renderBreadcrumbs()}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <PriceEditor
             onUpdate={() => showToast('success', 'Precios actualizados')}
@@ -1358,18 +1331,17 @@ export default function PantallaAdmin({ onSalir, onNav }) {
     }));
 
     // Filtered reservations
-    const filteredReservations = useMemo(() => {
-      return allReservations.filter(r => {
-        if (resFilter.numero && !String(r.numero).includes(resFilter.numero)) return false;
-        if (resFilter.huesped && !r.huesped?.toLowerCase().includes(resFilter.huesped.toLowerCase())) return false;
-        return true;
-      });
-    }, [allReservations, resFilter]);
+    const filteredReservations = allReservations.filter(r => {
+      if (resFilter.numero && !String(r.numero).includes(resFilter.numero)) return false;
+      if (resFilter.huesped && !r.huesped?.toLowerCase().includes(resFilter.huesped.toLowerCase())) return false;
+      return true;
+    });
 
     return (
       <div className="min-h-screen bg-gray-50">
         <AdminTopbar onSalir={onSalir} onNavigate={handleNavigate} />
         <AdminNav activeView={activeView} onNavigate={handleNavigate} />
+          {renderBreadcrumbs()}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-bold"><Calendar className="w-5 h-5 inline mr-2" /> Reservaciones</h2>
@@ -1450,6 +1422,7 @@ export default function PantallaAdmin({ onSalir, onNav }) {
       <div className="min-h-screen bg-gray-50">
         <AdminTopbar onSalir={onSalir} onNavigate={handleNavigate} />
         <AdminNav activeView={activeView} onNavigate={handleNavigate} />
+          {renderBreadcrumbs()}
         <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <h2 className="text-xl font-bold"><CreditCard className="w-5 h-5 inline mr-2" /> Registrar Consumo</h2>
           {txn.exito && (
@@ -1524,17 +1497,16 @@ export default function PantallaAdmin({ onSalir, onNav }) {
 
   // ── Accounting view ──
   if (activeView === 'accounting') {
-    const handleExport = () => {
+    const handleExport = async () => {
       setExporting(true);
-      downloadAccountingReport();
-      setTimeout(() => setExporting(false), 2000);
-    };
-
-    const formatM = (v) => {
-      if (!v) return '$0';
-      if (v >= 1000000) return `$${(v / 1000000).toFixed(1)}M`;
-      if (v >= 1000) return `$${(v / 1000).toFixed(0)}k`;
-      return `$${v}`;
+      try {
+        await downloadAccountingReport();
+        sonnerToast.success('Reporte descargado');
+      } catch (err) {
+        sonnerToast.error(err.message || 'Error al descargar el reporte');
+      } finally {
+        setExporting(false);
+      }
     };
 
     const statusData = accData ? [
@@ -1556,6 +1528,7 @@ export default function PantallaAdmin({ onSalir, onNav }) {
       <div className="min-h-screen bg-gray-50">
         <AdminTopbar onSalir={onSalir} onNavigate={handleNavigate} />
         <AdminNav activeView={activeView} onNavigate={handleNavigate} />
+          {renderBreadcrumbs()}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between mb-6">
             <div>
@@ -1704,13 +1677,21 @@ export default function PantallaAdmin({ onSalir, onNav }) {
       <div className="min-h-screen bg-gray-50">
         <AdminTopbar onSalir={onSalir} onNavigate={handleNavigate} />
         <AdminNav activeView={activeView} onNavigate={handleNavigate} />
+          {renderBreadcrumbs()}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center gap-2 text-sm text-gray-500 mb-4">
-            <span className="flex items-center"><Home className="w-4 h-4 inline mr-1" /> Admin</span>
-            <span>›</span>
-            <span className="text-green-600 font-medium">Nueva Reserva / Check-in</span>
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
+            <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+              <div>
+                <h2 className="text-lg font-bold text-gray-900">Nueva Reserva / Check-in</h2>
+                <p className="text-xs text-gray-500 mt-0.5">Registrar huesped y asignar habitacion</p>
+              </div>
+              <div className="flex items-center gap-3">
+                <Building2 className="w-6 h-6 text-green-600" />
+                <HotelTitle variant="inline" />
+              </div>
+            </div>
           </div>
-          <PantallaCheckin onNav={(action) => {
+          <PantallaCheckin standalone={false} onNav={(action) => {
             if (action === 'menu' || action === 'volver') {
               setActiveView('rooms');
             }
@@ -1726,6 +1707,7 @@ export default function PantallaAdmin({ onSalir, onNav }) {
       <div className="min-h-screen bg-gray-50">
         <AdminTopbar onSalir={onSalir} onNavigate={handleNavigate} />
         <AdminNav activeView={activeView} onNavigate={handleNavigate} />
+          {renderBreadcrumbs()}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <AdminDashboard
             rooms={rooms}
@@ -1742,6 +1724,7 @@ export default function PantallaAdmin({ onSalir, onNav }) {
     <div className="min-h-screen bg-gray-50">
       <AdminTopbar onSalir={onSalir} onNavigate={handleNavigate} />
       <AdminNav activeView={activeView} onNavigate={handleNavigate} />
+        {renderBreadcrumbs()}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-sm text-gray-500 mb-4">
@@ -1764,38 +1747,37 @@ export default function PantallaAdmin({ onSalir, onNav }) {
 
         {/* Unified filter bar */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
-          {/* StatPills only shown in grid view */}
-          {viewMode === 'grid' && (
-            <div className="px-4 py-3 border-b border-gray-100">
-              <StatPills stats={stats} filtro={filtro} onFilter={handleFilter} />
-            </div>
-          )}
+          <div className="px-4 py-3 flex flex-wrap items-center gap-4">
+            {/* StatPills */}
+            {viewMode === 'grid' && (
+              <div className="flex flex-wrap items-center gap-2">
+                <StatPills stats={stats} filtro={filtro} onFilter={handleFilter} />
+              </div>
+            )}
 
-          {/* Row 2: Search + Type + ViewMode */}
-          <div className="px-4 py-3 flex flex-col sm:flex-row items-start sm:items-center gap-3">
             {/* Search */}
-            <div className="relative flex-1 max-w-md w-full">
-              <Search className="w-4 h-4" />
+            <div className="relative flex-1 min-w-[200px] max-w-xs">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input
-                className="w-full pl-10 pr-10 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                className="w-full pl-10 pr-10 py-2.5 border border-gray-200 rounded-lg text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all"
                 type="text"
-                placeholder="Buscar habitación o huésped..."
+                placeholder="Buscar..."
                 value={buscar}
                 onChange={e => setBuscar(e.target.value)}
               />
               {buscar && (
                 <button
                   onClick={() => setBuscar('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 bg-transparent border-none cursor-pointer"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 >
-                  ✕
+                  <X className="w-4 h-4" />
                 </button>
               )}
             </div>
 
             {/* Type dropdown */}
             <select
-              className="w-full sm:w-auto px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-white"
+              className="px-3 py-2.5 border border-gray-200 rounded-lg text-sm bg-gray-50 hover:bg-white focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all"
               value={tipo}
               onChange={e => setTipo(e.target.value)}
             >
@@ -1805,7 +1787,7 @@ export default function PantallaAdmin({ onSalir, onNav }) {
               ))}
             </select>
 
-            {/* View mode toggle */}
+            {/* ViewMode toggle */}
             <ViewModeToggle viewMode={viewMode} onChange={handleViewMode} />
           </div>
 
@@ -1847,7 +1829,7 @@ export default function PantallaAdmin({ onSalir, onNav }) {
           )}
         </div>
 
-        {toast && <Toast message={toast.message} type={toast.type} onDismiss={() => setToast(null)} />}
+        {inlineToast && <Toast message={inlineToast.message} type={inlineToast.type} onDismiss={() => setInlineToast(null)} />}
 
         {/* Two-column layout: rooms list/grid + side panel */}
         <div className={`flex gap-6 transition-all duration-300 ${selectedRoomId ? 'lg:grid lg:grid-cols-1 lg:xl:grid-cols-[1fr_400px]' : ''}`}>

@@ -1,7 +1,7 @@
 import { Routes, Route, useNavigate, Navigate, useLocation } from 'react-router-dom';
 import { useState, Suspense, lazy } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
-import { Toaster, toast } from 'sonner';
+import { AnimatePresence } from 'framer-motion';
+import { Toaster } from 'sonner';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { getAuthToken, setAuthToken } from './services/api';
 import './App.css';
@@ -49,20 +49,6 @@ function LoadingFallback() {
         Cargando...
       </div>
     </div>
-  );
-}
-
-// Page transition wrapper component
-function PageTransition({ children }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -10 }}
-      transition={{ duration: 0.2, ease: 'easeInOut' }}
-    >
-      {children}
-    </motion.div>
   );
 }
 
@@ -151,6 +137,28 @@ export default function App() {
           }
         />
 
+        {/* Login sub-routes — LoginScreen handles internal routing */}
+        <Route
+          path="/login/admin"
+          element={!rol ? <LoginScreen onRole={handleRol} /> : <Navigate to="/admin" replace />}
+        />
+        <Route
+          path="/login/forgot"
+          element={!rol ? <LoginScreen onRole={handleRol} /> : <Navigate to="/admin" replace />}
+        />
+        <Route
+          path="/forgot"
+          element={!rol ? <LoginScreen onRole={handleRol} /> : <Navigate to="/admin" replace />}
+        />
+        <Route
+          path="/login/2fa/:userId"
+          element={!rol ? <LoginScreen onRole={handleRol} /> : <Navigate to="/admin" replace />}
+        />
+        <Route
+          path="/2fa/:userId"
+          element={!rol ? <LoginScreen onRole={handleRol} /> : <Navigate to="/admin" replace />}
+        />
+
         <Route
           path="/admin"
           element={
@@ -196,6 +204,28 @@ export default function App() {
         />
 
         <Route
+          path="/admin/register/checkin"
+          element={
+            rol === 'admin' ? (
+              <PantallaAdmin onSalir={handleExit} onNav={(path) => navigate(path)} />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
+
+        <Route
+          path="/admin/register/new"
+          element={
+            rol === 'admin' ? (
+              <PantallaAdmin onSalir={handleExit} onNav={(path) => navigate(path)} />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
+
+        <Route
           path="/admin/transactions"
           element={
             rol === 'admin' ? (
@@ -230,6 +260,17 @@ export default function App() {
 
         <Route
           path="/admin/prices"
+          element={
+            rol === 'admin' ? (
+              <PantallaAdmin onSalir={handleExit} onNav={(path) => navigate(path)} />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
+
+        <Route
+          path="/admin/users"
           element={
             rol === 'admin' ? (
               <PantallaAdmin onSalir={handleExit} onNav={(path) => navigate(path)} />

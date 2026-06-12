@@ -1,10 +1,23 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { DayPicker } from 'react-day-picker';
-import { format, addDays, eachDayOfInterval, isWithinInterval, isSameDay } from 'date-fns';
+import { format, addDays, eachDayOfInterval, isWithinInterval } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { API_BASE } from '../services/api';
-import { BadgeCheck, BadgeX, Calendar, Users, Clock } from 'lucide-react';
+import { fetchReservasByRoom } from '../services/api';
+import { BadgeCheck, BadgeX, Calendar, Users } from 'lucide-react';
 import 'react-day-picker/style.css';
+
+const safeErrorMessage = (err, fallback = 'Error cargando reservas') => {
+  if (!err) return fallback;
+  if (typeof err === 'string') return err;
+  if (typeof err.message === 'string') return err.message;
+  if (typeof err.error === 'string') return err.error;
+  try {
+    const serialized = JSON.stringify(err);
+    return serialized && serialized !== '{}' ? serialized : fallback;
+  } catch {
+    return fallback;
+  }
+};
 
 const RoomCalendar = ({ roomId, roomNumero, modo = 'selection', onSelectDates, initialDates }) => {
   const [reservas, setReservas] = useState([]);
@@ -12,24 +25,27 @@ const RoomCalendar = ({ roomId, roomNumero, modo = 'selection', onSelectDates, i
   const [selectedRange, setSelectedRange] = useState(initialDates || { from: undefined, to: undefined });
   const [error, setError] = useState(null);
 
-  useEffect(() => {
+  const fetchReservas = useCallback(async () => {
     if (!roomId) return;
-    fetchReservas();
-  }, [roomId]);
-
-  const fetchReservas = async () => {
     try {
       setLoading(true);
-      const res = await fetch(`${API_BASE}/reservas/room/${roomId}`);
-      if (!res.ok) throw new Error('Error fetching reservas');
-      const data = await res.json();
+      const data = await fetchReservasByRoom(roomId);
       setReservas(data.filter(r => r.estado !== 'cancelada'));
+      setError(null);
     } catch (e) {
-      setError(e.message);
+      setError(safeErrorMessage(e));
     } finally {
       setLoading(false);
     }
-  };
+  }, [roomId]);
+
+  useEffect(() => {
+    fetchReservas();
+  }, [fetchReservas]);
+
+  useEffect(() => {
+    setSelectedRange(initialDates || { from: undefined, to: undefined });
+  }, [initialDates]);
 
   const occupiedDates = [];
   reservas.forEach(r => {

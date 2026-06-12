@@ -5,12 +5,15 @@ import { memo } from 'react';
  * Change the name here to update all views consistently.
  *
  * @param {Object} props
- * @param {'topbar' | 'login'} [props.variant='topbar'] - Rendering style
+ * @param {'topbar' | 'login' | 'inline'} [props.variant='topbar'] - Rendering style
  * @param {Function} [props.onClick] - Click handler
  */
 const HotelTitle = memo(function HotelTitle({ variant = 'topbar', onClick }) {
   if (variant === 'login') {
     return <h1 className="login-title">EcoBosque</h1>;
+  }
+  if (variant === 'inline') {
+    return <h2 className="text-xl font-bold text-green-700">EcoBosque</h2>;
   }
   if (onClick) {
     return <span className="topbar-title cursor-pointer hover:text-green-600" onClick={onClick}>EcoBosque</span>;

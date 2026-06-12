@@ -12,7 +12,15 @@ import { Building2 } from 'lucide-react';
  * @param {Function} [props.onVolver] - Back button handler (hides button if omitted)
  * @param {React.ReactNode} props.children - Screen content
  */
-export default function PantallaForm({ titulo, desc, onVolver, children }) {
+export default function PantallaForm({ titulo, desc, onVolver, children, standalone = true }) {
+  if (!standalone) {
+    return (
+      <div className="w-full max-w-6xl mx-auto space-y-4">
+        {children}
+      </div>
+    );
+  }
+
   return (
     <div className="app-shell">
       <header className="topbar flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0 px-3 sm:px-6 py-3">
@@ -25,7 +33,7 @@ export default function PantallaForm({ titulo, desc, onVolver, children }) {
         )}
       </header>
       <div className="form-content flex items-start justify-center p-4 sm:p-6">
-        <div className="form-card w-full max-w-[800px] p-6 sm:p-10">
+        <div className="form-card w-full max-w-[1200px] p-6 sm:p-10">
           <h2 className="form-titulo text-xl sm:text-2xl md:text-3xl mb-2">{titulo}</h2>
           {desc && <p className="form-desc text-sm sm:text-base">{desc}</p>}
           {children}

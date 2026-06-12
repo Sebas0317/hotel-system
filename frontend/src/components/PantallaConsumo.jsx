@@ -21,6 +21,26 @@ export default function PantallaConsumo({ onNav }) {
   const [exito, setExito] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  const safeText = (value, fallback = '—') => {
+    if (value === null || value === undefined) return fallback;
+    if (typeof value === 'string') return value;
+    if (typeof value === 'number' || typeof value === 'boolean' || typeof value === 'bigint') return String(value);
+    try {
+      const serialized = JSON.stringify(value);
+      return serialized && serialized !== '{}' ? serialized : fallback;
+    } catch {
+      return fallback;
+    }
+  };
+
+  const safeErrorMessage = (e, fallback = 'Error al registrar consumo') => {
+    if (!e) return fallback;
+    if (typeof e === 'string') return e;
+    if (typeof e.message === 'string') return e.message;
+    if (typeof e.error === 'string') return e.error;
+    return safeText(e, fallback);
+  };
+
   const validar = async () => {
     if (!numero.trim() || !pin.trim()) {
       return setError('Ingresa número de habitación y PIN');
@@ -32,7 +52,7 @@ export default function PantallaConsumo({ onNav }) {
       setRoom(data);
       setStep(2);
     } catch (e) {
-      setError(e.message);
+      setError(safeErrorMessage(e));
     } finally {
       setLoading(false);
     }
@@ -57,7 +77,7 @@ export default function PantallaConsumo({ onNav }) {
       });
       setExito(true);
     } catch (e) {
-      setError(e.message);
+      setError(safeErrorMessage(e));
     } finally {
       setLoading(false);
     }
@@ -75,7 +95,7 @@ export default function PantallaConsumo({ onNav }) {
         <div className="exito-box">
           <CheckCircle className="w-16 h-16 text-green-600 mb-4" />
           <h3>Consumo registrado</h3>
-          <p className="exito-sub">Habitación #{room.numero} · {room.huesped}</p>
+          <p className="exito-sub">Habitación #{safeText(room?.numero)} · {safeText(room?.huesped, 'Sin huésped')}</p>
           <div className="consumo-chip"><strong>{form.descripcion}</strong><span>{COP(parseFloat(form.precio))}</span></div>
           <div className="btn-row">
             <button className="btn-main-action" onClick={resetForm}>+ Otro consumo</button>
@@ -89,7 +109,7 @@ export default function PantallaConsumo({ onNav }) {
   return (
     <PantallaForm
       titulo="Registrar Consumo"
-      desc={step === 1 ? 'Verifica la habitación con el PIN' : `Habitación #${room?.numero} · ${room?.huesped}`}
+      desc={step === 1 ? 'Verifica la habitación con el PIN' : `Habitación #${safeText(room?.numero)} · ${safeText(room?.huesped, 'Sin huésped')}`}
       onVolver={() => (step === 2 ? setStep(1) : onNav('menu'))}
     >
       {step === 1 && (

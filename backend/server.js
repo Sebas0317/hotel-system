@@ -60,6 +60,7 @@ const stateHistoryRoutes = require('./src/routes/stateHistory');
 const healthRoutes = require('./src/routes/health');
 const accountingRoutes = require('./src/routes/accounting');
 const reservasRoutes = require('./src/routes/reservas');
+const usersRoutes = require('./src/routes/users');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -188,7 +189,8 @@ app.use('/history', requireAuth, historyRoutes);
 app.use('/state-history', requireAuth, stateHistoryRoutes);
 app.use('/prices', requireAuth, pricesRoutes);
 app.use('/accounting', accountingRoutes);
-app.use('/reservas', reservasRoutes);
+app.use('/reservas', requireAuth, reservasRoutes);
+app.use('/users', authRateLimiter, usersRoutes);
 
 // ── BACKUP MANAGEMENT (admin only) ──
 app.post('/admin/backup', requireAuth, async (_req, res) => {
@@ -210,24 +212,34 @@ const server = app.listen(PORT, '0.0.0.0', () => {
   logger.info(`API Documentation: http://localhost:${PORT}/api-docs`);
   logger.info(`Health Check: http://localhost:${PORT}/health/detailed`);
 
-  // Run JSON integrity check on startup
-  const { startupValidation } = require('./src/utils/jsonValidator');
-  startupValidation().then(report => {
-    if (report.overall) {
-      logger.info('JSON integrity check passed');
-    } else {
-      logger.warn('JSON integrity check found issues');
-    }
-  }).catch(err => {
-    logger.warn({ err }, 'JSON integrity check failed (non-critical)');
-  });
+  // Avoid expensive startup side-effects during tests.
+  if (process.env.NODE_ENV !== 'test') {
+    // Run JSON integrity check on startup
+    const { startupValidation } = require('./src/utils/jsonValidator');
+    startupValidation().then(report => {
+      if (report.overall) {
+        logger.info('JSON integrity check passed');
+      } else {
+        logger.warn('JSON integrity check found issues');
+      }
+    }).catch(err => {
+      logger.warn({ err }, 'JSON integrity check failed (non-critical)');
+    });
 
-  // Create initial backup on startup
-  createBackup().then(() => {
-    logger.info('Initial backup created successfully');
-  }).catch(err => {
-    logger.warn({ err }, 'Initial backup failed (non-critical)');
-  });
+    // Create initial backup on startup
+    createBackup().then(() => {
+      logger.info('Initial backup created successfully');
+    }).catch(err => {
+      logger.warn({ err }, 'Initial backup failed (non-critical)');
+    });
+
+    // Seed admin user from env into multi-user store
+    require('./src/data/userStore').seedAdminUser().then(user => {
+      if (user) logger.info('Admin user seeded');
+    }).catch(err => {
+      logger.warn({ err }, 'Admin user seed failed (non-critical)');
+    });
+  }
 });
 
 module.exports = { app, server }; // Export for testing

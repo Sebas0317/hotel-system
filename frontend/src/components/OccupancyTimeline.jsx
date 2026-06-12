@@ -1,7 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { Timeline, DataSet } from 'vis-timeline/peer';
 import 'vis-timeline/styles/vis-timeline-graph2d.css';
-import vis from 'vis-timeline/peer';
 
 /**
  * OccupancyTimeline - Gantt chart for room occupancy visualization
@@ -13,11 +12,9 @@ import vis from 'vis-timeline/peer';
 export function OccupancyTimeline({ rooms }) {
   const containerRef = useRef(null);
   const timelineRef = useRef(null);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!rooms || rooms.length === 0) {
-      setLoading(false);
       return;
     }
 
@@ -25,7 +22,7 @@ export function OccupancyTimeline({ rooms }) {
     const items = new DataSet(
       rooms
         .filter(r => r.checkIn && r.checkOut)
-        .map((r, index) => ({
+        .map((r) => ({
           id: r.id,
           content: `${r.numero} - ${r.huesped || 'Libre'}`,
           start: new Date(r.checkIn),
@@ -65,8 +62,6 @@ export function OccupancyTimeline({ rooms }) {
     // Initialize timeline
     timelineRef.current = new Timeline(containerRef.current, items, options);
 
-    setLoading(false);
-
     return () => {
       if (timelineRef.current) {
         timelineRef.current.destroy();
@@ -74,10 +69,10 @@ export function OccupancyTimeline({ rooms }) {
     };
   }, [rooms]);
 
-  if (loading) {
+  if (!rooms || rooms.length === 0) {
     return (
       <div className="timeline-loading flex items-center justify-center p-8">
-        <span className="text-gray-500">Cargando timeline...</span>
+        <span className="text-gray-500">Sin datos para mostrar en el timeline</span>
       </div>
     );
   }

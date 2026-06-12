@@ -1,0 +1,11 @@
+[
+  {
+    "id": "admin-001",
+    "email": "sebastiansandoval12371@gmail.com",
+    "emailVerificado": false,
+    "twoFactorHabilitado": false,
+    "passwordHash": "$2b$12$USeZXgWX5SwTumU2rqjD3uDPhRxS0Q5JBRIqo3c/tUPdZiyjMMG3e",
+    "createdAt": "2026-06-11T23:19:04.846Z",
+    "updatedAt": "2026-06-11T23:19:04.846Z"
+  }
+]

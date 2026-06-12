@@ -1,6 +1,41 @@
 {
   "cambios": [
     {
+      "id": "1776995349280-4hahh",
+      "roomId": "sb-102",
+      "numero": "102",
+      "reservationId": "RES-202604-B8S1",
+      "estadoAnterior": "disponible",
+      "estadoNuevo": "ocupada",
+      "huesped": "Juan Pérez García",
+      "timestamp": "2026-04-24T01:49:09.280Z",
+      "reserva": {
+        "checkIn": "2026-04-24T01:49:09.146Z",
+        "checkOut": null,
+        "noches": 1,
+        "tarifa": 350000,
+        "documento": "1216107879",
+        "email": "",
+        "telefono": "",
+        "adultos": 1,
+        "ninos": 0,
+        "tieneMascota": false,
+        "nombreMascota": "",
+        "pago": {
+          "metodoPago": "efectivo",
+          "valorRecibido": 446250,
+          "total": 416500,
+          "subtotal": 350000,
+          "iva": 66500,
+          "cargoHabitacion": 350000,
+          "totalConsumos": 0,
+          "noches": 1,
+          "tarifaNoche": 350000,
+          "cambio": 29750
+        }
+      }
+    },
+    {
       "id": "1776123415609-wd2fd",
       "roomId": "sb-102",
       "numero": "102",

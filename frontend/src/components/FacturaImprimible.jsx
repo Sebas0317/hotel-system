@@ -1,4 +1,4 @@
-import { useCallback, useRef } from 'react';
+import { useRef } from 'react';
 import { useReactToPrint } from 'react-to-print';
 import { Printer, Building2, Package, CheckCircle } from 'lucide-react';
 import { COP, FECHA } from '../utils/helpers';

@@ -1,5 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 
 /**
  * Hook that polls the backend for room changes and triggers a callback.
@@ -15,7 +15,7 @@ export function useRoomSync({ interval = 5000, onChange, enabled = true } = {}) 
   const prevSnapshot = useRef('');
   const timerRef = useRef(null);
 
-  const fetchAndCompare = async () => {
+  const fetchAndCompare = useCallback(async () => {
     try {
       const data = await queryClient.fetchQuery({ 
         queryKey: ['rooms'],
@@ -64,7 +64,7 @@ export function useRoomSync({ interval = 5000, onChange, enabled = true } = {}) 
     } catch {
       // Silently ignore sync errors
     }
-  };
+  }, [onChange, queryClient]);
 
   useEffect(() => {
     if (!enabled) return;
@@ -75,7 +75,7 @@ export function useRoomSync({ interval = 5000, onChange, enabled = true } = {}) 
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [enabled, interval]);
+  }, [enabled, interval, fetchAndCompare]);
 
   return { refresh: fetchAndCompare };
 }
