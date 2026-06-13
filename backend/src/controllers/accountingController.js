@@ -41,7 +41,7 @@ function getStatusLabel(status) {
   return labels[status] || status;
 }
 
-function formatDate(dateStr) {
+function fmtDate(dateStr) {
   if (!dateStr) return '';
   const d = new Date(dateStr);
   return d.toLocaleDateString('es-CO', { 
@@ -174,8 +174,8 @@ const executiveSummary = [
         getStatusLabel(r.estado),
         r.huesped || '-',
         r.documento || '-',
-        r.checkIn ? formatDate(r.checkIn) : '-',
-        r.checkOut ? formatDate(r.checkOut) : (r.noches ? `Planificado: ${r.noches} días` : '-'),
+        r.checkIn ? fmtDate(r.checkIn) : '-',
+        r.checkOut ? fmtDate(r.checkOut) : (r.noches ? `Planificado: ${r.noches} días` : '-'),
         r.noches || '-',
         r.tarifa ? `$${r.tarifa.toLocaleString('es-CO')}` : '-',
         r.tarifa && r.noches ? `$${(r.tarifa * r.noches).toLocaleString('es-CO')}` : '-',
@@ -202,8 +202,8 @@ const executiveSummary = [
         r.documento || '-',
         r.telefono || '-',
         r.email || '-',
-        r.checkIn ? formatDate(r.checkIn) : '-',
-        r.checkOut ? formatDate(r.checkOut) : '-',
+        r.checkIn ? fmtDate(r.checkIn) : '-',
+        r.checkOut ? fmtDate(r.checkOut) : '-',
         r.noches || 1,
         r.tarifa ? `$${r.tarifa.toLocaleString('es-CO')}` : '-',
         (r.tarifa && r.noches) ? `$${(r.tarifa * r.noches).toLocaleString('es-CO')}` : '-',
@@ -256,8 +256,8 @@ const executiveSummary = [
         h.telefono || '-',
         h.email || '-',
         h.numero || '-',
-        h.checkIn ? formatDate(h.checkIn) : '-',
-        h.checkOut ? formatDate(h.checkOut) : '-',
+        h.checkIn ? fmtDate(h.checkIn) : '-',
+        h.checkOut ? fmtDate(h.checkOut) : '-',
         h.noches || 1,
         h.tarifa ? `$${h.tarifa.toLocaleString('es-CO')}` : '-',
         h.tarifa && h.noches ? `$${(h.tarifa * h.noches).toLocaleString('es-CO')}` : '-',
