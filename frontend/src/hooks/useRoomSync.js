@@ -2,18 +2,22 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef, useCallback } from 'react';
 
 /**
- * Hook that polls the backend for room changes and triggers a callback.
- * Uses React Query for efficient caching and refetching.
+ * useRoomSync — Real-time room sync via WebSocket with polling fallback.
+ *
+ * Connects to the backend WebSocket at /ws and listens for 'room:update' events.
+ * Falls back to 5-second polling if WebSocket connection fails.
  *
  * @param {Object} options
  * @param {number} options.interval - Polling interval in ms (default: 5000)
  * @param {Function} options.onChange - Callback(roomChanges) when changes detected
- * @param {boolean} options.enabled - Whether polling is active
+ * @param {boolean} options.enabled - Whether sync is active
  */
 export function useRoomSync({ interval = 5000, onChange, enabled = true } = {}) {
   const queryClient = useQueryClient();
   const prevSnapshot = useRef('');
   const timerRef = useRef(null);
+  const wsRef = useRef(null);
+  const wsConnected = useRef(false);
 
   const fetchAndCompare = useCallback(async () => {
     try {
@@ -66,16 +70,83 @@ export function useRoomSync({ interval = 5000, onChange, enabled = true } = {}) 
     }
   }, [onChange, queryClient]);
 
+  // WebSocket connection for real-time updates
   useEffect(() => {
     if (!enabled) return;
 
-    fetchAndCompare();
-    timerRef.current = setInterval(fetchAndCompare, interval);
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const host = window.location.host;
+    const wsUrl = `${protocol}//${host}/ws`;
+
+    let reconnectTimer;
+
+    function connect() {
+      try {
+        const ws = new WebSocket(wsUrl);
+        wsRef.current = ws;
+
+        ws.onopen = () => {
+          wsConnected.current = true;
+          // Clear polling interval when WS is connected
+          if (timerRef.current) {
+            clearInterval(timerRef.current);
+            timerRef.current = null;
+          }
+        };
+
+        ws.onmessage = (event) => {
+          try {
+            const msg = JSON.parse(event.data);
+            if (msg.type === 'room:update' || msg.type === 'room:changes') {
+              // Invalidate query cache to trigger re-fetch
+              queryClient.invalidateQueries({ queryKey: ['rooms'] });
+            }
+          } catch {
+            // Ignore parse errors
+          }
+        };
+
+        ws.onclose = () => {
+          wsConnected.current = false;
+          wsRef.current = null;
+          // Fall back to polling on disconnect
+          startPolling();
+          // Attempt reconnection after 3 seconds
+          reconnectTimer = setTimeout(connect, 3000);
+        };
+
+        ws.onerror = () => {
+          // onerror will be followed by onclose, which handles fallback
+          ws.close();
+        };
+      } catch {
+        // WebSocket not available, fall back to polling
+        startPolling();
+      }
+    }
+
+    function startPolling() {
+      if (timerRef.current) return;
+      fetchAndCompare();
+      timerRef.current = setInterval(fetchAndCompare, interval);
+    }
+
+    connect();
 
     return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
+      if (wsRef.current) {
+        wsRef.current.close();
+        wsRef.current = null;
+      }
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+      if (reconnectTimer) {
+        clearTimeout(reconnectTimer);
+      }
     };
-  }, [enabled, interval, fetchAndCompare]);
+  }, [enabled, interval, fetchAndCompare, queryClient]);
 
   return { refresh: fetchAndCompare };
 }

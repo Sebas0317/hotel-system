@@ -20,6 +20,7 @@ export const queryKeys = {
   // Auth
   lastLogin: ['lastLogin'],
   loginLogs: ['loginLogs'],
+  securityEvents: ['securityEvents'],
 };
 
 /**

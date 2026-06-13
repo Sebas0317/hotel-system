@@ -12,6 +12,8 @@ const router = express.Router();
 const roomController = require('../controllers/roomController');
 const { requireFields, validateEnum } = require('../middleware/validation');
 const { requireAuth } = require('../middleware/auth');
+const { requireTurnstile } = require('../middleware/turnstile');
+const { requireRoomAccess } = require('../middleware/roomAccess');
 const { writeRateLimiter, pinRateLimiter } = require('../middleware/rateLimiters');
 
 const METODOS_PAGO = ['efectivo', 'tarjeta', 'transferencia'];
@@ -40,6 +42,7 @@ router.post(
 router.post(
   '/validar',
   pinRateLimiter,
+  requireTurnstile,
   requireFields('numero', 'pin'),
   roomController.validarPin
 );
@@ -81,9 +84,10 @@ router.post(
   roomController.checkout
 );
 
-// POST /rooms/:id/solicitar-checkout - Guest requests checkout (no auth - public)
+// POST /rooms/:id/solicitar-checkout - Guest requests checkout (requires room token)
 router.post(
   '/:id/solicitar-checkout',
+  requireRoomAccess,
   writeRateLimiter,
   roomController.solicitarCheckout
 );

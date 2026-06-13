@@ -23,6 +23,11 @@ export default defineConfig({
       clientPort: 5173,
     },
     proxy: {
+      '/ws': {
+        target: 'ws://localhost:3001',
+        ws: true,
+      },
+      '/v1': 'http://localhost:3001',
       '/health': 'http://localhost:3001',
       '/rooms': 'http://localhost:3001',
       '/reservas': 'http://localhost:3001',

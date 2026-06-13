@@ -129,12 +129,12 @@
     "camas": "1 cama king",
     "capacidad": 2,
     "piso": 2,
-    "estado": "disponible",
-    "huesped": null,
+    "estado": "ocupada",
+    "huesped": "Test Guest",
     "telefono": null,
     "email": null,
-    "pin": null,
-    "checkIn": null,
+    "pin": "6781",
+    "checkIn": "2026-06-12T15:19:31.116Z",
     "checkOut": null,
     "noches": null,
     "mascotas": false,
@@ -172,7 +172,11 @@
       }
     ],
     "checkOutAt": "2026-04-12T02:12:32.835Z",
-    "reservationId": null
+    "reservationId": "RES-202606-34WT",
+    "solicitudCheckout": {
+      "fecha": "2026-06-12",
+      "hora": "2026-06-12T15:19:31.246Z"
+    }
   },
   {
     "id": "se-301",
@@ -490,7 +494,11 @@
         "nombre": "Jay",
         "documento": "0510085742"
       }
-    ]
+    ],
+    "solicitudCheckout": {
+      "fecha": "2026-06-14",
+      "hora": "2026-06-13T01:22:36.328Z"
+    }
   },
   {
     "id": "cb-02",

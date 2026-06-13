@@ -8,6 +8,7 @@ const express = require('express');
 const router = express.Router();
 const consumoController = require('../controllers/consumoController');
 const { requireFields, validateEnum, validatePositiveNumber } = require('../middleware/validation');
+const { requireRoomAccess } = require('../middleware/roomAccess');
 
 const CATEGORIAS = ['restaurante', 'bar', 'servicios'];
 
@@ -20,7 +21,7 @@ router.post(
   consumoController.createConsumo
 );
 
-// GET /consumos/:roomId - Get consumos for a room
-router.get('/:roomId', consumoController.getConsumosByRoom);
+// GET /consumos/:roomId - Get consumos for a room (requires room token for guest access)
+router.get('/:roomId', requireRoomAccess, consumoController.getConsumosByRoom);
 
 module.exports = router;

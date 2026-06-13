@@ -1,5 +1,22 @@
-// API base URL - empty string uses Vite dev server proxy
-export const API_BASE = '';
+// API base URL - uses /v1 prefix for versioned API
+export const API_BASE = '/v1';
+
+// ── Room token management ──
+// Stores the signed room token issued after PIN validation.
+// Used to prove room ownership on guest-facing API calls.
+let _roomToken = null;
+
+export function setRoomToken(token) {
+  _roomToken = token;
+}
+
+export function getRoomToken() {
+  return _roomToken;
+}
+
+export function clearRoomToken() {
+  _roomToken = null;
+}
 
 /**
  * Custom API error class with status code
@@ -446,8 +463,15 @@ export async function fetchReservaciones() {
   return Array.isArray(data) ? data.map((room, i) => normalizeRoom(room, i)) : [];
 }
 
-export async function fetchReservas() {
-  const data = await apiFetch('/reservas');
+export async function fetchReservas(pagination) {
+  let endpoint = '/reservas';
+  if (pagination?.page || pagination?.limit) {
+    const params = new URLSearchParams();
+    if (pagination.page) params.set('page', pagination.page);
+    if (pagination.limit) params.set('limit', pagination.limit);
+    endpoint += `?${params.toString()}`;
+  }
+  const data = await apiFetch(endpoint);
   return Array.isArray(data) ? data.map((reserva, i) => normalizeReserva(reserva, i)) : [];
 }
 
@@ -496,14 +520,18 @@ export async function checkOutReserva(id) {
  * Validate room PIN
  * @param {string} numero - Room number
  * @param {string} pin - 4-digit PIN
+ * @param {string} [turnstileToken] - Cloudflare Turnstile token
  * @returns {Promise<Object>} Room object if valid
  */
-export async function validarPin(numero, pin) {
+export async function validarPin(numero, pin, turnstileToken) {
   const data = await apiFetch('/rooms/validar', {
     method: 'POST',
-    body: { numero, pin },
+    body: { numero, pin, turnstileToken },
   });
-  return normalizeRoom(data);
+  if (data.roomToken) {
+    setRoomToken(data.roomToken);
+  }
+  return normalizeRoom(data.room || data);
 }
 
 /**
@@ -528,8 +556,12 @@ export async function checkout(roomId, { metodoPago, valorRecibido }) {
  * @returns {Promise<Object>} Result with updated room
  */
 export async function solicitarCheckout(roomId, checkOutDate) {
+  const headers = {};
+  const token = getRoomToken();
+  if (token) headers['x-room-token'] = token;
   return apiFetch(`/rooms/${roomId}/solicitar-checkout`, {
     method: 'POST',
+    headers,
     body: { checkOutDate },
   });
 }
@@ -612,10 +644,23 @@ export async function createConsumo({ roomId, descripcion, precio, categoria }) 
 /**
  * Fetch consumos for a specific room
  * @param {string|number} roomId - Room ID
+ * @param {Object} [pagination] - Optional pagination params
+ * @param {number} [pagination.page]
+ * @param {number} [pagination.limit]
  * @returns {Promise<Array>} Array of consumption objects
  */
-export async function fetchConsumos(roomId) {
-  const data = await apiFetch(`/consumos/${roomId}`);
+export async function fetchConsumos(roomId, pagination) {
+  let endpoint = `/consumos/${roomId}`;
+  if (pagination?.page || pagination?.limit) {
+    const params = new URLSearchParams();
+    if (pagination.page) params.set('page', pagination.page);
+    if (pagination.limit) params.set('limit', pagination.limit);
+    endpoint += `?${params.toString()}`;
+  }
+  const headers = {};
+  const token = getRoomToken();
+  if (token) headers['x-room-token'] = token;
+  const data = await apiFetch(endpoint, { headers });
   return Array.isArray(data) ? data.map((consumo, i) => normalizeConsumo(consumo, i)) : [];
 }
 
@@ -671,10 +716,20 @@ export async function checkIn({ numero, huesped, tipo, email, telefono, document
 
 /**
  * Get all history entries
- * @returns {Promise<Array>} History array
+ * @param {Object} [pagination] - Optional pagination params
+ * @param {number} [pagination.page]
+ * @param {number} [pagination.limit]
+ * @returns {Promise<Array|Object>} History array or paginated response
  */
-export async function fetchHistory() {
-  return apiFetch('/history', { method: 'GET' });
+export async function fetchHistory(pagination) {
+  let endpoint = '/history';
+  if (pagination?.page || pagination?.limit) {
+    const params = new URLSearchParams();
+    if (pagination.page) params.set('page', pagination.page);
+    if (pagination.limit) params.set('limit', pagination.limit);
+    endpoint += `?${params.toString()}`;
+  }
+  return apiFetch(endpoint, { method: 'GET' });
 }
 
 /**
@@ -755,6 +810,13 @@ export async function fetchLastLogin() {
  */
 export async function fetchLoginLogs(limit = 50) {
   return apiFetch(`/auth/login-logs?limit=${limit}`, { method: 'GET' });
+}
+
+/**
+ * Get security audit events
+ */
+export async function fetchSecurityEvents(limit = 100) {
+  return apiFetch(`/auth/security-events?limit=${limit}`, { method: 'GET' });
 }
 
 /**

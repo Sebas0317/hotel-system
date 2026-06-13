@@ -2,6 +2,7 @@
 
 const logger = require('../utils/logger');
 const userStore = require('../data/userStore');
+const auditor = require('../utils/auditor');
 
 async function listUsers(req, res) {
   try {
@@ -51,6 +52,7 @@ async function getUser(req, res) {
 async function createUser(req, res) {
   try {
     const { username, email, password, firstName, lastName, role } = req.body;
+    const meta = auditor.reqMeta(req);
 
     if (!username || !email || !password) {
       return res.status(400).json({ error: 'username, email y password requeridos' });
@@ -74,6 +76,7 @@ async function createUser(req, res) {
     });
 
     logger.info({ userId: safeUser.id, email, role: validRole }, 'User created by admin');
+    await auditor.userCreated(meta.userId, meta.ip, safeUser.id, email, validRole);
     return res.status(201).json({ mensaje: 'Usuario creado', usuario: safeUser });
   } catch (err) {
     logger.error({ err }, 'Create user error');
@@ -84,10 +87,18 @@ async function createUser(req, res) {
 async function updateUser(req, res) {
   try {
     const { firstName, lastName, avatar, role, isActive, emailVerified, twoFactorEnabled } = req.body;
+    const meta = auditor.reqMeta(req);
     const updates = { firstName, lastName, avatar };
+    const changes = {};
+
+    const currentUser = await userStore.findUserById(req.params.id);
 
     if (role !== undefined && userStore.ROLES.includes(role)) {
       updates.role = role;
+      if (currentUser && currentUser.role !== role) {
+        changes.oldRole = currentUser.role;
+        changes.newRole = role;
+      }
     }
     if (isActive !== undefined) updates.isActive = isActive;
     if (emailVerified !== undefined) updates.emailVerified = emailVerified;
@@ -97,6 +108,12 @@ async function updateUser(req, res) {
     if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
 
     logger.info({ userId: req.params.id }, 'User updated');
+    if (changes.oldRole) {
+      await auditor.roleChanged(meta.userId, meta.ip, req.params.id, changes.oldRole, changes.newRole);
+    } else {
+      const changedFields = Object.keys(updates).filter(k => updates[k] !== undefined);
+      await auditor.userUpdated(meta.userId, meta.ip, req.params.id, changedFields);
+    }
     return res.json({ mensaje: 'Usuario actualizado', usuario: user });
   } catch (err) {
     logger.error({ err }, 'Update user error');
@@ -106,6 +123,8 @@ async function updateUser(req, res) {
 
 async function deleteUser(req, res) {
   try {
+    const meta = auditor.reqMeta(req);
+
     if (req.params.id === req.user.id) {
       return res.status(400).json({ error: 'No puedes eliminarte a ti mismo' });
     }
@@ -114,6 +133,7 @@ async function deleteUser(req, res) {
     if (!deleted) return res.status(404).json({ error: 'Usuario no encontrado o es admin principal' });
 
     logger.info({ userId: req.params.id, deletedBy: req.user.id }, 'User deleted');
+    await auditor.userDeleted(meta.userId, meta.ip, req.params.id);
     return res.json({ mensaje: 'Usuario eliminado' });
   } catch (err) {
     logger.error({ err }, 'Delete user error');
@@ -124,6 +144,8 @@ async function deleteUser(req, res) {
 async function resetUserPassword(req, res) {
   try {
     const { newPassword } = req.body;
+    const meta = auditor.reqMeta(req);
+
     if (!newPassword || newPassword.length < 8) {
       return res.status(400).json({ error: 'La contrasena debe tener al menos 8 caracteres' });
     }
@@ -133,6 +155,7 @@ async function resetUserPassword(req, res) {
 
     await userStore.changePassword(req.params.id, newPassword);
     logger.info({ userId: req.params.id, resetBy: req.user.id }, 'Password reset by admin');
+    await auditor.passwordResetByAdmin(meta.userId, meta.ip, req.params.id);
 
     return res.json({ mensaje: 'Contrasena restablecida exitosamente' });
   } catch (err) {

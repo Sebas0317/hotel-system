@@ -1,9 +1,10 @@
 import { Routes, Route, useNavigate, Navigate, useLocation } from 'react-router-dom';
-import { useState, Suspense, lazy } from 'react';
+import { useState, Suspense, lazy, useRef, useEffect } from 'react';
 import { AnimatePresence } from 'framer-motion';
-import { Toaster } from 'sonner';
+import { Toaster, toast } from 'sonner';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { getAuthToken, setAuthToken } from './services/api';
+import { getAuthToken, setAuthToken, clearRoomToken } from './services/api';
+import { useSession } from './hooks/useSession';
 import './App.css';
 
 // Create query client with default options
@@ -89,10 +90,29 @@ export default function App() {
   const handleExit = () => {
     setRol(null);
     setAuthToken(null);
+    clearRoomToken();
     navigate('/', { replace: true });
   };
 
   const location = useLocation();
+  const warnedRef = useRef(false);
+
+  const { isWarning } = useSession({
+    timeout: 10 * 60 * 1000,
+    onExpire: handleExit,
+    enabled: !!rol,
+  });
+
+  useEffect(() => {
+    if (isWarning && !warnedRef.current) {
+      warnedRef.current = true;
+      toast.warning('Sesion por expirar', {
+        description: 'Tu sesion se cerrara en 1 minuto por inactividad. Mueve el mouse o presiona una tecla para mantenerla activa.',
+        duration: 60000,
+      });
+    }
+    if (!isWarning) warnedRef.current = false;
+  }, [isWarning]);
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -282,6 +302,17 @@ export default function App() {
 
         <Route
           path="/admin/history"
+          element={
+            rol === 'admin' ? (
+              <PantallaAdmin onSalir={handleExit} onNav={(path) => navigate(path)} />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
+
+        <Route
+          path="/admin/security"
           element={
             rol === 'admin' ? (
               <PantallaAdmin onSalir={handleExit} onNav={(path) => navigate(path)} />

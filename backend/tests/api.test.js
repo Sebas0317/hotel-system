@@ -19,6 +19,19 @@ beforeAll(async () => {
 
 describe('EcoBosque Hotel API', () => {
   let authToken;
+  let adminEmail = process.env.ADMIN_EMAIL || '';
+
+  // Fetch admin email before auth tests
+  beforeAll(async () => {
+    try {
+      const res = await request(app).get('/auth/setup');
+      if (res.body.email) {
+        adminEmail = res.body.email;
+      }
+    } catch {
+      // Fall back to env var
+    }
+  });
 
   // ── Health Check Tests ──
   describe('GET /', () => {
@@ -105,7 +118,7 @@ describe('EcoBosque Hotel API', () => {
     it('should fail with wrong password', async () => {
       const res = await request(app)
         .post('/auth/login')
-        .send({ password: 'wrongpassword' });
+        .send({ identifier: adminEmail || 'admin@ecobosque.com', password: 'wrongpassword' });
       expect(res.statusCode).toBe(401);
       expect(res.body).toHaveProperty('error');
     });
@@ -113,7 +126,7 @@ describe('EcoBosque Hotel API', () => {
     it('should succeed with correct password', async () => {
       const res = await request(app)
         .post('/auth/login')
-        .send({ password: process.env.ADMIN_PASSWORD || 'ecobosque2024' });
+        .send({ identifier: adminEmail || 'admin@ecobosque.com', password: process.env.ADMIN_PASSWORD || 'ecobosque2024' });
       expect(res.statusCode).toBe(200);
       expect(res.body).toHaveProperty('token');
       authToken = res.body.token;

@@ -3,3 +3,7 @@ node_modules
 .env
 
 /src/generated/prisma
+
+# Transient security tracking state
+security-attempts.json
+security-events.json

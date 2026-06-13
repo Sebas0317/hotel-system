@@ -34,6 +34,17 @@ const reservasController = {
   async getAll(req, res) {
     try {
       const reservas = getReservas();
+
+      if (req.query.page || req.query.limit) {
+        const page = Math.max(1, parseInt(req.query.page) || 1);
+        const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 50));
+        const total = reservas.length;
+        const totalPages = Math.ceil(total / limit);
+        const start = (page - 1) * limit;
+        const data = reservas.slice(start, start + limit);
+        return res.json({ data, pagination: { page, limit, total, totalPages } });
+      }
+
       res.json(reservas);
     } catch (e) {
       res.status(500).json({ error: e.message });

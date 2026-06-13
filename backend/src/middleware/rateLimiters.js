@@ -62,11 +62,63 @@ const writeRateLimiter = rateLimit({
  * 5 requests per minute per IP.
  */
 const pinRateLimiter = rateLimit({
-  windowMs: 60 * 1000, // 1 minute
+  windowMs: 60 * 1000,
   max: 5,
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'Demasiados intentos de PIN. Espera un minuto.' },
+  keyGenerator: ipKeyGenerator,
+});
+
+/**
+ * Strict rate limiter for login attempts.
+ * 5 requests per 2 minutes per IP.
+ */
+const loginLimiter = rateLimit({
+  windowMs: 120 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Demasiados intentos de inicio de sesion. Espera 2 minutos.' },
+  keyGenerator: ipKeyGenerator,
+});
+
+/**
+ * Strict rate limiter for code verification (2FA, email, recovery).
+ * 5 requests per 2 minutes per IP.
+ */
+const codeVerifyLimiter = rateLimit({
+  windowMs: 120 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Demasiados intentos de verificacion. Espera 2 minutos.' },
+  keyGenerator: ipKeyGenerator,
+});
+
+/**
+ * Very strict rate limiter for password recovery flow.
+ * 3 requests per 2 minutes per IP.
+ */
+const recoveryLimiter = rateLimit({
+  windowMs: 120 * 1000,
+  max: 3,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Demasiadas solicitudes de recuperacion. Espera 2 minutos.' },
+  keyGenerator: ipKeyGenerator,
+});
+
+/**
+ * Rate limiter for sending verification/recovery codes via email.
+ * 2 requests per 5 minutes per IP (to prevent email flooding).
+ */
+const emailCodeLimiter = rateLimit({
+  windowMs: 300 * 1000,
+  max: 2,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Demasiadas solicitudes de codigo. Espera 5 minutos.' },
   keyGenerator: ipKeyGenerator,
 });
 
@@ -76,4 +128,8 @@ module.exports = {
   readRateLimiter,
   writeRateLimiter,
   pinRateLimiter,
+  loginLimiter,
+  codeVerifyLimiter,
+  recoveryLimiter,
+  emailCodeLimiter,
 };

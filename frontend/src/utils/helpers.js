@@ -26,7 +26,7 @@ export const FECHA = (iso) =>
  * @returns {number} Sum of all prices
  */
 export const calcularTotal = (items) =>
-  items.reduce((sum, item) => sum + (item.precio || 0), 0);
+  Array.isArray(items) ? items.reduce((sum, item) => sum + (item.precio || 0), 0) : 0;
 
 /**
  * Groups rooms by floor (piso) or by type if piso is 0 (Cabañas)

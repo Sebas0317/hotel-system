@@ -46,5 +46,13 @@
     "categoria": "servicios",
     "precio": 200000,
     "fecha": "2026-04-05T15:30:00.000Z"
+  },
+  {
+    "id": "1781277571299-2tgtg",
+    "roomId": "ss-202",
+    "descripcion": "Test Consumo",
+    "categoria": "bar",
+    "precio": 25000,
+    "fecha": "2026-06-12T15:19:31.299Z"
   }
 ]

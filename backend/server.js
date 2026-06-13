@@ -18,6 +18,9 @@
 require('dotenv').config();
 
 const express = require('express');
+const https = require('https');
+const fs = require('fs');
+const path = require('path');
 const cors = require('cors');
 const helmet = require('helmet');
 const compression = require('compression');
@@ -31,6 +34,9 @@ const { invalidateCache } = require('./src/middleware/cache');
 
 // Import backups
 const { createBackup } = require('./src/utils/backup');
+
+// Import WebSocket
+const { initWebSocket } = require('./src/utils/websocket');
 
 // Import Swagger config
 const swaggerSpecs = require('./src/config/swagger');
@@ -163,6 +169,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs, {
 }));
 
 // ── HEALTH CHECKS ──
+app.use('/v1/health', healthRoutes);
 app.use('/health', healthRoutes);
 
 // Root endpoint
@@ -174,22 +181,31 @@ app.get('/', (_req, res) => res.json({
   health: '/health/detailed',
 }));
 
-// ── ROUTES ──
+// ── ROUTES (v1 + unversioned for backward compatibility) ──
 // Auth routes (strict rate limiting)
+app.use('/v1/auth', authRateLimiter, authRoutes);
 app.use('/auth', authRateLimiter, authRoutes);
 
 // Rooms routes (rate limiters applied per-route inside the router)
+app.use('/v1/rooms', roomsRoutes);
 app.use('/rooms', roomsRoutes);
 
 // Consumos routes (write rate limiting)
+app.use('/v1/consumos', writeRateLimiter, consumosRoutes);
 app.use('/consumos', writeRateLimiter, consumosRoutes);
 
 // Protected routes — require admin authentication
+app.use('/v1/history', requireAuth, historyRoutes);
 app.use('/history', requireAuth, historyRoutes);
+app.use('/v1/state-history', requireAuth, stateHistoryRoutes);
 app.use('/state-history', requireAuth, stateHistoryRoutes);
+app.use('/v1/prices', requireAuth, pricesRoutes);
 app.use('/prices', requireAuth, pricesRoutes);
+app.use('/v1/accounting', accountingRoutes);
 app.use('/accounting', accountingRoutes);
+app.use('/v1/reservas', requireAuth, reservasRoutes);
 app.use('/reservas', requireAuth, reservasRoutes);
+app.use('/v1/users', authRateLimiter, usersRoutes);
 app.use('/users', authRateLimiter, usersRoutes);
 
 // ── BACKUP MANAGEMENT (admin only) ──
@@ -206,9 +222,31 @@ app.post('/admin/backup', requireAuth, async (_req, res) => {
 app.use(notFoundHandler);
 app.use(errorHandler);
 
-// ── START SERVER ──
+// ── START HTTP SERVER ──
 const server = app.listen(PORT, '0.0.0.0', () => {
+  // Initialize WebSocket server for real-time updates
+  initWebSocket(server);
+
   logger.info(`EcoBosque API running on http://localhost:${PORT}`);
+
+  // ── OPTIONAL HTTPS (self-signed dev certs) ──
+  if (process.env.NODE_ENV !== 'test') {
+    const certPath = path.join(__dirname, 'certs', 'dev-cert.pem');
+    const keyPath = path.join(__dirname, 'certs', 'dev-key.pem');
+    if (fs.existsSync(certPath) && fs.existsSync(keyPath)) {
+      const httpsOpts = {
+        cert: fs.readFileSync(certPath),
+        key: fs.readFileSync(keyPath),
+      };
+      const httpsServer = https.createServer(httpsOpts, app);
+      const HTTPS_PORT = process.env.HTTPS_PORT || 3443;
+      httpsServer.listen(HTTPS_PORT, '0.0.0.0', () => {
+        initWebSocket(httpsServer);
+        logger.info(`EcoBosque API running on https://localhost:${HTTPS_PORT}`);
+      });
+    }
+  }
+
   logger.info(`API Documentation: http://localhost:${PORT}/api-docs`);
   logger.info(`Health Check: http://localhost:${PORT}/health/detailed`);
 

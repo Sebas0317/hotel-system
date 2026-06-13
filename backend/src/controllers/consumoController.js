@@ -6,10 +6,12 @@
  */
 const { getConsumos, saveConsumos, getRooms } = require('../data/jsonStore');
 const { generateId } = require('../utils/idGenerator');
+const auditor = require('../utils/auditor');
 
 async function createConsumo(req, res) {
   try {
     const { roomId, descripcion, precio, categoria } = req.body;
+    const meta = auditor.reqMeta(req);
 
     const rooms = await getRooms();
     const room = rooms.find(r => String(r.id) === String(roomId));
@@ -35,6 +37,7 @@ async function createConsumo(req, res) {
     consumos.push(nuevo);
     await saveConsumos(consumos);
 
+    await auditor.consumoCreated(meta.userId, meta.ip, room.numero, descripcion, precio);
     res.json(nuevo);
   } catch (err) {
     require('../utils/logger').error('Error creating consumo', { error: err.message });
@@ -44,8 +47,25 @@ async function createConsumo(req, res) {
 
 async function getConsumosByRoom(req, res) {
   try {
+    const roomId = req.params.roomId;
+
+    if (req.roomAccess && String(req.roomAccess.roomId) !== String(roomId)) {
+      return res.status(403).json({ error: 'No tienes acceso a los consumos de esta habitacion' });
+    }
+
     const consumos = await getConsumos();
-    const filtered = consumos.filter(c => String(c.roomId) === req.params.roomId);
+    const filtered = consumos.filter(c => String(c.roomId) === roomId);
+
+    if (req.query.page || req.query.limit) {
+      const page = Math.max(1, parseInt(req.query.page) || 1);
+      const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 50));
+      const total = filtered.length;
+      const totalPages = Math.ceil(total / limit);
+      const start = (page - 1) * limit;
+      const data = filtered.slice(start, start + limit);
+      return res.json({ data, pagination: { page, limit, total, totalPages } });
+    }
+
     res.json(filtered);
   } catch (err) {
     require('../utils/logger').error('Error getting consumos', { error: err.message });

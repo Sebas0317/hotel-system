@@ -5,14 +5,11 @@ const logger = require('../utils/logger');
 const userStore = require('../data/userStore');
 const codeStore = require('../data/codeStore');
 const emailService = require('../utils/emailService');
+const securityTracker = require('../utils/securityTracker');
+const auditor = require('../utils/auditor');
 
-const failedAttempts = new Map();
-const codeRequests = new Map();
 const loginLogs = [];
 const MAX_LOGIN_LOGS = 500;
-const MAX_FAILED_ATTEMPTS = 5;
-const LOCKOUT_DURATION = 15 * 60 * 1000;
-const COOLDOWN_DURATION = 60000;
 
 function generateToken(user) {
   const expiresIn = process.env.JWT_EXPIRES_IN || '8h';
@@ -78,6 +75,7 @@ async function getAuthStatus(req, res) {
 async function register(req, res) {
   try {
     const { username, email, password, firstName, lastName, role } = req.body;
+    const ip = getClientIp(req);
 
     if (!username || !email || !password) {
       return res.status(400).json({ error: 'username, email y password son requeridos' });
@@ -124,6 +122,7 @@ async function register(req, res) {
     }
 
     logger.info({ userId: safeUser.id, email, role: safeUser.role }, 'User registered');
+    await auditor.register(safeUser.id, ip, email, safeUser.role);
 
     return res.status(201).json({
       mensaje: 'Usuario creado exitosamente',
@@ -138,37 +137,34 @@ async function register(req, res) {
 
 async function login(req, res) {
   try {
-    const { identifier, password, turnstileToken } = req.body;
+    const { identifier, password } = req.body;
     const ip = getClientIp(req);
 
     if (!identifier || !password) {
       return res.status(400).json({ error: 'Usuario/email y contrasena requeridos' });
     }
 
-    const now = Date.now();
-    const attemptData = failedAttempts.get(ip) || { count: 0, lockUntil: 0 };
-
-    if (now < attemptData.lockUntil) {
-      const remaining = Math.ceil((attemptData.lockUntil - now) / 1000);
+    const { blocked, lockUntil } = await securityTracker.isBlocked({
+      ip, action: 'login',
+    });
+    if (blocked) {
+      const remaining = Math.ceil((lockUntil - Date.now()) / 1000);
       return res.status(429).json({ error: `Demasiados intentos. Intenta en ${remaining}s` });
-    }
-
-    const delay = Math.min(500 * Math.pow(2, attemptData.count - 1), 10000);
-    if (attemptData.count > 0) {
-      await new Promise(resolve => setTimeout(resolve, delay));
     }
 
     const result = await userStore.verifyPassword(identifier, password);
 
     if (!result.valid) {
-      attemptData.count += 1;
-      if (attemptData.count >= MAX_FAILED_ATTEMPTS) {
-        attemptData.lockUntil = now + LOCKOUT_DURATION;
-        logger.warn({ ip }, 'Account locked due to failed attempts');
+      const trackResult = await securityTracker.recordAttempt({
+        ip, action: 'login', success: false,
+      });
+
+      if (trackResult.blocked) {
+        await auditor.accountLocked(ip, identifier);
       }
-      failedAttempts.set(ip, attemptData);
 
       const reason = result.reason || 'Credenciales invalidas';
+      await auditor.failedLogin(ip, identifier, reason);
       loginLogs.push({
         timestamp: new Date().toISOString(), identifier, ip,
         success: false, reason,
@@ -179,7 +175,7 @@ async function login(req, res) {
     }
 
     const user = result.user;
-    failedAttempts.delete(ip);
+    await securityTracker.resetAttempts({ ip, action: 'login' });
 
     await userStore.updateLastLogin(user.id, ip);
 
@@ -213,6 +209,8 @@ async function login(req, res) {
     const token = generateToken(user);
     logger.info({ userId: user.id, email: user.email, role: user.role }, 'Successful login');
 
+    await auditor.login(user.id, ip, user.email);
+
     return res.json({
       token,
       usuario: userStore.sanitizeUser(user),
@@ -227,9 +225,22 @@ async function login(req, res) {
 async function verify2FA(req, res) {
   try {
     const { userId, code } = req.body;
+    const ip = getClientIp(req);
 
     if (!userId || !code) {
       return res.status(400).json({ error: 'userId y code requeridos' });
+    }
+
+    const { blocked, lockUntil } = await securityTracker.isBlocked({
+      userId, ip, action: '2fa',
+    });
+    if (blocked) {
+      await securityTracker.logSecurityEvent({
+        type: 'block', userId, ip, action: '2fa',
+        detail: 'IP bloqueada por multiples intentos de 2FA',
+      });
+      const remaining = Math.ceil((lockUntil - Date.now()) / 1000);
+      return res.status(429).json({ error: `Demasiados intentos. Intenta en ${remaining}s` });
     }
 
     let result = await codeStore.verifyCode(userId, '2fa', code);
@@ -238,6 +249,9 @@ async function verify2FA(req, res) {
     }
 
     if (!result.valid) {
+      await securityTracker.recordAttempt({
+        userId, ip, action: '2fa', success: false,
+      });
       return res.status(401).json({ error: result.reason || 'Codigo invalido' });
     }
 
@@ -249,8 +263,15 @@ async function verify2FA(req, res) {
       return res.status(403).json({ error: 'Cuenta desactivada' });
     }
 
+    await securityTracker.resetAttempts({ userId, ip, action: '2fa' });
+
     const token = generateToken(user);
     logger.info({ userId, email: user.email }, '2FA verification successful');
+
+    await securityTracker.logSecurityEvent({
+      type: 'success', userId, ip, action: '2fa',
+      detail: 'Verificacion 2FA exitosa',
+    });
 
     return res.json({ token, usuario: userStore.sanitizeUser(user) });
   } catch (err) {
@@ -268,8 +289,14 @@ async function sendLoginCode(req, res) {
       return res.status(400).json({ error: 'Usuario/email y contrasena requeridos' });
     }
 
+    const { blocked } = await securityTracker.isBlocked({ ip, action: 'login' });
+    if (blocked) {
+      return res.status(429).json({ error: 'Demasiados intentos. Intenta mas tarde.' });
+    }
+
     const result = await userStore.verifyPassword(identifier, password);
     if (!result.valid) {
+      await securityTracker.recordAttempt({ ip, action: 'login', success: false });
       return res.status(401).json({ error: 'Credenciales invalidas' });
     }
 
@@ -289,6 +316,11 @@ async function sendLoginCode(req, res) {
 
     logger.info({ userId: user.id, email: user.email }, 'Login code sent');
 
+    await securityTracker.logSecurityEvent({
+      type: 'info', userId: user.id, ip, action: 'login_code',
+      detail: 'Codigo de inicio de sesion enviado',
+    });
+
     return res.json({
       userId: user.id,
       email: user.email,
@@ -307,13 +339,6 @@ async function enviarCodigoVerificacion(req, res) {
 
     if (!userId && !email) {
       return res.status(400).json({ error: 'userId o email requerido' });
-    }
-
-    const cooldownKey = `verify:${ip}`;
-    const lastRequest = codeRequests.get(cooldownKey);
-    if (lastRequest && Date.now() - lastRequest < COOLDOWN_DURATION) {
-      const remaining = Math.ceil((COOLDOWN_DURATION - (Date.now() - lastRequest)) / 1000);
-      return res.status(429).json({ error: `Espera ${remaining}s antes de solicitar otro codigo` });
     }
 
     let user;
@@ -336,7 +361,6 @@ async function enviarCodigoVerificacion(req, res) {
       return res.status(500).json({ error: 'Error al enviar el codigo. Configura SMTP primero.' });
     }
 
-    codeRequests.set(cooldownKey, Date.now());
     logger.info({ email: user.email }, 'Codigo de verificacion enviado');
 
     return res.json({
@@ -352,16 +376,29 @@ async function enviarCodigoVerificacion(req, res) {
 async function verificarCorreo(req, res) {
   try {
     const { userId, code } = req.body;
+    const ip = getClientIp(req);
 
     if (!userId || !code) {
       return res.status(400).json({ error: 'userId y code requeridos' });
     }
 
+    const { blocked } = await securityTracker.isBlocked({
+      userId, ip, action: 'code_verify',
+    });
+    if (blocked) {
+      return res.status(429).json({ error: 'Demasiados intentos. Espera unos minutos.' });
+    }
+
     const result = await codeStore.verifyCode(userId, 'email_verification', code);
 
     if (!result.valid) {
+      await securityTracker.recordAttempt({
+        userId, ip, action: 'code_verify', success: false,
+      });
       return res.status(401).json({ error: result.reason || 'Codigo invalido' });
     }
+
+    await securityTracker.resetAttempts({ userId, ip, action: 'code_verify' });
 
     await userStore.updateUser(userId, { emailVerified: true });
 
@@ -371,6 +408,8 @@ async function verificarCorreo(req, res) {
     }
 
     logger.info({ userId }, 'Email verified successfully');
+    await auditor.emailVerified(userId, ip);
+
     return res.json({ mensaje: 'Correo verificado exitosamente' });
   } catch (err) {
     logger.error({ err }, 'Verify email error');
@@ -382,13 +421,6 @@ async function solicitarRecuperacion(req, res) {
   try {
     const { identifier, email } = req.body;
     const ip = getClientIp(req);
-
-    const cooldownKey = `recovery:${ip}`;
-    const lastRequest = codeRequests.get(cooldownKey);
-    if (lastRequest && Date.now() - lastRequest < COOLDOWN_DURATION) {
-      const remaining = Math.ceil((COOLDOWN_DURATION - (Date.now() - lastRequest)) / 1000);
-      return res.status(429).json({ error: `Espera ${remaining}s antes de solicitar otro codigo` });
-    }
 
     let user = null;
     if (identifier) {
@@ -410,8 +442,12 @@ async function solicitarRecuperacion(req, res) {
       return res.status(500).json({ error: 'Error al enviar el codigo. Configura SMTP primero.' });
     }
 
-    codeRequests.set(cooldownKey, Date.now());
     logger.info({ email: user.email }, 'Recovery code sent');
+
+    await securityTracker.logSecurityEvent({
+      type: 'info', userId: user.id, ip, action: 'recovery_request',
+      detail: 'Codigo de recuperacion enviado',
+    });
 
     return res.json({
       mensaje: 'Codigo enviado a tu correo',
@@ -426,6 +462,7 @@ async function solicitarRecuperacion(req, res) {
 async function verificarCodigoRecuperacion(req, res) {
   try {
     const { identifier, email, code } = req.body;
+    const ip = getClientIp(req);
 
     if (!code) {
       return res.status(400).json({ error: 'Codigo requerido' });
@@ -442,11 +479,23 @@ async function verificarCodigoRecuperacion(req, res) {
       return res.status(404).json({ error: 'Usuario no encontrado' });
     }
 
+    const { blocked } = await securityTracker.isBlocked({
+      userId: user.id, ip, action: 'recovery',
+    });
+    if (blocked) {
+      return res.status(429).json({ error: 'Demasiados intentos. Espera unos minutos.' });
+    }
+
     const result = await codeStore.verifyCode(user.id, 'password_recovery', code);
 
     if (!result.valid) {
+      await securityTracker.recordAttempt({
+        userId: user.id, ip, action: 'recovery', success: false,
+      });
       return res.status(401).json({ error: result.reason || 'Codigo invalido o expirado' });
     }
+
+    await securityTracker.resetAttempts({ userId: user.id, ip, action: 'recovery' });
 
     const resetToken = jwt.sign(
       { id: user.id, purpose: 'password_reset' },
@@ -455,6 +504,11 @@ async function verificarCodigoRecuperacion(req, res) {
     );
 
     logger.info({ userId: user.id }, 'Recovery code verified');
+
+    await securityTracker.logSecurityEvent({
+      type: 'success', userId: user.id, ip, action: 'recovery_verify',
+      detail: 'Codigo de recuperacion verificado exitosamente',
+    });
 
     return res.json({
       puedeCambiar: true,
@@ -470,6 +524,7 @@ async function verificarCodigoRecuperacion(req, res) {
 async function cambiarContrasena(req, res) {
   try {
     const { resetToken, nuevaContrasena, userId, currentPassword } = req.body;
+    const ip = getClientIp(req);
 
     if (!nuevaContrasena || nuevaContrasena.length < 8) {
       return res.status(400).json({ error: 'La contrasena debe tener al menos 8 caracteres' });
@@ -485,6 +540,10 @@ async function cambiarContrasena(req, res) {
         }
         targetUserId = decoded.id;
       } catch {
+        await securityTracker.logSecurityEvent({
+          type: 'suspicious', ip, action: 'password_change',
+          detail: 'Intento de cambio de contrasena con token invalido/expirado',
+        });
         return res.status(401).json({ error: 'Token expirado o invalido' });
       }
     }
@@ -501,6 +560,10 @@ async function cambiarContrasena(req, res) {
     if (!resetToken && currentPassword) {
       const { valid } = await userStore.verifyPassword(user.email, currentPassword);
       if (!valid) {
+        await securityTracker.logSecurityEvent({
+          type: 'failed_login', userId: targetUserId, ip, action: 'password_change',
+          detail: 'Contrasena actual incorrecta al cambiar contrasena',
+        });
         return res.status(401).json({ error: 'Contrasena actual incorrecta' });
       }
     }
@@ -513,6 +576,11 @@ async function cambiarContrasena(req, res) {
 
     logger.info({ userId: targetUserId }, 'Password changed');
 
+    await securityTracker.logSecurityEvent({
+      type: 'success', userId: targetUserId, ip, action: 'password_change',
+      detail: 'Contrasena cambiada exitosamente',
+    });
+
     return res.json({ mensaje: 'Contrasena cambiada exitosamente' });
   } catch (err) {
     logger.error({ err }, 'Change password error');
@@ -523,6 +591,7 @@ async function cambiarContrasena(req, res) {
 async function toggle2FA(req, res) {
   try {
     const userId = req.body?.userId || req.user?.id;
+    const ip = getClientIp(req);
 
     if (!userId) {
       return res.status(400).json({ error: 'userId requerido' });
@@ -541,6 +610,7 @@ async function toggle2FA(req, res) {
     await userStore.updateUser(userId, { twoFactorEnabled: newState });
 
     logger.info({ userId, twoFactorEnabled: newState }, '2FA toggled');
+    await auditor.twoFactorToggled(userId, ip, newState);
 
     return res.json({
       mensaje: newState ? '2FA activado' : '2FA desactivado',
@@ -583,6 +653,7 @@ async function updateProfile(req, res) {
 async function changeOwnPassword(req, res) {
   try {
     const { currentPassword, newPassword } = req.body;
+    const ip = getClientIp(req);
 
     if (!currentPassword || !newPassword) {
       return res.status(400).json({ error: 'Contrasena actual y nueva requeridas' });
@@ -594,11 +665,20 @@ async function changeOwnPassword(req, res) {
 
     const { valid } = await userStore.verifyPassword(req.user.email, currentPassword);
     if (!valid) {
+      await securityTracker.logSecurityEvent({
+        type: 'failed_login', userId: req.user.id, ip, action: 'password_change',
+        detail: 'Contrasena actual incorrecta al cambiar propia contrasena',
+      });
       return res.status(401).json({ error: 'Contrasena actual incorrecta' });
     }
 
     await userStore.changePassword(req.user.id, newPassword);
     logger.info({ userId: req.user.id }, 'Own password changed');
+
+    await securityTracker.logSecurityEvent({
+      type: 'success', userId: req.user.id, ip, action: 'password_change',
+      detail: 'Contrasena propia cambiada exitosamente',
+    });
 
     return res.json({ mensaje: 'Contrasena cambiada exitosamente' });
   } catch (err) {
@@ -625,6 +705,21 @@ async function getLoginLogs(req, res) {
   }
 }
 
+async function getSecurityEvents(req, res) {
+  try {
+    const limit = Math.min(parseInt(req.query.limit) || 100, 500);
+    const events = await securityTracker.getSecurityEvents({
+      limit,
+      type: req.query.type || null,
+      userId: req.query.userId || null,
+    });
+    return res.json(events);
+  } catch (err) {
+    logger.error({ err }, 'Get security events error');
+    return res.status(500).json({ error: 'Error al obtener eventos de seguridad' });
+  }
+}
+
 async function hashPassword(req, res) {
   try {
     const { password } = req.body;
@@ -647,5 +742,6 @@ module.exports = {
   toggle2FA,
   getProfile, updateProfile, changeOwnPassword,
   getLastLogin, getLoginLogs,
+  getSecurityEvents,
   hashPassword,
 };

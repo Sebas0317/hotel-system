@@ -7,9 +7,14 @@
 const { getRooms, saveRooms, getConsumos, saveConsumos, getHistory, saveHistory, getStateHistory, saveStateHistory } = require('../data/jsonStore');
 const { getPrices } = require('../data/priceStore');
 const { generateId, generateReservationId } = require('../utils/idGenerator');
+const { generateRoomToken } = require('../middleware/roomAccess');
 const { generarPin } = require('../utils/pinGenerator');
 const { calcularCheckout } = require('../utils/checkoutCalc');
 const { parseISO, formatISO, differenceInDays, addDays } = require('date-fns');
+const { broadcast } = require('../utils/websocket');
+
+const logger = require('../utils/logger');
+const auditor = require('../utils/auditor');
 
 const pinAttempts = new Map();
 const PIN_MAX_ATTEMPTS = 5;
@@ -26,7 +31,7 @@ setInterval(() => {
   }
 }, PIN_CLEANUP_INTERVAL);
 
-async function recordStateChange(room, estadoAnterior, estadoNuevo) {
+async function recordStateChange(room, estadoAnterior, estadoNuevo, consumos = []) {
   const cambios = await getStateHistory();
   const entry = {
     id: generateId(),
@@ -51,6 +56,7 @@ async function recordStateChange(room, estadoAnterior, estadoNuevo) {
       tieneMascota: room.tieneMascota || false,
       nombreMascota: room.nombreMascota || '',
       pago: room.pago || null,
+      consumos: consumos.length > 0 ? consumos.map(c => ({ descripcion: c.descripcion, precio: c.precio, categoria: c.categoria })) : undefined,
     } : null,
   };
   cambios.unshift(entry);
@@ -81,6 +87,8 @@ async function recordStateChange(room, estadoAnterior, estadoNuevo) {
     checkOut: room.checkOut || null,
     noches: room.noches || 1,
     tarifa: room.tarifa || 0,
+    consumos: consumos.length > 0 ? consumos.map(c => ({ descripcion: c.descripcion, precio: c.precio, categoria: c.categoria })) : undefined,
+    pago: room.pago || null,
   };
   history.unshift(historyEntry);
 
@@ -96,6 +104,7 @@ async function recordStateChange(room, estadoAnterior, estadoNuevo) {
 async function solicitarCheckout(req, res) {
   try {
     const { checkOutDate } = req.body;
+    const meta = auditor.reqMeta(req);
     const rooms = await getRooms();
     const idx = rooms.findIndex(r => String(r.id) === req.params.id);
 
@@ -104,6 +113,14 @@ async function solicitarCheckout(req, res) {
     }
 
     const room = rooms[idx];
+
+    if (!req.roomAccess) {
+      return res.status(401).json({ error: 'Debes validar el acceso a la habitacion primero' });
+    }
+
+    if (String(req.roomAccess.roomId) !== String(room.id)) {
+      return res.status(403).json({ error: 'No tienes acceso a esta habitacion' });
+    }
 
     if (room.estado !== 'ocupada') {
       return res.status(400).json({ error: `Solo huéspedes ocupando pueden solicitar checkout. Estado actual: ${room.estado}` });
@@ -117,9 +134,12 @@ async function solicitarCheckout(req, res) {
       },
     };
     await saveRooms(rooms);
+    broadcast('room:update', rooms[idx]);
+    await auditor.checkoutRequested(meta.userId, meta.ip, room.numero);
 
     res.json({ success: true, room: rooms[idx] });
   } catch (err) {
+    logger.error('Error requesting checkout', { error: err.message });
     res.status(500).json({ error: 'Error interno al solicitar checkout' });
   }
 }
@@ -186,6 +206,7 @@ function getReservaciones(_req, res) {
 async function checkIn(req, res) {
   try {
     const { numero, huesped, tipo } = req.body;
+    const meta = auditor.reqMeta(req);
     const rooms = await getRooms();
     const idx = rooms.findIndex(r => r.numero === numero);
 
@@ -205,6 +226,8 @@ async function checkIn(req, res) {
       };
       await saveRooms(rooms);
       await recordStateChange(rooms[idx], 'reservada', 'ocupada');
+      broadcast('room:update', rooms[idx]);
+      await auditor.checkIn(meta.userId, meta.ip, numero, huesped);
       return res.json(rooms[idx]);
     }
 
@@ -230,6 +253,8 @@ async function checkIn(req, res) {
       };
       await saveRooms(rooms);
       await recordStateChange(rooms[idx], 'disponible', 'ocupada');
+      broadcast('room:update', rooms[idx]);
+      await auditor.checkIn(meta.userId, meta.ip, numero, huesped);
       return res.json(rooms[idx]);
     }
 
@@ -249,9 +274,11 @@ async function checkIn(req, res) {
     rooms.push(nueva);
     await saveRooms(rooms);
     await recordStateChange(nueva, 'nueva', 'ocupada');
+    broadcast('room:update', nueva);
+    await auditor.checkIn(meta.userId, meta.ip, numero, huesped);
     res.json(nueva);
   } catch (err) {
-    require('../utils/logger').error('Error checking in', { error: err.message });
+    logger.error('Error checking in', { error: err.message });
     res.status(500).json({ error: 'Error interno al hacer check-in' });
   }
 }
@@ -259,6 +286,7 @@ async function checkIn(req, res) {
 async function reservar(req, res) {
   try {
     const { huesped, telefono, email, noches } = req.body;
+    const meta = auditor.reqMeta(req);
 
     const rooms = await getRooms();
     const idx = rooms.findIndex(r => String(r.id) === req.params.id);
@@ -268,6 +296,7 @@ async function reservar(req, res) {
     }
 
     const room = rooms[idx];
+    const numero = room.numero;
 
     const OPERATIONAL_STATES = ['limpieza', 'mantenimiento'];
     if (room.estado !== 'disponible') {
@@ -303,9 +332,11 @@ async function reservar(req, res) {
 
     await recordStateChange(rooms[idx], 'disponible', 'reservada');
 
+    broadcast('room:update', rooms[idx]);
+    await auditor.reserve(meta.userId, meta.ip, numero, huesped);
     res.json(rooms[idx]);
   } catch (err) {
-    require('../utils/logger').error('Error reserving room', { error: err.message });
+    logger.error('Error reserving room', { error: err.message });
     res.status(500).json({ error: 'Error interno al reservar' });
   }
 }
@@ -331,6 +362,7 @@ async function actualizarHuesped(req, res) {
     if (email !== undefined) rooms[idx].email = email.trim() || null;
 
     await saveRooms(rooms);
+    broadcast('room:update', rooms[idx]);
     res.json(rooms[idx]);
   } catch (err) {
     require('../utils/logger').error('Error updating guest', { error: err.message });
@@ -341,6 +373,7 @@ async function actualizarHuesped(req, res) {
 async function actualizarEstado(req, res) {
   try {
     const { estado } = req.body;
+    const meta = auditor.reqMeta(req);
     const VALID_ESTADOS = ['disponible', 'reservada', 'limpieza', 'mantenimiento', 'fuera_servicio'];
 
     if (!VALID_ESTADOS.includes(estado)) {
@@ -392,9 +425,11 @@ async function actualizarEstado(req, res) {
       await recordStateChange(rooms[idx], room.estado, estado);
     }
 
+    broadcast('room:update', rooms[idx]);
+    await auditor.roomStatusChanged(meta.userId, meta.ip, room.numero, room.estado, estado);
     res.json(rooms[idx]);
   } catch (err) {
-    require('../utils/logger').error('Error updating room status', { error: err.message });
+    logger.error('Error updating room status', { error: err.message });
     res.status(500).json({ error: 'Error interno al actualizar estado' });
   }
 }
@@ -425,7 +460,9 @@ async function validarPin(req, res) {
 
     pinAttempts.delete(ip);
 
-    res.json(room);
+    const roomToken = generateRoomToken(room.id, room.numero);
+
+    res.json({ room, roomToken });
   } catch (err) {
     require('../utils/logger').error('Error validating PIN', { error: err.message });
     res.status(500).json({ error: 'Error interno al validar PIN' });
@@ -435,6 +472,7 @@ async function validarPin(req, res) {
 async function checkout(req, res) {
   try {
     const { metodoPago, valorRecibido } = req.body;
+    const meta = auditor.reqMeta(req);
     const rooms = await getRooms();
     const consumos = await getConsumos();
     const idx = rooms.findIndex(r => String(r.id) === req.params.id);
@@ -494,9 +532,17 @@ async function checkout(req, res) {
     };
     await saveRooms(rooms);
 
-    await saveConsumos(consumos.filter(c => String(c.roomId) !== String(room.id)));
+    // Preserve consumos for historical records — mark as archived instead of deleting
+    const updatedConsumos = consumos.map(c =>
+      String(c.roomId) === String(room.id)
+        ? { ...c, archivedAt: new Date().toISOString(), archived: true }
+        : c
+    );
+    await saveConsumos(updatedConsumos);
 
-    await recordStateChange(rooms[idx], 'ocupada', 'limpieza');
+    await recordStateChange(rooms[idx], 'ocupada', 'limpieza', consumosHab);
+    broadcast('room:update', rooms[idx]);
+    await auditor.checkout(meta.userId, meta.ip, room.numero, room.huesped, totals.total);
 
     const factura = {
       numero: room.numero,
@@ -525,13 +571,14 @@ async function checkout(req, res) {
       factura,
     });
   } catch (err) {
-    require('../utils/logger').error('Error during checkout', { error: err.message });
+    logger.error('Error during checkout', { error: err.message });
     res.status(500).json({ error: 'Error interno al hacer checkout' });
   }
 }
 
 async function cancelarReserva(req, res) {
   try {
+    const meta = auditor.reqMeta(req);
     const rooms = await getRooms();
     const idx = rooms.findIndex(r => String(r.id) === req.params.id);
 
@@ -555,10 +602,12 @@ async function cancelarReserva(req, res) {
       estado: 'disponible',
     };
     await saveRooms(rooms);
+    broadcast('room:update', rooms[idx]);
+    await auditor.cancelReservation(meta.userId, meta.ip, room.numero);
 
     res.json({ message: 'Reserva cancelada', room: rooms[idx] });
   } catch (err) {
-    require('../utils/logger').error('Error canceling reservation', { error: err.message });
+    logger.error('Error canceling reservation', { error: err.message });
     res.status(500).json({ error: 'Error interno al cancelar reserva' });
   }
 }
