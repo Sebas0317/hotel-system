@@ -265,10 +265,10 @@
     "role": "admin",
     "isActive": true,
     "emailVerified": true,
-    "twoFactorEnabled": false,
+    "twoFactorEnabled": true,
     "lastLogin": null,
     "lastIp": null,
     "createdAt": "2026-06-13T02:34:40.641Z",
-    "updatedAt": "2026-06-13T02:34:40.642Z"
+    "updatedAt": "2026-06-13T02:41:47.156Z"
   }
 ]
