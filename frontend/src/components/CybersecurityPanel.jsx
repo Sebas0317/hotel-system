@@ -13,21 +13,21 @@ const SECTIONS = [
     icon: ShieldCheck,
     title: 'Google reCAPTCHA v2',
     scope: 'POST /auth/login • /auth/register • /rooms/access',
-    explanation: 'Verifica que las solicitudes provengan de humanos reales mediante el widget "No soy un robot" de Google, protegiendo login, registro y acceso a habitaciones.',
+    explanation: 'reCAPTCHA es un mecanismo de seguridad que permite diferenciar entre usuarios humanos y programas automatizados (bots). Antes de permitir el inicio de sesion, registro o acceso a habitaciones, el sistema solicita una validacion mediante el servicio de Google reCAPTCHA.',
     code: `// backend/src/middleware/recaptcha.js
 const result = await verifyRecaptcha(token);
 if (!result.success)
   return res.status(403).json(
     { error: 'Verificacion de seguridad fallida' }
   );`,
-    benefit: 'Bloquea bots y ataques automatizados antes de que lleguen a la logica de autenticacion.',
+    benefit: 'Reduce ataques automatizados, intentos masivos de acceso y abuso de formularios publicos.',
   },
   {
     id: '2fa',
     icon: Fingerprint,
-    title: 'Autenticacion 2FA por Correo',
-    scope: 'POST /auth/login (si 2FA habilitado)',
-    explanation: 'Segundo factor de autenticacion via codigo de 6 digitos enviado al correo electronico del administrador, con expiracion de 5 minutos.',
+    title: 'Autenticacion de Doble Factor (2FA)',
+    scope: 'POST /auth/login',
+    explanation: 'La autenticacion de doble factor agrega una segunda capa de seguridad ademas de la contrasena tradicional. Cuando un administrador inicia sesion, el sistema genera un codigo temporal de 6 digitos que es enviado a su correo electronico y debe ser validado antes de conceder acceso.',
     code: `// backend/src/controllers/authController.js
 if (user.twoFactorEnabled) {
   const { plainCode } = await codeStore
@@ -37,14 +37,14 @@ if (user.twoFactorEnabled) {
   );
   return res.json({ requires2FA: true });
 }`,
-    benefit: 'Protege cuentas administrativas incluso si la contrasena es comprometida.',
+    benefit: 'Protege las cuentas administrativas incluso si un atacante obtiene la contrasena principal.',
   },
   {
     id: 'rate-limit',
     icon: Gauge,
-    title: 'Limitador de Peticiones por Capas',
+    title: 'Limitacion de Peticiones (Rate Limiting)',
     scope: 'Global • auth • login • PIN • 2FA • recovery',
-    explanation: 'Limita solicitudes por IP con 8 niveles distintos: global (100/min), auth (10/min), login (5/2min), PIN (5/min), codigo 2FA (5/2min) y recuperacion (3/2min).',
+    explanation: 'Es una tecnica que restringe la cantidad de solicitudes que un usuario puede realizar en un determinado tiempo. El sistema aplica diferentes limites segun la sensibilidad de cada operacion, como login, recuperacion de contrasena y validacion de codigos.',
     code: `// backend/src/middleware/rateLimiters.js
 const loginLimiter = rateLimit({
   windowMs: 120 * 1000, max: 5,
@@ -54,14 +54,14 @@ const pinRateLimiter = rateLimit({
   windowMs: 60 * 1000, max: 5,
   message: { error: 'Demasiados intentos de PIN.' }
 });`,
-    benefit: 'Previene fuerza bruta, enumeracion de usuarios y ataques DoS.',
+    benefit: 'Mitiga ataques de fuerza bruta, automatizacion maliciosa y saturacion de servicios.',
   },
   {
     id: 'headers',
     icon: Shield,
-    title: 'Headers de Seguridad (Helmet)',
+    title: 'Encabezados de Seguridad HTTP (Helmet)',
     scope: 'Todo el sistema',
-    explanation: 'Configura estrictos encabezados HTTP: CSP limita origenes de scripts, HSTS forza HTTPS por 1 ano, X-Frame-Options bloquea iframes, y XSS-Protection activa.',
+    explanation: 'Los Security Headers son configuraciones enviadas por el servidor para indicar al navegador como debe proteger la aplicacion. Se utilizan politicas de seguridad mediante Helmet para restringir scripts, iframes, contenido inseguro y otros comportamientos potencialmente peligrosos.',
     code: `// backend/server.js
 app.use(helmet({
   contentSecurityPolicy: {
@@ -74,28 +74,28 @@ app.use(helmet({
   hsts: { maxAge: 31536000, preload: true },
   xssFilter: true,
 }));`,
-    benefit: 'Mitiga XSS, clickjacking, MIME sniffing y asegura comunicacion cifrada.',
+    benefit: 'Ayuda a prevenir ataques como XSS, Clickjacking y manipulacion de contenido web.',
   },
   {
     id: 'password',
     icon: Lock,
-    title: 'Hash de Contrasenas (bcrypt)',
+    title: 'Proteccion de Contrasenas con bcrypt',
     scope: 'Sistema de autenticacion',
-    explanation: 'Almacena contrasenas con bcrypt a 12 rondas de sal, haciendo que cada hash sea unico y computacionalmente costoso de crackear.',
+    explanation: 'bcrypt es un algoritmo criptografico disenado especificamente para proteger contrasenas. Las contrasenas nunca se almacenan directamente. Antes de guardarlas son transformadas mediante hashing y sal criptografica.',
     code: `// backend/src/data/userStore.js
 const passwordHash = await bcrypt
   .hash(password, 12);
 
 const valid = await bcrypt
   .compare(password, user.passwordHash);`,
-    benefit: 'Protege las credenciales incluso si la base de datos es comprometida.',
+    benefit: 'Si la base de datos es comprometida, las contrasenas reales de los usuarios no quedan expuestas.',
   },
   {
     id: 'jwt',
     icon: KeyRound,
-    title: 'Tokens JWT con Algoritmo Seguro',
+    title: 'Autenticacion mediante JWT',
     scope: 'Todas las rutas protegidas',
-    explanation: 'Autenticacion sin estado mediante tokens JWT firmados con HS256, expiracion configurable (8h por defecto) y validacion de estructura en cada peticion protegida.',
+    explanation: 'JWT (JSON Web Token) es un estandar utilizado para identificar usuarios autenticados sin almacenar sesiones en el servidor. Despues de iniciar sesion correctamente, el sistema genera un token firmado digitalmente que se valida en cada peticion protegida.',
     code: `// backend/src/middleware/auth.js
 function requireAuth(req, res, next) {
   const token = header.slice(7);
@@ -106,14 +106,14 @@ function requireAuth(req, res, next) {
   req.user = decoded;
   next();
 }`,
-    benefit: 'Evita falsificacion de sesion y permite verificar identidad sin estado compartido.',
+    benefit: 'Evita la falsificacion de identidad y garantiza que unicamente usuarios autenticados accedan a recursos privados.',
   },
   {
     id: 'pin-access',
     icon: UserCheck,
-    title: 'Control de Acceso por PIN',
+    title: 'Control de Acceso por PIN de Habitacion',
     scope: 'POST /rooms/access',
-    explanation: 'Acceso a habitaciones mediante PIN de 4 digitos generado con crypto.randomFillSync, con token JWT firmado de 2 horas y rate limiting por IP.',
+    explanation: 'Es un mecanismo de autenticacion especifico para huespedes basado en credenciales temporales. Durante el check-in se genera un PIN asociado a la habitacion. Solo quienes posean dicho PIN pueden consultar informacion relacionada con su estancia.',
     code: `// backend/src/utils/pinGenerator.js
 function generarPin() {
   const array = new Uint32Array(1);
@@ -126,28 +126,28 @@ const roomToken = jwt.sign(
   { roomId, type: 'room' },
   JWT_SECRET, { expiresIn: '2h' }
 );`,
-    benefit: 'Restringe acceso a datos de habitacion solo a huespedes autorizados con credencial temporal.',
+    benefit: 'Protege la informacion de reservas, consumos y servicios frente a accesos no autorizados.',
   },
   {
     id: 'audit',
     icon: FileText,
-    title: 'Auditoria de Seguridad',
-    scope: 'Acciones sensibles (login, check-in, consumos)',
-    explanation: 'Todas las acciones sensibles (login, check-in, cambios de estado, 2FA) se registran con metadatos: usuario, IP, accion y timestamp, almacenados en archivo seguro.',
+    title: 'Auditoria y Registro de Eventos',
+    scope: 'Login • Check-in • Check-out • Consumos • 2FA',
+    explanation: 'La auditoria consiste en registrar acciones importantes para mantener trazabilidad dentro del sistema. Se almacenan eventos relevantes incluyendo usuario, fecha, direccion IP y accion ejecutada.',
     code: `// backend/src/utils/auditor.js
 auditor.login(userId, ip, email);
 auditor.failedLogin(ip, identifier);
 auditor.checkIn(userId, ip, room, guest);
 auditor.roomStatusChanged(userId, ip, num, from, to);
 auditor.consumoCreated(userId, ip, num, desc, precio);`,
-    benefit: 'Proporciona trazabilidad completa para detectar y responder a incidentes de seguridad.',
+    benefit: 'Permite detectar actividades sospechosas, reconstruir incidentes y mejorar el control administrativo.',
   },
   {
     id: 'lockout',
     icon: UserX,
     title: 'Bloqueo por Intentos Fallidos',
     scope: 'POST /auth/login • /2fa • /recovery',
-    explanation: 'Implementa bloqueo progresivo: 5 fallos en login/2FA = bloqueo 15 min, 3 fallos en recuperacion = bloqueo 30 min. Ventana deslizante de 10 min.',
+    explanation: 'Es una medida defensiva contra ataques de fuerza bruta. Cuando se supera una cantidad determinada de intentos incorrectos, la cuenta o proceso queda temporalmente bloqueado.',
     code: `// backend/src/utils/securityTracker.js
 const DEFAULTS = {
   login: { maxAttempts: 5, lockoutMs: 900000 },
@@ -157,14 +157,14 @@ const DEFAULTS = {
 
 if (entry.count >= actionCfg.maxAttempts)
   entry.lockUntil = now() + actionCfg.lockoutMs;`,
-    benefit: 'Previene ataques de fuerza bruta bloqueando temporalmente la cuenta del atacante.',
+    benefit: 'Dificulta significativamente la adivinacion de contrasenas y codigos de verificacion.',
   },
   {
     id: 'sanitize',
     icon: Search,
-    title: 'Sanitizacion de Entradas (XSS)',
-    scope: 'Todas las rutas POST / PUT / PATCH',
-    explanation: 'Middleware que codifica caracteres HTML peligrosos (& < > " \') en todos los campos del body antes de que cualquier ruta los procese.',
+    title: 'Sanitizacion de Entradas (Proteccion XSS)',
+    scope: 'Todas las rutas POST • PUT • PATCH',
+    explanation: 'La sanitizacion consiste en limpiar datos ingresados por los usuarios antes de procesarlos o almacenarlos. El sistema filtra caracteres y estructuras potencialmente peligrosas que podrian ejecutar codigo malicioso.',
     code: `// backend/src/middleware/sanitize.js
 function sanitizeString(value) {
   return value
@@ -175,14 +175,14 @@ function sanitizeString(value) {
     .replace(/'/g, '&#x27;')
     .trim();
 }`,
-    benefit: 'Elimina ataques XSS almacenados y reflejados en formularios y entradas de usuario.',
+    benefit: 'Previene ataques Cross-Site Scripting (XSS), una de las vulnerabilidades web mas comunes.',
   },
   {
     id: 'timeout',
     icon: Clock,
-    title: 'Timeout de Peticiones',
+    title: 'Timeout de Solicitudes',
     scope: 'Todo el sistema',
-    explanation: 'Las solicitudes HTTP que excedan 30 segundos son abortadas automaticamente, liberando recursos del servidor y previniendo agotamiento de conexiones.',
+    explanation: 'Consiste en establecer un tiempo maximo para que una peticion permanezca activa. Las solicitudes excesivamente largas son canceladas automaticamente por el servidor.',
     code: `// backend/src/middleware/requestTimeout.js
 function requestTimeout(timeoutMs) {
   return (req, res, next) => {
@@ -195,14 +195,14 @@ function requestTimeout(timeoutMs) {
     next();
   };
 }`,
-    benefit: 'Protege contra Slowloris y agotamiento de conexiones por solicitudes lentas.',
+    benefit: 'Reduce riesgos de agotamiento de recursos y ataques basados en conexiones lentas.',
   },
   {
     id: 'pathtravel',
     icon: FileJson,
     title: 'Proteccion contra Path Traversal',
-    scope: 'Capas de datos + archivos estaticos',
-    explanation: 'Bloquea accesos a archivos sensibles (.env, .git, .json, .pem, .key) y previene navegacion de directorios con ../ en URLs y en operaciones de archivo internas.',
+    scope: 'Sistema de archivos y almacenamiento',
+    explanation: 'Path Traversal es una vulnerabilidad que intenta acceder a archivos fuera de los directorios permitidos. El sistema bloquea rutas sospechosas y restringe el acceso a archivos sensibles del servidor.',
     code: `// backend/src/data/jsonStore.js
 function validatePath(filePath) {
   const resolved = path.resolve(filePath);
@@ -215,14 +215,14 @@ function validatePath(filePath) {
 const SENSITIVE_PATTERNS = [
   /\.env/, /\.git/, /\\.json$/i,
 ];`,
-    benefit: 'Impide la lectura o escritura de archivos fuera del directorio permitido.',
+    benefit: 'Evita la exposicion de configuraciones internas, credenciales y archivos criticos.',
   },
   {
     id: 'cors',
     icon: Server,
-    title: 'CORS Restringido',
+    title: 'Politica de CORS Restringida',
     scope: 'Todo el sistema',
-    explanation: 'Solo origenes explicitamente configurados (localhost:5173, localhost:4173, dominios *.vercel.app) pueden consumir la API, con metodos HTTP limitados.',
+    explanation: 'CORS controla que sitios web pueden comunicarse con la API. Solo dominios previamente autorizados pueden realizar solicitudes al backend.',
     code: `// backend/server.js
 app.use(cors({
   origin: function (origin, callback) {
@@ -236,14 +236,14 @@ app.use(cors({
   methods: ['GET', 'POST', 'PATCH', 'PUT'],
   credentials: true,
 }));`,
-    benefit: 'Evita que sitios externos no autorizados realicen peticiones a la API.',
+    benefit: 'Reduce el riesgo de consumo no autorizado de la API desde sitios externos.',
   },
   {
     id: 'redact',
     icon: Eye,
-    title: 'Redaccion de Datos Sensibles (PII)',
-    scope: 'Todo el sistema (logger)',
-    explanation: 'Pino logger redacta automaticamente passwords, tokens, PINs, cookies y headers de autorizacion en todos los logs, reemplazandolos con "**REDACTED**".',
+    title: 'Proteccion de Datos Sensibles en Logs',
+    scope: 'Sistema de registro y monitoreo',
+    explanation: 'Consiste en evitar que informacion critica aparezca en registros del sistema. Contrasenas, tokens, PINs y credenciales son ocultados automaticamente antes de almacenarse en logs.',
     code: `// backend/src/utils/logger.js
 redact: {
   paths: [
@@ -255,14 +255,14 @@ redact: {
   ],
   censor: '**REDACTED**',
 }`,
-    benefit: 'Previene la exposicion de informacion sensible en archivos de log.',
+    benefit: 'Impide la filtracion accidental de informacion sensible durante tareas de monitoreo y soporte.',
   },
   {
     id: 'filelock',
     icon: Terminal,
-    title: 'Bloqueo de Archivos (Race Condition)',
-    scope: 'Capas de datos (jsonStore)',
-    explanation: 'Implementa cola de promesas por archivo que serializa las escrituras, evitando condiciones de carrera en operaciones concurrentes sobre JSON.',
+    title: 'Proteccion contra Condiciones de Carrera',
+    scope: 'Persistencia de datos',
+    explanation: 'Las condiciones de carrera ocurren cuando multiples procesos intentan modificar el mismo recurso al mismo tiempo. El sistema serializa operaciones de escritura para evitar conflictos y corruption de datos.',
     code: `// backend/src/data/jsonStore.js
 const writeQueues = new Map();
 
@@ -274,7 +274,7 @@ async function enqueueTask(filePath, task) {
   writeQueues.set(filePath, next);
   return next;
 }`,
-    benefit: 'Garantiza integridad de datos en escrituras concurrentes sin necesidad de base de datos.',
+    benefit: 'Garantiza la integridad de la informacion de reservas, habitaciones y operaciones concurrentes.',
   },
 ];
 
@@ -338,12 +338,9 @@ export default function CybersecurityPanel() {
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
             className="fixed right-0 top-0 h-full z-40 w-[420px] max-w-[90vw] overflow-hidden"
           >
-            {/* Solid background */}
             <div className="absolute inset-0 bg-emerald-950/95 backdrop-blur-lg border-l border-emerald-500/20 shadow-2xl shadow-emerald-900/40" />
 
-            {/* Content */}
             <div className="relative h-full flex flex-col">
-              {/* Header */}
               <div className="shrink-0 p-6 pb-4 border-b border-emerald-500/20">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
@@ -364,7 +361,6 @@ export default function CybersecurityPanel() {
                 </div>
               </div>
 
-              {/* Sections list */}
               <div className="flex-1 overflow-y-auto p-4 space-y-2 scrollbar-thin scrollbar-thumb-emerald-500/20 scrollbar-track-transparent">
                 {SECTIONS.map((section) => {
                   const Icon = section.icon;
@@ -377,7 +373,6 @@ export default function CybersecurityPanel() {
                       animate={{ opacity: 1, y: 0 }}
                       className="rounded-xl border border-emerald-500/10 bg-emerald-950/80 overflow-hidden"
                     >
-                      {/* Section header (clickable) */}
                       <button
                         onClick={() => setExpanded(isExpanded ? null : section.id)}
                         className="w-full flex items-center gap-3 p-4 text-left hover:bg-emerald-500/5 transition-colors cursor-pointer border-none"
@@ -400,7 +395,6 @@ export default function CybersecurityPanel() {
                         </motion.div>
                       </button>
 
-                      {/* Expandable content */}
                       <AnimatePresence initial={false}>
                         {isExpanded && (
                           <motion.div
@@ -432,7 +426,6 @@ export default function CybersecurityPanel() {
                 })}
               </div>
 
-              {/* Footer */}
               <div className="shrink-0 p-4 border-t border-emerald-500/20">
                 <p className="text-[10px] text-emerald-400/40 text-center">
                   EcoBosque Hotel System — Sustentacion de Ciberseguridad
