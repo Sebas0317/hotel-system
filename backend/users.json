@@ -258,7 +258,7 @@
     "id": "1781318080641-5f038806",
     "username": "afcipamochas",
     "email": "afcipamochas@ut.edu.co",
-    "passwordHash": "\\$.gIXie3on44E/p/s2FVXQucG8bcAExzr0QAC4eHh3iHR969NhHXDa",
+    "passwordHash": "$2b$12$yt2uCCnNnh0XhqniMSMyrOawHwljnC.I4S.s5rPC9ZN5mgj/2lImy",
     "firstName": "Admin",
     "lastName": "User",
     "avatar": null,
@@ -266,9 +266,9 @@
     "isActive": true,
     "emailVerified": true,
     "twoFactorEnabled": true,
-    "lastLogin": null,
-    "lastIp": null,
+    "lastLogin": "2026-06-13T02:46:25.727Z",
+    "lastIp": "127.0.0.1",
     "createdAt": "2026-06-13T02:34:40.641Z",
-    "updatedAt": "2026-06-13T02:41:47.156Z"
+    "updatedAt": "2026-06-13T02:46:25.727Z"
   }
 ]
