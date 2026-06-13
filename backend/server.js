@@ -185,6 +185,17 @@ app.get('/', (_req, res) => res.json({
   health: '/health/detailed',
 }));
 
+// On Vercel, strip the route prefix so Express routes match correctly
+if (process.env.VERCEL) {
+  const PREFIX = '/_/backend';
+  app.use((req, _res, next) => {
+    if (req.url.startsWith(PREFIX)) {
+      req.url = req.url.slice(PREFIX.length);
+    }
+    next();
+  });
+}
+
 // ── ROUTES (v1 + unversioned for backward compatibility) ──
 // Auth routes (strict rate limiting)
 app.use('/v1/auth', authRateLimiter, authRoutes);
@@ -226,10 +237,9 @@ app.post('/admin/backup', requireAuth, async (_req, res) => {
 app.use(notFoundHandler);
 app.use(errorHandler);
 
-// ── START HTTP SERVER (skip when running on Vercel serverless) ──
+// ── START HTTP SERVER ──
 let server;
-if (!process.env.VERCEL) {
-  server = app.listen(PORT, '0.0.0.0', () => {
+server = app.listen(PORT, '0.0.0.0', () => {
     // Initialize WebSocket server for real-time updates
     initWebSocket(server);
 
@@ -285,7 +295,6 @@ if (!process.env.VERCEL) {
       });
     }
   });
-}
 
 module.exports = app; // Export for Vercel serverless
 module.exports.app = app;
