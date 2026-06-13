@@ -226,62 +226,67 @@ app.post('/admin/backup', requireAuth, async (_req, res) => {
 app.use(notFoundHandler);
 app.use(errorHandler);
 
-// ── START HTTP SERVER ──
-const server = app.listen(PORT, '0.0.0.0', () => {
-  // Initialize WebSocket server for real-time updates
-  initWebSocket(server);
+// ── START HTTP SERVER (skip when running on Vercel serverless) ──
+let server;
+if (!process.env.VERCEL) {
+  server = app.listen(PORT, '0.0.0.0', () => {
+    // Initialize WebSocket server for real-time updates
+    initWebSocket(server);
 
-  logger.info(`EcoBosque API running on http://localhost:${PORT}`);
+    logger.info(`EcoBosque API running on http://localhost:${PORT}`);
 
-  // ── OPTIONAL HTTPS (self-signed dev certs) ──
-  if (process.env.NODE_ENV !== 'test') {
-    const certPath = path.join(__dirname, 'certs', 'dev-cert.pem');
-    const keyPath = path.join(__dirname, 'certs', 'dev-key.pem');
-    if (fs.existsSync(certPath) && fs.existsSync(keyPath)) {
-      const httpsOpts = {
-        cert: fs.readFileSync(certPath),
-        key: fs.readFileSync(keyPath),
-      };
-      const httpsServer = https.createServer(httpsOpts, app);
-      const HTTPS_PORT = process.env.HTTPS_PORT || 3443;
-      httpsServer.listen(HTTPS_PORT, '0.0.0.0', () => {
-        initWebSocket(httpsServer);
-        logger.info(`EcoBosque API running on https://localhost:${HTTPS_PORT}`);
+    // ── OPTIONAL HTTPS (self-signed dev certs) ──
+    if (process.env.NODE_ENV !== 'test') {
+      const certPath = path.join(__dirname, 'certs', 'dev-cert.pem');
+      const keyPath = path.join(__dirname, 'certs', 'dev-key.pem');
+      if (fs.existsSync(certPath) && fs.existsSync(keyPath)) {
+        const httpsOpts = {
+          cert: fs.readFileSync(certPath),
+          key: fs.readFileSync(keyPath),
+        };
+        const httpsServer = https.createServer(httpsOpts, app);
+        const HTTPS_PORT = process.env.HTTPS_PORT || 3443;
+        httpsServer.listen(HTTPS_PORT, '0.0.0.0', () => {
+          initWebSocket(httpsServer);
+          logger.info(`EcoBosque API running on https://localhost:${HTTPS_PORT}`);
+        });
+      }
+    }
+
+    logger.info(`API Documentation: http://localhost:${PORT}/api-docs`);
+    logger.info(`Health Check: http://localhost:${PORT}/health/detailed`);
+
+    // Avoid expensive startup side-effects during tests.
+    if (process.env.NODE_ENV !== 'test') {
+      // Run JSON integrity check on startup
+      const { startupValidation } = require('./src/utils/jsonValidator');
+      startupValidation().then(report => {
+        if (report.overall) {
+          logger.info('JSON integrity check passed');
+        } else {
+          logger.warn('JSON integrity check found issues');
+        }
+      }).catch(err => {
+        logger.warn({ err }, 'JSON integrity check failed (non-critical)');
+      });
+
+      // Create initial backup on startup
+      createBackup().then(() => {
+        logger.info('Initial backup created successfully');
+      }).catch(err => {
+        logger.warn({ err }, 'Initial backup failed (non-critical)');
+      });
+
+      // Seed admin user from env into multi-user store
+      require('./src/data/userStore').seedAdminUser().then(user => {
+        if (user) logger.info('Admin user seeded');
+      }).catch(err => {
+        logger.warn({ err }, 'Admin user seed failed (non-critical)');
       });
     }
-  }
+  });
+}
 
-  logger.info(`API Documentation: http://localhost:${PORT}/api-docs`);
-  logger.info(`Health Check: http://localhost:${PORT}/health/detailed`);
-
-  // Avoid expensive startup side-effects during tests.
-  if (process.env.NODE_ENV !== 'test') {
-    // Run JSON integrity check on startup
-    const { startupValidation } = require('./src/utils/jsonValidator');
-    startupValidation().then(report => {
-      if (report.overall) {
-        logger.info('JSON integrity check passed');
-      } else {
-        logger.warn('JSON integrity check found issues');
-      }
-    }).catch(err => {
-      logger.warn({ err }, 'JSON integrity check failed (non-critical)');
-    });
-
-    // Create initial backup on startup
-    createBackup().then(() => {
-      logger.info('Initial backup created successfully');
-    }).catch(err => {
-      logger.warn({ err }, 'Initial backup failed (non-critical)');
-    });
-
-    // Seed admin user from env into multi-user store
-    require('./src/data/userStore').seedAdminUser().then(user => {
-      if (user) logger.info('Admin user seeded');
-    }).catch(err => {
-      logger.warn({ err }, 'Admin user seed failed (non-critical)');
-    });
-  }
-});
-
-module.exports = { app, server }; // Export for testing
+module.exports = app; // Export for Vercel serverless
+module.exports.app = app;
+module.exports.server = server; // Export for testing

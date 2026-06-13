@@ -175,8 +175,7 @@ async function writeJSON(filePath, data) {
       persistentCache.set(validatedPath, data);
       isCacheLoaded.set(validatedPath, true);
     } catch (err) {
-      logger.error('Failed to write JSON file', { file: filePath, error: err.message });
-      throw err;
+      logger.warn('Failed to write JSON file (read-only filesystem?)', { file: filePath, error: err.message });
     }
   });
 }

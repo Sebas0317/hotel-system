@@ -31,8 +31,14 @@ async function readJsonFile(filePath, defaultVal = null) {
 async function writeJsonFile(filePath, data) {
   const resolved = validatePath(filePath);
   const tmp = resolved + '.tmp';
-  await fs.writeFile(tmp, JSON.stringify(data, null, 2), 'utf8');
-  await fs.rename(tmp, resolved);
+  try {
+    await fs.writeFile(tmp, JSON.stringify(data, null, 2), 'utf8');
+    await fs.rename(tmp, resolved);
+  } catch (err) {
+    // In serverless environments (Vercel), the filesystem is read-only.
+    // Log the error and continue without crashing.
+    logger.warn({ err, file: filePath }, 'Error writing JSON file (read-only filesystem?)');
+  }
 }
 
 module.exports = { readJsonFile, writeJsonFile };
