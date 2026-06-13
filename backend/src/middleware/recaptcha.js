@@ -11,7 +11,7 @@ const https = require('https');
 const { URL } = require('url');
 const { logger } = require('../utils/logger');
 
-const RECAPTCHA_SECRET = process.env.RECAPTCHA_SECRET_KEY || '6LdmYxwtAAAAAAELykK5L605m23qnhC7c6HzFoXe';
+const RECAPTCHA_SECRET = process.env.RECAPTCHA_SECRET_KEY;
 const MIN_SCORE = 0.5;
 
 /**
