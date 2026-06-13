@@ -92,7 +92,7 @@ export default function PinGate({ onAccess, onBack, title = 'Acceso a Habitacion
                 ref={turnstileRef}
                 sitekey={TURNSTILE_SITE_KEY}
                 onVerify={(token) => { setTurnstileToken(token); setError(''); }}
-                onError={() => { setCaptchaError(true); setError('Error al cargar la verificacion de seguridad, puedes intentar de nuevo'); }}
+                onError={() => { setCaptchaError(true); setError('Verificacion de seguridad no disponible para este dominio. Puedes continuar sin ella.'); }}
                 onTimeout={() => { setError('La verificacion de seguridad expiro, intentalo de nuevo'); setTurnstileToken(null); }}
                 theme="light"
               />
