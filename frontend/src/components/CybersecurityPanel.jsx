@@ -275,10 +275,24 @@ export default function CybersecurityPanel() {
 
   return (
     <>
+      {/* Page overlay when panel is open */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="fixed inset-0 z-30 bg-black/40 backdrop-blur-sm cursor-pointer"
+            onClick={toggle}
+          />
+        )}
+      </AnimatePresence>
+
       {/* Toggle button */}
       <motion.button
         onClick={toggle}
-        className="fixed right-0 top-1/3 z-50 flex items-center gap-2 px-3 py-3 rounded-l-xl bg-gradient-to-r from-emerald-700/90 to-emerald-600/90 backdrop-blur-md border border-emerald-500/30 border-r-0 text-white shadow-lg shadow-emerald-900/30 hover:from-emerald-600 hover:to-emerald-500 transition-all duration-300 cursor-pointer"
+        className="fixed right-0 top-1/3 z-50 flex items-center gap-2 px-3 py-3 rounded-l-xl bg-gradient-to-r from-emerald-700 to-emerald-600 border border-emerald-500/30 border-r-0 text-white shadow-lg shadow-emerald-900/50 hover:from-emerald-600 hover:to-emerald-500 transition-all duration-300 cursor-pointer"
         whileHover={{ x: -4 }}
         whileTap={{ scale: 0.97 }}
         title="Panel de Ciberseguridad"
@@ -310,8 +324,8 @@ export default function CybersecurityPanel() {
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
             className="fixed right-0 top-0 h-full z-40 w-[420px] max-w-[90vw] overflow-hidden"
           >
-            {/* Overlay background */}
-            <div className="absolute inset-0 bg-gradient-to-l from-emerald-950/90 via-emerald-950/80 to-transparent backdrop-blur-md" />
+            {/* Solid background */}
+            <div className="absolute inset-0 bg-emerald-950/95 backdrop-blur-lg border-l border-emerald-500/20 shadow-2xl shadow-emerald-900/40" />
 
             {/* Content */}
             <div className="relative h-full flex flex-col">
@@ -347,12 +361,12 @@ export default function CybersecurityPanel() {
                       key={section.id}
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="rounded-xl border border-white/5 bg-white/[0.03] overflow-hidden"
+                      className="rounded-xl border border-emerald-500/10 bg-emerald-950/80 overflow-hidden"
                     >
                       {/* Section header (clickable) */}
                       <button
                         onClick={() => setExpanded(isExpanded ? null : section.id)}
-                        className="w-full flex items-center gap-3 p-4 text-left hover:bg-white/[0.03] transition-colors cursor-pointer border-none"
+                        className="w-full flex items-center gap-3 p-4 text-left hover:bg-emerald-500/5 transition-colors cursor-pointer border-none"
                       >
                         <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center shrink-0">
                           <Icon className="w-4 h-4 text-emerald-400" />
@@ -377,11 +391,11 @@ export default function CybersecurityPanel() {
                             transition={{ duration: 0.3, ease: 'easeInOut' }}
                             className="overflow-hidden"
                           >
-                            <div className="px-4 pb-4 space-y-3">
-                              <p className="text-xs text-emerald-200/70 leading-relaxed">{section.explanation}</p>
-                              <div className="relative">
+                              <div className="px-4 pb-4 space-y-3">
+                              <p className="text-xs text-emerald-200/80 leading-relaxed">{section.explanation}</p>
+                              <div className="relative rounded-lg bg-black/40 p-3">
                                 <div className="absolute top-0 left-0 w-px h-full bg-emerald-500/20" />
-                                <pre className="pl-4 text-[11px] leading-relaxed text-emerald-300/80 font-mono whitespace-pre-wrap overflow-x-auto">
+                                <pre className="text-[11px] leading-relaxed text-emerald-300/90 font-mono whitespace-pre-wrap overflow-x-auto">
                                   {section.code}
                                 </pre>
                               </div>
