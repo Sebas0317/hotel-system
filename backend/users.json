@@ -270,5 +270,22 @@
     "lastIp": "127.0.0.1",
     "createdAt": "2026-06-13T02:34:40.641Z",
     "updatedAt": "2026-06-13T02:46:25.727Z"
+  },
+  {
+    "id": "1781375393990-b4cbc184",
+    "username": "dacastilloma",
+    "email": "dacastilloma@ut.edu.co",
+    "passwordHash": "$2b$12$6H4pXa96oBViPupoSivMtO965h7CV0hmV/Orrw.27tuIgd56F78vm",
+    "firstName": "David",
+    "lastName": "Castillo",
+    "avatar": null,
+    "role": "admin",
+    "isActive": true,
+    "emailVerified": true,
+    "twoFactorEnabled": true,
+    "lastLogin": null,
+    "lastIp": null,
+    "createdAt": "2026-06-13T18:29:53.990Z",
+    "updatedAt": "2026-06-13T18:29:53.990Z"
   }
 ]
