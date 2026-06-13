@@ -1,26 +1,27 @@
-const fs = require('fs');
 const path = require('path');
-const { fileURLToPath } = require('url');
-
-const jsonStore = require('../data/jsonStore');
+const { readJsonFile, writeJsonFile } = require('../data/jsonStoreHelper');
+const persistence = require('../data/persistence');
 
 const RESERVAS_FILE = path.join(__dirname, '../../reservas.json');
 
-function getReservas() {
+async function getReservas() {
+  if (persistence.isRedisAvailable()) {
+    return persistence.getReservas();
+  }
   try {
-    if (!fs.existsSync(RESERVAS_FILE)) {
-      return [];
-    }
-    return jsonStore.read(RESERVAS_FILE) || [];
+    return await readJsonFile(RESERVAS_FILE, []);
   } catch (e) {
     console.error('Error reading reservas:', e);
     return [];
   }
 }
 
-function saveReservas(reservas) {
+async function saveReservas(reservas) {
+  if (persistence.isRedisAvailable()) {
+    return persistence.setReservas(reservas);
+  }
   try {
-    fs.writeFileSync(RESERVAS_FILE, JSON.stringify(reservas, null, 2), 'utf8');
+    await writeJsonFile(RESERVAS_FILE, reservas);
   } catch (e) {
     console.error('Error saving reservas:', e);
   }
@@ -33,7 +34,7 @@ function generateId() {
 const reservasController = {
   async getAll(req, res) {
     try {
-      const reservas = getReservas();
+      const reservas = await getReservas();
 
       if (req.query.page || req.query.limit) {
         const page = Math.max(1, parseInt(req.query.page) || 1);
@@ -54,7 +55,7 @@ const reservasController = {
   async getByRoom(req, res) {
     try {
       const { roomId } = req.params;
-      const reservas = getReservas();
+      const reservas = await getReservas();
       const roomReservas = reservas.filter(r => r.roomId === roomId);
       res.json(roomReservas);
     } catch (e) {
@@ -65,7 +66,7 @@ const reservasController = {
   async getByDateRange(req, res) {
     try {
       const { start, end } = req.query;
-      const reservas = getReservas();
+      const reservas = await getReservas();
       
       if (!start || !end) {
         return res.status(400).json({ error: 'Start and end dates required' });
@@ -94,7 +95,7 @@ const reservasController = {
         return res.status(400).json({ error: 'Datos incompletos: roomId, huesped, checkIn, checkOut requeridos' });
       }
 
-      const reservas = getReservas();
+      const reservas = await getReservas();
       const checkInDate = new Date(checkIn);
       const checkOutDate = new Date(checkOut);
 
@@ -130,7 +131,7 @@ const reservasController = {
       };
 
       reservas.push(reserva);
-      saveReservas(reservas);
+      await saveReservas(reservas);
 
       res.status(201).json(reserva);
     } catch (e) {
@@ -142,7 +143,7 @@ const reservasController = {
     try {
       const { id } = req.params;
       const updates = req.body;
-      const reservas = getReservas();
+      const reservas = await getReservas();
       
       const idx = reservas.findIndex(r => r.id === id);
       if (idx === -1) {
@@ -168,7 +169,7 @@ const reservasController = {
       }
 
       reservas[idx] = { ...reservas[idx], ...updates, updatedAt: new Date().toISOString() };
-      saveReservas(reservas);
+      await saveReservas(reservas);
 
       res.json(reservas[idx]);
     } catch (e) {
@@ -179,7 +180,7 @@ const reservasController = {
   async cancel(req, res) {
     try {
       const { id } = req.params;
-      const reservas = getReservas();
+      const reservas = await getReservas();
       
       const idx = reservas.findIndex(r => r.id === id);
       if (idx === -1) {
@@ -188,7 +189,7 @@ const reservasController = {
 
       reservas[idx].estado = 'cancelada';
       reservas[idx].canceledAt = new Date().toISOString();
-      saveReservas(reservas);
+      await saveReservas(reservas);
 
       res.json(reservas[idx]);
     } catch (e) {
@@ -199,7 +200,7 @@ const reservasController = {
   async checkIn(req, res) {
     try {
       const { id } = req.params;
-      const reservas = getReservas();
+      const reservas = await getReservas();
       
       const idx = reservas.findIndex(r => r.id === id);
       if (idx === -1) {
@@ -212,7 +213,7 @@ const reservasController = {
 
       reservas[idx].estado = 'checkin';
       reservas[idx].checkInTime = new Date().toISOString();
-      saveReservas(reservas);
+      await saveReservas(reservas);
 
       res.json(reservas[idx]);
     } catch (e) {
@@ -223,7 +224,7 @@ const reservasController = {
   async checkOut(req, res) {
     try {
       const { id } = req.params;
-      const reservas = getReservas();
+      const reservas = await getReservas();
       
       const idx = reservas.findIndex(r => r.id === id);
       if (idx === -1) {
@@ -232,7 +233,7 @@ const reservasController = {
 
       reservas[idx].estado = 'completada';
       reservas[idx].checkOutTime = new Date().toISOString();
-      saveReservas(reservas);
+      await saveReservas(reservas);
 
       res.json(reservas[idx]);
     } catch (e) {

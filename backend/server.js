@@ -32,6 +32,9 @@ const { logger, httpLogger } = require('./src/utils/logger');
 // Import caching
 const { invalidateCache } = require('./src/middleware/cache');
 
+// Import persistence (Redis fallback)
+const persistence = require('./src/data/persistence');
+
 // Import backups
 const { createBackup } = require('./src/utils/backup');
 
@@ -292,6 +295,11 @@ server = app.listen(PORT, '0.0.0.0', () => {
         if (user) logger.info('Admin user seeded');
       }).catch(err => {
         logger.warn({ err }, 'Admin user seed failed (non-critical)');
+      });
+
+      // Bootstrap Redis from JSON files on first cold start
+      persistence.bootstrapFromFiles().catch(err => {
+        logger.warn({ err }, 'Redis bootstrap failed (non-critical)');
       });
     }
   });

@@ -4,6 +4,7 @@ const crypto = require('crypto');
 const path = require('path');
 const { readJsonFile, writeJsonFile } = require('./jsonStoreHelper');
 const { logger } = require('../utils/logger');
+const persistence = require('./persistence');
 
 const CODES_FILE = path.join(__dirname, '../../codes.json');
 
@@ -21,10 +22,16 @@ function hashCode(code) {
 }
 
 async function getCodes() {
+  if (persistence.isRedisAvailable()) {
+    return persistence.getCodes();
+  }
   return readJsonFile(CODES_FILE, []);
 }
 
 async function saveCodes(codes) {
+  if (persistence.isRedisAvailable()) {
+    return persistence.setCodes(codes);
+  }
   try {
     await writeJsonFile(CODES_FILE, codes);
   } catch {
@@ -52,7 +59,7 @@ async function createCode({ userId, type, ttlMs = 300000, maxAttempts = 5 }) {
   const key = `${userId}:${type}:${entry.id}`;
   memoryStore.set(key, entry);
 
-  // Persist to file asynchronously (best-effort)
+  // Persist to file/Redis asynchronously (best-effort)
   getCodes().then(codes => {
     codes.push(entry);
     saveCodes(codes);
@@ -88,7 +95,7 @@ async function verifyCode(userId, type, inputCode, invalidateAfterUse = true) {
     }
   }
 
-  // Fallback: search file store
+  // Fallback: search persistent store (file or Redis)
   const codes = await getCodes();
   const match = codes.find(c =>
     c.userId === userId &&
@@ -126,7 +133,7 @@ function cleanupExpired() {
       memoryStore.delete(key);
     }
   }
-  // Also clean file store (async, best-effort)
+  // Also clean persistent store (async, best-effort)
   getCodes().then(codes => {
     const filtered = codes.filter(c => !c.expiresAt || now < c.expiresAt);
     if (filtered.length < codes.length) saveCodes(filtered);
@@ -141,7 +148,7 @@ async function hasPendingCode(userId, type) {
       return true;
     }
   }
-  // Fallback to file
+  // Fallback to persistent store
   const codes = await getCodes();
   return codes.some(c => c.userId === userId && c.type === type && !c.used && now < c.expiresAt);
 }
@@ -153,7 +160,7 @@ async function invalidateUserCodes(userId, type) {
       entry.used = true;
     }
   }
-  // Invalidate in file
+  // Invalidate in persistent store
   const codes = await getCodes();
   for (const c of codes) {
     if (c.userId === userId && c.type === type) {

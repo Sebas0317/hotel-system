@@ -5,6 +5,7 @@ const fsSync = require('fs');
 const path = require('path');
 const logger = require('../utils/logger');
 const { validateJSON, createBackup: createValidatorBackup, repairFromBackup } = require('../utils/jsonValidator');
+const persistence = require('./persistence');
 
 // Resolve data directory securely - MUST be within backend/
 const DATA_DIR = path.resolve(__dirname, '..', '..');
@@ -25,7 +26,7 @@ const HISTORY_FILE = validatePath(path.join(DATA_DIR, 'history.json'));
 const STATE_HISTORY_FILE = validatePath(path.join(DATA_DIR, 'stateHistory.json'));
 
 // ── Backup management ──
-const MAX_BACKUPS = 5; // Keep last 5 backups per file
+const MAX_BACKUPS = 5;
 
 async function ensureBackupDir() {
   try {
@@ -45,16 +46,13 @@ async function createBackup(filePath) {
   try {
     await ensureBackupDir();
     const exists = fsSync.existsSync(filePath);
-    if (!exists) return; // Nothing to backup
+    if (!exists) return;
 
     const data = await fs.readFile(filePath, 'utf-8');
     const backupPath = getBackupPath(filePath);
     await fs.writeFile(backupPath, data, 'utf-8');
-
-    // Clean old backups
     await cleanupOldBackups(path.basename(filePath, '.json'));
   } catch (err) {
-    // Log but don't fail - backup is best-effort
     logger.error('Backup creation failed', { file: filePath, error: err.message });
   }
 }
@@ -65,9 +63,7 @@ async function cleanupOldBackups(filePrefix) {
     const prefixBackups = files
       .filter(f => f.startsWith(filePrefix) && f.endsWith('.json'))
       .sort()
-      .reverse(); // Newest first
-
-    // Remove backups beyond MAX_BACKUPS
+      .reverse();
     const toDelete = prefixBackups.slice(MAX_BACKUPS);
     for (const file of toDelete) {
       await fs.unlink(path.join(BACKUP_DIR, file));
@@ -84,7 +80,6 @@ async function enqueueTask(filePath, task) {
   if (!writeQueues.has(filePath)) {
     writeQueues.set(filePath, Promise.resolve());
   }
-  
   const previousTask = writeQueues.get(filePath);
   const newTask = previousTask.then(task);
   writeQueues.set(filePath, newTask);
@@ -92,8 +87,6 @@ async function enqueueTask(filePath, task) {
 }
 
 // ── In-memory Store (serves as primary, file is persistence layer) ──
-// Data is kept in memory and synced to file for durability.
-// On Vercel serverless (read-only filesystem), in-memory is the only store.
 const persistentCache = new Map();
 const isCacheLoaded = new Map();
 
@@ -101,7 +94,7 @@ async function getCachedData(filePath, expectedType) {
   if (isCacheLoaded.get(filePath)) {
     return persistentCache.get(filePath);
   }
-  
+
   const data = await readJSON(filePath, expectedType);
   persistentCache.set(filePath, data);
   isCacheLoaded.set(filePath, true);
@@ -117,10 +110,6 @@ function setInCache(filePath, data) {
   isCacheLoaded.set(filePath, true);
 }
 
-/**
- * Internal helper to ensure data matches expected format (array or object).
- * Prevents application from processing malformed or empty data.
- */
 function validateJSONData(data, expectedType) {
   if (expectedType === 'array') {
     return Array.isArray(data) ? data : [];
@@ -131,7 +120,6 @@ function validateJSONData(data, expectedType) {
   return data;
 }
 
-// ── Async read/write ──
 async function readJSON(filePath, expectedType = 'array') {
   try {
     const validatedPath = validatePath(filePath);
@@ -159,10 +147,6 @@ async function writeJSON(filePath, data) {
     throw new Error('Invalid data: cannot write null or undefined');
   }
 
-  // Schema validation before write (omitted for brevity in this replace call, 
-  // but logically preserved in implementation)
-  const filename = path.basename(validatedPath);
-  
   return enqueueTask(validatedPath, async () => {
     try {
       await createBackup(validatedPath);
@@ -170,8 +154,7 @@ async function writeJSON(filePath, data) {
       const tempFile = validatedPath + '.tmp';
       await fs.writeFile(tempFile, serialized, 'utf-8');
       await fs.rename(tempFile, validatedPath);
-      
-      // Update cache immediately after successful write
+
       persistentCache.set(validatedPath, data);
       isCacheLoaded.set(validatedPath, true);
     } catch (err) {
@@ -182,38 +165,62 @@ async function writeJSON(filePath, data) {
 
 // ── Rooms (optimized) ──
 async function getRooms() {
+  if (persistence.isRedisAvailable()) {
+    return persistence.getRooms();
+  }
   return getCachedData(ROOMS_FILE, 'array');
 }
 
 async function saveRooms(rooms) {
+  if (persistence.isRedisAvailable()) {
+    return persistence.setRooms(rooms);
+  }
   return writeJSON(ROOMS_FILE, rooms);
 }
 
 // ── Consumos (optimized) ──
 async function getConsumos() {
+  if (persistence.isRedisAvailable()) {
+    return persistence.getConsumos();
+  }
   return getCachedData(CONSUMOS_FILE, 'array');
 }
 
 async function saveConsumos(consumos) {
+  if (persistence.isRedisAvailable()) {
+    return persistence.setConsumos(consumos);
+  }
   return writeJSON(CONSUMOS_FILE, consumos);
 }
 
-// ── History (not cached — write-heavy) ──
+// ── History ──
 async function getHistory() {
+  if (persistence.isRedisAvailable()) {
+    return persistence.getHistory();
+  }
   return readJSON(HISTORY_FILE, 'object');
 }
 
 async function saveHistory(history) {
+  if (persistence.isRedisAvailable()) {
+    return persistence.setHistory(history);
+  }
   await writeJSON(HISTORY_FILE, history);
 }
 
-// ── State History (not cached — write-heavy) ──
+// ── State History ──
 async function getStateHistory() {
+  if (persistence.isRedisAvailable()) {
+    return persistence.getStateHistory();
+  }
   const data = await readJSON(STATE_HISTORY_FILE, 'object');
   return data.cambios || [];
 }
 
 async function saveStateHistory(cambios) {
+  if (persistence.isRedisAvailable()) {
+    return persistence.setStateHistory(cambios);
+  }
   await writeJSON(STATE_HISTORY_FILE, { cambios });
 }
 
@@ -231,7 +238,6 @@ module.exports = {
   HISTORY_FILE,
   STATE_HISTORY_FILE,
   BACKUP_DIR,
-  // Expose cache utilities for manual invalidation
   invalidateCache,
   setInCache,
 };

@@ -3,6 +3,7 @@
 const path = require('path');
 const { readJsonFile, writeJsonFile } = require('../data/jsonStoreHelper');
 const { logger } = require('./logger');
+const persistence = require('../data/persistence');
 
 const ATTEMPTS_FILE = path.join(__dirname, '../../security-attempts.json');
 const EVENTS_FILE = path.join(__dirname, '../../security-events.json');
@@ -23,6 +24,13 @@ const DEFAULTS = {
 function now() { return Date.now(); }
 
 async function getAttempts() {
+  if (persistence.isRedisAvailable()) {
+    const data = await persistence.getSecurityAttempts();
+    // Sync memory for fast subsequent access
+    memoryAttempts.length = 0;
+    memoryAttempts.push(...data);
+    return data;
+  }
   const fromFile = await readJsonFile(ATTEMPTS_FILE, []);
   if (fromFile.length > 0) {
     memoryAttempts.length = 0;
@@ -39,10 +47,19 @@ async function getAttempts() {
 async function saveAttempts(data) {
   memoryAttempts.length = 0;
   memoryAttempts.push(...data);
+  if (persistence.isRedisAvailable()) {
+    return persistence.setSecurityAttempts(data);
+  }
   await writeJsonFile(ATTEMPTS_FILE, data);
 }
 
 async function getEvents() {
+  if (persistence.isRedisAvailable()) {
+    const data = await persistence.getSecurityEvents();
+    memoryEvents.length = 0;
+    memoryEvents.push(...data);
+    return data;
+  }
   const fromFile = await readJsonFile(EVENTS_FILE, []);
   if (fromFile.length > 0) {
     memoryEvents.length = 0;
@@ -55,6 +72,9 @@ async function getEvents() {
 async function saveEvents(data) {
   memoryEvents.length = 0;
   memoryEvents.push(...data);
+  if (persistence.isRedisAvailable()) {
+    return persistence.setSecurityEvents(data);
+  }
   await writeJsonFile(EVENTS_FILE, data);
 }
 
