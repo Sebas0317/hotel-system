@@ -265,13 +265,10 @@ async function verify2FA(req, res) {
 
     await securityTracker.resetAttempts({ userId, ip, action: '2fa' });
 
+    await auditor.login(user.id, ip, user.email);
+
     const token = generateToken(user);
     logger.info({ userId, email: user.email }, '2FA verification successful');
-
-    await securityTracker.logSecurityEvent({
-      type: 'success', userId, ip, action: '2fa',
-      detail: 'Verificacion 2FA exitosa',
-    });
 
     return res.json({ token, usuario: userStore.sanitizeUser(user) });
   } catch (err) {
