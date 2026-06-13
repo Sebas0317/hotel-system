@@ -11,10 +11,10 @@
     "isActive": true,
     "emailVerified": true,
     "twoFactorEnabled": true,
-    "lastLogin": "2026-06-13T01:46:51.365Z",
+    "lastLogin": "2026-06-13T02:34:22.006Z",
     "lastIp": "127.0.0.1",
     "createdAt": "2026-06-11T23:35:05.882Z",
-    "updatedAt": "2026-06-13T01:46:51.365Z"
+    "updatedAt": "2026-06-13T02:34:22.006Z"
   },
   {
     "id": "1781220920482-86537205",
@@ -253,5 +253,22 @@
     "lastIp": null,
     "createdAt": "2026-06-12T02:22:26.355Z",
     "updatedAt": "2026-06-12T02:34:36.912Z"
+  },
+  {
+    "id": "1781318080641-5f038806",
+    "username": "afcipamochas",
+    "email": "afcipamochas@ut.edu.co",
+    "passwordHash": "\\$.gIXie3on44E/p/s2FVXQucG8bcAExzr0QAC4eHh3iHR969NhHXDa",
+    "firstName": "Admin",
+    "lastName": "User",
+    "avatar": null,
+    "role": "admin",
+    "isActive": true,
+    "emailVerified": true,
+    "twoFactorEnabled": false,
+    "lastLogin": null,
+    "lastIp": null,
+    "createdAt": "2026-06-13T02:34:40.641Z",
+    "updatedAt": "2026-06-13T02:34:40.642Z"
   }
 ]

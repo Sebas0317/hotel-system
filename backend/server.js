@@ -15,7 +15,7 @@
  * - Advanced health checks and metrics
  */
 
-require('dotenv').config();
+require('dotenv').config({ path: require('path').join(__dirname, '.env') });
 
 const express = require('express');
 const https = require('https');
