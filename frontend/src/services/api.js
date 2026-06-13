@@ -1,5 +1,6 @@
 // API base URL - uses /v1 prefix for versioned API
-export const API_BASE = '/v1';
+// Override with VITE_API_BASE env var for Vercel production (e.g. /_/backend/v1)
+export const API_BASE = import.meta.env.VITE_API_BASE || '/v1';
 
 // ── Room token management ──
 // Stores the signed room token issued after PIN validation.
