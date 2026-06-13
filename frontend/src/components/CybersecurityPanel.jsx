@@ -4,7 +4,7 @@ import {
   Shield, ShieldCheck, Fingerprint, KeyRound, Lock,
   Gauge, Eye, Swords, UserCheck, UserX, AlertTriangle,
   Search, Clock, FileJson, Server, Terminal, FileText,
-  ChevronRight, FileCode, ExternalLink,
+  ChevronRight, FileCode, ExternalLink, Route,
 } from 'lucide-react';
 
 const SECTIONS = [
@@ -12,6 +12,7 @@ const SECTIONS = [
     id: 'recaptcha',
     icon: ShieldCheck,
     title: 'Google reCAPTCHA v2',
+    scope: 'POST /auth/login • /auth/register • /rooms/access',
     explanation: 'Verifica que las solicitudes provengan de humanos reales mediante el widget "No soy un robot" de Google, protegiendo login, registro y acceso a habitaciones.',
     code: `// backend/src/middleware/recaptcha.js
 const result = await verifyRecaptcha(token);
@@ -25,6 +26,7 @@ if (!result.success)
     id: '2fa',
     icon: Fingerprint,
     title: 'Autenticacion 2FA por Correo',
+    scope: 'POST /auth/login (si 2FA habilitado)',
     explanation: 'Segundo factor de autenticacion via codigo de 6 digitos enviado al correo electronico del administrador, con expiracion de 5 minutos.',
     code: `// backend/src/controllers/authController.js
 if (user.twoFactorEnabled) {
@@ -41,6 +43,7 @@ if (user.twoFactorEnabled) {
     id: 'rate-limit',
     icon: Gauge,
     title: 'Limitador de Peticiones por Capas',
+    scope: 'Global • auth • login • PIN • 2FA • recovery',
     explanation: 'Limita solicitudes por IP con 8 niveles distintos: global (100/min), auth (10/min), login (5/2min), PIN (5/min), codigo 2FA (5/2min) y recuperacion (3/2min).',
     code: `// backend/src/middleware/rateLimiters.js
 const loginLimiter = rateLimit({
@@ -57,6 +60,7 @@ const pinRateLimiter = rateLimit({
     id: 'headers',
     icon: Shield,
     title: 'Headers de Seguridad (Helmet)',
+    scope: 'Todo el sistema',
     explanation: 'Configura estrictos encabezados HTTP: CSP limita origenes de scripts, HSTS forza HTTPS por 1 ano, X-Frame-Options bloquea iframes, y XSS-Protection activa.',
     code: `// backend/server.js
 app.use(helmet({
@@ -76,12 +80,12 @@ app.use(helmet({
     id: 'password',
     icon: Lock,
     title: 'Hash de Contrasenas (bcrypt)',
+    scope: 'Sistema de autenticacion',
     explanation: 'Almacena contrasenas con bcrypt a 12 rondas de sal, haciendo que cada hash sea unico y computacionalmente costoso de crackear.',
     code: `// backend/src/data/userStore.js
 const passwordHash = await bcrypt
   .hash(password, 12);
 
-// Verificacion
 const valid = await bcrypt
   .compare(password, user.passwordHash);`,
     benefit: 'Protege las credenciales incluso si la base de datos es comprometida.',
@@ -90,6 +94,7 @@ const valid = await bcrypt
     id: 'jwt',
     icon: KeyRound,
     title: 'Tokens JWT con Algoritmo Seguro',
+    scope: 'Todas las rutas protegidas',
     explanation: 'Autenticacion sin estado mediante tokens JWT firmados con HS256, expiracion configurable (8h por defecto) y validacion de estructura en cada peticion protegida.',
     code: `// backend/src/middleware/auth.js
 function requireAuth(req, res, next) {
@@ -107,6 +112,7 @@ function requireAuth(req, res, next) {
     id: 'pin-access',
     icon: UserCheck,
     title: 'Control de Acceso por PIN',
+    scope: 'POST /rooms/access',
     explanation: 'Acceso a habitaciones mediante PIN de 4 digitos generado con crypto.randomFillSync, con token JWT firmado de 2 horas y rate limiting por IP.',
     code: `// backend/src/utils/pinGenerator.js
 function generarPin() {
@@ -126,6 +132,7 @@ const roomToken = jwt.sign(
     id: 'audit',
     icon: FileText,
     title: 'Auditoria de Seguridad',
+    scope: 'Acciones sensibles (login, check-in, consumos)',
     explanation: 'Todas las acciones sensibles (login, check-in, cambios de estado, 2FA) se registran con metadatos: usuario, IP, accion y timestamp, almacenados en archivo seguro.',
     code: `// backend/src/utils/auditor.js
 auditor.login(userId, ip, email);
@@ -139,6 +146,7 @@ auditor.consumoCreated(userId, ip, num, desc, precio);`,
     id: 'lockout',
     icon: UserX,
     title: 'Bloqueo por Intentos Fallidos',
+    scope: 'POST /auth/login • /2fa • /recovery',
     explanation: 'Implementa bloqueo progresivo: 5 fallos en login/2FA = bloqueo 15 min, 3 fallos en recuperacion = bloqueo 30 min. Ventana deslizante de 10 min.',
     code: `// backend/src/utils/securityTracker.js
 const DEFAULTS = {
@@ -155,6 +163,7 @@ if (entry.count >= actionCfg.maxAttempts)
     id: 'sanitize',
     icon: Search,
     title: 'Sanitizacion de Entradas (XSS)',
+    scope: 'Todas las rutas POST / PUT / PATCH',
     explanation: 'Middleware que codifica caracteres HTML peligrosos (& < > " \') en todos los campos del body antes de que cualquier ruta los procese.',
     code: `// backend/src/middleware/sanitize.js
 function sanitizeString(value) {
@@ -172,6 +181,7 @@ function sanitizeString(value) {
     id: 'timeout',
     icon: Clock,
     title: 'Timeout de Peticiones',
+    scope: 'Todo el sistema',
     explanation: 'Las solicitudes HTTP que excedan 30 segundos son abortadas automaticamente, liberando recursos del servidor y previniendo agotamiento de conexiones.',
     code: `// backend/src/middleware/requestTimeout.js
 function requestTimeout(timeoutMs) {
@@ -191,6 +201,7 @@ function requestTimeout(timeoutMs) {
     id: 'pathtravel',
     icon: FileJson,
     title: 'Proteccion contra Path Traversal',
+    scope: 'Capas de datos + archivos estaticos',
     explanation: 'Bloquea accesos a archivos sensibles (.env, .git, .json, .pem, .key) y previene navegacion de directorios con ../ en URLs y en operaciones de archivo internas.',
     code: `// backend/src/data/jsonStore.js
 function validatePath(filePath) {
@@ -210,6 +221,7 @@ const SENSITIVE_PATTERNS = [
     id: 'cors',
     icon: Server,
     title: 'CORS Restringido',
+    scope: 'Todo el sistema',
     explanation: 'Solo origenes explicitamente configurados (localhost:5173, localhost:4173, dominios *.vercel.app) pueden consumir la API, con metodos HTTP limitados.',
     code: `// backend/server.js
 app.use(cors({
@@ -230,6 +242,7 @@ app.use(cors({
     id: 'redact',
     icon: Eye,
     title: 'Redaccion de Datos Sensibles (PII)',
+    scope: 'Todo el sistema (logger)',
     explanation: 'Pino logger redacta automaticamente passwords, tokens, PINs, cookies y headers de autorizacion en todos los logs, reemplazandolos con "**REDACTED**".',
     code: `// backend/src/utils/logger.js
 redact: {
@@ -248,6 +261,7 @@ redact: {
     id: 'filelock',
     icon: Terminal,
     title: 'Bloqueo de Archivos (Race Condition)',
+    scope: 'Capas de datos (jsonStore)',
     explanation: 'Implementa cola de promesas por archivo que serializa las escrituras, evitando condiciones de carrera en operaciones concurrentes sobre JSON.',
     code: `// backend/src/data/jsonStore.js
 const writeQueues = new Map();
@@ -371,12 +385,18 @@ export default function CybersecurityPanel() {
                         <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center shrink-0">
                           <Icon className="w-4 h-4 text-emerald-400" />
                         </div>
-                        <span className="flex-1 text-sm font-semibold text-white/90">{section.title}</span>
+                        <div className="flex-1 min-w-0">
+                          <span className="block text-sm font-semibold text-white/90 truncate">{section.title}</span>
+                          <span className="inline-flex items-center gap-1 mt-0.5 text-[10px] text-emerald-400/60 font-mono">
+                            <Route className="w-2.5 h-2.5" />
+                            {section.scope}
+                          </span>
+                        </div>
                         <motion.div
                           animate={{ rotate: isExpanded ? 90 : 0 }}
                           transition={{ duration: 0.2 }}
                         >
-                          <ChevronRight className="w-4 h-4 text-white/30" />
+                          <ChevronRight className="w-4 h-4 text-white/30 shrink-0" />
                         </motion.div>
                       </button>
 
