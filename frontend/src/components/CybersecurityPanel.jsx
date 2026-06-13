@@ -40,7 +40,7 @@ if (user.twoFactorEnabled) {
   {
     id: 'rate-limit',
     icon: Gauge,
-    title: 'Rate Limiting por Capas',
+    title: 'Limitador de Peticiones por Capas',
     explanation: 'Limita solicitudes por IP con 8 niveles distintos: global (100/min), auth (10/min), login (5/2min), PIN (5/min), codigo 2FA (5/2min) y recuperacion (3/2min).',
     code: `// backend/src/middleware/rateLimiters.js
 const loginLimiter = rateLimit({
@@ -90,7 +90,7 @@ const valid = await bcrypt
     id: 'jwt',
     icon: KeyRound,
     title: 'Tokens JWT con Algoritmo Seguro',
-    explanation: 'Autenticacion stateless mediante JSON Web Tokens firmados con HS256, expiracion configurable (8h por defecto) y validacion de estructura en cada request protegido.',
+    explanation: 'Autenticacion sin estado mediante tokens JWT firmados con HS256, expiracion configurable (8h por defecto) y validacion de estructura en cada peticion protegida.',
     code: `// backend/src/middleware/auth.js
 function requireAuth(req, res, next) {
   const token = header.slice(7);
@@ -178,7 +178,7 @@ function requestTimeout(timeoutMs) {
   return (req, res, next) => {
     const timer = setTimeout(() => {
       res.status(408).json(
-        { error: 'Request timeout' }
+        { error: 'Request timeout. La solicitud tardo demasiado.' }
       );
     }, timeoutMs);
     res.on('finish', () => clearTimeout(timer));
