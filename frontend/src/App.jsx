@@ -1,4 +1,4 @@
-import { Routes, Route, useNavigate, Navigate, useLocation } from 'react-router-dom';
+import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { useState, Suspense, lazy, useRef, useEffect } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { Toaster, toast } from 'sonner';
@@ -33,6 +33,13 @@ const PantallaReservaciones = lazy(() => import('./components/PantallaReservacio
 const EcoWeb = lazy(() => import('./ecoweb/App'));
 import './ecoweb/style/index.css';
 import './ecoweb/style/fonts.css';
+
+// Wrapper around Navigate that defers navigation to avoid render-phase router updates
+function SafeNavigate({ to, replace = true }) {
+  const navigate = useNavigate();
+  useEffect(() => { navigate(to, { replace }); }, [navigate, to, replace]);
+  return null;
+}
 
 // Loading fallback component with skeleton animation
 function LoadingFallback() {
@@ -152,7 +159,7 @@ export default function App() {
             !rol ? (
               <LoginScreen onRole={handleRol} />
             ) : (
-              <Navigate to={rol === 'admin' ? '/admin' : '/user'} replace />
+              <SafeNavigate to={rol === 'admin' ? '/admin' : '/user'} replace />
             )
           }
         />
@@ -160,23 +167,23 @@ export default function App() {
         {/* Login sub-routes — LoginScreen handles internal routing */}
         <Route
           path="/login/admin"
-          element={!rol ? <LoginScreen onRole={handleRol} /> : <Navigate to="/admin" replace />}
+          element={!rol ? <LoginScreen onRole={handleRol} /> : <SafeNavigate to="/admin" replace />}
         />
         <Route
           path="/login/forgot"
-          element={!rol ? <LoginScreen onRole={handleRol} /> : <Navigate to="/admin" replace />}
+          element={!rol ? <LoginScreen onRole={handleRol} /> : <SafeNavigate to="/admin" replace />}
         />
         <Route
           path="/forgot"
-          element={!rol ? <LoginScreen onRole={handleRol} /> : <Navigate to="/admin" replace />}
+          element={!rol ? <LoginScreen onRole={handleRol} /> : <SafeNavigate to="/admin" replace />}
         />
         <Route
           path="/login/2fa/:userId"
-          element={!rol ? <LoginScreen onRole={handleRol} /> : <Navigate to="/admin" replace />}
+          element={!rol ? <LoginScreen onRole={handleRol} /> : <SafeNavigate to="/admin" replace />}
         />
         <Route
           path="/2fa/:userId"
-          element={!rol ? <LoginScreen onRole={handleRol} /> : <Navigate to="/admin" replace />}
+          element={!rol ? <LoginScreen onRole={handleRol} /> : <SafeNavigate to="/admin" replace />}
         />
 
         <Route
@@ -185,7 +192,7 @@ export default function App() {
             rol === 'admin' ? (
               <PantallaAdmin onSalir={handleExit} onNav={(path) => navigate(path)} />
             ) : (
-              <Navigate to="/" replace />
+              <SafeNavigate to="/" replace />
             )
           }
         />
@@ -196,7 +203,7 @@ export default function App() {
             rol === 'admin' ? (
               <PantallaAdmin onSalir={handleExit} onNav={(path) => navigate(path)} />
             ) : (
-              <Navigate to="/" replace />
+              <SafeNavigate to="/" replace />
             )
           }
         />
@@ -207,7 +214,7 @@ export default function App() {
             rol === 'admin' ? (
               <PantallaAdmin onSalir={handleExit} onNav={(path) => navigate(path)} />
             ) : (
-              <Navigate to="/" replace />
+              <SafeNavigate to="/" replace />
             )
           }
         />
@@ -218,7 +225,7 @@ export default function App() {
             rol === 'admin' ? (
               <PantallaAdmin onSalir={handleExit} onNav={(path) => navigate(path)} />
             ) : (
-              <Navigate to="/" replace />
+              <SafeNavigate to="/" replace />
             )
           }
         />
@@ -229,7 +236,7 @@ export default function App() {
             rol === 'admin' ? (
               <PantallaAdmin onSalir={handleExit} onNav={(path) => navigate(path)} />
             ) : (
-              <Navigate to="/" replace />
+              <SafeNavigate to="/" replace />
             )
           }
         />
@@ -240,7 +247,7 @@ export default function App() {
             rol === 'admin' ? (
               <PantallaAdmin onSalir={handleExit} onNav={(path) => navigate(path)} />
             ) : (
-              <Navigate to="/" replace />
+              <SafeNavigate to="/" replace />
             )
           }
         />
@@ -251,7 +258,7 @@ export default function App() {
             rol === 'admin' ? (
               <PantallaAdmin onSalir={handleExit} onNav={(path) => navigate(path)} />
             ) : (
-              <Navigate to="/" replace />
+              <SafeNavigate to="/" replace />
             )
           }
         />
@@ -262,7 +269,7 @@ export default function App() {
             rol === 'admin' ? (
               <PantallaAdmin onSalir={handleExit} onNav={(path) => navigate(path)} />
             ) : (
-              <Navigate to="/" replace />
+              <SafeNavigate to="/" replace />
             )
           }
         />
@@ -273,7 +280,7 @@ export default function App() {
             rol === 'admin' ? (
               <PantallaAdmin onSalir={handleExit} onNav={(path) => navigate(path)} />
             ) : (
-              <Navigate to="/" replace />
+              <SafeNavigate to="/" replace />
             )
           }
         />
@@ -284,7 +291,7 @@ export default function App() {
             rol === 'admin' ? (
               <PantallaAdmin onSalir={handleExit} onNav={(path) => navigate(path)} />
             ) : (
-              <Navigate to="/" replace />
+              <SafeNavigate to="/" replace />
             )
           }
         />
@@ -295,7 +302,7 @@ export default function App() {
             rol === 'admin' ? (
               <PantallaAdmin onSalir={handleExit} onNav={(path) => navigate(path)} />
             ) : (
-              <Navigate to="/" replace />
+              <SafeNavigate to="/" replace />
             )
           }
         />
@@ -306,7 +313,7 @@ export default function App() {
             rol === 'admin' ? (
               <PantallaAdmin onSalir={handleExit} onNav={(path) => navigate(path)} />
             ) : (
-              <Navigate to="/" replace />
+              <SafeNavigate to="/" replace />
             )
           }
         />
@@ -317,7 +324,7 @@ export default function App() {
             rol === 'admin' ? (
               <PantallaAdmin onSalir={handleExit} onNav={(path) => navigate(path)} />
             ) : (
-              <Navigate to="/" replace />
+              <SafeNavigate to="/" replace />
             )
           }
         />
@@ -328,7 +335,7 @@ export default function App() {
             rol === 'admin' ? (
               <PantallaAdmin onSalir={handleExit} onNav={(path) => navigate(path)} />
             ) : (
-              <Navigate to="/" replace />
+              <SafeNavigate to="/" replace />
             )
           }
         />
@@ -339,7 +346,7 @@ export default function App() {
             rol === 'user' ? (
               <UserView onExit={handleExit} />
             ) : (
-              <Navigate to="/" replace />
+              <SafeNavigate to="/" replace />
             )
           }
         />
@@ -349,7 +356,7 @@ export default function App() {
             rol === 'user' ? (
               <PantallaCheckin onNav={(screen) => navigate(`/user/${screen}`)} />
             ) : (
-              <Navigate to="/" replace />
+              <SafeNavigate to="/" replace />
             )
           }
         />
@@ -359,7 +366,7 @@ export default function App() {
             rol === 'user' ? (
               <PantallaConsumo onNav={(screen) => navigate(`/user/${screen}`)} />
             ) : (
-              <Navigate to="/" replace />
+              <SafeNavigate to="/" replace />
             )
           }
         />
@@ -369,7 +376,7 @@ export default function App() {
             rol === 'user' ? (
               <PantallaVer onNav={(screen) => navigate(`/user/${screen}`)} />
             ) : (
-              <Navigate to="/" replace />
+              <SafeNavigate to="/" replace />
             )
           }
         />
@@ -379,13 +386,13 @@ export default function App() {
             rol === 'user' ? (
               <UserCheckout onExit={handleExit} />
             ) : (
-              <Navigate to="/" replace />
+              <SafeNavigate to="/" replace />
             )
           }
         />
 
         <Route path="/landing/*" element={<EcoWeb />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<SafeNavigate to="/" replace />} />
       </Routes>
         </AnimatePresence>
       </Suspense>
