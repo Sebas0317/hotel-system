@@ -1,5 +1,5 @@
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
-import { useState, Suspense, lazy, useRef, useEffect } from 'react';
+import { Component, useState, Suspense, lazy, useRef, useEffect } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { Toaster, toast } from 'sonner';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -33,6 +33,39 @@ const PantallaReservaciones = lazy(() => import('./components/PantallaReservacio
 const EcoWeb = lazy(() => import('./ecoweb/App'));
 import './ecoweb/style/index.css';
 import './ecoweb/style/fonts.css';
+
+// Error boundary to catch rendering errors without white-screening the app
+class ErrorBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{ padding: '40px', textAlign: 'center', fontFamily: 'sans-serif' }}>
+          <h2>Algo salio mal</h2>
+          <p style={{ color: '#6b7280', marginBottom: '20px' }}>
+            Ocurrio un error inesperado. La sesion y datos no se perdieron.
+          </p>
+          <button
+            onClick={() => { this.setState({ hasError: false, error: null }); window.location.reload(); }}
+            style={{
+              padding: '10px 24px', background: '#2563eb', color: '#fff', border: 'none',
+              borderRadius: '8px', cursor: 'pointer', fontSize: '14px',
+            }}
+          >
+            Recargar pagina
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 // Wrapper around Navigate that defers navigation to avoid render-phase router updates
 function SafeNavigate({ to, replace = true }) {
@@ -123,6 +156,7 @@ export default function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <ErrorBoundary>
       <div>
         {/* Toast notifications provider */}
       <Toaster
@@ -397,6 +431,7 @@ export default function App() {
         </AnimatePresence>
       </Suspense>
       </div>
+      </ErrorBoundary>
     </QueryClientProvider>
   );
 }

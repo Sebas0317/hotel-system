@@ -8,6 +8,11 @@ const ATTEMPTS_FILE = path.join(__dirname, '../../security-attempts.json');
 const EVENTS_FILE = path.join(__dirname, '../../security-events.json');
 const MAX_EVENTS = 1000;
 
+// In-memory fallback for serverless environments (Vercel read-only filesystem)
+const memoryAttempts = [];
+const memoryEvents = [];
+let memoryLoaded = false;
+
 const DEFAULTS = {
   login: { maxAttempts: 5, lockoutMs: 15 * 60 * 1000, windowMs: 10 * 60 * 1000 },
   '2fa': { maxAttempts: 5, lockoutMs: 15 * 60 * 1000, windowMs: 10 * 60 * 1000 },
@@ -18,19 +23,39 @@ const DEFAULTS = {
 function now() { return Date.now(); }
 
 async function getAttempts() {
-  return readJsonFile(ATTEMPTS_FILE, []);
+  const fromFile = await readJsonFile(ATTEMPTS_FILE, []);
+  if (fromFile.length > 0) {
+    memoryAttempts.length = 0;
+    memoryAttempts.push(...fromFile);
+    memoryLoaded = true;
+    return fromFile;
+  }
+  if (!memoryLoaded && memoryAttempts.length === 0) {
+    memoryLoaded = true;
+  }
+  return memoryAttempts;
 }
 
 async function saveAttempts(data) {
-  return writeJsonFile(ATTEMPTS_FILE, data);
+  memoryAttempts.length = 0;
+  memoryAttempts.push(...data);
+  await writeJsonFile(ATTEMPTS_FILE, data);
 }
 
 async function getEvents() {
-  return readJsonFile(EVENTS_FILE, []);
+  const fromFile = await readJsonFile(EVENTS_FILE, []);
+  if (fromFile.length > 0) {
+    memoryEvents.length = 0;
+    memoryEvents.push(...fromFile);
+    return fromFile;
+  }
+  return memoryEvents;
 }
 
 async function saveEvents(data) {
-  return writeJsonFile(EVENTS_FILE, data);
+  memoryEvents.length = 0;
+  memoryEvents.push(...data);
+  await writeJsonFile(EVENTS_FILE, data);
 }
 
 function createKey(userId, ip, action) {

@@ -91,9 +91,9 @@ async function enqueueTask(filePath, task) {
   return newTask;
 }
 
-// ── Persistent In-memory Cache ──
-// Data is kept in memory permanently and updated on write.
-// This eliminates disk reads for read-heavy operations.
+// ── In-memory Store (serves as primary, file is persistence layer) ──
+// Data is kept in memory and synced to file for durability.
+// On Vercel serverless (read-only filesystem), in-memory is the only store.
 const persistentCache = new Map();
 const isCacheLoaded = new Map();
 
