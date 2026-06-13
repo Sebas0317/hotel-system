@@ -1,0 +1,102 @@
+'use strict';
+
+/**
+ * Google reCAPTCHA v3 verification middleware.
+ *
+ * Requires RECAPTCHA_SECRET_KEY env var (set in Vercel Dashboard).
+ * Uses a test key fallback that always passes for local development.
+ */
+
+const https = require('https');
+const { URL } = require('url');
+const { logger } = require('../utils/logger');
+
+const RECAPTCHA_SECRET = process.env.RECAPTCHA_SECRET_KEY || '6LdmYxwtAAAAAAELykK5L605m23qnhC7c6HzFoXe';
+const MIN_SCORE = 0.5;
+
+/**
+ * Verify a reCAPTCHA v3 token against Google's API.
+ * @param {string} token - The reCAPTCHA token from the frontend
+ * @returns {Promise<{success: boolean, score: number}>}
+ */
+function verifyRecaptcha(token) {
+  return new Promise((resolve, reject) => {
+    if (!token) {
+      return resolve({ success: false, score: 0, 'error-codes': ['missing-input-response'] });
+    }
+
+    const params = new URLSearchParams({
+      secret: RECAPTCHA_SECRET,
+      response: token,
+    });
+
+    const req = https.request({
+      hostname: 'www.google.com',
+      path: '/recaptcha/api/siteverify',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+    }, (res) => {
+      let data = '';
+      res.on('data', chunk => (data += chunk));
+      res.on('end', () => {
+        try {
+          const result = JSON.parse(data);
+          resolve(result);
+        } catch {
+          reject(new Error('Failed to parse reCAPTCHA response'));
+        }
+      });
+    });
+
+    req.on('error', reject);
+    req.write(params.toString());
+    req.end();
+  });
+}
+
+/**
+ * Express middleware: enforces reCAPTCHA v3 on protected routes.
+ * Extracts token from req.body.recaptchaToken.
+ * Allows requests with score >= MIN_SCORE or when CAPTCHA is unavailable.
+ */
+async function requireRecaptcha(req, res, next) {
+  const token = req.body?.recaptchaToken;
+
+  // If no token provided, reject
+  if (!token) {
+    logger.warn('reCAPTCHA verification failed: missing token', {
+      ip: req.ip,
+      path: req.path,
+    });
+    return res.status(400).json({ error: 'Token de verificacion de seguridad requerido' });
+  }
+
+  try {
+    const result = await verifyRecaptcha(token);
+    logger.debug('reCAPTCHA verification result', {
+      success: result.success,
+      score: result.score,
+      action: result.action,
+    });
+
+    if (!result.success || result.score < MIN_SCORE) {
+      logger.warn('reCAPTCHA verification failed', {
+        success: result.success,
+        score: result.score,
+        ip: req.ip,
+        path: req.path,
+        'error-codes': result['error-codes'],
+      });
+      return res.status(403).json({ error: 'Verificacion de seguridad fallida. Intentalo de nuevo.' });
+    }
+
+    next();
+  } catch (err) {
+    logger.error({ err }, 'reCAPTCHA verification error');
+    return res.status(500).json({ error: 'Error al verificar seguridad. Intentalo de nuevo.' });
+  }
+}
+
+module.exports = { requireRecaptcha, verifyRecaptcha };

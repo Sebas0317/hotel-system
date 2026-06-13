@@ -72,20 +72,20 @@ async function run() {
   // ── 1. Failed login ──
   console.log('[1] Failed login attempts');
   let r = await fetch('POST', '/auth/login', {
-    identifier: ADMIN_EMAIL, password: 'wrongpass', turnstileToken: '',
+    identifier: ADMIN_EMAIL, password: 'wrongpass', recaptchaToken: '',
   });
   check('Failed login returns 401', r.status === 401, JSON.stringify(r.body));
   check('Error message in Spanish', r.body?.error === 'Credenciales invalidas');
 
   r = await fetch('POST', '/auth/login', {
-    identifier: ADMIN_EMAIL, password: 'wrongpass2', turnstileToken: '',
+    identifier: ADMIN_EMAIL, password: 'wrongpass2', recaptchaToken: '',
   });
   check('Second failed login returns 401', r.status === 401);
 
   // ── 2. Successful login ──
   console.log('\n[2] Successful login');
   r = await fetch('POST', '/auth/login', {
-    identifier: ADMIN_EMAIL, password: ADMIN_PASS, turnstileToken: '',
+    identifier: ADMIN_EMAIL, password: ADMIN_PASS, recaptchaToken: '',
   });
   check('Login returns 200 or 2FA', r.status === 200 || r.status === 201,
     `status=${r.status}`);

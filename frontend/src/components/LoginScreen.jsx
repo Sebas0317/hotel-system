@@ -6,6 +6,7 @@ import {
   ArrowLeft, Loader, CheckCircle, AlertCircle,
 } from 'lucide-react';
 import { loginAdmin, setAuthToken, registerUser } from '../services/api';
+import { getRecaptchaToken } from '../utils/recaptcha';
 import HotelTitle from './HotelTitle';
 import TwoFactorScreen from './TwoFactorScreen';
 import ForgotPasswordScreen from './ForgotPasswordScreen';
@@ -311,7 +312,8 @@ function AdminLogin({ onBack, onRole }) {
     setLoading(true);
     setError('');
     try {
-      const result = await loginAdmin(identifier, password, '');
+      const recaptchaToken = await getRecaptchaToken('login');
+      const result = await loginAdmin(identifier, password, recaptchaToken);
       if (result.requires2FA) {
         navigate(`/2fa/${result.userId}`, {
           state: { email: result.email, expiresIn: result.expiresIn },

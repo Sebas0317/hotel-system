@@ -226,13 +226,13 @@ async function apiFetch(endpoint, options = {}, timeout = 10000) {
  * Login with email/username and password
  * @param {string} identifier - Email or username
  * @param {string} password - Password
- * @param {string} [turnstileToken] - Cloudflare Turnstile token
+ * @param {string} [recaptchaToken] - Google reCAPTCHA token
  * @returns {Promise<{token?: string, requires2FA?: boolean, userId?: string, usuario?: object}>}
  */
-export async function loginAdmin(identifier, password, turnstileToken) {
+export async function loginAdmin(identifier, password, recaptchaToken) {
   return apiFetch('/auth/login', {
     method: 'POST',
-    body: { identifier, password, turnstileToken },
+    body: { identifier, password, recaptchaToken },
   });
 }
 
@@ -521,13 +521,13 @@ export async function checkOutReserva(id) {
  * Validate room PIN
  * @param {string} numero - Room number
  * @param {string} pin - 4-digit PIN
- * @param {string} [turnstileToken] - Cloudflare Turnstile token
- * @returns {Promise<Object>} Room object if valid
+ * @param {string} [recaptchaToken] - Google reCAPTCHA token
+ * @returns {Promise<object>} Room data
  */
-export async function validarPin(numero, pin, turnstileToken) {
-  const data = await apiFetch('/rooms/validar', {
+export async function validarPin(numero, pin, recaptchaToken) {
+  return apiFetch('/rooms/validar', {
     method: 'POST',
-    body: { numero, pin, turnstileToken },
+    body: { numero, pin, recaptchaToken },
   });
   if (data.roomToken) {
     setRoomToken(data.roomToken);

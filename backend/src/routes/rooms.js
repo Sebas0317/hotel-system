@@ -12,7 +12,7 @@ const router = express.Router();
 const roomController = require('../controllers/roomController');
 const { requireFields, validateEnum } = require('../middleware/validation');
 const { requireAuth } = require('../middleware/auth');
-const { requireTurnstile } = require('../middleware/turnstile');
+const { requireRecaptcha } = require('../middleware/recaptcha');
 const { requireRoomAccess } = require('../middleware/roomAccess');
 const { writeRateLimiter, pinRateLimiter } = require('../middleware/rateLimiters');
 
@@ -42,7 +42,7 @@ router.post(
 router.post(
   '/validar',
   pinRateLimiter,
-  requireTurnstile,
+  requireRecaptcha,
   requireFields('numero', 'pin'),
   roomController.validarPin
 );

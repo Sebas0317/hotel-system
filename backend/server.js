@@ -87,14 +87,14 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", 'https://challenges.cloudflare.com'],
+      scriptSrc: ["'self'", 'https://www.google.com', 'https://www.gstatic.com'],
       styleSrc: ["'self'", "'unsafe-inline'"], // Required for inline styles
       imgSrc: ["'self'", 'data:', 'blob:'],
       connectSrc: ["'self'"],
       fontSrc: ["'self'"],
       objectSrc: ["'none'"],
       mediaSrc: ["'self'"],
-      frameSrc: ["https://challenges.cloudflare.com"],
+      frameSrc: ["https://www.google.com"],
       workerSrc: ["'self'"],
       baseUri: ["'self'"],
       formAction: ["'self'"],

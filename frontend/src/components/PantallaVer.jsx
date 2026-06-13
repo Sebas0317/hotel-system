@@ -1,12 +1,10 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { validarPin, fetchConsumos } from '../services/api';
 import { COP, FECHA } from '../utils/helpers';
 import { CAT_ICONS } from '../constants';
 import PantallaForm from './PantallaForm';
 import { AlertTriangle, Package } from 'lucide-react';
-import { Turnstile } from 'react-turnstile';
-
-const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY || '1x0000000000000000000000000000000AA';
+import { getRecaptchaToken } from '../utils/recaptcha';
 
 export default function PantallaVer({ onNav }) {
   const [numero, setNumero] = useState('');
@@ -15,9 +13,6 @@ export default function PantallaVer({ onNav }) {
   const [consumos, setConsumos] = useState([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [turnstileToken, setTurnstileToken] = useState(null);
-  const [captchaError, setCaptchaError] = useState(false);
-  const turnstileRef = useRef(null);
 
   const safeText = (value, fallback = '—') => {
     if (value === null || value === undefined) return fallback;
@@ -43,18 +38,16 @@ export default function PantallaVer({ onNav }) {
     if (!numero.trim() || !pin.trim()) {
       return setError('Ingresa número de habitación y PIN');
     }
-    if (!turnstileToken && !captchaError) return setError('Completa la verificacion de seguridad');
     setLoading(true);
     setError('');
     try {
-      const data = await validarPin(numero.trim(), pin.trim(), turnstileToken);
+      const recaptchaToken = await getRecaptchaToken('room_consult');
+      const data = await validarPin(numero.trim(), pin.trim(), recaptchaToken);
       setRoom(data);
       const consumosData = await fetchConsumos(data.id);
       setConsumos(consumosData);
     } catch (e) {
       setError(safeErrorMessage(e));
-      setTurnstileToken(null);
-      turnstileRef.current?.reset();
     } finally {
       setLoading(false);
     }
@@ -67,7 +60,6 @@ export default function PantallaVer({ onNav }) {
     setConsumos([]);
     setNumero('');
     setPin('');
-    setTurnstileToken(null);
   };
 
   return (
@@ -86,11 +78,8 @@ export default function PantallaVer({ onNav }) {
             <label>PIN</label>
             <input type="password" placeholder="4 dígitos" value={pin} onChange={(e) => setPin(e.target.value)} maxLength={4} />
           </div>
-          <div className="flex justify-center pt-2">
-            <Turnstile ref={turnstileRef} sitekey={TURNSTILE_SITE_KEY} onVerify={(t) => { setTurnstileToken(t); setError(''); }} onError={() => setCaptchaError(true)} onTimeout={() => { setError('Verificacion expirada, intenta de nuevo'); setTurnstileToken(null); }} theme="light" />
-          </div>
           {error && <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm mb-4"><AlertTriangle className="w-4 h-4 inline mr-1" /> {error}</div>}
-          <button className="btn-main-action" onClick={consultar} disabled={loading || (!turnstileToken && !captchaError)}>
+          <button className="btn-main-action" onClick={consultar} disabled={loading}>
             {loading ? 'Consultando...' : 'Consultar'}
           </button>
         </form>

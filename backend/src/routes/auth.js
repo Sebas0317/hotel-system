@@ -4,7 +4,7 @@ const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
 const { requireAuth } = require('../middleware/auth');
-const { requireTurnstile } = require('../middleware/turnstile');
+const { requireRecaptcha } = require('../middleware/recaptcha');
 const {
   writeRateLimiter,
   pinRateLimiter,
@@ -17,8 +17,8 @@ const {
 router.get('/setup', authController.setup);
 router.get('/status', authController.getAuthStatus);
 
-router.post('/register', requireTurnstile, writeRateLimiter, authController.register);
-router.post('/login', requireTurnstile, loginLimiter, authController.login);
+router.post('/register', requireRecaptcha, writeRateLimiter, authController.register);
+router.post('/login', requireRecaptcha, loginLimiter, authController.login);
 router.post('/2fa/verify', codeVerifyLimiter, authController.verify2FA);
 router.post('/login-code/send', loginLimiter, authController.sendLoginCode);
 
