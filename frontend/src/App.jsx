@@ -5,6 +5,7 @@ import { Toaster, toast } from 'sonner';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { getAuthToken, setAuthToken, clearRoomToken } from './services/api';
 import { useSession } from './hooks/useSession';
+import CybersecurityPanel from './components/CybersecurityPanel';
 import './App.css';
 
 // Create query client with default options
@@ -183,6 +184,8 @@ export default function App() {
           },
         }}
       />
+
+      <CybersecurityPanel />
 
       <Suspense fallback={<LoadingFallback />}>
         <AnimatePresence mode="wait" initial={false}>
