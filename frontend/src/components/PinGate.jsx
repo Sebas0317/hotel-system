@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { validarPin } from '../services/api';
-import { getRecaptchaToken } from '../utils/recaptcha';
+import ReCaptchaWidget from './ReCaptchaWidget';
 import { Key, Shield, AlertCircle, ArrowRight } from 'lucide-react';
 
 export default function PinGate({ onAccess, onBack, title = 'Acceso a Habitacion', description = 'Ingresa el numero de habitacion y PIN que recibiste al hacer check-in' }) {
@@ -8,24 +8,28 @@ export default function PinGate({ onAccess, onBack, title = 'Acceso a Habitacion
   const [pin, setPin] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [recaptchaToken, setRecaptchaToken] = useState(null);
+  const [captchaError, setCaptchaError] = useState(false);
 
   const handleSubmit = async (e) => {
     e?.preventDefault();
     if (!numero.trim() || !pin.trim()) return setError('Ingresa numero de habitacion y PIN');
+    if (!recaptchaToken && !captchaError) return setError('Completa la verificacion de seguridad');
     setLoading(true);
     setError('');
     try {
-      const recaptchaToken = await getRecaptchaToken('room_access');
       const room = await validarPin(numero.trim(), pin.trim(), recaptchaToken);
+      setRecaptchaToken(null);
       onAccess(room);
     } catch (e) {
       setError(e.message || 'PIN o numero de habitacion incorrecto');
+      setRecaptchaToken(null);
     } finally {
       setLoading(false);
     }
   };
 
-  const isButtonDisabled = loading;
+  const isButtonDisabled = loading || (!recaptchaToken && !captchaError);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-emerald-50/40 flex items-center justify-center p-4">
@@ -77,6 +81,13 @@ export default function PinGate({ onAccess, onBack, title = 'Acceso a Habitacion
                   className="w-full pl-10 pr-4 py-3 bg-gray-50/50 border border-gray-200/60 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 transition-all duration-200 tracking-[0.3em] text-center font-bold"
                 />
               </div>
+            </div>
+
+            <div className="flex justify-center pt-2">
+              <ReCaptchaWidget
+                onVerify={(token) => { setRecaptchaToken(token); setError(''); }}
+                onExpire={() => { setRecaptchaToken(null); setError('Verificacion expirada, intenta de nuevo'); }}
+              />
             </div>
 
             {error && (

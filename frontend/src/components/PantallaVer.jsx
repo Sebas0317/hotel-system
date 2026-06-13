@@ -4,7 +4,7 @@ import { COP, FECHA } from '../utils/helpers';
 import { CAT_ICONS } from '../constants';
 import PantallaForm from './PantallaForm';
 import { AlertTriangle, Package } from 'lucide-react';
-import { getRecaptchaToken } from '../utils/recaptcha';
+import ReCaptchaWidget from './ReCaptchaWidget';
 
 export default function PantallaVer({ onNav }) {
   const [numero, setNumero] = useState('');
@@ -13,6 +13,8 @@ export default function PantallaVer({ onNav }) {
   const [consumos, setConsumos] = useState([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [recaptchaToken, setRecaptchaToken] = useState(null);
+  const [captchaError, setCaptchaError] = useState(false);
 
   const safeText = (value, fallback = '—') => {
     if (value === null || value === undefined) return fallback;
@@ -38,16 +40,17 @@ export default function PantallaVer({ onNav }) {
     if (!numero.trim() || !pin.trim()) {
       return setError('Ingresa número de habitación y PIN');
     }
+    if (!recaptchaToken && !captchaError) return setError('Completa la verificacion de seguridad');
     setLoading(true);
     setError('');
     try {
-      const recaptchaToken = await getRecaptchaToken('room_consult');
       const data = await validarPin(numero.trim(), pin.trim(), recaptchaToken);
       setRoom(data);
       const consumosData = await fetchConsumos(data.id);
       setConsumos(consumosData);
     } catch (e) {
       setError(safeErrorMessage(e));
+      setRecaptchaToken(null);
     } finally {
       setLoading(false);
     }
@@ -60,6 +63,7 @@ export default function PantallaVer({ onNav }) {
     setConsumos([]);
     setNumero('');
     setPin('');
+    setRecaptchaToken(null);
   };
 
   return (
@@ -78,8 +82,14 @@ export default function PantallaVer({ onNav }) {
             <label>PIN</label>
             <input type="password" placeholder="4 dígitos" value={pin} onChange={(e) => setPin(e.target.value)} maxLength={4} />
           </div>
+          <div className="flex justify-center pt-2">
+            <ReCaptchaWidget
+              onVerify={(token) => { setRecaptchaToken(token); setError(''); }}
+              onExpire={() => { setRecaptchaToken(null); setError('Verificacion expirada, intenta de nuevo'); }}
+            />
+          </div>
           {error && <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm mb-4"><AlertTriangle className="w-4 h-4 inline mr-1" /> {error}</div>}
-          <button className="btn-main-action" onClick={consultar} disabled={loading}>
+          <button className="btn-main-action" onClick={consultar} disabled={loading || (!recaptchaToken && !captchaError)}>
             {loading ? 'Consultando...' : 'Consultar'}
           </button>
         </form>

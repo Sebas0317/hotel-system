@@ -57,14 +57,14 @@ function verifyRecaptcha(token) {
 }
 
 /**
- * Express middleware: enforces reCAPTCHA v3 on protected routes.
+ * Express middleware: enforces reCAPTCHA v2/v3 on protected routes.
  * Extracts token from req.body.recaptchaToken.
- * Allows requests with score >= MIN_SCORE or when CAPTCHA is unavailable.
+ * v2: checks success === true
+ * v3: checks success && score >= MIN_SCORE
  */
 async function requireRecaptcha(req, res, next) {
   const token = req.body?.recaptchaToken;
 
-  // If no token provided, reject
   if (!token) {
     logger.warn('reCAPTCHA verification failed: missing token', {
       ip: req.ip,
@@ -75,19 +75,24 @@ async function requireRecaptcha(req, res, next) {
 
   try {
     const result = await verifyRecaptcha(token);
-    logger.debug('reCAPTCHA verification result', {
-      success: result.success,
-      score: result.score,
-      action: result.action,
-    });
 
-    if (!result.success || result.score < MIN_SCORE) {
+    if (!result.success) {
       logger.warn('reCAPTCHA verification failed', {
         success: result.success,
         score: result.score,
         ip: req.ip,
         path: req.path,
         'error-codes': result['error-codes'],
+      });
+      return res.status(403).json({ error: 'Verificacion de seguridad fallida. Intentalo de nuevo.' });
+    }
+
+    // v3 includes a score; v2 checkbox does not
+    if (result.score !== undefined && result.score < MIN_SCORE) {
+      logger.warn('reCAPTCHA score too low', {
+        score: result.score,
+        ip: req.ip,
+        path: req.path,
       });
       return res.status(403).json({ error: 'Verificacion de seguridad fallida. Intentalo de nuevo.' });
     }
