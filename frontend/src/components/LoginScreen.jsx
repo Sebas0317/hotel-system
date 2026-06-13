@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { loginAdmin, setAuthToken, registerUser } from '../services/api';
 import ReCaptchaWidget from './ReCaptchaWidget';
+import CybersecurityPanel from './CybersecurityPanel';
 import HotelTitle from './HotelTitle';
 import TwoFactorScreen from './TwoFactorScreen';
 import ForgotPasswordScreen from './ForgotPasswordScreen';
@@ -210,6 +211,7 @@ function RoleCards({ onSelectAdmin, onSelectUser }) {
   return (
     <div className="min-h-screen flex items-center justify-center p-4 sm:p-6">
       <AnimatedBackground />
+      <CybersecurityPanel />
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
