@@ -47,7 +47,9 @@ const STATE_KEY = 'data:state';
 
 // ── In-memory fallback (for serverless where Redis is unavailable) ──
 const memoryStore = new Map();
-const memoryLoaded = new Map();
+
+// Track which keys have been lazily bootstrapped from files
+const bootstrapped = new Set();
 
 // ── Public API ──
 
@@ -61,7 +63,28 @@ async function getData(key, defaultVal = null) {
       logger.warn({ err, key }, 'Redis get failed, falling back to memory');
     }
   }
-  return memoryStore.has(key) ? memoryStore.get(key) : defaultVal;
+  // Check in-memory fallback
+  if (memoryStore.has(key)) return memoryStore.get(key);
+
+  // Lazy bootstrap: seed from file if not yet loaded into Redis
+  if (r && !bootstrapped.has(key)) {
+    bootstrapped.add(key);
+    const file = fileForKey(key);
+    if (file) {
+      try {
+        const data = await readJsonFile(file, null);
+        if (data !== null) {
+          memoryStore.set(key, data);
+          await r.set(key, data).catch(() => {});
+          logger.info(`Lazy-seeded Redis key ${key} from ${path.basename(file)}`);
+          return data;
+        }
+      } catch {
+        // File missing or unreadable, use default
+      }
+    }
+  }
+  return defaultVal;
 }
 
 async function setData(key, data) {
@@ -86,6 +109,25 @@ async function delData(key) {
       logger.warn({ err, key }, 'Redis del failed');
     }
   }
+}
+
+// ── Map Redis keys back to file paths for lazy bootstrap ──
+function fileForKey(key) {
+  const map = {
+    [ROOMS_KEY]: 'rooms.json',
+    [CONSUMOS_KEY]: 'consumos.json',
+    [USERS_KEY]: 'users.json',
+    [HISTORY_KEY]: 'history.json',
+    [STATE_HISTORY_KEY]: 'stateHistory.json',
+    [PRICES_KEY]: 'prices.json',
+    [RESERVAS_KEY]: 'reservas.json',
+    [CODES_KEY]: 'codes.json',
+    [SECURITY_ATTEMPTS_KEY]: 'security-attempts.json',
+    [SECURITY_EVENTS_KEY]: 'security-events.json',
+    [STATE_KEY]: 'state.json',
+  };
+  const name = map[key];
+  return name ? path.join(DATA_DIR, name) : null;
 }
 
 // ── Key-specific helpers ──
