@@ -8,9 +8,6 @@ const emailService = require('../utils/emailService');
 const securityTracker = require('../utils/securityTracker');
 const auditor = require('../utils/auditor');
 
-const loginLogs = [];
-const MAX_LOGIN_LOGS = 500;
-
 function generateToken(user) {
   const expiresIn = process.env.JWT_EXPIRES_IN || '8h';
   return jwt.sign(
@@ -165,11 +162,6 @@ async function login(req, res) {
 
       const reason = result.reason || 'Credenciales invalidas';
       await auditor.failedLogin(ip, identifier, reason);
-      loginLogs.push({
-        timestamp: new Date().toISOString(), identifier, ip,
-        success: false, reason,
-      });
-      if (loginLogs.length > MAX_LOGIN_LOGS) loginLogs.shift();
 
       return res.status(401).json({ error: 'Credenciales invalidas' });
     }
@@ -178,12 +170,6 @@ async function login(req, res) {
     await securityTracker.resetAttempts({ ip, action: 'login' });
 
     await userStore.updateLastLogin(user.id, ip);
-
-    loginLogs.push({
-      timestamp: new Date().toISOString(), identifier, ip,
-      success: true, userId: user.id, role: user.role,
-    });
-    if (loginLogs.length > MAX_LOGIN_LOGS) loginLogs.shift();
 
     if (user.twoFactorEnabled && user.emailVerified) {
       try {
@@ -686,8 +672,20 @@ async function changeOwnPassword(req, res) {
 
 async function getLastLogin(req, res) {
   try {
-    const entries = loginLogs.filter(l => l.success).slice(-1);
-    return res.json({ lastLogin: entries[entries.length - 1] || null });
+    const events = await securityTracker.getSecurityEvents({ limit: 1, type: 'login' });
+    const last = events[0];
+    if (!last) return res.json({ lastLogin: null });
+
+    const email = last.detail?.replace('Inicio de sesion: ', '') || '';
+    return res.json({
+      lastLogin: {
+        timestamp: last.timestamp,
+        ip: last.ip,
+        identifier: email,
+        userId: last.userId,
+        success: true,
+      },
+    });
   } catch {
     return res.json({ lastLogin: null });
   }
@@ -696,7 +694,24 @@ async function getLastLogin(req, res) {
 async function getLoginLogs(req, res) {
   try {
     const limit = Math.min(parseInt(req.query.limit) || 50, 500);
-    return res.json(loginLogs.slice(-limit).reverse());
+    const events = await securityTracker.getSecurityEvents({ limit: 1000 });
+    const logs = events
+      .filter(e => e.type === 'login' || e.type === 'failed_login')
+      .slice(0, limit)
+      .map(e => {
+        const isLogin = e.type === 'login';
+        const email = e.detail?.replace(/^Inicio de sesion: |^Intento fallido: /, '').split(' - ')[0] || '';
+        return {
+          id: e.id,
+          timestamp: e.timestamp,
+          ip: e.ip,
+          identifier: email,
+          userId: e.userId,
+          success: isLogin,
+          reason: isLogin ? null : (e.detail?.split(' - ')[1] || 'Credenciales invalidas'),
+        };
+      });
+    return res.json(logs);
   } catch {
     return res.json([]);
   }
