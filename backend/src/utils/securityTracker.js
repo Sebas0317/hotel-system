@@ -1,18 +1,24 @@
 'use strict';
 
 const path = require('path');
+const os = require('os');
 const { readJsonFile, writeJsonFile } = require('../data/jsonStoreHelper');
 const { logger } = require('./logger');
 const persistence = require('../data/persistence');
 
-const ATTEMPTS_FILE = path.join(__dirname, '../../security-attempts.json');
-const EVENTS_FILE = path.join(__dirname, '../../security-events.json');
+// On Vercel (serverless), use /tmp/ for writable storage
+const DATA_DIR = process.env.VERCEL_ENV
+  ? path.join(os.tmpdir(), 'ecobosque-data')
+  : path.join(__dirname, '../..');
+
+const ATTEMPTS_FILE = path.join(DATA_DIR, 'security-attempts.json');
+const EVENTS_FILE = path.join(DATA_DIR, 'security-events.json');
 const MAX_EVENTS = 1000;
 
-// In-memory fallback for serverless environments (Vercel read-only filesystem)
+// In-memory store — primary for speed, file/Redis for persistence
 const memoryAttempts = [];
 const memoryEvents = [];
-let memoryLoaded = false;
+let bootstrapped = false;
 
 const DEFAULTS = {
   login: { maxAttempts: 5, lockoutMs: 15 * 60 * 1000, windowMs: 10 * 60 * 1000 },
@@ -21,32 +27,35 @@ const DEFAULTS = {
   recovery: { maxAttempts: 3, lockoutMs: 30 * 60 * 1000, windowMs: 15 * 60 * 1000 },
 };
 
+// Ensure data directory exists (especially for /tmp/ on Vercel)
+const fs = require('fs');
+try {
+  if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
+} catch { /* best-effort */ }
+
 function now() { return Date.now(); }
 
 async function getAttempts() {
   if (persistence.isRedisAvailable()) {
     const data = await persistence.getSecurityAttempts();
-    // Sync memory for fast subsequent access
     memoryAttempts.length = 0;
     memoryAttempts.push(...data);
     return data;
   }
-  const fromFile = await readJsonFile(ATTEMPTS_FILE, []);
-  if (fromFile.length > 0) {
+  if (!bootstrapped) {
+    const fromFile = await readJsonFile(ATTEMPTS_FILE, []);
     memoryAttempts.length = 0;
     memoryAttempts.push(...fromFile);
-    memoryLoaded = true;
-    return fromFile;
-  }
-  if (!memoryLoaded && memoryAttempts.length === 0) {
-    memoryLoaded = true;
+    bootstrapped = true;
   }
   return memoryAttempts;
 }
 
 async function saveAttempts(data) {
-  memoryAttempts.length = 0;
-  memoryAttempts.push(...data);
+  if (data !== memoryAttempts) {
+    memoryAttempts.length = 0;
+    memoryAttempts.push(...data);
+  }
   if (persistence.isRedisAvailable()) {
     return persistence.setSecurityAttempts(data);
   }
@@ -60,18 +69,20 @@ async function getEvents() {
     memoryEvents.push(...data);
     return data;
   }
-  const fromFile = await readJsonFile(EVENTS_FILE, []);
-  if (fromFile.length > 0) {
+  if (!bootstrapped) {
+    const fromFile = await readJsonFile(EVENTS_FILE, []);
     memoryEvents.length = 0;
     memoryEvents.push(...fromFile);
-    return fromFile;
+    bootstrapped = true;
   }
   return memoryEvents;
 }
 
 async function saveEvents(data) {
-  memoryEvents.length = 0;
-  memoryEvents.push(...data);
+  if (data !== memoryEvents) {
+    memoryEvents.length = 0;
+    memoryEvents.push(...data);
+  }
   if (persistence.isRedisAvailable()) {
     return persistence.setSecurityEvents(data);
   }
