@@ -927,6 +927,13 @@ export default function PantallaAdmin({ onSalir, onNav }) {
   const allRooms = historyData?.[1] || [];
   const reservationHistory = historyData?.[2]?.reservas || historyData?.[2] || [];
 
+  const { data: loginLogsData = [], isLoading: loginLogsLoading, refetch: refetchLogs } = useQuery({
+    queryKey: ['login-logs'],
+    queryFn: () => fetchLoginLogs(500),
+    staleTime: 1000 * 30,
+    enabled: activeView === 'history',
+  });
+
   const handleRefresh = useCallback(() => {
     refresh();
   }, [refresh]);
@@ -1159,42 +1166,23 @@ export default function PantallaAdmin({ onSalir, onNav }) {
     );
   }
 
-  // ── History view ──
+  // ── History view (login access logs) ──
   if (activeView === 'history') {
-    // Group state changes by room
-    const roomStateMap = {};
-    history.forEach(entry => {
-      const roomId = entry.roomId || entry.numero;
-      if (!roomStateMap[roomId]) {
-        roomStateMap[roomId] = {
-          roomId,
-          numero: entry.numero,
-          room: allRooms.find(r => r.id === roomId || r.numero === entry.numero),
-          entries: [],
-        };
+    const [logSearch, setLogSearch] = useState('');
+    const [logFilter, setLogFilter] = useState('todos');
+
+    const filteredLogs = loginLogsData.filter(l => {
+      if (logFilter === 'success' && !l.success) return false;
+      if (logFilter === 'failed' && l.success) return false;
+      if (logSearch) {
+        const q = logSearch.toLowerCase();
+        const matches = (l.identifier?.toLowerCase().includes(q)) ||
+          (l.ip?.toLowerCase().includes(q)) ||
+          (l.userId?.toLowerCase().includes(q));
+        if (!matches) return false;
       }
-      roomStateMap[roomId].entries.push(entry);
+      return true;
     });
-
-    // All rooms with history (for counter)
-    const roomsWithHistory = Object.values(roomStateMap)
-      .filter(r => r.entries.length > 0);
-
-    // Filtered rooms by room number or state
-    const filteredRoomsHistory = roomsWithHistory
-      .filter(r => {
-        if (histFilter.room && !r.numero.includes(histFilter.room)) return false;
-        if (histFilter.estado !== 'todos') {
-          const hasState = r.entries.some(e => e.estadoNuevo === histFilter.estado || e.estadoAnterior === histFilter.estado);
-          if (!hasState) return false;
-        }
-        return true;
-      })
-      .sort((a, b) => {
-        const aLatest = a.entries[0]?.timestamp || '';
-        const bLatest = b.entries[0]?.timestamp || '';
-        return bLatest.localeCompare(aLatest);
-      });
 
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-emerald-50/40">
@@ -1203,33 +1191,42 @@ export default function PantallaAdmin({ onSalir, onNav }) {
           {renderBreadcrumbs()}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold"><ClipboardList className="w-5 h-5 inline mr-2" /> Historial de Estados</h2>
-            <span className="text-sm text-gray-500">{filteredRoomsHistory.length} de {roomsWithHistory.length} habitaciones</span>
+            <div>
+              <h2 className="text-xl font-bold"><ClipboardList className="w-5 h-5 inline mr-2" /> Historial de Accesos</h2>
+              <p className="text-sm text-gray-500 mt-1">Registro completo de inicios de sesion en el sistema</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-500">{filteredLogs.length} registros</span>
+              <button
+                onClick={() => refetchLogs()}
+                className="px-3 py-1.5 text-sm text-emerald-600 hover:bg-emerald-50 rounded-lg flex items-center gap-1"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                Actualizar
+              </button>
+            </div>
           </div>
 
-          {/* Table Filters */}
+          {/* Filters */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-3 mb-4 flex flex-wrap gap-2">
             <input
-              className="px-3 py-1.5 border border-gray-300/60 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 transition-all duration-200"
-              placeholder="Habitacion..."
-              value={histFilter.room}
-              onChange={e => setHistFilter(f => ({ ...f, room: e.target.value }))}
+              className="px-3 py-1.5 border border-gray-300/60 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 transition-all duration-200 min-w-[200px]"
+              placeholder="Buscar por email, IP o ID..."
+              value={logSearch}
+              onChange={e => setLogSearch(e.target.value)}
             />
             <select
               className="px-3 py-1.5 border border-gray-300/60 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 transition-all duration-200"
-              value={histFilter.estado}
-              onChange={e => setHistFilter(f => ({ ...f, estado: e.target.value }))}
+              value={logFilter}
+              onChange={e => setLogFilter(e.target.value)}
             >
-              <option value="todos">Todos los estados</option>
-              <option value="disponible">Disponible</option>
-              <option value="ocupada">Ocupada</option>
-              <option value="reservada">Reservada</option>
-              <option value="limpieza">Limpieza</option>
-              <option value="mantenimiento">Mantenimiento</option>
+              <option value="todos">Todos</option>
+              <option value="success">Exitosos</option>
+              <option value="failed">Fallidos</option>
             </select>
-            {(histFilter.room || histFilter.estado !== 'todos') && (
+            {(logSearch || logFilter !== 'todos') && (
               <button
-                onClick={() => setHistFilter({ room: '', estado: 'todos' })}
+                onClick={() => { setLogSearch(''); setLogFilter('todos'); }}
                 className="px-3 py-1.5 text-sm text-red-600 hover:bg-red-50 rounded-lg"
               >
                 ✕ Limpiar
@@ -1237,173 +1234,61 @@ export default function PantallaAdmin({ onSalir, onNav }) {
             )}
           </div>
 
-          {historyLoading ? (
+          {loginLogsLoading ? (
             <div className="text-center text-gray-400 py-12">
               <div className="text-4xl mb-2">⏳</div>
-              <p>Cargando historial...</p>
+              <p>Cargando historial de accesos...</p>
             </div>
-          ) : filteredRoomsHistory.length === 0 ? (
+          ) : filteredLogs.length === 0 ? (
             <div className="text-center text-gray-400 py-12">
               <div className="text-4xl mb-2">📭</div>
-              <p>Sin registros de historial</p>
+              <p>Sin registros de acceso</p>
             </div>
           ) : (
-            <div className="space-y-4">
-              {filteredRoomsHistory.map(roomData => {
-                const isExpanded = expandedRoomId === roomData.roomId;
-                return (
-                  <div key={roomData.roomId} className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
-                    <button
-                      className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
-                      onClick={() => setExpandedRoomId(prev => prev === roomData.roomId ? null : roomData.roomId)}
-                    >
-                      <div className="flex items-center gap-3">
-                        <span className="text-lg font-bold text-gray-900">{roomData.numero}</span>
-                        {roomData.room && <span className="text-sm text-gray-500">{roomData.room.tipo}</span>}
-                        <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full font-medium">
-                          {roomData.entries.length} cambios
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className={`text-sm transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}>▼</span>
-                      </div>
-                    </button>
-
-                    {isExpanded && (
-                      <div className="border-t border-gray-100">
-                        {/* Timeline */}
-                        <div className="p-4 space-y-0">
-                          {roomData.entries.map((entry, i) => {
-                            const cfg = ESTADO_CFG[entry.estadoNuevo] || ESTADO_CFG.disponible;
-                            const prevCfg = ESTADO_CFG[entry.estadoAnterior] || null;
-                            const wasOccupied = entry.estadoAnterior === 'ocupada';
-
-                            // Use saved reservation data from the entry (stored when state changed)
-                            // Or fall back to finding in reservationHistory
-                            let reservation = entry.reserva || null;
-                            if (!reservation && wasOccupied) {
-                              reservation = reservationHistory.find(r =>
-                                (r.roomId === entry.roomId || r.numero === entry.numero) &&
-                                r.tipo !== 'cambio_estado' &&
-                                r.huesped &&
-                                r.huesped !== ''
-                              );
-                            }
-
-                            return (
-                              <div key={entry.id} className="relative flex gap-4 pb-4">
-                                {/* Timeline line */}
-                                {i < roomData.entries.length - 1 && (
-                                  <div className="absolute left-4 top-8 bottom-0 w-0.5 bg-gray-200"></div>
-                                )}
-                                {/* Timeline dot */}
-                                <div className={`relative z-10 w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 border-2`} style={{ borderColor: cfg.border, background: cfg.bg }}>
-                                  <span className="text-sm">{cfg.label?.charAt(0) || 'D'}</span>
-                                </div>
-                                {/* Content */}
-                                <div className="flex-1 bg-gray-50 rounded-lg p-3">
-                                  <div className="flex items-center gap-2 flex-wrap">
-                                    {prevCfg && (
-                                      <span className="px-2 py-0.5 rounded-full text-xs font-semibold line-through opacity-60" style={{ background: prevCfg.bg, color: prevCfg.color }}>
-                                        {entry.estadoAnterior}
-                                      </span>
-                                    )}
-                                    <ArrowRight className="w-4 h-4" />
-                                    <span className="px-2 py-1 rounded-full text-xs font-semibold" style={{ background: cfg.bg, color: cfg.color }}>
-                                      {entry.estadoNuevo}
-                                    </span>
-                                    <span className="text-xs text-gray-500 ml-auto">{FECHA(entry.timestamp)}</span>
-                                  </div>
-
-                                  {/* Guest name from entry if no full reservation */}
-                                  {!reservation && entry.huesped && entry.huesped !== '' && (
-                                    <div className="mt-2 text-sm text-gray-600">
-                                      <span className="font-medium">Huésped:</span> {entry.huesped}
-                                    </div>
-                                  )}
-
-                                  {/* Complete reservation data when available */}
-                                  {reservation && (
-                                    <div className="mt-3 p-3 bg-white rounded-lg border border-gray-200">
-                                      <div className="flex items-center gap-2 mb-2">
-                                        <span className="text-xs font-semibold text-gray-600 uppercase tracking-wider"><FileText className="w-3 h-3 inline mr-1" /> Datos de la Reservacion</span>
-                                      </div>
-                                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-2 text-xs">
-                                        {reservation.huesped && (
-                                          <div className="col-span-2 sm:col-span-3">
-                                            <span className="text-gray-500">Huésped:</span>
-                                            <p className="font-semibold text-gray-900 text-sm">{reservation.huesped}</p>
-                                          </div>
-                                        )}
-                                        {reservation.documento && (
-                                          <div>
-                                            <span className="text-gray-500">Documento:</span>
-                                            <p className="font-medium text-gray-900">{reservation.documento}</p>
-                                          </div>
-                                        )}
-                                        {reservation.email && (
-                                          <div>
-                                            <span className="text-gray-500">Email:</span>
-                                            <p className="font-medium text-gray-900 truncate" title={reservation.email}>{reservation.email}</p>
-                                          </div>
-                                        )}
-                                        {reservation.telefono && (
-                                          <div>
-                                            <span className="text-gray-500">Teléfono:</span>
-                                            <p className="font-medium text-gray-900">{reservation.telefono}</p>
-                                          </div>
-                                        )}
-                                        {reservation.checkIn && (
-                                          <div>
-                                            <span className="text-gray-500">Check-in:</span>
-                                            <p className="font-medium text-gray-900">{FECHA(reservation.checkIn)}</p>
-                                          </div>
-                                        )}
-                                        {reservation.checkOut && (
-                                          <div>
-                                            <span className="text-gray-500">Check-out:</span>
-                                            <p className="font-medium text-gray-900">{FECHA(reservation.checkOut)}</p>
-                                          </div>
-                                        )}
-                                        {reservation.noches && (
-                                          <div>
-                                            <span className="text-gray-500">Noches:</span>
-                                            <p className="font-medium text-gray-900">{reservation.noches}</p>
-                                          </div>
-                                        )}
-                                        {reservation.tarifa && (
-                                          <div>
-                                            <span className="text-gray-500">Tarifa/noche:</span>
-                                            <p className="font-semibold text-green-700">{COP(reservation.tarifa)}</p>
-                                          </div>
-                                        )}
-                                        <div>
-                                          <span className="text-gray-500">Adultos:</span>
-                                          <p className="font-medium text-gray-900">{reservation.adultos || 1}</p>
-                                        </div>
-                                        <div>
-                                          <span className="text-gray-500">Niños:</span>
-                                          <p className="font-medium text-gray-900">{reservation.ninos || 0}</p>
-                                        </div>
-                                        {reservation.tieneMascota && (
-                                          <div>
-                                            <span className="text-gray-500">Mascota:</span>
-                                            <p className="font-medium text-gray-900"><Dog className="w-4 h-4" /> {reservation.nombreMascota || 'Si'}</p>
-                                          </div>
-                                        )}
-                                      </div>
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
+            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="bg-gray-50 border-b border-gray-200">
+                      <th className="text-left px-4 py-3 font-semibold text-gray-600 whitespace-nowrap">#</th>
+                      <th className="text-left px-4 py-3 font-semibold text-gray-600 whitespace-nowrap">Fecha / Hora</th>
+                      <th className="text-left px-4 py-3 font-semibold text-gray-600 whitespace-nowrap">Email / Usuario</th>
+                      <th className="text-left px-4 py-3 font-semibold text-gray-600 whitespace-nowrap">Direccion IP</th>
+                      <th className="text-center px-4 py-3 font-semibold text-gray-600 whitespace-nowrap">Estado</th>
+                      <th className="text-left px-4 py-3 font-semibold text-gray-600 whitespace-nowrap">Detalle</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {filteredLogs.map((log, i) => (
+                      <tr key={log.id || i} className="hover:bg-gray-50/50 transition-colors">
+                        <td className="px-4 py-3 text-xs text-gray-400 font-mono">{filteredLogs.length - i}</td>
+                        <td className="px-4 py-3 text-xs text-gray-700 whitespace-nowrap">
+                          {log.timestamp ? new Date(log.timestamp).toLocaleString('es-CO') : '—'}
+                        </td>
+                        <td className="px-4 py-3">
+                          <div>
+                            <span className="text-sm text-gray-900">{log.identifier || '—'}</span>
+                            {log.userId && <p className="text-xs text-gray-400 font-mono">ID: {log.userId.slice(0, 12)}...</p>}
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 text-xs font-mono text-gray-500">{log.ip || '—'}</td>
+                        <td className="px-4 py-3 text-center">
+                          {log.success ? (
+                            <span className="inline-flex items-center gap-1 text-xs text-green-700 bg-green-50 px-2 py-0.5 rounded-full font-medium">
+                              <CheckCircle className="w-3 h-3" /> Exitoso
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 text-xs text-red-700 bg-red-50 px-2 py-0.5 rounded-full font-medium">
+                              <XCircle className="w-3 h-3" /> Fallido
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-4 py-3 text-xs text-gray-500 max-w-[200px] truncate">{log.reason || '—'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
         </div>
