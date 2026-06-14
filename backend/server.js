@@ -114,26 +114,27 @@ app.use(helmet({
 }));
 
 // ── CORS (strict) ──
+const vercelUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null;
+const defaultOrigins = ['http://localhost:5173', 'http://localhost:4173'];
+if (vercelUrl) defaultOrigins.push(vercelUrl);
+
 const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim())
-  : ['http://localhost:5173', 'http://localhost:4173'];
+  : defaultOrigins;
 
 app.use(cors({
   origin: function (origin, callback) {
-    // Allow requests with no origin (server-to-server, curl, etc.)
     if (!origin) return callback(null, true);
     if (allowedOrigins.indexOf(origin) !== -1) {
       return callback(null, true);
     }
-    // Wildcard .vercel.app removed for CSRF safety.
-    // Set ALLOWED_ORIGINS env var to your production domain.
     callback(new Error('Not allowed by CORS'));
   },
   credentials: true,
   methods: ['GET', 'POST', 'PATCH', 'PUT'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   exposedHeaders: ['X-RateLimit-Limit', 'X-RateLimit-Remaining', 'X-RateLimit-Reset'],
-  maxAge: 600, // Preflight cache for 10 minutes
+  maxAge: 600,
 }));
 
 // ── REQUEST TIMEOUT (HTTP flood protection) ──
