@@ -1,25 +1,55 @@
 'use strict';
 
 const fs = require('fs').promises;
+const fss = require('fs');
 const path = require('path');
+const os = require('os');
 const logger = require('../utils/logger');
 
-const DATA_DIR = path.resolve(__dirname, '..', '..');
+const DEPLOY_DIR = path.resolve(__dirname, '..', '..');
+const DATA_DIR = process.env.VERCEL_ENV
+  ? path.join(os.tmpdir(), 'ecobosque-data')
+  : DEPLOY_DIR;
+
+// Ensure writable data dir exists (especially for /tmp/ on Vercel)
+try {
+  if (!fss.existsSync(DATA_DIR)) fss.mkdirSync(DATA_DIR, { recursive: true });
+} catch { /* best-effort */ }
 
 function validatePath(filePath) {
   const resolved = path.resolve(filePath);
-  if (!resolved.startsWith(DATA_DIR)) {
+  if (!resolved.startsWith(DATA_DIR) && !resolved.startsWith(DEPLOY_DIR)) {
     throw new Error('Path traversal detected');
   }
   return resolved;
 }
 
+function deployPath(filePath) {
+  const name = path.basename(filePath);
+  return path.join(DEPLOY_DIR, name);
+}
+
 async function readJsonFile(filePath, defaultVal = null) {
+  // On Vercel: try writable /tmp/ first, fall back to deployment directory
   const resolved = validatePath(filePath);
   try {
     const raw = await fs.readFile(resolved, 'utf8');
     return JSON.parse(raw);
   } catch (err) {
+    if (err.code === 'ENOENT' && DATA_DIR !== DEPLOY_DIR) {
+      // File not in /tmp/ — try copying from deployment directory
+      try {
+        const src = deployPath(filePath);
+        const raw = await fs.readFile(src, 'utf8');
+        const data = JSON.parse(raw);
+        // Seed /tmp/ for future writes
+        await fs.writeFile(resolved, JSON.stringify(data, null, 2), 'utf8').catch(() => {});
+        logger.info(`Seeded ${path.basename(resolved)} from deployment dir`);
+        return data;
+      } catch {
+        return defaultVal;
+      }
+    }
     if (err.code === 'ENOENT') {
       return defaultVal;
     }
@@ -35,9 +65,7 @@ async function writeJsonFile(filePath, data) {
     await fs.writeFile(tmp, JSON.stringify(data, null, 2), 'utf8');
     await fs.rename(tmp, resolved);
   } catch (err) {
-    // In serverless environments (Vercel), the filesystem is read-only.
-    // Log the error and continue without crashing.
-    logger.warn({ err, file: filePath }, 'Error writing JSON file (read-only filesystem?)');
+    logger.warn({ err, file: filePath }, 'Error writing JSON file');
   }
 }
 

@@ -2,11 +2,14 @@
 
 const crypto = require('crypto');
 const path = require('path');
+const os = require('os');
 const { readJsonFile, writeJsonFile } = require('./jsonStoreHelper');
 const { logger } = require('../utils/logger');
 const persistence = require('./persistence');
 
-const CODES_FILE = path.join(__dirname, '../../codes.json');
+const CODES_FILE = process.env.VERCEL_ENV
+  ? path.join(os.tmpdir(), 'ecobosque-data', 'codes.json')
+  : path.join(__dirname, '../../codes.json');
 
 // In-memory store as primary — file-based persistence as backup.
 // This ensures codes work even on read-only filesystems (Vercel serverless).
@@ -63,7 +66,7 @@ async function createCode({ userId, type, ttlMs = 300000, maxAttempts = 5 }) {
   getCodes().then(codes => {
     codes.push(entry);
     saveCodes(codes);
-  }).catch(() => {});
+  }).catch(err => logger.warn({ err }, 'Failed to persist code'));
 
   cleanupExpired();
 
@@ -89,7 +92,7 @@ async function verifyCode(userId, type, inputCode, invalidateAfterUse = true) {
         const idx = codes.findIndex(c => c.id === entry.id);
         if (idx !== -1) codes[idx] = entry;
         saveCodes(codes);
-      }).catch(() => {});
+      }).catch(err => logger.warn({ err }, 'Failed to persist code update'));
 
       return { valid: true, entry };
     }
