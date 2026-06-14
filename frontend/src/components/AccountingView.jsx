@@ -5,7 +5,7 @@ import { Card, CardHeader, CardTitle, CardContent } from './ui/Card';
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import {
   Receipt, XCircle, Loader, Download, TrendingUp,
-  DollarSign, TrendingBar, CheckCircle2,
+  DollarSign, BarChart3, CheckCircle2,
   Home, UtensilsCrossed
 } from 'lucide-react';
 
@@ -138,7 +138,7 @@ export default function AccountingView() {
                   <p className="text-sm text-gray-500">Revenue Histórico</p>
                   <p className="text-xl font-bold text-yellow-600">{formatM(summary.historicalRevenue)}</p>
                 </div>
-                <TrendingBar className="w-6 h-6" />
+                <BarChart3 className="w-6 h-6" />
               </div>
             </CardContent>
           </Card>

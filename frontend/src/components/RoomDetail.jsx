@@ -1,7 +1,7 @@
 import { useMemo, useState, useCallback, useEffect, memo } from 'react';
 import { COP, FECHA, calcularTotal } from '../utils/helpers';
 import { CAT_ICONS } from '../constants';
-import { generarConsumosMock, calcularFechaDisponible, generarContactoMock } from '../utils/mockData';
+
 import { fetchConsumos, fetchStateHistory } from '../services/api';
 import RoomActions, { Toast } from './RoomActions';
 import {
@@ -16,7 +16,11 @@ function RoomDetail({ room, onRefresh }) {
   const [consumosLoading, setConsumosLoading] = useState(true);
   const [stateHistory, setStateHistory] = useState([]);
 
-  const fechaDisponible = useMemo(() => calcularFechaDisponible(room), [room]);
+  const fechaDisponible = useMemo(() => {
+    if (room.estado === 'disponible' || !room.checkIn) return null;
+    if (room.checkOut) return new Date(room.checkOut);
+    return null;
+  }, [room]);
   const contacto = useMemo(() => {
     if (room.email || room.telefono || room.documento) {
       return {
@@ -25,7 +29,7 @@ function RoomDetail({ room, onRefresh }) {
         email: room.email || '—',
       };
     }
-    return generarContactoMock(room);
+    return null;
   }, [room]);
   const totalConsumos = useMemo(() => calcularTotal(consumos), [consumos]);
 
@@ -52,16 +56,10 @@ function RoomDetail({ room, onRefresh }) {
     fetchConsumos(room.id)
       .then((data) => {
         if (!cancelled) {
-          if (data.length > 0) {
-            setConsumos(data);
-          } else {
-            setConsumos(generarConsumosMock(room));
-          }
+          setConsumos(data);
         }
       })
-      .catch(() => {
-        if (!cancelled) setConsumos(generarConsumosMock(room));
-      })
+      .catch(() => {})
       .finally(() => {
         if (!cancelled) setConsumosLoading(false);
       });

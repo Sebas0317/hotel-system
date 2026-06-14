@@ -2,6 +2,7 @@
 
 const { getHistory, saveHistory } = require('../data/jsonStore');
 const { generateId } = require('../utils/idGenerator');
+const logger = require('../utils/logger');
 
 async function getAllHistory(req, res) {
   try {
@@ -26,7 +27,7 @@ async function getAllHistory(req, res) {
     // Legacy format (no pagination)
     res.json(historyData);
   } catch (err) {
-    require('../utils/logger').error('Error getting history', { error: err.message });
+    logger.error('Error getting history', { error: err.message });
     res.status(500).json({ error: 'Error interno al obtener historial' });
   }
 }
@@ -45,7 +46,7 @@ async function addHistoryEntry(req, res) {
     await saveHistory(history);
     res.json(entry);
   } catch (err) {
-    require('../utils/logger').error('Error adding history entry', { error: err.message });
+    logger.error('Error adding history entry', { error: err.message });
     res.status(500).json({ error: 'Error interno al agregar entrada' });
   }
 }
@@ -56,7 +57,7 @@ async function getHistoryByRoom(req, res) {
     const roomHistory = history.filter(h => h.roomId === req.params.roomId || h.numero === req.params.roomId);
     res.json(roomHistory);
   } catch (err) {
-    require('../utils/logger').error('Error getting room history', { error: err.message });
+    logger.error('Error getting room history', { error: err.message });
     res.status(500).json({ error: 'Error interno al obtener historial de habitación' });
   }
 }

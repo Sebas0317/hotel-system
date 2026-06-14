@@ -35,4 +35,4 @@ function hideTechHeaders(_req, res, next) {
   next();
 }
 
-module.exports = { requestTimeout, hideTechHeaders };
+module.exports = { requestTimeout };

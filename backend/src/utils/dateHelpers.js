@@ -1,3 +1,5 @@
+'use strict';
+
 const { format, formatDistanceToNow, parseISO, differenceInDays, addDays, startOfDay, endOfDay, isAfter, isBefore, isValid } = require('date-fns');
 const { es } = require('date-fns/locale');
 

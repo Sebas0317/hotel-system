@@ -13,13 +13,18 @@
  */
 const jwt = require('jsonwebtoken');
 const logger = require('../utils/logger');
+const crypto = require('crypto');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'ecobosque-secret-key';
+function getJwtSecret() {
+  if (process.env.JWT_SECRET) return process.env.JWT_SECRET;
+  logger.error('JWT_SECRET no configurado en roomAccess. Usando secreto temporal.');
+  return crypto.randomBytes(64).toString('hex');
+}
 
 function generateRoomToken(roomId, numero) {
   return jwt.sign(
     { roomId, numero, type: 'room' },
-    JWT_SECRET,
+    getJwtSecret(),
     { expiresIn: '2h', algorithm: 'HS256' }
   );
 }
@@ -32,7 +37,7 @@ function requireRoomAccess(req, res, next) {
   }
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET, {
+    const decoded = jwt.verify(token, getJwtSecret(), {
       algorithms: ['HS256'],
       clockTolerance: 30,
     });

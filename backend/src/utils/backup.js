@@ -8,6 +8,7 @@
 const cron = require('node-cron');
 const fs = require('fs').promises;
 const path = require('path');
+const { logger } = require('./logger');
 
 const BACKUP_DIR = path.join(__dirname, '../../backups');
 const DATA_DIR = path.join(__dirname, '../..');
@@ -39,10 +40,10 @@ async function createBackup() {
       }
     }
 
-    console.log(`[Backup] Created backup at ${timestamp}`);
+    logger.info({ timestamp }, 'Backup created');
     return { timestamp, results };
   } catch (error) {
-    console.error('[Backup] Failed to create backup:', error.message);
+    logger.error({ err: error }, 'Backup creation failed');
     throw error;
   }
 }
@@ -65,10 +66,10 @@ async function cleanupOldBackups() {
     for (const dir of toRemove) {
       const backupPath = path.join(BACKUP_DIR, dir);
       await fs.rm(backupPath, { recursive: true, force: true });
-      console.log(`[Backup] Removed old backup: ${dir}`);
+      logger.info({ dir }, 'Removed old backup');
     }
   } catch (error) {
-    console.error('[Backup] Failed to cleanup old backups:', error.message);
+    logger.error({ err: error }, 'Backup cleanup failed');
   }
 }
 
@@ -107,23 +108,23 @@ async function restoreBackup(timestamp) {
       }
     }
 
-    console.log(`[Backup] Restored from ${timestamp}`);
+    logger.info({ timestamp }, 'Backup restored');
     return { timestamp, results };
   } catch (error) {
-    console.error('[Backup] Failed to restore backup:', error.message);
+    logger.error({ err: error }, 'Backup restore failed');
     throw error;
   }
 }
 
 // Schedule daily backup at 2:00 AM
 cron.schedule('0 2 * * *', async () => {
-  console.log('[Backup] Starting scheduled backup...');
+  logger.info('Starting scheduled backup');
   try {
     await createBackup();
     await cleanupOldBackups();
-    console.log('[Backup] Scheduled backup completed');
+    logger.info('Scheduled backup completed');
   } catch (error) {
-    console.error('[Backup] Scheduled backup failed:', error.message);
+    logger.error({ err: error }, 'Scheduled backup failed');
   }
 });
 

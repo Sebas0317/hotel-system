@@ -12,14 +12,9 @@
 
 const express = require('express');
 const router = express.Router();
-const { cache, getCacheStats } = require('../middleware/cache');
-const path = require('path');
-const fs = require('fs').promises;
 const { validateAll, repairFromBackup } = require('../utils/jsonValidator');
 
 const startTime = Date.now();
-const DATA_DIR = path.join(__dirname, '../..');
-const DATA_FILES = ['rooms.json', 'consumos.json', 'history.json', 'stateHistory.json', 'prices.json'];
 
 /**
  * @swagger
@@ -87,36 +82,11 @@ router.get('/detailed', async (req, res) => {
   const uptimeMs = Date.now() - startTime;
   const memUsage = process.memoryUsage();
 
-  // Check data files
-  const dataFilesStatus = {};
-  for (const file of DATA_FILES) {
-    try {
-      const filePath = path.join(DATA_DIR, file);
-      const stats = await fs.stat(filePath);
-      const content = await fs.readFile(filePath, 'utf-8');
-      JSON.parse(content); // Verify valid JSON
-      
-      dataFilesStatus[file] = {
-        exists: true,
-        size: stats.size,
-        lastModified: stats.mtime,
-        valid: true,
-      };
-    } catch (error) {
-      dataFilesStatus[file] = {
-        exists: false,
-        valid: false,
-        error: error.message,
-      };
-    }
-  }
-
-  // Calculate overall health
-  const allFilesValid = Object.values(dataFilesStatus).every(f => f.valid);
-  const overallStatus = allFilesValid ? 'healthy' : 'degraded';
+  // Use jsonValidator for file status (avoids direct fs.readFile)
+  const integrity = await validateAll();
 
   res.json({
-    status: overallStatus,
+    status: integrity.overall?.valid ? 'healthy' : 'degraded',
     uptime: {
       ms: uptimeMs,
       human: `${Math.floor(uptimeMs / (1000 * 60 * 60))}h ${Math.floor((uptimeMs % (1000 * 60 * 60)) / (1000 * 60))}m ${Math.floor((uptimeMs % (1000 * 60)) / 1000)}s`,
@@ -127,8 +97,8 @@ router.get('/detailed', async (req, res) => {
       heapTotal: `${(memUsage.heapTotal / 1024 / 1024).toFixed(2)} MB`,
       external: `${(memUsage.external / 1024 / 1024).toFixed(2)} MB`,
     },
-    cache: getCacheStats(),
-    dataFiles: dataFilesStatus,
+    cache: { status: 'removed' },
+    dataFiles: integrity.files,
     node: {
       version: process.version,
       platform: process.platform,
@@ -159,10 +129,7 @@ router.get('/metrics', (req, res) => {
       heapUsed: memUsage.heapUsed,
       heapTotal: memUsage.heapTotal,
     },
-    cache: {
-      keys: cache.keys().length,
-      stats: cache.getStats(),
-    },
+    cache: { status: 'removed' },
     cpu: process.cpuUsage(),
   });
 });

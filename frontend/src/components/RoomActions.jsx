@@ -398,7 +398,6 @@ function CheckoutPanel({ room, consumos, onAction, onRefresh }) {
       {metodoPago === 'efectivo' && (
         <div className="ra-field">
           <label>Valor recibido (COP)</label>
-          <label>Valor recibido (COP)</label>
           <input 
             type="number" 
             step="1" 

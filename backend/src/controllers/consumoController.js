@@ -6,6 +6,7 @@
  */
 const { getConsumos, saveConsumos, getRooms } = require('../data/jsonStore');
 const { generateId } = require('../utils/idGenerator');
+const logger = require('../utils/logger');
 const auditor = require('../utils/auditor');
 
 async function createConsumo(req, res) {
@@ -40,7 +41,7 @@ async function createConsumo(req, res) {
     await auditor.consumoCreated(meta.userId, meta.ip, room.numero, descripcion, precio);
     res.json(nuevo);
   } catch (err) {
-    require('../utils/logger').error('Error creating consumo', { error: err.message });
+    logger.error('Error creating consumo', { error: err.message });
     res.status(500).json({ error: 'Error interno al registrar consumo' });
   }
 }
@@ -68,7 +69,7 @@ async function getConsumosByRoom(req, res) {
 
     res.json(filtered);
   } catch (err) {
-    require('../utils/logger').error('Error getting consumos', { error: err.message });
+    logger.error('Error getting consumos', { error: err.message });
     res.status(500).json({ error: 'Error interno al obtener consumos' });
   }
 }

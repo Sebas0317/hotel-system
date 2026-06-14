@@ -1,0 +1,164 @@
+=== MEDIDA 1: Google reCAPTCHA v2 ===
+RUTAS: POST /auth/login • /auth/register • /rooms/access
+
+EXPLICACION:
+Verifica que las solicitudes provengan de humanos reales mediante el widget "No soy un robot" de Google, protegiendo login, registro y acceso a habitaciones.
+
+BENEFICIO:
+Bloquea bots y ataques automatizados antes de que lleguen a la logica de autenticacion.
+
+========================================
+
+=== MEDIDA 2: Autenticacion 2FA por Correo ===
+RUTAS: POST /auth/login (si 2FA habilitado)
+
+EXPLICACION:
+Segundo factor de autenticacion via codigo de 6 digitos enviado al correo electronico del administrador, con expiracion de 5 minutos.
+
+BENEFICIO:
+Protege cuentas administrativas incluso si la contrasena es comprometida.
+
+========================================
+
+=== MEDIDA 3: Limitador de Peticiones por Capas ===
+RUTAS: Global • auth • login • PIN • 2FA • recovery
+
+EXPLICACION:
+Limita solicitudes por IP con 8 niveles distintos: global (100/min), auth (10/min), login (5/2min), PIN (5/min), codigo 2FA (5/2min) y recuperacion (3/2min).
+
+BENEFICIO:
+Previene fuerza bruta, enumeracion de usuarios y ataques DoS.
+
+========================================
+
+=== MEDIDA 4: Headers de Seguridad (Helmet) ===
+RUTAS: Todo el sistema
+
+EXPLICACION:
+Configura estrictos encabezados HTTP: CSP limita origenes de scripts, HSTS forza HTTPS por 1 ano, X-Frame-Options bloquea iframes, y XSS-Protection activa.
+
+BENEFICIO:
+Mitiga XSS, clickjacking, MIME sniffing y asegura comunicacion cifrada.
+
+========================================
+
+=== MEDIDA 5: Hash de Contrasenas (bcrypt) ===
+RUTAS: Sistema de autenticacion
+
+EXPLICACION:
+Almacena contrasenas con bcrypt a 12 rondas de sal, haciendo que cada hash sea unico y computacionalmente costoso de crackear.
+
+BENEFICIO:
+Protege las credenciales incluso si la base de datos es comprometida.
+
+========================================
+
+=== MEDIDA 6: Tokens JWT con Algoritmo Seguro ===
+RUTAS: Todas las rutas protegidas
+
+EXPLICACION:
+Autenticacion sin estado mediante tokens JWT firmados con HS256, expiracion configurable (8h por defecto) y validacion de estructura en cada peticion protegida.
+
+BENEFICIO:
+Evita falsificacion de sesion y permite verificar identidad sin estado compartido.
+
+========================================
+
+=== MEDIDA 7: Control de Acceso por PIN ===
+RUTAS: POST /rooms/access
+
+EXPLICACION:
+Acceso a habitaciones mediante PIN de 4 digitos generado con crypto.randomFillSync, con token JWT firmado de 2 horas y rate limiting por IP.
+
+BENEFICIO:
+Restringe acceso a datos de habitacion solo a huespedes autorizados con credencial temporal.
+
+========================================
+
+=== MEDIDA 8: Auditoria de Seguridad ===
+RUTAS: Acciones sensibles (login, check-in, consumos)
+
+EXPLICACION:
+Todas las acciones sensibles (login, check-in, cambios de estado, 2FA) se registran con metadatos: usuario, IP, accion y timestamp, almacenados en archivo seguro.
+
+BENEFICIO:
+Proporciona trazabilidad completa para detectar y responder a incidentes de seguridad.
+
+========================================
+
+=== MEDIDA 9: Bloqueo por Intentos Fallidos ===
+RUTAS: POST /auth/login • /2fa • /recovery
+
+EXPLICACION:
+Implementa bloqueo progresivo: 5 fallos en login/2FA = bloqueo 15 min, 3 fallos en recuperacion = bloqueo 30 min. Ventana deslizante de 10 min.
+
+BENEFICIO:
+Previene ataques de fuerza bruta bloqueando temporalmente la cuenta del atacante.
+
+========================================
+
+=== MEDIDA 10: Sanitizacion de Entradas (XSS) ===
+RUTAS: Todas las rutas POST / PUT / PATCH
+
+EXPLICACION:
+Middleware que codifica caracteres HTML peligrosos (& < > " ') en todos los campos del body antes de que cualquier ruta los procese.
+
+BENEFICIO:
+Elimina ataques XSS almacenados y reflejados en formularios y entradas de usuario.
+
+========================================
+
+=== MEDIDA 11: Timeout de Peticiones ===
+RUTAS: Todo el sistema
+
+EXPLICACION:
+Las solicitudes HTTP que excedan 30 segundos son abortadas automaticamente, liberando recursos del servidor y previniendo agotamiento de conexiones.
+
+BENEFICIO:
+Protege contra Slowloris y agotamiento de conexiones por solicitudes lentas.
+
+========================================
+
+=== MEDIDA 12: Proteccion contra Path Traversal ===
+RUTAS: Capas de datos + archivos estaticos
+
+EXPLICACION:
+Bloquea accesos a archivos sensibles (.env, .git, .json, .pem, .key) y previene navegacion de directorios con ../ en URLs y en operaciones de archivo internas.
+
+BENEFICIO:
+Impide la lectura o escritura de archivos fuera del directorio permitido.
+
+========================================
+
+=== MEDIDA 13: CORS Restringido ===
+RUTAS: Todo el sistema
+
+EXPLICACION:
+Solo origenes explicitamente configurados (localhost:5173, localhost:4173, dominios *.vercel.app) pueden consumir la API, con metodos HTTP limitados.
+
+BENEFICIO:
+Evita que sitios externos no autorizados realicen peticiones a la API.
+
+========================================
+
+=== MEDIDA 14: Redaccion de Datos Sensibles (PII) ===
+RUTAS: Todo el sistema (logger)
+
+EXPLICACION:
+Pino logger redacta automaticamente passwords, tokens, PINs, cookies y headers de autorizacion en todos los logs, reemplazandolos con "**REDACTED**".
+
+BENEFICIO:
+Previene la exposicion de informacion sensible en archivos de log.
+
+========================================
+
+=== MEDIDA 15: Bloqueo de Archivos (Race Condition) ===
+RUTAS: Capas de datos (jsonStore)
+
+EXPLICACION:
+Implementa cola de promesas por archivo que serializa las escrituras, evitando condiciones de carrera en operaciones concurrentes sobre JSON.
+
+BENEFICIO:
+Garantiza integridad de datos en escrituras concurrentes sin necesidad de base de datos.
+
+========================================

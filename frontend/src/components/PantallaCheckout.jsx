@@ -1,12 +1,12 @@
 import { useState, useCallback, useMemo } from 'react';
-import { validarPin, fetchConsumos, checkout } from '../services/api';
+import { validarPin, fetchConsumos, checkout, safeText, normalizeErrorMessage as safeErrorMessage } from '../services/api';
 import { METODOS_PAGO, CAT_ICONS } from '../constants';
 import { COP, FECHA } from '../utils/helpers';
 import { calcularCheckout } from '../utils/checkoutCalc';
 import { usePrices } from '../hooks/usePrices';
 import PantallaForm from './PantallaForm';
 import FacturaImprimible from './FacturaImprimible';
-import { AlertTriangle, CheckCircle, Wallet } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Wallet, Bed, Package } from 'lucide-react';
 
 /**
  * Checkout screen - Three-step flow:
@@ -25,26 +25,6 @@ export default function PantallaCheckout({ onNav }) {
   const [factura, setFactura] = useState(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-
-  const safeText = (value, fallback = '—') => {
-    if (value === null || value === undefined) return fallback;
-    if (typeof value === 'string') return value;
-    if (typeof value === 'number' || typeof value === 'boolean' || typeof value === 'bigint') return String(value);
-    try {
-      const serialized = JSON.stringify(value);
-      return serialized && serialized !== '{}' ? serialized : fallback;
-    } catch {
-      return fallback;
-    }
-  };
-
-  const safeErrorMessage = (e, fallback = 'Error procesando checkout') => {
-    if (!e) return fallback;
-    if (typeof e === 'string') return e;
-    if (typeof e.message === 'string') return e.message;
-    if (typeof e.error === 'string') return e.error;
-    return safeText(e, fallback);
-  };
 
   const validar = async () => {
     if (!numero.trim() || !pin.trim()) {

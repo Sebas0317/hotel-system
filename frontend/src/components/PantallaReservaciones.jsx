@@ -6,7 +6,7 @@ import PantallaForm from './PantallaForm';
 import { Toast } from './RoomActions';
 import {
   ClipboardList, BarChart3, Calendar, AlertTriangle, Mail, Bell,
-  Trash2, CheckCircle, Phone, Circle
+  Trash2, CheckCircle, Phone
 } from 'lucide-react';
 
 export default function PantallaReservaciones({ onNav }) {

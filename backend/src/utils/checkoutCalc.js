@@ -17,7 +17,7 @@
 function calcularCheckout({ roomTipo, checkIn, consumos = [], tarifas = {} }) {
   const roomTarifa = tarifas[roomTipo];
   const tarifaNoche = roomTarifa?.precio || 200000;
-  const incluyeDesayuno = roomTarifa?.incluyeDesayuno || true;
+  const incluyeDesayuno = roomTarifa?.incluyeDesayuno ?? true;
 
   let noches = 1;
   if (checkIn) {

@@ -29,9 +29,6 @@ const swaggerUi = require('swagger-ui-express');
 // Import logging
 const { logger, httpLogger } = require('./src/utils/logger');
 
-// Import caching
-const { invalidateCache } = require('./src/middleware/cache');
-
 // Import persistence (Redis fallback)
 const persistence = require('./src/data/persistence');
 
@@ -49,6 +46,7 @@ const { requestLogger, errorHandler, notFoundHandler } = require('./src/middlewa
 const { requireAuth } = require('./src/middleware/auth');
 const { sanitizeBody } = require('./src/middleware/sanitize');
 const { requestTimeout } = require('./src/middleware/requestTimeout');
+const cookieParser = require('cookie-parser');
 const { blockSensitiveFiles } = require('./src/middleware/blockSensitiveFiles');
 const { securityHeaders } = require('./src/middleware/securityHeaders');
 const {
@@ -120,19 +118,16 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim())
   : ['http://localhost:5173', 'http://localhost:4173'];
 
-const vercelSuffix = '.vercel.app';
-
 app.use(cors({
   origin: function (origin, callback) {
     // Allow requests with no origin (server-to-server, curl, etc.)
     if (!origin) return callback(null, true);
     if (allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else if (origin.endsWith(vercelSuffix)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
+      return callback(null, true);
     }
+    // Wildcard .vercel.app removed for CSRF safety.
+    // Set ALLOWED_ORIGINS env var to your production domain.
+    callback(new Error('Not allowed by CORS'));
   },
   credentials: true,
   methods: ['GET', 'POST', 'PATCH', 'PUT'],
@@ -156,6 +151,10 @@ app.use(compression());
 // ── BODY PARSING (with size limits) ──
 app.use(express.json({ limit: '500kb' }));
 app.use(express.urlencoded({ extended: false, limit: '500kb' }));
+
+// ── COOKIE PARSER (for httpOnly JWT) ──
+app.use(cookieParser());
+
 app.use(sanitizeBody);
 
 // ── RATE LIMITING ──

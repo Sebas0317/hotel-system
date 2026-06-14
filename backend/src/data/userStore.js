@@ -1,21 +1,18 @@
 'use strict';
 
-const path = require('path');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
-const { readJsonFile, writeJsonFile } = require('./jsonStoreHelper');
+const persistence = require('./persistence');
 const logger = require('../utils/logger');
-
-const USERS_FILE = path.join(__dirname, '../../users.json');
 
 const ROLES = ['owner', 'admin', 'operator', 'analyst', 'cliente'];
 
 async function getUsers() {
-  return readJsonFile(USERS_FILE, []);
+  return persistence.getUsers();
 }
 
 async function saveUsers(users) {
-  return writeJsonFile(USERS_FILE, users);
+  return persistence.setUsers(users);
 }
 
 async function findUserById(id) {
@@ -210,7 +207,7 @@ function sanitizeUsers(users) {
 
 async function seedOwnerUser() {
   const users = await getUsers();
-  const ownerEmail = 'sebastiansandoval12371@gmail.com';
+  const ownerEmail = process.env.OWNER_EMAIL || 'sebastiansandoval12371@gmail.com';
 
   const existing = users.find(u => u.email === ownerEmail);
   if (existing) {
@@ -226,13 +223,17 @@ async function seedOwnerUser() {
   const existingOwnerByRole = users.find(u => u.role === 'owner');
   if (existingOwnerByRole) return existingOwnerByRole;
 
-  // Create owner user if it doesn't exist
+  const ownerPassword = process.env.OWNER_PASSWORD || process.env.ADMIN_PASSWORD;
+  if (!ownerPassword) {
+    logger.error('No se puede crear usuario owner: OWNER_PASSWORD o ADMIN_PASSWORD no configurado');
+    return null;
+  }
   const safeUser = await createUser({
-    username: 'sebastiansandoval',
+    username: process.env.OWNER_USERNAME || 'sebastiansandoval',
     email: ownerEmail,
-    password: process.env.OWNER_PASSWORD || process.env.ADMIN_PASSWORD || 'ecohotel2024',
-    firstName: 'Sebastian',
-    lastName: 'Sandoval',
+    password: ownerPassword,
+    firstName: process.env.OWNER_FIRST_NAME || 'Sebastian',
+    lastName: process.env.OWNER_LAST_NAME || 'Sandoval',
     role: 'owner',
     isActive: true,
   });

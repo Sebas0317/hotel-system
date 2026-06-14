@@ -4,13 +4,13 @@
  * Room controllers - handles all room-related business logic
  * Async operations with non-blocking I/O
  */
-const { getRooms, saveRooms, getConsumos, saveConsumos, getHistory, saveHistory, getStateHistory, saveStateHistory } = require('../data/jsonStore');
+const { getRooms, saveRooms, getConsumos, saveConsumos, getStateHistory, saveStateHistory } = require('../data/jsonStore');
 const { getPrices } = require('../data/priceStore');
 const { generateId, generateReservationId } = require('../utils/idGenerator');
 const { generateRoomToken } = require('../middleware/roomAccess');
 const { generarPin } = require('../utils/pinGenerator');
 const { calcularCheckout } = require('../utils/checkoutCalc');
-const { parseISO, formatISO, differenceInDays, addDays } = require('date-fns');
+const {} = require('date-fns');
 const { broadcast } = require('../utils/websocket');
 
 const logger = require('../utils/logger');
@@ -19,17 +19,19 @@ const auditor = require('../utils/auditor');
 const pinAttempts = new Map();
 const PIN_MAX_ATTEMPTS = 5;
 const PIN_WINDOW_MS = 60 * 1000;
+const PIN_BACKOFF_MULTIPLIER = 2;
 const PIN_CLEANUP_INTERVAL = 5 * 60 * 1000; // 5 minutes
 
 // Periodic cleanup of expired PIN attempt entries
-setInterval(() => {
+const pinCleanupTimer = setInterval(() => {
   const now = Date.now();
-  for (const [ip, attempt] of pinAttempts.entries()) {
-    if (now - attempt.lastReset > PIN_WINDOW_MS) {
-      pinAttempts.delete(ip);
+  for (const [key, attempt] of pinAttempts.entries()) {
+    if (now - attempt.windowStart > PIN_WINDOW_MS * attempt.backoffLevel) {
+      pinAttempts.delete(key);
     }
   }
 }, PIN_CLEANUP_INTERVAL);
+if (pinCleanupTimer.unref) pinCleanupTimer.unref();
 
 async function recordStateChange(room, estadoAnterior, estadoNuevo, consumos = []) {
   const cambios = await getStateHistory();
@@ -61,44 +63,6 @@ async function recordStateChange(room, estadoAnterior, estadoNuevo, consumos = [
   };
   cambios.unshift(entry);
   await saveStateHistory(cambios);
-
-  // Also save to history.json
-  const historyData = await getHistory();
-  const history = Array.isArray(historyData) ? historyData : (historyData.reservas || []);
-  const historyEntry = {
-    id: generateId(),
-    reservationId: room.reservationId || null,
-    tipo: 'cambio_estado',
-    roomId: room.id,
-    numero: room.numero,
-    huesped: room.huesped || '',
-    email: room.email || '',
-    telefono: room.telefono || '',
-    documento: room.documento || '',
-    adultos: room.adultos || 1,
-    ninos: room.ninos || 0,
-    tieneMascota: room.tieneMascota || false,
-    nombreMascota: room.nombreMascota || '',
-    estadoAnterior,
-    estadoNuevo,
-    estado: estadoNuevo,
-    createdAt: new Date().toISOString(),
-    checkIn: room.checkIn || null,
-    checkOut: room.checkOut || null,
-    noches: room.noches || 1,
-    tarifa: room.tarifa || 0,
-    consumos: consumos.length > 0 ? consumos.map(c => ({ descripcion: c.descripcion, precio: c.precio, categoria: c.categoria })) : undefined,
-    pago: room.pago || null,
-  };
-  history.unshift(historyEntry);
-
-  // Check if original format was object with reservas array
-  const originalHistory = await getHistory();
-  if (originalHistory && originalHistory.reservas) {
-    await saveHistory({ reservas: history });
-  } else {
-    await saveHistory(history);
-  }
 }
 
 async function solicitarCheckout(req, res) {
@@ -144,11 +108,25 @@ async function solicitarCheckout(req, res) {
   }
 }
 
-function getAllRooms(_req, res) {
+function stripPin(rooms) {
+  return rooms.map(r => {
+    const { pin, ...rest } = r;
+    return rest;
+  });
+}
+
+function getAllRooms(req, res) {
   getRooms()
-    .then(rooms => res.json(rooms))
+    .then(rooms => {
+      // Only expose PINs to admin/owner roles
+      const userRole = req.user?.role;
+      if (userRole === 'admin' || userRole === 'owner' || userRole === 'operator') {
+        return res.json(rooms);
+      }
+      return res.json(stripPin(rooms));
+    })
     .catch(err => {
-      require('../utils/logger').error('Error getting rooms', { error: err.message });
+      logger.error('Error getting rooms', { error: err.message });
       res.status(500).json({ error: 'Error interno al obtener habitaciones' });
     });
 }
@@ -171,7 +149,7 @@ function getRoomStats(_req, res) {
       res.json(stats);
     })
     .catch(err => {
-      require('../utils/logger').error('Error getting room stats', { error: err.message });
+      logger.error('Error getting room stats', { error: err.message });
       res.status(500).json({ error: 'Error interno al obtener estadísticas' });
     });
 }
@@ -198,7 +176,7 @@ function getReservaciones(_req, res) {
       res.json(reservaciones);
     })
     .catch(err => {
-      require('../utils/logger').error('Error getting reservaciones', { error: err.message });
+      logger.error('Error getting reservaciones', { error: err.message });
       res.status(500).json({ error: 'Error interno al obtener reservaciones' });
     });
 }
@@ -365,7 +343,7 @@ async function actualizarHuesped(req, res) {
     broadcast('room:update', rooms[idx]);
     res.json(rooms[idx]);
   } catch (err) {
-    require('../utils/logger').error('Error updating guest', { error: err.message });
+    logger.error('Error updating guest', { error: err.message });
     res.status(500).json({ error: 'Error interno al actualizar huésped' });
   }
 }
@@ -439,16 +417,22 @@ async function validarPin(req, res) {
     const { numero, pin } = req.body;
     const ip = req.ip || req.connection.remoteAddress;
     const now = Date.now();
+    const key = `${ip}:${numero}`;
 
-    const attempt = pinAttempts.get(ip);
-    if (attempt && now - attempt.lastReset < PIN_WINDOW_MS) {
+    let attempt = pinAttempts.get(key);
+    const effectiveWindow = PIN_WINDOW_MS * (attempt ? Math.pow(PIN_BACKOFF_MULTIPLIER, attempt.backoffLevel - 1) : 1);
+
+    if (attempt && now - attempt.windowStart < effectiveWindow) {
       if (attempt.count >= PIN_MAX_ATTEMPTS) {
-        const remaining = Math.ceil((PIN_WINDOW_MS - (now - attempt.lastReset)) / 1000);
-        return res.status(429).json({ error: `Demasiados intentos. Espera ${remaining} segundos.` });
+        attempt.backoffLevel++;
+        attempt.count = 0;
+        attempt.windowStart = now;
+        const waitSec = Math.ceil(effectiveWindow / 1000) * PIN_BACKOFF_MULTIPLIER;
+        return res.status(429).json({ error: `Demasiados intentos. Espera ${waitSec} segundos.` });
       }
       attempt.count++;
     } else {
-      pinAttempts.set(ip, { count: 1, lastReset: now });
+      pinAttempts.set(key, { count: 1, windowStart: now, backoffLevel: 1 });
     }
 
     const rooms = await getRooms();
@@ -458,13 +442,16 @@ async function validarPin(req, res) {
       return res.status(404).json({ error: 'Habitación o PIN incorrecto' });
     }
 
-    pinAttempts.delete(ip);
+    // Reset on success (legitimate guest)
+    pinAttempts.delete(key);
 
     const roomToken = generateRoomToken(room.id, room.numero);
 
-    res.json({ room, roomToken });
+    // Strip PIN from response to prevent leaking it after successful validation
+    const { pin: _pin, ...safeRoom } = room;
+    res.json({ room: safeRoom, roomToken });
   } catch (err) {
-    require('../utils/logger').error('Error validating PIN', { error: err.message });
+    logger.error('Error validating PIN', { error: err.message });
     res.status(500).json({ error: 'Error interno al validar PIN' });
   }
 }
@@ -511,7 +498,7 @@ async function checkout(req, res) {
     rooms[idx] = {
       ...room,
       huesped: null,
-      pin: null,
+      pin: generarPin(),
       checkIn: null,
       checkOut: null,
       noches: null,
@@ -612,6 +599,10 @@ async function cancelarReserva(req, res) {
   }
 }
 
+function cleanupPinCleanup() {
+  clearInterval(pinCleanupTimer);
+}
+
 module.exports = {
   getAllRooms,
   getRoomStats,
@@ -624,4 +615,5 @@ module.exports = {
   checkout,
   solicitarCheckout,
   cancelarReserva,
+  cleanupPinCleanup,
 };

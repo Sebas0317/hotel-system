@@ -14,8 +14,8 @@ const {
   emailCodeLimiter,
 } = require('../middleware/rateLimiters');
 
-router.get('/setup', authController.setup);
-router.get('/status', authController.getAuthStatus);
+router.get('/setup', requireAuth, authController.setup);
+router.get('/status', requireAuth, authController.getAuthStatus);
 
 router.post('/register', requireRecaptcha, writeRateLimiter, authController.register);
 router.post('/login', requireRecaptcha, loginLimiter, authController.login);
@@ -35,7 +35,8 @@ router.get('/profile', requireAuth, authController.getProfile);
 router.put('/profile', requireAuth, authController.updateProfile);
 router.post('/profile/change-password', requireAuth, authController.changeOwnPassword);
 
-router.get('/last-login', authController.getLastLogin);
+router.post('/logout', requireAuth, authController.logout);
+router.get('/last-login', requireAuth, authController.getLastLogin);
 router.get('/login-logs', requireAuth, authController.getLoginLogs);
 router.get('/security-events', requireAuth, authController.getSecurityEvents);
 

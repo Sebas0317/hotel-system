@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { fetchConsumos, solicitarCheckout } from '../services/api';
 import { COP, FECHA } from '../utils/helpers';
 import { ESTADO_CFG } from '../constants';
+import { calcularCheckout } from '../utils/checkoutCalc';
+import { usePrices } from '../hooks/usePrices';
 import HotelTitle from './HotelTitle';
 import PinGate from './PinGate';
 
@@ -13,6 +15,7 @@ export default function UserCheckout({ onExit }) {
   const [checkoutDate, setCheckoutDate] = useState('');
   const [processing, setProcessing] = useState(false);
   const [completed, setCompleted] = useState(false);
+  const { tarifas } = usePrices();
 
   useEffect(() => {
     if (room) {
@@ -25,10 +28,8 @@ export default function UserCheckout({ onExit }) {
     }
   }, [room]);
 
-  const totalConsumos = consumos.reduce((sum, c) => sum + c.precio, 0);
-  const nights = room?.noches || 1;
-  const roomTotal = (room?.tarifa || 0) * nights;
-  const totalAPagar = roomTotal + totalConsumos;
+  const checkoutCalc = room ? calcularCheckout({ roomTipo: room.tipo, checkIn: room.checkIn, consumos, tarifas }) : null;
+  const totalAPagar = checkoutCalc?.total || 0;
   const pagado = room?.pago?.pagado || 0;
   const saldoPendiente = totalAPagar - pagado;
 
@@ -151,13 +152,13 @@ export default function UserCheckout({ onExit }) {
                 <h3 className="rdp-section-title">Habitacion</h3>
                 <div className="rdp-room-charges">
                   <div className="rdp-charge-item">
-                    <span>Tarifa ({COP(room.tarifa)} x {nights} noche{nights > 1 ? 's' : ''})</span>
-                    <span>{COP(roomTotal)}</span>
+                    <span>Tarifa ({COP(checkoutCalc.tarifaNoche)} x {checkoutCalc.noches} noche{checkoutCalc.noches > 1 ? 's' : ''})</span>
+                    <span>{COP(checkoutCalc.cargoHabitacion)}</span>
                   </div>
                 </div>
                 <div className="rdp-subtotal">
                   <span>Subtotal Habitacion</span>
-                  <span>{COP(roomTotal)}</span>
+                  <span>{COP(checkoutCalc.cargoHabitacion)}</span>
                 </div>
               </div>
 
@@ -178,7 +179,7 @@ export default function UserCheckout({ onExit }) {
                 {consumos.length > 0 && (
                   <div className="rdp-subtotal">
                     <span>Subtotal Consumos</span>
-                    <span>{COP(totalConsumos)}</span>
+                    <span>{COP(checkoutCalc.totalConsumos)}</span>
                   </div>
                 )}
               </div>

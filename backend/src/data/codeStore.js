@@ -1,19 +1,18 @@
 'use strict';
 
 const crypto = require('crypto');
-const path = require('path');
-const os = require('os');
-const { readJsonFile, writeJsonFile } = require('./jsonStoreHelper');
 const { logger } = require('../utils/logger');
 const persistence = require('./persistence');
 
-const CODES_FILE = process.env.VERCEL_ENV
-  ? path.join(os.tmpdir(), 'ecobosque-data', 'codes.json')
-  : path.join(__dirname, '../../codes.json');
-
-// In-memory store as primary — file-based persistence as backup.
-// This ensures codes work even on read-only filesystems (Vercel serverless).
+// In-memory store as primary — persistence module as backup.
 const memoryStore = new Map();
+
+// Simple promise-chain lock to prevent race conditions on persistence operations
+let persistenceLock = Promise.resolve();
+function withPersistenceLock(fn) {
+  persistenceLock = persistenceLock.then(fn, fn);
+  return persistenceLock;
+}
 
 function generateCode(length = 6) {
   const bytes = crypto.randomBytes(length);
@@ -25,21 +24,11 @@ function hashCode(code) {
 }
 
 async function getCodes() {
-  if (persistence.isRedisAvailable()) {
-    return persistence.getCodes();
-  }
-  return readJsonFile(CODES_FILE, []);
+  return persistence.getCodes();
 }
 
 async function saveCodes(codes) {
-  if (persistence.isRedisAvailable()) {
-    return persistence.setCodes(codes);
-  }
-  try {
-    await writeJsonFile(CODES_FILE, codes);
-  } catch {
-    // File persistence is best-effort
-  }
+  return persistence.setCodes(codes);
 }
 
 async function createCode({ userId, type, ttlMs = 300000, maxAttempts = 5 }) {
@@ -62,11 +51,16 @@ async function createCode({ userId, type, ttlMs = 300000, maxAttempts = 5 }) {
   const key = `${userId}:${type}:${entry.id}`;
   memoryStore.set(key, entry);
 
-  // Persist to file/Redis asynchronously (best-effort)
-  getCodes().then(codes => {
-    codes.push(entry);
-    saveCodes(codes);
-  }).catch(err => logger.warn({ err }, 'Failed to persist code'));
+  // Persist to file/Redis asynchronously (race-safe via promise-chain lock)
+  withPersistenceLock(async () => {
+    try {
+      const codes = await getCodes();
+      codes.push(entry);
+      await saveCodes(codes);
+    } catch (err) {
+      logger.warn({ err }, 'Failed to persist code');
+    }
+  });
 
   cleanupExpired();
 
@@ -79,37 +73,63 @@ async function verifyCode(userId, type, inputCode, invalidateAfterUse = true) {
 
   // Try in-memory first (fast path)
   for (const [key, entry] of memoryStore) {
-    if (entry.userId === userId && entry.type === type && entry.codeHash === inputHash && !entry.used) {
+    if (entry.userId === userId && entry.type === type && !entry.used) {
       if (now > entry.expiresAt) return { valid: false, reason: 'Codigo expirado' };
-      if (entry.attempts >= entry.maxAttempts) return { valid: false, reason: 'Demasiados intentos. Solicita un nuevo codigo.' };
+      if (entry.attempts >= entry.maxAttempts) {
+        logger.warn({ userId: entry.userId, type: entry.type }, 'Code max attempts reached');
+        return { valid: false, reason: 'Demasiados intentos. Solicita un nuevo codigo.' };
+      }
 
       entry.attempts += 1;
-      if (invalidateAfterUse) entry.used = true;
-      entry.attempts = 0;
 
-      // Persist update asynchronously (best-effort)
-      getCodes().then(codes => {
-        const idx = codes.findIndex(c => c.id === entry.id);
-        if (idx !== -1) codes[idx] = entry;
-        saveCodes(codes);
-      }).catch(err => logger.warn({ err }, 'Failed to persist code update'));
+      if (entry.codeHash === inputHash) {
+        if (invalidateAfterUse) entry.used = true;
+        entry.attempts = 0;
+        withPersistenceLock(async () => {
+          try {
+            const codes = await getCodes();
+            const idx = codes.findIndex(c => c.id === entry.id);
+            if (idx !== -1) codes[idx] = entry;
+            await saveCodes(codes);
+          } catch (err) {
+            logger.warn({ err }, 'Failed to persist code update');
+          }
+        });
+        return { valid: true, entry };
+      }
 
-      return { valid: true, entry };
+      // Wrong code — persist attempt count
+      withPersistenceLock(async () => {
+        try {
+          const codes = await getCodes();
+          const idx = codes.findIndex(c => c.id === entry.id);
+          if (idx !== -1) codes[idx] = entry;
+          await saveCodes(codes);
+        } catch (err) {
+          logger.warn({ err }, 'Failed to persist code attempt');
+        }
+      });
+
+      return { valid: false, reason: 'Codigo invalido' };
     }
   }
 
   // Fallback: search persistent store (file or Redis)
   const codes = await getCodes();
+
+  // Find the matching entry by userId+type (regardless of hash)
   const match = codes.find(c =>
     c.userId === userId &&
     c.type === type &&
-    c.codeHash === inputHash &&
     !c.used
   );
 
-  if (!match) return { valid: false, reason: 'Codigo invalido' };
+  if (!match) return { valid: false, reason: 'Codigo invalido o expirado' };
   if (now > match.expiresAt) return { valid: false, reason: 'Codigo expirado' };
-  if (match.attempts >= match.maxAttempts) return { valid: false, reason: 'Demasiados intentos. Solicita un nuevo codigo.' };
+  if (match.attempts >= match.maxAttempts) {
+    logger.warn({ userId: match.userId, type: match.type }, 'Code max attempts reached');
+    return { valid: false, reason: 'Demasiados intentos. Solicita un nuevo codigo.' };
+  }
 
   match.attempts += 1;
 
@@ -118,7 +138,6 @@ async function verifyCode(userId, type, inputCode, invalidateAfterUse = true) {
   if (valid) {
     if (invalidateAfterUse) match.used = true;
     match.attempts = 0;
-    // Sync to memory for fast subsequent lookups
     const key = `${userId}:${type}:${match.id}`;
     memoryStore.set(key, match);
     await saveCodes(codes);

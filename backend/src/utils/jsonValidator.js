@@ -8,6 +8,7 @@
 
 const fs = require('fs').promises;
 const path = require('path');
+const { logger } = require('./logger');
 
 const DATA_DIR = path.join(__dirname, '../..');
 const BACKUP_DIR = path.join(DATA_DIR, 'backups');
@@ -267,7 +268,7 @@ async function cleanupOldBackups(filename) {
       }
     }
   } catch (err) {
-    console.error(`[JSON Validator] Error cleaning up backups:`, err.message);
+    logger.error({ err }, 'JSON Validator backup cleanup error');
   }
 }
 
@@ -299,57 +300,47 @@ async function repairFromBackup(filename) {
 }
 
 /**
- * Middleware: Validate JSON integrity before serving responses.
- * Logs warnings/errors but does not block requests.
- */
-function integrityCheckMiddleware(req, res, next) {
-  // Only run on startup or on-demand via endpoint
-  next();
-}
-
-/**
  * Run validation on server startup.
  * Auto-repairs if corruption is detected.
  */
 async function startupValidation() {
-  console.log('[JSON Validator] Starting integrity check...');
+  logger.info('Starting JSON integrity check');
   const report = await validateAll();
 
   for (const [file, info] of Object.entries(report.files)) {
     if (!info.exists) {
-      console.warn(`[JSON Validator] ⚠️ ${file}: File not found`);
+      logger.warn({ file }, 'JSON file not found');
       continue;
     }
     if (!info.parsable) {
-      console.error(`[JSON Validator] ❌ ${file}: JSON parse error - attempting repair from backup`);
+      logger.error({ file }, 'JSON parse error — attempting repair from backup');
       const repair = await repairFromBackup(file);
       if (repair.success) {
-        console.log(`[JSON Validator] ✅ ${file}: Restored from ${repair.restoredFrom}`);
+        logger.info({ file, restoredFrom: repair.restoredFrom }, 'JSON file restored from backup');
       } else {
-        console.error(`[JSON Validator] ❌ ${file}: Repair failed - ${repair.error}`);
+        logger.error({ file, error: repair.error }, 'JSON file repair failed');
       }
       continue;
     }
     if (!info.valid) {
-      console.error(`[JSON Validator] ❌ ${file}: Schema validation failed`);
-      info.errors.forEach(e => console.error(`    - ${e}`));
+      logger.error({ file, errors: info.errors }, 'JSON schema validation failed');
       // Auto-repair
       const repair = await repairFromBackup(file);
       if (repair.success) {
-        console.log(`[JSON Validator] ✅ ${file}: Restored from backup ${repair.restoredFrom}`);
+        logger.info({ file, restoredFrom: repair.restoredFrom }, 'JSON file restored from backup');
       }
       continue;
     }
     if (info.warnings.length > 0) {
-      console.warn(`[JSON Validator] ⚠️ ${file}: ${info.warnings.join(', ')}`);
+      logger.warn({ file, warnings: info.warnings }, 'JSON file warnings');
     }
-    console.log(`[JSON Validator] ✅ ${file}: OK (${info.itemCount} items)`);
+    logger.info({ file, itemCount: info.itemCount }, 'JSON file OK');
   }
 
   if (report.overall) {
-    console.log('[JSON Validator] ✅ All JSON files are valid');
+    logger.info('All JSON files are valid');
   } else {
-    console.error('[JSON Validator] ⚠️ Some files have issues - check logs above');
+    logger.warn('Some JSON files have issues — check logs above');
   }
 
   return report;

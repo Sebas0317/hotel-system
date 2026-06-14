@@ -2,13 +2,14 @@
 
 const { getStateHistory, saveStateHistory } = require('../data/jsonStore');
 const { generateId } = require('../utils/idGenerator');
+const logger = require('../utils/logger');
 
 async function getAllStateHistory(_req, res) {
   try {
     const cambios = await getStateHistory();
     res.json(cambios);
   } catch (err) {
-    require('../utils/logger').error('Error getting state history', { error: err.message });
+    logger.error('Error getting state history', { error: err.message });
     res.status(500).json({ error: 'Error interno al obtener historial de estados' });
   }
 }
@@ -32,7 +33,7 @@ async function addStateChange(req, res) {
     await saveStateHistory(cambios);
     res.json(entry);
   } catch (err) {
-    require('../utils/logger').error('Error adding state change', { error: err.message });
+    logger.error('Error adding state change', { error: err.message });
     res.status(500).json({ error: 'Error interno al agregar cambio de estado' });
   }
 }
@@ -43,7 +44,7 @@ async function getStateHistoryByRoom(req, res) {
     const roomHistory = cambios.filter(c => c.roomId === req.params.roomId || c.numero === req.params.roomId);
     res.json(roomHistory);
   } catch (err) {
-    require('../utils/logger').error('Error getting room state history', { error: err.message });
+    logger.error('Error getting room state history', { error: err.message });
     res.status(500).json({ error: 'Error interno al obtener historial de habitación' });
   }
 }

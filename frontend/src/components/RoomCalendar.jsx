@@ -2,22 +2,9 @@ import { useState, useEffect, useCallback } from 'react';
 import { DayPicker } from 'react-day-picker';
 import { format, addDays, eachDayOfInterval, isWithinInterval } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { fetchReservasByRoom } from '../services/api';
+import { fetchReservasByRoom, normalizeErrorMessage as safeErrorMessage } from '../services/api';
 import { BadgeCheck, BadgeX, Calendar, Users } from 'lucide-react';
 import 'react-day-picker/style.css';
-
-const safeErrorMessage = (err, fallback = 'Error cargando reservas') => {
-  if (!err) return fallback;
-  if (typeof err === 'string') return err;
-  if (typeof err.message === 'string') return err.message;
-  if (typeof err.error === 'string') return err.error;
-  try {
-    const serialized = JSON.stringify(err);
-    return serialized && serialized !== '{}' ? serialized : fallback;
-  } catch {
-    return fallback;
-  }
-};
 
 const RoomCalendar = ({ roomId, roomNumero, modo = 'selection', onSelectDates, initialDates }) => {
   const [reservas, setReservas] = useState([]);

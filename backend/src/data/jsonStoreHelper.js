@@ -1,7 +1,6 @@
 'use strict';
 
 const fs = require('fs').promises;
-const fss = require('fs');
 const path = require('path');
 const os = require('os');
 const logger = require('../utils/logger');
@@ -11,10 +10,8 @@ const DATA_DIR = process.env.VERCEL_ENV
   ? path.join(os.tmpdir(), 'ecobosque-data')
   : DEPLOY_DIR;
 
-// Ensure writable data dir exists (especially for /tmp/ on Vercel)
-try {
-  if (!fss.existsSync(DATA_DIR)) fss.mkdirSync(DATA_DIR, { recursive: true });
-} catch { /* best-effort */ }
+// Ensure writable data dir exists (async, non-blocking)
+fs.mkdir(DATA_DIR, { recursive: true }).catch(() => {});
 
 function validatePath(filePath) {
   const resolved = path.resolve(filePath);

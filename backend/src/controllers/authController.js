@@ -7,9 +7,11 @@ const codeStore = require('../data/codeStore');
 const emailService = require('../utils/emailService');
 const securityTracker = require('../utils/securityTracker');
 const auditor = require('../utils/auditor');
+const { getJwtSecret } = require('../middleware/auth');
 
 function generateToken(user) {
   const expiresIn = process.env.JWT_EXPIRES_IN || '8h';
+  const secret = getJwtSecret();
   return jwt.sign(
     {
       id: user.id,
@@ -19,34 +21,76 @@ function generateToken(user) {
       emailVerified: user.emailVerified || false,
       twoFactorEnabled: user.twoFactorEnabled || false,
     },
-    process.env.JWT_SECRET,
-    { algorithm: 'HS256', expiresIn }
+    secret,
+    { expiresIn }
   );
+}
+
+function setTokenCookie(res, token) {
+  res.cookie('token', token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
+    maxAge: 8 * 60 * 60 * 1000,
+    path: '/',
+  });
 }
 
 function getClientIp(req) {
   return req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.ip || req.connection?.remoteAddress || 'unknown';
 }
 
+function validatePasswordComplexity(password) {
+  if (password.length < 8) {
+    return 'La contrasena debe tener al menos 8 caracteres';
+  }
+  if (!/[A-Z]/.test(password)) {
+    return 'La contrasena debe contener al menos una mayuscula';
+  }
+  if (!/[a-z]/.test(password)) {
+    return 'La contrasena debe contener al menos una minuscula';
+  }
+  if (!/[0-9]/.test(password)) {
+    return 'La contrasena debe contener al menos un numero';
+  }
+  if (!/[^A-Za-z0-9]/.test(password)) {
+    return 'La contrasena debe contener al menos un caracter especial';
+  }
+  return null;
+}
+
 async function setup(req, res) {
   try {
-    const users = await userStore.getUsers();
+    const isAuthed = !!(req.user?.role);
+    const users = isAuthed ? await userStore.getUsers() : [];
     const admin = users.find(u => u.role === 'admin');
     const smtpConfig = emailService.isConfigured();
 
+    // Only expose email/user count to authenticated admin/owner
     return res.json({
-      configurado: users.length > 0,
-      email: admin?.email || process.env.ADMIN_EMAIL || '',
+      configurado: isAuthed ? users.length > 0 : true,
+      email: (isAuthed && (req.user.role === 'admin' || req.user.role === 'owner')) ? (admin?.email || '') : '',
       smtpConfigurado: smtpConfig,
       twoFactorHabilitado: admin?.twoFactorEnabled || false,
       emailVerificado: admin?.emailVerified || false,
       rolesDisponibles: userStore.ROLES,
-      totalUsuarios: users.length,
+      totalUsuarios: isAuthed ? users.length : 0,
     });
   } catch (err) {
     logger.error({ err }, 'Setup error');
     return res.status(500).json({ error: 'Error al obtener configuracion' });
   }
+}
+
+async function logout(req, res) {
+  logger.info({ userId: req.user?.id }, 'User logged out');
+  res.clearCookie('token', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
+    path: '/',
+  });
+  return res.json({ mensaje: 'Sesion cerrada exitosamente' });
 }
 
 async function getAuthStatus(req, res) {
@@ -78,9 +122,8 @@ async function register(req, res) {
       return res.status(400).json({ error: 'username, email y password son requeridos' });
     }
 
-    if (password.length < 8) {
-      return res.status(400).json({ error: 'La contrasena debe tener al menos 8 caracteres' });
-    }
+    const pwErr = validatePasswordComplexity(password);
+    if (pwErr) return res.status(400).json({ error: pwErr });
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
@@ -183,7 +226,7 @@ async function login(req, res) {
 
       logger.info({ userId: user.id, email: user.email }, '2FA code sent');
 
-      return res.json({
+    return res.json({
         requires2FA: true,
         userId: user.id,
         expiresIn: 300,
@@ -196,6 +239,8 @@ async function login(req, res) {
     logger.info({ userId: user.id, email: user.email, role: user.role }, 'Successful login');
 
     await auditor.login(user.id, ip, user.email);
+
+    setTokenCookie(res, token);
 
     return res.json({
       token,
@@ -255,6 +300,8 @@ async function verify2FA(req, res) {
 
     const token = generateToken(user);
     logger.info({ userId, email: user.email }, '2FA verification successful');
+
+    setTokenCookie(res, token);
 
     return res.json({ token, usuario: userStore.sanitizeUser(user) });
   } catch (err) {
@@ -482,7 +529,7 @@ async function verificarCodigoRecuperacion(req, res) {
 
     const resetToken = jwt.sign(
       { id: user.id, purpose: 'password_reset' },
-      process.env.JWT_SECRET,
+      getJwtSecret(),
       { algorithm: 'HS256', expiresIn: '5m' }
     );
 
@@ -509,15 +556,17 @@ async function cambiarContrasena(req, res) {
     const { resetToken, nuevaContrasena, userId, currentPassword } = req.body;
     const ip = getClientIp(req);
 
-    if (!nuevaContrasena || nuevaContrasena.length < 8) {
+    if (!nuevaContrasena) {
       return res.status(400).json({ error: 'La contrasena debe tener al menos 8 caracteres' });
     }
+    const pwErr2 = validatePasswordComplexity(nuevaContrasena);
+    if (pwErr2) return res.status(400).json({ error: pwErr2 });
 
     let targetUserId = userId;
 
     if (resetToken) {
       try {
-        const decoded = jwt.verify(resetToken, process.env.JWT_SECRET, { algorithms: ['HS256'] });
+        const decoded = jwt.verify(resetToken, getJwtSecret(), { algorithms: ['HS256'] });
         if (decoded.purpose !== 'password_reset') {
           return res.status(400).json({ error: 'Token invalido' });
         }
@@ -642,9 +691,8 @@ async function changeOwnPassword(req, res) {
       return res.status(400).json({ error: 'Contrasena actual y nueva requeridas' });
     }
 
-    if (newPassword.length < 8) {
-      return res.status(400).json({ error: 'La contrasena debe tener al menos 8 caracteres' });
-    }
+    const pwErr3 = validatePasswordComplexity(newPassword);
+    if (pwErr3) return res.status(400).json({ error: pwErr3 });
 
     const { valid } = await userStore.verifyPassword(req.user.email, currentPassword);
     if (!valid) {
@@ -748,7 +796,7 @@ async function hashPassword(req, res) {
 module.exports = {
   setup, getAuthStatus,
   register,
-  login, verify2FA, sendLoginCode,
+  login, verify2FA, sendLoginCode, logout,
   enviarCodigoVerificacion, verificarCorreo,
   solicitarRecuperacion, verificarCodigoRecuperacion, cambiarContrasena,
   toggle2FA,

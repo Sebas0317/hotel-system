@@ -63,6 +63,9 @@ function verifyRecaptcha(token) {
  * v3: checks success && score >= MIN_SCORE
  */
 async function requireRecaptcha(req, res, next) {
+  // Allow test suite to bypass reCAPTCHA
+  if (process.env.NODE_ENV === 'test' && req.headers['x-test-skip-captcha'] === 'true') return next();
+
   const token = req.body?.recaptchaToken;
 
   if (!token) {

@@ -1,6 +1,7 @@
 'use strict';
 
 const { getPrices, savePrices } = require('../data/priceStore');
+const logger = require('../utils/logger');
 
 async function getAllPrices(_req, res) {
   try {
@@ -10,7 +11,7 @@ async function getAllPrices(_req, res) {
     }
     res.json(prices);
   } catch (err) {
-    require('../utils/logger').error('Error getting prices', { error: err.message });
+    logger.error('Error getting prices', { error: err.message });
     res.status(500).json({ error: 'Error interno al obtener precios' });
   }
 }
@@ -43,7 +44,7 @@ async function updatePrices(req, res) {
     await savePrices({ tarifas, productos });
     res.json({ message: 'Precios actualizados', tarifas, productos });
   } catch (err) {
-    require('../utils/logger').error('Error updating prices', { error: err.message });
+    logger.error('Error updating prices', { error: err.message });
     res.status(500).json({ error: 'Error interno al actualizar precios' });
   }
 }

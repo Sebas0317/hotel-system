@@ -6,7 +6,7 @@ import {
 } from 'recharts';
 import {
   Home, Building2, TrendingUp, CheckCircle, DollarSign, CircleDot,
-  Calendar, Sparkles, Wrench, BarChart3, Search, TrendingDown, Tag, UtensilsCrossed, ClipboardList, ChevronDown
+  Calendar, Sparkles, Wrench, BarChart3, Search, Tag, UtensilsCrossed, ClipboardList, ChevronDown
 } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from './ui/Card';
 

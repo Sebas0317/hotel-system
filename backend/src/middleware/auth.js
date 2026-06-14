@@ -4,17 +4,15 @@ const jwt = require('jsonwebtoken');
 const logger = require('../utils/logger');
 const { hasPermission } = require('../utils/permissions');
 
+function getJwtSecret() {
+  if (process.env.JWT_SECRET) return process.env.JWT_SECRET;
+  logger.error('JWT_SECRET no configurado. Usando secreto temporal.');
+  return require('crypto').randomBytes(64).toString('hex');
+}
+
 function requireAuth(req, res, next) {
-  const header = req.headers.authorization;
-
-  if (!header || !header.startsWith('Bearer ')) {
-    logger.warn('Auth failed: missing or malformed Authorization header', {
-      ip: req.ip, path: req.originalUrl,
-    });
-    return res.status(401).json({ error: 'Autenticacion requerida' });
-  }
-
-  const token = header.slice(7);
+  // Only accept httpOnly cookie (Bearer header removed for security)
+  const token = req.cookies && req.cookies.token;
 
   if (!token || token.length < 10) {
     logger.warn('Auth failed: invalid token length', { ip: req.ip });
@@ -22,7 +20,7 @@ function requireAuth(req, res, next) {
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET, {
+    const decoded = jwt.verify(token, getJwtSecret(), {
       algorithms: ['HS256'],
       clockTolerance: 30,
     });
@@ -76,4 +74,4 @@ function requireRole(...roles) {
   };
 }
 
-module.exports = { requireAuth, requirePermission, requireRole };
+module.exports = { requireAuth, requirePermission, requireRole, getJwtSecret };

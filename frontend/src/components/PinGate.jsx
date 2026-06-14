@@ -9,7 +9,7 @@ export default function PinGate({ onAccess, onBack, title = 'Acceso a Habitacion
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [recaptchaToken, setRecaptchaToken] = useState(null);
-  const [captchaError, setCaptchaError] = useState(false);
+  const [captchaError] = useState(false);
 
   const handleSubmit = async (e) => {
     e?.preventDefault();

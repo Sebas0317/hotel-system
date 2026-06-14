@@ -40,14 +40,7 @@ export const PRODUCTOS = {
   ],
 };
 
-/**
- * Room state configuration with visual styling
- * Eco-tourism hotel color palette: organic, forest greens, warm neutrals
- */
-/**
- * Room state configuration with visual styling
- * Eco-tourism hotel color palette: organic, forest greens, warm neutrals
- */
+/** Room state configuration with visual styling */
 export const ESTADO_CFG = {
   disponible:     { label: 'Disponible', color: '#2D5A3D', bg: '#E8F0E8', border: '#B8D4B8', dot: '#2D5A3D' },
   reservada:       { label: 'Reservada', color: '#5B7FA3', bg: '#E6EDF5', border: '#B8C8E0', dot: '#5B7FA3' },

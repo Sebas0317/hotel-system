@@ -38,14 +38,8 @@ const baseConfig = {
 const logger = pino({
   ...baseConfig,
   transport: isProduction
-    ? {
-        target: 'pino/file',
-        options: { destination: 1 },
-      }
-    : {
-        target: 'pino/file',
-        options: { destination: 1 },
-      },
+    ? { target: 'pino/file', options: { destination: 1 } }
+    : { target: 'pino-pretty', options: { colorize: true, translateTime: 'SYS:standard' } },
 });
 
 // Export Express middleware

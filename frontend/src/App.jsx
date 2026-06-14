@@ -3,25 +3,23 @@ import { Component, useState, Suspense, lazy, useRef, useEffect } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { Toaster, toast } from 'sonner';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { getAuthToken, setAuthToken, clearRoomToken, getUserInfo } from './services/api';
+import { logout as apiLogout, clearRoomToken, getUserInfo } from './services/api';
 import { useSession } from './hooks/useSession';
 import CybersecurityPanel from './components/CybersecurityPanel';
+import ProtectedRoute from './components/ProtectedRoute';
 import './App.css';
 
-// Create query client with default options
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 1000 * 60 * 5, // 5 minutes
+      staleTime: 1000 * 60 * 5,
       retry: 1,
       refetchOnWindowFocus: false,
     },
   },
 });
 
-// Lazy-loaded route components for code splitting
 const LoginScreen = lazy(() => import('./components/LoginScreen'));
-const PantallaAdmin = lazy(() => import('./components/PantallaAdmin'));
 const UserView = lazy(() => import('./components/UserView'));
 const UserCheckout = lazy(() => import('./components/UserCheckout'));
 const PantallaCheckin = lazy(() => import('./components/PantallaCheckin'));
@@ -30,12 +28,23 @@ const PantallaVer = lazy(() => import('./components/PantallaVer'));
 const PantallaCheckout = lazy(() => import('./components/PantallaCheckout'));
 const PantallaReservaciones = lazy(() => import('./components/PantallaReservaciones'));
 
-// EcoWeb landing page — converted to lazy for performance
+// Admin route components
+const AdminShell = lazy(() => import('./components/AdminShell'));
+const RoomsView = lazy(() => import('./components/RoomsView'));
+const RegisterView = lazy(() => import('./components/RegisterView'));
+const TransactionsView = lazy(() => import('./components/TransactionsView'));
+const ReservationsView = lazy(() => import('./components/ReservationsView'));
+const PricesView = lazy(() => import('./components/PricesView'));
+const HistoryView = lazy(() => import('./components/HistoryView'));
+const SecurityView = lazy(() => import('./components/SecurityView'));
+const AccountingView = lazy(() => import('./components/AccountingView'));
+const DashboardView = lazy(() => import('./components/DashboardView'));
+const PantallaUsuarios = lazy(() => import('./components/PantallaUsuarios'));
+
 const EcoWeb = lazy(() => import('./ecoweb/App'));
 import './ecoweb/style/index.css';
 import './ecoweb/style/fonts.css';
 
-// Error boundary to catch rendering errors without white-screening the app
 class ErrorBoundary extends Component {
   constructor(props) {
     super(props);
@@ -68,14 +77,12 @@ class ErrorBoundary extends Component {
   }
 }
 
-// Wrapper around Navigate that defers navigation to avoid render-phase router updates
 function SafeNavigate({ to, replace = true }) {
   const navigate = useNavigate();
   useEffect(() => { navigate(to, { replace }); }, [navigate, to, replace]);
   return null;
 }
 
-// Loading fallback component with skeleton animation
 function LoadingFallback() {
   return (
     <div className="loading-fallback" style={{
@@ -94,45 +101,29 @@ function LoadingFallback() {
   );
 }
 
-function isAdmin(rol) {
-  return rol && rol !== 'user' && rol !== 'cliente';
-}
-
-function adminRoute(rol, onSalir, navigate) {
-  return isAdmin(rol) ? <PantallaAdmin rol={rol} onSalir={onSalir} onNav={(path) => navigate(path)} /> : <SafeNavigate to="/" replace />;
-}
-
 /**
- * App root — now driven by URL routes instead of local state.
+ * App root — route-driven navigation.
  *
- * Route map:
- *   /              → Login screen (role selection)
- *   /admin         → Admin dashboard
- *   /usuario       → Reception menu
- *   /usuario/checkin   → Check-in screen
- *   /usuario/consumo   → Register consumption
- *   /usuario/ver       → View room details
- *   /usuario/checkout  → Check-out screen
- *
- * A shared `rol` state is kept so the app knows which role is active,
- * but navigation is delegated to React Router via `useNavigate`.
- * Admin sessions are persisted via JWT token in localStorage.
+ * Admin routes use nested layout via AdminShell:
+ *   /admin              → RoomsView (index)
+ *   /admin/dashboard    → AdminDashboard
+ *   /admin/register     → RegisterView
+ *   /admin/room/:roomId → RoomsView (with selected room)
+ *   /admin/transactions → TransactionsView
+ *   /admin/reservations → ReservationsView
+ *   /admin/accounting   → AccountingView
+ *   /admin/prices       → PricesView
+ *   /admin/users        → PantallaUsuarios
+ *   /admin/history      → HistoryView
+ *   /admin/security     → SecurityView
  */
 export default function App() {
   const [rol, setRol] = useState(() => {
-    const token = getAuthToken();
-    if (!token) return null;
     const userInfo = getUserInfo();
-    return userInfo ? userInfo.role : 'admin';
+    return userInfo ? userInfo.role : null;
   });
   const navigate = useNavigate();
 
-  // Clear stale token on mount (backend will reject expired tokens)
-
-  /**
-   * Called from the login screen when a role is selected.
-   * Updates role state and navigates to the corresponding route.
-   */
   const handleRol = (r) => {
     setRol(r);
     if (r === 'user' || r === 'cliente') {
@@ -142,12 +133,14 @@ export default function App() {
     }
   };
 
-  const handleExit = () => {
+  const handleExit = async () => {
     setRol(null);
-    setAuthToken(null);
+    await apiLogout();
     clearRoomToken();
     navigate('/', { replace: true });
   };
+
+
 
   const location = useLocation();
   const warnedRef = useRef(false);
@@ -173,7 +166,6 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <ErrorBoundary>
       <div>
-        {/* Toast notifications provider */}
       <Toaster
         position="top-right"
         toastOptions={{
@@ -207,154 +199,113 @@ export default function App() {
         <Route
           path="/"
           element={
-            !rol ? (
+            <ProtectedRoute rol={rol} allowed="guest">
               <LoginScreen onRole={handleRol} />
-            ) : (
-              <SafeNavigate to={isAdmin(rol) ? '/admin' : '/user'} replace />
-            )
+            </ProtectedRoute>
           }
         />
-
-        {/* Login sub-routes — LoginScreen handles internal routing */}
         <Route
           path="/login/admin"
-          element={!rol ? <LoginScreen onRole={handleRol} /> : <SafeNavigate to="/admin" replace />}
+          element={
+            <ProtectedRoute rol={rol} allowed="guest">
+              <LoginScreen onRole={handleRol} />
+            </ProtectedRoute>
+          }
         />
         <Route
           path="/login/forgot"
-          element={!rol ? <LoginScreen onRole={handleRol} /> : <SafeNavigate to="/admin" replace />}
+          element={
+            <ProtectedRoute rol={rol} allowed="guest">
+              <LoginScreen onRole={handleRol} />
+            </ProtectedRoute>
+          }
         />
         <Route
           path="/forgot"
-          element={!rol ? <LoginScreen onRole={handleRol} /> : <SafeNavigate to="/admin" replace />}
+          element={
+            <ProtectedRoute rol={rol} allowed="guest">
+              <LoginScreen onRole={handleRol} />
+            </ProtectedRoute>
+          }
         />
         <Route
           path="/login/2fa/:userId"
-          element={!rol ? <LoginScreen onRole={handleRol} /> : <SafeNavigate to="/admin" replace />}
+          element={
+            <ProtectedRoute rol={rol} allowed="guest">
+              <LoginScreen onRole={handleRol} />
+            </ProtectedRoute>
+          }
         />
         <Route
           path="/2fa/:userId"
-          element={!rol ? <LoginScreen onRole={handleRol} /> : <SafeNavigate to="/admin" replace />}
+          element={
+            <ProtectedRoute rol={rol} allowed="guest">
+              <LoginScreen onRole={handleRol} />
+            </ProtectedRoute>
+          }
         />
 
+        {/* ── Admin routes with nested layout ── */}
         <Route
           path="/admin"
-          element={adminRoute(rol, handleExit, navigate)}
-        />
-
-        <Route
-          path="/admin/dashboard"
-          element={adminRoute(rol, handleExit, navigate)}
-        />
-
-        <Route
-          path="/admin/room/:roomId"
-          element={adminRoute(rol, handleExit, navigate)}
-        />
-
-        <Route
-          path="/admin/register"
-          element={adminRoute(rol, handleExit, navigate)}
-        />
-
-        <Route
-          path="/admin/register/checkin"
-          element={adminRoute(rol, handleExit, navigate)}
-        />
-
-        <Route
-          path="/admin/register/new"
-          element={adminRoute(rol, handleExit, navigate)}
-        />
-
-        <Route
-          path="/admin/transactions"
-          element={adminRoute(rol, handleExit, navigate)}
-        />
-
-        <Route
-          path="/admin/reservations"
-          element={adminRoute(rol, handleExit, navigate)}
-        />
-
-        <Route
-          path="/admin/accounting"
-          element={adminRoute(rol, handleExit, navigate)}
-        />
-
-        <Route
-          path="/admin/prices"
-          element={adminRoute(rol, handleExit, navigate)}
-        />
-
-        <Route
-          path="/admin/users"
-          element={adminRoute(rol, handleExit, navigate)}
-        />
-
-        <Route
-          path="/admin/history"
-          element={adminRoute(rol, handleExit, navigate)}
-        />
-
-        <Route
-          path="/admin/security"
-          element={adminRoute(rol, handleExit, navigate)}
-        />
-
-        <Route
-          path="/admin/reservaciones"
-          element={adminRoute(rol, handleExit, navigate)}
-        />
+          element={
+            <ProtectedRoute rol={rol} allowed="admin">
+              <AdminShell rol={rol} onSalir={handleExit} />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<RoomsView />} />
+          <Route path="dashboard" element={<DashboardView />} />
+          <Route path="register" element={<RegisterView />} />
+          <Route path="room/:roomId" element={<RoomsView />} />
+          <Route path="transactions" element={<TransactionsView />} />
+          <Route path="reservations" element={<ReservationsView />} />
+          <Route path="reservaciones" element={<ReservationsView />} />
+          <Route path="accounting" element={<AccountingView />} />
+          <Route path="prices" element={<PricesView />} />
+          <Route path="users" element={<PantallaUsuarios userRole={rol} />} />
+          <Route path="history" element={<HistoryView />} />
+          <Route path="security" element={<SecurityView />} />
+        </Route>
 
         <Route
           path="/user"
           element={
-            rol === 'user' || rol === 'cliente' ? (
+            <ProtectedRoute rol={rol} allowed="user">
               <UserView onExit={handleExit} />
-            ) : (
-              <SafeNavigate to="/" replace />
-            )
+            </ProtectedRoute>
           }
         />
         <Route
           path="/user/register"
           element={
-            rol === 'user' || rol === 'cliente' ? (
+            <ProtectedRoute rol={rol} allowed="user">
               <PantallaCheckin onNav={(screen) => navigate(`/user/${screen}`)} />
-            ) : (
-              <SafeNavigate to="/" replace />
-            )
+            </ProtectedRoute>
           }
         />
         <Route
           path="/user/transactions"
           element={
-            rol === 'user' || rol === 'cliente' ? (
+            <ProtectedRoute rol={rol} allowed="user">
               <PantallaConsumo onNav={(screen) => navigate(`/user/${screen}`)} />
-            ) : (
-              <SafeNavigate to="/" replace />
-            )
+            </ProtectedRoute>
           }
         />
         <Route
           path="/user/ver"
           element={
-            rol === 'user' || rol === 'cliente' ? (
+            <ProtectedRoute rol={rol} allowed="user">
               <PantallaVer onNav={(screen) => navigate(`/user/${screen}`)} />
-            ) : (
-              <SafeNavigate to="/" replace />
-            )
+            </ProtectedRoute>
           }
         />
         <Route
           path="/user/checkout"
           element={
-            rol === 'user' || rol === 'cliente' ? (
+            <ProtectedRoute rol={rol} allowed="user">
               <UserCheckout onExit={handleExit} />
-            ) : (
-              <SafeNavigate to="/" replace />
-            )
+            </ProtectedRoute>
           }
         />
 

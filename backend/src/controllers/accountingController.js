@@ -7,8 +7,9 @@
 const XLSX = require('xlsx');
 const { getRooms } = require('../data/jsonStore');
 const { getHistory } = require('../data/jsonStore');
-const { format, parseISO, formatISO } = require('date-fns');
+const { format, parseISO } = require('date-fns');
 const { es } = require('date-fns/locale');
+const logger = require('../utils/logger');
 
 function formatDate(date, formatStr = 'PP') {
   const d = typeof date === 'string' ? parseISO(date) : date;
@@ -31,8 +32,7 @@ function formatFileDate(date) {
 function getStatusLabel(status) {
   const labels = {
     disponible: 'Disponible',
-    ocupda: 'Ocupada',
-    ocupadA: 'Ocupada',
+    ocupada: 'Ocupada',
     reservada: 'Reservada',
     limpieza: 'En Limpieza',
     mantenimiento: 'En Mantenimiento',
@@ -106,7 +106,7 @@ async function getAccountingSummary(req, res) {
       completedStays: completedStays.length,
     });
   } catch (err) {
-    require('../utils/logger').error('Error getting accounting summary', { error: err.message });
+    logger.error('Error getting accounting summary', { error: err.message });
     res.status(500).json({ error: 'Error interno al obtener datos contables' });
   }
 }
@@ -312,7 +312,7 @@ const executiveSummary = [
     res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
     res.send(buffer);
   } catch (err) {
-    require('../utils/logger').error('Error exporting accounting report', { error: err.message });
+    logger.error('Error exporting accounting report', { error: err.message });
     res.status(500).json({ error: 'Error interno al generar reporte' });
   }
 }

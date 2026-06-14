@@ -32,6 +32,7 @@ router.get('/reservaciones', requireAuth, roomController.getReservaciones);
 // POST /rooms/checkin - Check in a guest
 router.post(
   '/checkin',
+  requireAuth,
   writeRateLimiter,
   requireFields('numero', 'huesped'),
   roomController.checkIn

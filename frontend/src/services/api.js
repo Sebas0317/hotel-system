@@ -31,7 +31,7 @@ export class ApiError extends Error {
   }
 }
 
-function safeText(value, fallback = '') {
+export function safeText(value, fallback = '') {
   if (value === null || value === undefined) return fallback;
   const t = typeof value;
   if (t === 'string') return value;
@@ -59,7 +59,7 @@ function safeText(value, fallback = '') {
   return fallback;
 }
 
-function safeNumber(value, fallback = 0) {
+export function safeNumber(value, fallback = 0) {
   if (typeof value === 'number' && Number.isFinite(value)) return value;
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : fallback;
@@ -85,7 +85,6 @@ function normalizeRoom(room, index = 0) {
     email: safeText(r.email, ''),
     telefono: safeText(r.telefono, ''),
     documento: safeText(r.documento, ''),
-    pin: safeText(r.pin, ''),
     checkIn: safeText(r.checkIn, ''),
     checkOut: safeText(r.checkOut, ''),
     piso,
@@ -127,7 +126,7 @@ function normalizeReserva(reserva, index = 0) {
   };
 }
 
-function normalizeErrorMessage(input, fallback = 'Request failed') {
+export function normalizeErrorMessage(input, fallback = 'Request failed') {
   if (typeof input === 'string') return input;
   if (typeof input === 'number' || typeof input === 'boolean' || typeof input === 'bigint') {
     return String(input);
@@ -171,12 +170,11 @@ export async function checkHealth() {
  */
 async function apiFetch(endpoint, options = {}, timeout = 10000) {
   const url = `${API_BASE}${endpoint}`;
-  const token = localStorage.getItem('adminToken');
   const config = {
     headers: {
       'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
+    credentials: 'include',
     ...options,
     body: options.body ? JSON.stringify(options.body) : undefined,
     signal: AbortSignal.timeout(timeout),
@@ -427,35 +425,15 @@ export async function fetchUserStats() {
 }
 
 /**
- * Attach JWT token to all subsequent API requests
- * @param {string} token - JWT token
- */
-export function setAuthToken(token) {
-  if (token) {
-    localStorage.setItem('adminToken', token);
-  } else {
-    localStorage.removeItem('adminToken');
-    localStorage.removeItem('userInfo');
-  }
-}
-
-/**
- * Get stored JWT token
- * @returns {string|null}
- */
-export function getAuthToken() {
-  return localStorage.getItem('adminToken');
-}
-
-/**
- * Store user info (including role) for role-based UI
+ * Store user info (including role) for role-based UI.
+ * Only non-sensitive metadata (role, username) — JWT stays in httpOnly cookie.
  * @param {object} user
  */
 export function setUserInfo(user) {
   if (user) {
-    localStorage.setItem('userInfo', JSON.stringify(user));
+    sessionStorage.setItem('userInfo', JSON.stringify(user));
   } else {
-    localStorage.removeItem('userInfo');
+    sessionStorage.removeItem('userInfo');
   }
 }
 
@@ -465,11 +443,23 @@ export function setUserInfo(user) {
  */
 export function getUserInfo() {
   try {
-    const raw = localStorage.getItem('userInfo');
+    const raw = sessionStorage.getItem('userInfo');
     return raw ? JSON.parse(raw) : null;
   } catch {
     return null;
   }
+}
+
+/**
+ * Logout — calls backend to clear httpOnly cookie, then clears local state
+ */
+export async function logout() {
+  try {
+    await apiFetch('/auth/logout', { method: 'POST' });
+  } catch {
+    // Best-effort — clear local state regardless
+  }
+  setUserInfo(null);
 }
 
 // ── Room API ──
@@ -777,17 +767,13 @@ export async function fetchAccountingSummary() {
  * Download accounting Excel report
  */
 export async function downloadAccountingReport() {
-  const token = getAuthToken();
-  const url = `/accounting/export`;
-  if (!token) {
-    throw new ApiError('No hay sesión de administrador activa', 401);
-  }
+  const url = `${API_BASE}/accounting/export`;
 
   let response;
   try {
     response = await fetch(url, {
       method: 'GET',
-      headers: { 'Authorization': `Bearer ${token}` },
+      credentials: 'include',
       signal: AbortSignal.timeout(15000),
     });
   } catch (err) {
@@ -845,6 +831,21 @@ export async function fetchSecurityEvents(limit = 100) {
 }
 
 /**
+ * Sanitize a CSV cell value to prevent formula injection (=, +, -, @, tab)
+ */
+function sanitizeCSV(value) {
+  const str = String(value ?? '');
+  if (/^[=+\-@\t]/.test(str)) {
+    return `'${str}`;
+  }
+  // Escape double quotes by doubling them, then wrap in quotes if contains comma, quote, or newline
+  if (/[,"\n]/.test(str)) {
+    return `"${str.replace(/"/g, '""')}"`;
+  }
+  return str;
+}
+
+/**
  * Download login logs as CSV
  */
 export function downloadLoginLogsCSV(logs) {
@@ -856,7 +857,7 @@ export function downloadLoginLogsCSV(logs) {
     l.userAgent || '',
     l.country || '',
   ]);
-  const csv = [headers, ...rows].map(r => r.join(',')).join('\n');
+  const csv = [headers, ...rows].map(r => r.map(sanitizeCSV).join(',')).join('\n');
   const blob = new Blob([csv], { type: 'text/csv' });
   const url = window.URL.createObjectURL(blob);
   const a = document.createElement('a');

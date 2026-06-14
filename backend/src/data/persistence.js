@@ -66,8 +66,8 @@ async function getData(key, defaultVal = null) {
   // Check in-memory fallback
   if (memoryStore.has(key)) return memoryStore.get(key);
 
-  // Lazy bootstrap: seed from file if not yet loaded into Redis
-  if (r && !bootstrapped.has(key)) {
+  // Lazy bootstrap: seed from file (also runs without Redis for local dev)
+  if (!bootstrapped.has(key)) {
     bootstrapped.add(key);
     const file = fileForKey(key);
     if (file) {
@@ -75,8 +75,10 @@ async function getData(key, defaultVal = null) {
         const data = await readJsonFile(file, null);
         if (data !== null) {
           memoryStore.set(key, data);
-          await r.set(key, data).catch(() => {});
-          logger.info(`Lazy-seeded Redis key ${key} from ${path.basename(file)}`);
+          if (r) {
+            await r.set(key, data).catch(() => {});
+          }
+          logger.info(`Lazy-seeded ${key} from ${path.basename(file)}`);
           return data;
         }
       } catch {
@@ -93,8 +95,18 @@ async function setData(key, data) {
   if (r) {
     try {
       await r.set(key, data);
+      return;
     } catch (err) {
       logger.warn({ err, key }, 'Redis set failed');
+    }
+  }
+  // Fallback: persist to JSON file for restart resilience
+  const file = fileForKey(key);
+  if (file) {
+    try {
+      await writeJsonFile(file, data);
+    } catch (err) {
+      logger.warn({ err, key, file }, 'File write failed');
     }
   }
 }

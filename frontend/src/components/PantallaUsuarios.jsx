@@ -570,8 +570,31 @@ export default function PantallaUsuarios({ userRole = 'admin' }) {
 
       {/* User table */}
       {isLoading ? (
-        <div className="flex justify-center py-16">
-          <Loader className="w-8 h-8 animate-spin text-green-600" />
+        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="bg-gray-50 border-b border-gray-200">
+                  <th className="text-left px-4 py-3 font-semibold text-gray-600">Usuario</th>
+                  <th className="text-left px-4 py-3 font-semibold text-gray-600">Email</th>
+                  <th className="text-center px-4 py-3 font-semibold text-gray-600">Rol</th>
+                  <th className="text-center px-4 py-3 font-semibold text-gray-600">Estado</th>
+                  <th className="text-right px-4 py-3 font-semibold text-gray-600">Acciones</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {[1,2,3,4].map(i => (
+                  <tr key={i}>
+                    <td className="px-4 py-3"><div className="h-4 w-36 animate-pulse bg-gray-200 rounded" /></td>
+                    <td className="px-4 py-3"><div className="h-4 w-52 animate-pulse bg-gray-200 rounded" /></td>
+                    <td className="px-4 py-3"><div className="h-4 w-20 animate-pulse bg-gray-200 rounded mx-auto" /></td>
+                    <td className="px-4 py-3"><div className="h-4 w-16 animate-pulse bg-gray-200 rounded mx-auto" /></td>
+                    <td className="px-4 py-3"><div className="h-4 w-24 animate-pulse bg-gray-200 rounded ml-auto" /></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       ) : error ? (
         <div className="text-center py-16 text-red-500">Error al cargar usuarios</div>

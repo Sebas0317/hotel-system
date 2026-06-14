@@ -5,7 +5,7 @@ import {
   Mail, Lock, Eye, EyeOff, LogIn, UserPlus,
   ArrowLeft, Loader, CheckCircle, AlertCircle,
 } from 'lucide-react';
-import { loginAdmin, setAuthToken, setUserInfo, registerUser } from '../services/api';
+import { loginAdmin, setUserInfo, registerUser, normalizeErrorMessage as safeErrorMessage } from '../services/api';
 import ReCaptchaWidget from './ReCaptchaWidget';
 import HotelTitle from './HotelTitle';
 import TwoFactorScreen from './TwoFactorScreen';
@@ -165,7 +165,7 @@ function AnimatedLink({ onClick, icon: Icon, children, color = 'white/50' }) {
     <motion.button
       onClick={onClick}
       whileHover={{ x: 3 }}
-      className={`relative text-sm text-${color} hover:text-white/80 transition-colors duration-200 flex items-center gap-1 group`}
+      className={`relative text-sm hover:text-white/80 transition-colors duration-200 flex items-center gap-1 group ${color === 'emerald-400' ? 'text-emerald-400' : 'text-white/50'}`}
     >
       {Icon && <Icon className="w-3.5 h-3.5" />}
       <span>{children}</span>
@@ -290,24 +290,11 @@ function AdminLogin({ onBack, onRole }) {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [recaptchaToken, setRecaptchaToken] = useState(null);
-  const [captchaError, setCaptchaError] = useState(false);
+  const [captchaError] = useState(false);
 
   const [registered, setRegistered] = useState(false);
   const [registeredEmail, setRegisteredEmail] = useState('');
 
-
-  const safeErrorMessage = (e, fallback = 'Error de autenticacion') => {
-    if (!e) return fallback;
-    if (typeof e === 'string') return e;
-    if (typeof e.message === 'string') return e.message;
-    if (typeof e.error === 'string') return e.error;
-    try {
-      const serialized = JSON.stringify(e);
-      return serialized && serialized !== '{}' ? serialized : fallback;
-    } catch {
-      return fallback;
-    }
-  };
 
   const handleLogin = async () => {
     if (!identifier.trim()) return setError('Ingresa tu usuario o correo');
@@ -324,7 +311,7 @@ function AdminLogin({ onBack, onRole }) {
         });
         return;
       }
-      setAuthToken(result.token);
+      // JWT is set as httpOnly cookie by the server — no localStorage needed
       if (result.usuario) {
         setUserInfo(result.usuario);
         onRole(result.usuario.role || 'admin');
@@ -613,8 +600,8 @@ function TwoFactorRoute({ onRole }) {
   const userId = params.userId;
   const state = location.state || {};
 
-  const handleVerified = (token, usuario) => {
-    setAuthToken(token);
+  const handleVerified = (_token, usuario) => {
+    // JWT is set as httpOnly cookie by the server — no localStorage needed
     if (usuario) {
       setUserInfo(usuario);
       onRole(usuario.role || 'admin');

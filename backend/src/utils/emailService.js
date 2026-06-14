@@ -46,6 +46,12 @@ function getTransporter() {
 }
 
 async function sendEmail({ to, subject, html }) {
+  // Do not send real emails during tests
+  if (process.env.NODE_ENV === 'test') {
+    logger.info({ to, subject }, 'Test mode: email skipped');
+    return { success: true, messageId: 'test-skip' };
+  }
+
   const transport = getTransporter();
   if (!transport) {
     logger.warn('Email not sent: SMTP not configured');

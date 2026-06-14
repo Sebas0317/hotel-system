@@ -2,16 +2,15 @@
 
 /**
  * Sanitize string inputs to prevent XSS.
- * Strips HTML tags and encodes dangerous characters.
+ * Strips dangerous content but PRESERVES Unicode/accents — does NOT HTML-escape.
+ * HTML escaping se hace SOLO en el frontend al renderizar.
  */
 function sanitizeString(value) {
   if (typeof value !== 'string') return value;
   return value
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#x27;')
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+    .replace(/on\w+\s*=\s*["']?[^"'\s>]+["']?/gi, '')
+    .replace(/javascript\s*:/gi, '')
     .trim();
 }
 

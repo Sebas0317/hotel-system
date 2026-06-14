@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { validarPin, fetchConsumos } from '../services/api';
+import { validarPin, fetchConsumos, safeText, normalizeErrorMessage as safeErrorMessage } from '../services/api';
 import { COP, FECHA } from '../utils/helpers';
 import { CAT_ICONS } from '../constants';
 import PantallaForm from './PantallaForm';
@@ -14,27 +14,7 @@ export default function PantallaVer({ onNav }) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [recaptchaToken, setRecaptchaToken] = useState(null);
-  const [captchaError, setCaptchaError] = useState(false);
-
-  const safeText = (value, fallback = '—') => {
-    if (value === null || value === undefined) return fallback;
-    if (typeof value === 'string') return value;
-    if (typeof value === 'number' || typeof value === 'boolean' || typeof value === 'bigint') return String(value);
-    try {
-      const serialized = JSON.stringify(value);
-      return serialized && serialized !== '{}' ? serialized : fallback;
-    } catch {
-      return fallback;
-    }
-  };
-
-  const safeErrorMessage = (e, fallback = 'Error al consultar habitación') => {
-    if (!e) return fallback;
-    if (typeof e === 'string') return e;
-    if (typeof e.message === 'string') return e.message;
-    if (typeof e.error === 'string') return e.error;
-    return safeText(e, fallback);
-  };
+  const [captchaError] = useState(false);
 
   const consultar = async () => {
     if (!numero.trim() || !pin.trim()) {

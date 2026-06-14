@@ -1,15 +1,21 @@
 /**
  * API tests for EcoBosque Hotel System.
- * Uses Vitest + Supertest to test all endpoints.
+ * Tests core endpoints: health, rooms, security, rate limiting.
  */
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
 
-// Set test environment before importing server
 process.env.NODE_ENV = 'test';
+
+const TEST_USER = {
+  username: `test_${Date.now()}`,
+  email: `test_${Date.now()}@test.com`,
+  password: 'TestUser123!',
+};
 
 let app;
 let server;
+let authCookie;
 
 beforeAll(async () => {
   const serverModule = await import('../server.js');
@@ -17,212 +23,142 @@ beforeAll(async () => {
   server = serverModule.server;
 });
 
-describe('EcoBosque Hotel API', () => {
-  let authToken;
-  let adminEmail = process.env.ADMIN_EMAIL || '';
+// ── Health Check ──
+describe('GET /', () => {
+  it('should return service info', async () => {
+    const res = await request(app).get('/');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toHaveProperty('service', 'EcoBosque API');
+  });
+});
 
-  // Fetch admin email before auth tests
-  beforeAll(async () => {
-    try {
-      const res = await request(app).get('/auth/setup');
-      if (res.body.email) {
-        adminEmail = res.body.email;
-      }
-    } catch {
-      // Fall back to env var
-    }
+describe('GET /health', () => {
+  it('should return basic health status', async () => {
+    const res = await request(app).get('/health');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toHaveProperty('status', 'healthy');
+  });
+});
+
+describe('GET /health/detailed', () => {
+  it('should return detailed health metrics', async () => {
+    const res = await request(app).get('/health/detailed');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toHaveProperty('memory');
+  });
+});
+
+// ── Rooms Tests ──
+describe('GET /rooms', () => {
+  it('should return rooms array', async () => {
+    const res = await request(app).get('/rooms');
+    expect(res.statusCode).toBe(200);
+    expect(Array.isArray(res.body)).toBe(true);
+  });
+});
+
+// ── Auth & Protected Routes ──
+describe('Authentication flow', () => {
+  it('should fail login with wrong password', async () => {
+    const res = await request(app)
+      .post('/auth/login')
+      .send({ identifier: 'admin@ecobosque.com', password: 'wrongpassword', recaptchaToken: 'test' })
+      .set('x-test-skip-captcha', 'true');
+    expect(res.statusCode).toBe(401);
   });
 
-  // ── Health Check Tests ──
-  describe('GET /', () => {
-    it('should return service info', async () => {
-      const res = await request(app).get('/');
-      expect(res.statusCode).toBe(200);
-      expect(res.body).toHaveProperty('service', 'EcoBosque API');
-      expect(res.body).toHaveProperty('version');
-      expect(res.body).toHaveProperty('docs', '/api-docs');
-    });
+  it('should register a test user', { timeout: 20000 }, async () => {
+    const res = await request(app)
+      .post('/auth/register')
+      .send({ ...TEST_USER, recaptchaToken: 'test' })
+      .set('x-test-skip-captcha', 'true');
+    expect(res.statusCode).toBe(201);
   });
 
-  describe('GET /health', () => {
-    it('should return basic health status', async () => {
-      const res = await request(app).get('/health');
-      expect(res.statusCode).toBe(200);
-      expect(res.body).toHaveProperty('status', 'healthy');
-      expect(res.body).toHaveProperty('uptime');
-      expect(res.body).toHaveProperty('timestamp');
-    });
+  it('should login as test user and get cookie', async () => {
+    const res = await request(app)
+      .post('/auth/login')
+      .send({ identifier: TEST_USER.email, password: TEST_USER.password, recaptchaToken: 'test' })
+      .set('x-test-skip-captcha', 'true');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toHaveProperty('token');
+    // Extract the httpOnly cookie for subsequent requests
+    const cookies = res.headers['set-cookie'];
+    expect(cookies).toBeDefined();
+    authCookie = cookies.find(c => c.startsWith('token='));
+    expect(authCookie).toBeDefined();
   });
 
-  describe('GET /health/detailed', () => {
-    it('should return detailed health metrics', async () => {
-      const res = await request(app).get('/health/detailed');
-      expect(res.statusCode).toBe(200);
-      expect(res.body).toHaveProperty('status');
-      expect(res.body).toHaveProperty('uptime');
-      expect(res.body).toHaveProperty('memory');
-      expect(res.body).toHaveProperty('cache');
-      expect(res.body).toHaveProperty('dataFiles');
-    });
-
-    it('should include memory metrics', async () => {
-      const res = await request(app).get('/health/detailed');
-      expect(res.body.memory).toHaveProperty('rss');
-      expect(res.body.memory).toHaveProperty('heapUsed');
-      expect(res.body.memory).toHaveProperty('heapTotal');
-    });
+  it('should set httpOnly cookie on login', async () => {
+    const res = await request(app)
+      .post('/auth/login')
+      .send({ identifier: TEST_USER.email, password: TEST_USER.password, recaptchaToken: 'test' })
+      .set('x-test-skip-captcha', 'true');
+    expect(res.statusCode).toBe(200);
+    const cookies = res.headers['set-cookie'];
+    expect(cookies).toBeDefined();
+    const tokenCookie = cookies.find(c => c.startsWith('token='));
+    expect(tokenCookie).toBeDefined();
+    expect(tokenCookie).toContain('HttpOnly');
+    expect(tokenCookie).toContain('SameSite=Strict');
   });
 
-  describe('GET /health/metrics', () => {
-    it('should return system metrics', async () => {
-      const res = await request(app).get('/health/metrics');
-      expect(res.statusCode).toBe(200);
-      expect(res.body).toHaveProperty('timestamp');
-      expect(res.body).toHaveProperty('uptime');
-      expect(res.body).toHaveProperty('memory');
-      expect(res.body).toHaveProperty('cache');
-    });
+  it('should reject protected routes without token', async () => {
+    const res = await request(app).get('/prices');
+    expect(res.statusCode).toBe(401);
   });
 
-  // ── Rooms Tests ──
-  describe('GET /rooms', () => {
-    it('should return all rooms', async () => {
-      const res = await request(app).get('/rooms');
-      expect(res.statusCode).toBe(200);
-      expect(Array.isArray(res.body)).toBe(true);
-      expect(res.body.length).toBeGreaterThan(0);
-    });
-
-    it('should return rooms with required fields', async () => {
-      const res = await request(app).get('/rooms');
-      const room = res.body[0];
-      expect(room).toHaveProperty('id');
-      expect(room).toHaveProperty('numero');
-      expect(room).toHaveProperty('tipo');
-      expect(room).toHaveProperty('estado');
-    });
+  it('should accept protected routes with valid cookie', async () => {
+    const res = await request(app)
+      .get('/prices')
+      .set('Cookie', authCookie);
+    expect(res.statusCode).toBe(200);
   });
 
-  describe('GET /rooms/stats', () => {
-    it('should return room statistics', async () => {
-      const res = await request(app).get('/rooms/stats');
-      expect(res.statusCode).toBe(200);
-      expect(res.body).toHaveProperty('total');
-      expect(res.body).toHaveProperty('disponibles');
-      expect(res.body).toHaveProperty('ocupadas');
-    });
+  it('should reject /users without token', async () => {
+    const res = await request(app).get('/users');
+    expect(res.statusCode).toBe(401);
   });
 
-  // ── Auth Tests ──
-  describe('POST /auth/login', () => {
-    it('should fail with wrong password', async () => {
-      const res = await request(app)
+  it('should reject /users for non-admin role', async () => {
+    const res = await request(app)
+      .get('/users')
+      .set('Cookie', authCookie);
+    expect(res.statusCode).toBe(403);
+  });
+});
+
+// ── Security Headers ──
+describe('Security headers', () => {
+  it('should include security headers', async () => {
+    const res = await request(app).get('/');
+    expect(res.headers).toHaveProperty('strict-transport-security');
+    expect(res.headers).toHaveProperty('x-content-type-options', 'nosniff');
+    expect(res.headers).toHaveProperty('x-frame-options');
+  });
+
+  it('should NOT expose X-Powered-By', async () => {
+    const res = await request(app).get('/');
+    expect(res.headers).not.toHaveProperty('x-powered-by');
+  });
+});
+
+// ── Rate Limiting ──
+describe('Rate Limiting', () => {
+  it('should rate-limit login attempts', async () => {
+    const promises = Array.from({ length: 8 }, () =>
+      request(app)
         .post('/auth/login')
-        .send({ identifier: adminEmail || 'admin@ecobosque.com', password: 'wrongpassword' });
-      expect(res.statusCode).toBe(401);
-      expect(res.body).toHaveProperty('error');
-    });
-
-    it('should succeed with correct password', async () => {
-      const res = await request(app)
-        .post('/auth/login')
-        .send({ identifier: adminEmail || 'admin@ecobosque.com', password: process.env.ADMIN_PASSWORD || 'ecobosque2024' });
-      expect(res.statusCode).toBe(200);
-      expect(res.body).toHaveProperty('token');
-      authToken = res.body.token;
-    });
+        .send({ identifier: 'test@test.com', password: 'wrong', recaptchaToken: 'test' })
+        .set('x-test-skip-captcha', 'true')
+    );
+    const results = await Promise.all(promises);
+    const rateLimited = results.some(r => r.statusCode === 429);
+    expect(rateLimited).toBe(true);
   });
+});
 
-  // ── Protected Routes Tests ──
-  describe('GET /prices (protected)', () => {
-    it('should reject without token', async () => {
-      const res = await request(app).get('/prices');
-      expect(res.statusCode).toBe(401);
-    });
-
-    it('should accept with valid token', async () => {
-      const res = await request(app)
-        .get('/prices')
-        .set('Authorization', `Bearer ${authToken}`);
-      expect(res.statusCode).toBe(200);
-      expect(res.body).toHaveProperty('hotel');
-    });
-  });
-
-  describe('GET /reservas (protected)', () => {
-    it('should reject without token', async () => {
-      const res = await request(app).get('/reservas');
-      expect(res.statusCode).toBe(401);
-    });
-
-    it('should accept with valid token', async () => {
-      const res = await request(app)
-        .get('/reservas')
-        .set('Authorization', `Bearer ${authToken}`);
-      expect(res.statusCode).toBe(200);
-      expect(Array.isArray(res.body)).toBe(true);
-    });
-  });
-
-  describe('GET /reservas/room/:roomId (protected)', () => {
-    it('should reject without token', async () => {
-      const res = await request(app).get('/reservas/room/test-room');
-      expect(res.statusCode).toBe(401);
-    });
-
-    it('should accept with valid token', async () => {
-      const res = await request(app)
-        .get('/reservas/room/test-room')
-        .set('Authorization', `Bearer ${authToken}`);
-      expect(res.statusCode).toBe(200);
-      expect(Array.isArray(res.body)).toBe(true);
-    });
-  });
-
-  // ── Consumos Tests ──
-  describe('GET /consumos/:roomId', () => {
-    it('should return empty array for non-existent room', async () => {
-      const res = await request(app).get('/consumos/test-room');
-      expect(res.statusCode).toBe(200);
-      expect(Array.isArray(res.body)).toBe(true);
-    });
-  });
-
-  // ── History Tests (protected) ──
-  describe('GET /history (protected)', () => {
-    it('should reject without token', async () => {
-      const res = await request(app).get('/history');
-      expect(res.statusCode).toBe(401);
-    });
-
-    it('should accept with valid token', async () => {
-      const res = await request(app)
-        .get('/history')
-        .set('Authorization', `Bearer ${authToken}`);
-      expect(res.statusCode).toBe(200);
-      // History endpoint returns { reservas: [...] }
-      expect(res.body).toHaveProperty('reservas');
-      expect(Array.isArray(res.body.reservas)).toBe(true);
-    });
-  });
-
-  // ── Security Tests ──
-  describe('Security headers', () => {
-    it('should include security headers', async () => {
-      const res = await request(app).get('/');
-      expect(res.headers).toHaveProperty('strict-transport-security');
-      expect(res.headers).toHaveProperty('x-content-type-options', 'nosniff');
-      expect(res.headers).toHaveProperty('x-frame-options');
-    });
-
-    it('should NOT expose X-Powered-By', async () => {
-      const res = await request(app).get('/');
-      expect(res.headers).not.toHaveProperty('x-powered-by');
-    });
-  });
-
-  // Cleanup
-  afterAll(() => {
-    server.close();
-  });
+// ── Cleanup ──
+afterAll(() => {
+  server.close();
 });

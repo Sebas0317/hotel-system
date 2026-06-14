@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { validarPin, createConsumo } from '../services/api';
+import { validarPin, createConsumo, safeText, normalizeErrorMessage as safeErrorMessage } from '../services/api';
 import { PRODUCTOS, CATEGORIAS_CONSUMO } from '../constants';
 import { COP } from '../utils/helpers';
 import PantallaForm from './PantallaForm';
@@ -22,27 +22,7 @@ export default function PantallaConsumo({ onNav }) {
   const [exito, setExito] = useState(false);
   const [loading, setLoading] = useState(false);
   const [recaptchaToken, setRecaptchaToken] = useState(null);
-  const [captchaError, setCaptchaError] = useState(false);
-
-  const safeText = (value, fallback = '—') => {
-    if (value === null || value === undefined) return fallback;
-    if (typeof value === 'string') return value;
-    if (typeof value === 'number' || typeof value === 'boolean' || typeof value === 'bigint') return String(value);
-    try {
-      const serialized = JSON.stringify(value);
-      return serialized && serialized !== '{}' ? serialized : fallback;
-    } catch {
-      return fallback;
-    }
-  };
-
-  const safeErrorMessage = (e, fallback = 'Error al registrar consumo') => {
-    if (!e) return fallback;
-    if (typeof e === 'string') return e;
-    if (typeof e.message === 'string') return e.message;
-    if (typeof e.error === 'string') return e.error;
-    return safeText(e, fallback);
-  };
+  const [captchaError] = useState(false);
 
   const validar = async () => {
     if (!numero.trim() || !pin.trim()) {
