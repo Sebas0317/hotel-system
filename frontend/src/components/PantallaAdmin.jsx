@@ -870,12 +870,13 @@ export default function PantallaAdmin({ onSalir, onNav }) {
     </div>
   );
 
-  const [expandedRoomId, setExpandedRoomId] = useState(null);
-
   // Table filter states
   const [listFilter, setListFilter] = useState({ numero: '', huesped: '', tipo: '', estado: 'todos' });
   const [resFilter, setResFilter] = useState({ numero: '', huesped: '' });
-  const [histFilter, setHistFilter] = useState({ room: '', estado: 'todos' });
+
+  // History log filter states
+  const [logSearch, setLogSearch] = useState('');
+  const [logFilter, setLogFilter] = useState('todos');
 
   // Excel export state
   const [exporting, setExporting] = useState(false);
@@ -916,7 +917,7 @@ export default function PantallaAdmin({ onSalir, onNav }) {
   });
 
   // History loading — using TanStack Query
-  const { data: historyData, isLoading: historyLoading } = useQuery({
+  const { data: historyData } = useQuery({
     queryKey: queryKeys.history,
     queryFn: () => Promise.all([fetchStateHistory(), fetchRooms(), fetchHistory()]),
     staleTime: 1000 * 60 * 10, // 10 minutes
@@ -924,7 +925,6 @@ export default function PantallaAdmin({ onSalir, onNav }) {
   });
 
   const history = historyData?.[0] || [];
-  const allRooms = historyData?.[1] || [];
   const reservationHistory = historyData?.[2]?.reservas || historyData?.[2] || [];
 
   const { data: loginLogsData = [], isLoading: loginLogsLoading, refetch: refetchLogs } = useQuery({
@@ -932,6 +932,20 @@ export default function PantallaAdmin({ onSalir, onNav }) {
     queryFn: () => fetchLoginLogs(500),
     staleTime: 1000 * 30,
     enabled: activeView === 'history',
+  });
+
+  // Security queries
+  const { data: secEvents } = useQuery({
+    queryKey: queryKeys.securityEvents,
+    queryFn: () => fetchSecurityEvents(200),
+    staleTime: 1000 * 60,
+    enabled: activeView === 'security',
+  });
+  const { data: secUsers } = useQuery({
+    queryKey: ['users-list'],
+    queryFn: () => fetchUsers(),
+    staleTime: 1000 * 60 * 5,
+    enabled: activeView === 'security',
   });
 
   const handleRefresh = useCallback(() => {
@@ -1168,9 +1182,6 @@ export default function PantallaAdmin({ onSalir, onNav }) {
 
   // ── History view (login access logs) ──
   if (activeView === 'history') {
-    const [logSearch, setLogSearch] = useState('');
-    const [logFilter, setLogFilter] = useState('todos');
-
     const filteredLogs = loginLogsData.filter(l => {
       if (logFilter === 'success' && !l.success) return false;
       if (logFilter === 'failed' && l.success) return false;
@@ -1707,9 +1718,9 @@ export default function PantallaAdmin({ onSalir, onNav }) {
               </div>
             </div>
           </div>
-          <PantallaCheckin standalone={false} onNav={(action) => {
+            <PantallaCheckin standalone={false} onNav={(action) => {
             if (action === 'menu' || action === 'volver') {
-              setActiveView('rooms');
+              handleNavigate('rooms');
             }
           }} />
         </div>
@@ -1737,18 +1748,6 @@ export default function PantallaAdmin({ onSalir, onNav }) {
 
   // ── Security view ──
   if (activeView === 'security') {
-    const { data: secEvents } = useQuery({
-      queryKey: queryKeys.securityEvents,
-      queryFn: () => fetchSecurityEvents(200),
-      staleTime: 1000 * 60,
-      enabled: activeView === 'security',
-    });
-    const { data: secUsers } = useQuery({
-      queryKey: ['users-list'],
-      queryFn: () => fetchUsers(),
-      staleTime: 1000 * 60 * 5,
-      enabled: activeView === 'security',
-    });
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-emerald-50/40">
         <AdminTopbar onSalir={onSalir} onNavigate={handleNavigate} rooms={rooms} onRoomSelect={handleSelectRoom} />

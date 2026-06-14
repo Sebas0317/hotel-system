@@ -529,10 +529,6 @@ export async function validarPin(numero, pin, recaptchaToken) {
     method: 'POST',
     body: { numero, pin, recaptchaToken },
   });
-  if (data.roomToken) {
-    setRoomToken(data.roomToken);
-  }
-  return normalizeRoom(data.room || data);
 }
 
 /**
