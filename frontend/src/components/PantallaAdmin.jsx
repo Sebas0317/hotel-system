@@ -31,16 +31,28 @@ import { Card, CardContent } from './ui/Card';
 import PantallaCheckin from './PantallaCheckin';
 import PantallaUsuarios from './PantallaUsuarios';
 
-const NAV_ITEMS = [
-  { key: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { key: 'rooms', label: 'Habitaciones', icon: Home },
-  { key: 'register', label: 'Registrar', icon: ClipboardPen },
-  { key: 'transactions', label: 'Transacciones', icon: CreditCard },
-  { key: 'accounting', label: 'Contabilidad', icon: Receipt },
-  { key: 'prices', label: 'Precios', icon: DollarSign },
-  { key: 'users', label: 'Usuarios', icon: Users },
-  { key: 'security', label: 'Seguridad', icon: Shield },
-];
+function getNavItems(rol) {
+  const all = [
+    { key: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { key: 'rooms', label: 'Habitaciones', icon: Home },
+    { key: 'register', label: 'Registrar', icon: ClipboardPen },
+    { key: 'transactions', label: 'Transacciones', icon: CreditCard },
+    { key: 'reservations', label: 'Reservaciones', icon: Calendar },
+    { key: 'accounting', label: 'Contabilidad', icon: Receipt },
+    { key: 'prices', label: 'Precios', icon: DollarSign },
+    { key: 'users', label: 'Usuarios', icon: Users },
+    { key: 'history', label: 'Historial', icon: History },
+    { key: 'security', label: 'Seguridad', icon: Shield },
+  ];
+  if (rol === 'analyst') {
+    return all.filter(i => i.key === 'dashboard' || i.key === 'accounting');
+  }
+  if (rol === 'operator') {
+    return all.filter(i => ['dashboard', 'rooms', 'register', 'transactions', 'reservations', 'prices', 'history'].includes(i.key));
+  }
+  // owner and admin see everything
+  return all;
+}
 
 /** Memoized topbar with last login, logs dropdown, and notification bell */
 const AdminTopbar = memo(function AdminTopbar({ onSalir, onNavigate, rooms = [], onRoomSelect }) {
@@ -312,12 +324,13 @@ const AdminTopbar = memo(function AdminTopbar({ onSalir, onNavigate, rooms = [],
 });
 
 /** Memoized navigation — extracted from 6 duplicated instances */
-const AdminNav = memo(function AdminNav({ activeView, onNavigate }) {
+const NAV_ITEMS = getNavItems('admin');
+const AdminNav = memo(function AdminNav({ activeView, onNavigate, items = NAV_ITEMS }) {
   return (
     <nav className="bg-white/90 backdrop-blur-lg border-b border-gray-200/50 sticky top-[58px] z-50">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex items-center gap-1 py-2 overflow-x-auto scrollbar-hide">
-          {NAV_ITEMS.map(item => (
+          {items.map(item => (
             <button
               key={item.key}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-all duration-300 ${
@@ -761,7 +774,7 @@ function CheckinForm({ room, onSuccess, onCancel }) {
   );
 }
 
-export default function PantallaAdmin({ onSalir, onNav }) {
+export default function PantallaAdmin({ rol = 'admin', onSalir, onNav }) {
   const { rooms, loading, refresh } = useRooms();
   const [inlineToast, setInlineToast] = useState(null);
 
@@ -793,6 +806,7 @@ export default function PantallaAdmin({ onSalir, onNav }) {
   const navigateFn = onNav || routerNavigate;
   const activeView = getViewFromPath(location.pathname);
   const selectedRoomId = getRoomIdFromPath(location.pathname);
+  const navItems = useMemo(() => getNavItems(rol), [rol]);
 
   const [filtro, setFiltro] = useState('todos');
   const [buscar, setBuscar] = useState('');
@@ -1198,7 +1212,7 @@ export default function PantallaAdmin({ onSalir, onNav }) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-emerald-50/40">
         <AdminTopbar onSalir={onSalir} onNavigate={handleNavigate} rooms={rooms} onRoomSelect={handleSelectRoom} />
-        <AdminNav activeView={activeView} onNavigate={handleNavigate} />
+        <AdminNav activeView={activeView} onNavigate={handleNavigate} items={navItems} />
           {renderBreadcrumbs()}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between mb-6">
@@ -1312,9 +1326,9 @@ export default function PantallaAdmin({ onSalir, onNav }) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-emerald-50/40">
         <AdminTopbar onSalir={onSalir} onNavigate={handleNavigate} rooms={rooms} onRoomSelect={handleSelectRoom} />
-        <AdminNav activeView={activeView} onNavigate={handleNavigate} />
+        <AdminNav activeView={activeView} onNavigate={handleNavigate} items={navItems} />
           {renderBreadcrumbs()}
-        <PantallaUsuarios />
+        <PantallaUsuarios userRole={rol} />
       </div>
     );
   }
@@ -1323,7 +1337,7 @@ export default function PantallaAdmin({ onSalir, onNav }) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-emerald-50/40">
         <AdminTopbar onSalir={onSalir} onNavigate={handleNavigate} rooms={rooms} onRoomSelect={handleSelectRoom} />
-        <AdminNav activeView={activeView} onNavigate={handleNavigate} />
+        <AdminNav activeView={activeView} onNavigate={handleNavigate} items={navItems} />
           {renderBreadcrumbs()}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <PriceEditor
@@ -1367,7 +1381,7 @@ export default function PantallaAdmin({ onSalir, onNav }) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-emerald-50/40">
         <AdminTopbar onSalir={onSalir} onNavigate={handleNavigate} rooms={rooms} onRoomSelect={handleSelectRoom} />
-        <AdminNav activeView={activeView} onNavigate={handleNavigate} />
+        <AdminNav activeView={activeView} onNavigate={handleNavigate} items={navItems} />
           {renderBreadcrumbs()}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between mb-6">
@@ -1448,7 +1462,7 @@ export default function PantallaAdmin({ onSalir, onNav }) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-emerald-50/40">
         <AdminTopbar onSalir={onSalir} onNavigate={handleNavigate} rooms={rooms} onRoomSelect={handleSelectRoom} />
-        <AdminNav activeView={activeView} onNavigate={handleNavigate} />
+        <AdminNav activeView={activeView} onNavigate={handleNavigate} items={navItems} />
           {renderBreadcrumbs()}
         <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <h2 className="text-xl font-bold"><CreditCard className="w-5 h-5 inline mr-2" /> Registrar Consumo</h2>
@@ -1554,7 +1568,7 @@ export default function PantallaAdmin({ onSalir, onNav }) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-emerald-50/40">
         <AdminTopbar onSalir={onSalir} onNavigate={handleNavigate} rooms={rooms} onRoomSelect={handleSelectRoom} />
-        <AdminNav activeView={activeView} onNavigate={handleNavigate} />
+        <AdminNav activeView={activeView} onNavigate={handleNavigate} items={navItems} />
           {renderBreadcrumbs()}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between mb-6">
@@ -1703,7 +1717,7 @@ export default function PantallaAdmin({ onSalir, onNav }) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-emerald-50/40">
         <AdminTopbar onSalir={onSalir} onNavigate={handleNavigate} rooms={rooms} onRoomSelect={handleSelectRoom} />
-        <AdminNav activeView={activeView} onNavigate={handleNavigate} />
+        <AdminNav activeView={activeView} onNavigate={handleNavigate} items={navItems} />
           {renderBreadcrumbs()}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-md border border-gray-200/60 overflow-hidden hover:shadow-lg transition-shadow duration-300 mb-6">
@@ -1733,7 +1747,7 @@ export default function PantallaAdmin({ onSalir, onNav }) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-emerald-50/40">
         <AdminTopbar onSalir={onSalir} onNavigate={handleNavigate} rooms={rooms} onRoomSelect={handleSelectRoom} />
-        <AdminNav activeView={activeView} onNavigate={handleNavigate} />
+        <AdminNav activeView={activeView} onNavigate={handleNavigate} items={navItems} />
           {renderBreadcrumbs()}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <AdminDashboard
@@ -1751,7 +1765,7 @@ export default function PantallaAdmin({ onSalir, onNav }) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-emerald-50/40">
         <AdminTopbar onSalir={onSalir} onNavigate={handleNavigate} rooms={rooms} onRoomSelect={handleSelectRoom} />
-        <AdminNav activeView={activeView} onNavigate={handleNavigate} />
+        <AdminNav activeView={activeView} onNavigate={handleNavigate} items={navItems} />
           {renderBreadcrumbs()}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <SecurityDashboard
@@ -1772,7 +1786,7 @@ export default function PantallaAdmin({ onSalir, onNav }) {
         <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-emerald-300/15 rounded-full blur-3xl" />
       </div>
       <AdminTopbar onSalir={onSalir} onNavigate={handleNavigate} rooms={rooms} onRoomSelect={handleSelectRoom} />
-      <AdminNav activeView={activeView} onNavigate={handleNavigate} />
+      <AdminNav activeView={activeView} onNavigate={handleNavigate} items={navItems} />
         {renderBreadcrumbs()}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 relative">
         {/* Breadcrumb */}

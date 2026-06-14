@@ -5,7 +5,7 @@ import {
   Mail, Lock, Eye, EyeOff, LogIn, UserPlus,
   ArrowLeft, Loader, CheckCircle, AlertCircle,
 } from 'lucide-react';
-import { loginAdmin, setAuthToken, registerUser } from '../services/api';
+import { loginAdmin, setAuthToken, setUserInfo, registerUser } from '../services/api';
 import ReCaptchaWidget from './ReCaptchaWidget';
 import HotelTitle from './HotelTitle';
 import TwoFactorScreen from './TwoFactorScreen';
@@ -325,7 +325,12 @@ function AdminLogin({ onBack, onRole }) {
         return;
       }
       setAuthToken(result.token);
-      onRole('admin');
+      if (result.usuario) {
+        setUserInfo(result.usuario);
+        onRole(result.usuario.role || 'admin');
+      } else {
+        onRole('admin');
+      }
     } catch (e) {
       setError(safeErrorMessage(e));
     } finally {
@@ -608,9 +613,14 @@ function TwoFactorRoute({ onRole }) {
   const userId = params.userId;
   const state = location.state || {};
 
-  const handleVerified = (token) => {
+  const handleVerified = (token, usuario) => {
     setAuthToken(token);
-    onRole('admin');
+    if (usuario) {
+      setUserInfo(usuario);
+      onRole(usuario.role || 'admin');
+    } else {
+      onRole('admin');
+    }
   };
 
   return (

@@ -8,7 +8,7 @@ const logger = require('../utils/logger');
 
 const USERS_FILE = path.join(__dirname, '../../users.json');
 
-const ROLES = ['admin', 'operator', 'analyst', 'reception', 'cliente'];
+const ROLES = ['owner', 'admin', 'operator', 'analyst', 'cliente'];
 
 async function getUsers() {
   return readJsonFile(USERS_FILE, []);
@@ -38,7 +38,7 @@ async function findUserByEmailOrUsername(identifier) {
   return users.find(u => u.email === identifier || u.username === identifier) || null;
 }
 
-async function createUser({ username, email, password, firstName, lastName, role = 'reception', isActive = true }) {
+async function createUser({ username, email, password, firstName, lastName, role = 'cliente', isActive = true }) {
   const users = await getUsers();
   const passwordHash = await bcrypt.hash(password, 12);
   const now = new Date().toISOString();
@@ -87,14 +87,28 @@ async function updateUser(id, updates) {
   return safeUser;
 }
 
-async function deleteUser(id) {
+async function deleteUser(id, callerRole = null) {
   const users = await getUsers();
   const index = users.findIndex(u => u.id === id);
-  if (index === -1) return false;
-  if (users[index].role === 'admin') return false;
+  if (index === -1) return { deleted: false, reason: 'not_found' };
+
+  const targetRole = users[index].role;
+
+  // owner can delete anyone
+  if (callerRole === 'owner') {
+    users.splice(index, 1);
+    await saveUsers(users);
+    return { deleted: true };
+  }
+
+  // admin cannot delete other admins or owners
+  if (targetRole === 'admin' || targetRole === 'owner') {
+    return { deleted: false, reason: 'protected' };
+  }
+
   users.splice(index, 1);
   await saveUsers(users);
-  return true;
+  return { deleted: true };
 }
 
 async function verifyPassword(identifier, password) {
@@ -194,6 +208,40 @@ function sanitizeUsers(users) {
   return users.map(sanitizeUser);
 }
 
+async function seedOwnerUser() {
+  const users = await getUsers();
+  const ownerEmail = 'sebastiansandoval12371@gmail.com';
+
+  const existing = users.find(u => u.email === ownerEmail);
+  if (existing) {
+    if (existing.role !== 'owner') {
+      return updateUser(existing.id, { role: 'owner', emailVerified: true });
+    }
+    if (!existing.emailVerified) {
+      return updateUser(existing.id, { emailVerified: true });
+    }
+    return existing;
+  }
+
+  const existingOwnerByRole = users.find(u => u.role === 'owner');
+  if (existingOwnerByRole) return existingOwnerByRole;
+
+  // Create owner user if it doesn't exist
+  const safeUser = await createUser({
+    username: 'sebastiansandoval',
+    email: ownerEmail,
+    password: process.env.OWNER_PASSWORD || process.env.ADMIN_PASSWORD || 'ecohotel2024',
+    firstName: 'Sebastian',
+    lastName: 'Sandoval',
+    role: 'owner',
+    isActive: true,
+  });
+  await updateUser(safeUser.id, { emailVerified: true });
+  const result = await findUserById(safeUser.id);
+  logger.info('Owner user seeded');
+  return result;
+}
+
 async function countByRole() {
   const users = await getUsers();
   const counts = {};
@@ -214,7 +262,7 @@ module.exports = {
   findUserById, findUserByEmail, findUserByUsername, findUserByEmailOrUsername,
   createUser, updateUser, deleteUser,
   verifyPassword, changePassword,
-  seedAdminUser, updateLastLogin,
+  seedAdminUser, seedOwnerUser, updateLastLogin,
   sanitizeUser, sanitizeUsers,
   countByRole, getActiveCount,
 };

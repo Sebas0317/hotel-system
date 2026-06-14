@@ -129,8 +129,13 @@ async function deleteUser(req, res) {
       return res.status(400).json({ error: 'No puedes eliminarte a ti mismo' });
     }
 
-    const deleted = await userStore.deleteUser(req.params.id);
-    if (!deleted) return res.status(404).json({ error: 'Usuario no encontrado o es admin principal' });
+    const result = await userStore.deleteUser(req.params.id, req.user.role);
+    if (!result.deleted) {
+      if (result.reason === 'protected') {
+        return res.status(403).json({ error: 'No puedes eliminar administradores u otros owners' });
+      }
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
 
     logger.info({ userId: req.params.id, deletedBy: req.user.id }, 'User deleted');
     await auditor.userDeleted(meta.userId, meta.ip, req.params.id);
@@ -143,11 +148,24 @@ async function deleteUser(req, res) {
 
 async function resetUserPassword(req, res) {
   try {
-    const { newPassword } = req.body;
+    const { newPassword, twoFactorCode } = req.body;
     const meta = auditor.reqMeta(req);
 
     if (!newPassword || newPassword.length < 8) {
       return res.status(400).json({ error: 'La contrasena debe tener al menos 8 caracteres' });
+    }
+
+    // Require 2FA code if the admin has 2FA enabled
+    const admin = await userStore.findUserById(req.user.id);
+    if (admin && admin.twoFactorEnabled) {
+      if (!twoFactorCode) {
+        return res.status(400).json({ error: 'Codigo 2FA requerido', requires2FA: true });
+      }
+      const codeStore = require('../data/codeStore');
+      const verification = await codeStore.verifyCode(req.user.id, '2fa', twoFactorCode, true);
+      if (!verification.valid) {
+        return res.status(401).json({ error: verification.reason || 'Codigo 2FA invalido' });
+      }
     }
 
     const user = await userStore.findUserById(req.params.id);

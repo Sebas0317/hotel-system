@@ -106,7 +106,7 @@ async function register(req, res) {
       username, email, password,
       firstName: firstName || '',
       lastName: lastName || '',
-      role: ['admin', 'operator', 'analyst', 'reception'].includes(role) ? role : 'reception',
+      role: ['owner', 'admin', 'operator', 'analyst', 'cliente'].includes(role) ? role : 'cliente',
     });
 
     try {

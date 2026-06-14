@@ -53,7 +53,7 @@ export default function TwoFactorScreen({ userId, onVerified, onBack, email }) {
       const result = await verify2FA(userId, fullCode);
       setSuccess(true);
       await new Promise(r => setTimeout(r, 1200));
-      onVerified(result.token);
+      onVerified(result.token, result.usuario);
     } catch (e) {
       setError(e.message || 'Codigo invalido o expirado');
     } finally {

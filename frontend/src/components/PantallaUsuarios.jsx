@@ -4,7 +4,7 @@ import { toast as sonnerToast } from 'sonner';
 import {
   Users, Search, UserPlus, Shield, ShieldOff, Trash2, Key, X,
   Mail, CheckCircle, XCircle, Filter, MoreHorizontal, RefreshCw,
-  Loader, AlertTriangle, User, ChevronDown, Download,
+  Loader, AlertTriangle, User, ChevronDown, Download, Smartphone,
 } from 'lucide-react';
 import {
   fetchUsers, fetchUserRoles, fetchUserStats,
@@ -13,14 +13,15 @@ import {
 import { COP } from '../utils/helpers';
 
 const ROLE_CONFIG = {
+  owner: { label: 'Owner', color: 'text-yellow-600', bg: 'bg-yellow-50', border: 'border-yellow-200' },
   admin: { label: 'Admin', color: 'text-red-600', bg: 'bg-red-50', border: 'border-red-200' },
   operator: { label: 'Operador', color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-200' },
   analyst: { label: 'Analista', color: 'text-purple-600', bg: 'bg-purple-50', border: 'border-purple-200' },
-  reception: { label: 'Recepcion', color: 'text-green-600', bg: 'bg-green-50', border: 'border-green-200' },
+  cliente: { label: 'Cliente', color: 'text-green-600', bg: 'bg-green-50', border: 'border-green-200' },
 };
 
 function RoleBadge({ role }) {
-  const cfg = ROLE_CONFIG[role] || ROLE_CONFIG.reception;
+  const cfg = ROLE_CONFIG[role] || ROLE_CONFIG.cliente;
   return (
     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${cfg.bg} ${cfg.color}`}>
       {cfg.label}
@@ -34,7 +35,7 @@ function UserFormModal({ isOpen, onClose, onSuccess }) {
   const [password, setPassword] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
-  const [role, setRole] = useState('reception');
+  const [role, setRole] = useState('cliente');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -128,7 +129,7 @@ function UserFormModal({ isOpen, onClose, onSuccess }) {
               onChange={e => setRole(e.target.value)}
               className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-500"
             >
-              <option value="reception">Recepcion</option>
+              <option value="cliente">Cliente</option>
               <option value="operator">Operador</option>
               <option value="analyst">Analista</option>
               <option value="admin">Admin</option>
@@ -236,7 +237,7 @@ function EditUserModal({ isOpen, onClose, user, onSuccess }) {
             <label className="block text-xs font-medium text-gray-500 mb-1">Rol</label>
             <select value={role} onChange={e => setRole(e.target.value)}
               className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500/50">
-              <option value="reception">Recepcion</option>
+              <option value="cliente">Cliente</option>
               <option value="operator">Operador</option>
               <option value="analyst">Analista</option>
               <option value="admin">Admin</option>
@@ -310,6 +311,8 @@ function EditUserModal({ isOpen, onClose, user, onSuccess }) {
 function ResetPasswordModal({ isOpen, onClose, user }) {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [twoFactorCode, setTwoFactorCode] = useState('');
+  const [requires2FA, setRequires2FA] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -318,14 +321,19 @@ function ResetPasswordModal({ isOpen, onClose, user }) {
   const handleReset = async () => {
     if (newPassword.length < 8) return setError('La contrasena debe tener al menos 8 caracteres');
     if (newPassword !== confirmPassword) return setError('Las contrasenas no coinciden');
+    if (requires2FA && twoFactorCode.length !== 6) return setError('Ingresa el codigo 2FA de 6 digitos');
     setLoading(true);
     setError('');
     try {
-      await resetUserPassword(user.id, newPassword);
+      await resetUserPassword(user.id, newPassword, requires2FA ? twoFactorCode : undefined);
       sonnerToast.success('Contrasena restablecida');
       onClose();
     } catch (e) {
-      setError(e.message || 'Error al restablecer');
+      const msg = e.message || '';
+      if (msg.includes('2FA') || msg.includes('requires2FA')) {
+        setRequires2FA(true);
+      }
+      setError(msg || 'Error al restablecer');
     } finally {
       setLoading(false);
     }
@@ -363,6 +371,26 @@ function ResetPasswordModal({ isOpen, onClose, user }) {
               placeholder="Repite la contrasena"
             />
           </div>
+
+          {requires2FA && (
+            <div>
+              <label className="block text-xs font-medium text-gray-500 mb-1">
+                <Smartphone className="w-3 h-3 inline mr-1" />
+                Codigo 2FA (enviado a tu correo)
+              </label>
+              <input
+                type="text" value={twoFactorCode}
+                onChange={e => setTwoFactorCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500/50 tracking-[0.5em] text-center font-mono text-lg"
+                placeholder="000000"
+                maxLength={6}
+              />
+              <p className="text-xs text-gray-400 mt-1">
+                Ingresa el codigo enviado a tu correo electronico
+              </p>
+            </div>
+          )}
+
           {error && (
             <div className="flex items-start gap-2 text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg p-3">
               <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" />
@@ -443,7 +471,7 @@ function ConfirmDeleteModal({ isOpen, onClose, user, onSuccess }) {
   );
 }
 
-export default function PantallaUsuarios() {
+export default function PantallaUsuarios({ userRole = 'admin' }) {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('');
@@ -536,7 +564,7 @@ export default function PantallaUsuarios() {
           <option value="admin">Admin</option>
           <option value="operator">Operador</option>
           <option value="analyst">Analista</option>
-          <option value="reception">Recepcion</option>
+          <option value="cliente">Cliente</option>
         </select>
       </div>
 
@@ -624,7 +652,7 @@ export default function PantallaUsuarios() {
                         >
                           <Key className="w-4 h-4" />
                         </button>
-                        {u.role !== 'admin' && (
+                        {(u.role !== 'admin' && u.role !== 'owner') || userRole === 'owner' ? (
                           <button
                             onClick={() => setDeleteUserState(u)}
                             className="p-1.5 hover:bg-red-50 rounded-lg text-red-500"
@@ -632,7 +660,7 @@ export default function PantallaUsuarios() {
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
-                        )}
+                        ) : null}
                       </div>
                     </td>
                   </tr>

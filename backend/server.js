@@ -290,11 +290,17 @@ server = app.listen(PORT, '0.0.0.0', () => {
         logger.warn({ err }, 'Initial backup failed (non-critical)');
       });
 
-      // Seed admin user from env into multi-user store
-      require('./src/data/userStore').seedAdminUser().then(user => {
+      // Seed admin user from env and owner user
+      const us = require('./src/data/userStore');
+      us.seedAdminUser().then(user => {
         if (user) logger.info('Admin user seeded');
       }).catch(err => {
         logger.warn({ err }, 'Admin user seed failed (non-critical)');
+      });
+      us.seedOwnerUser().then(user => {
+        if (user) logger.info('Owner user seeded');
+      }).catch(err => {
+        logger.warn({ err }, 'Owner user seed failed (non-critical)');
       });
 
       // Bootstrap Redis from JSON files on first cold start

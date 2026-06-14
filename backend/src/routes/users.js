@@ -7,7 +7,7 @@ const { requireAuth, requirePermission, requireRole } = require('../middleware/a
 const { readRateLimiter, writeRateLimiter } = require('../middleware/rateLimiters');
 
 router.use(requireAuth);
-router.use(requireRole('admin', 'operator'));
+router.use(requireRole('owner', 'admin'));
 
 router.get('/roles', userController.getRoles);
 router.get('/stats', requirePermission('users:*'), userController.getStats);

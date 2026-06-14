@@ -3,7 +3,7 @@ import { Component, useState, Suspense, lazy, useRef, useEffect } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { Toaster, toast } from 'sonner';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { getAuthToken, setAuthToken, clearRoomToken } from './services/api';
+import { getAuthToken, setAuthToken, clearRoomToken, getUserInfo } from './services/api';
 import { useSession } from './hooks/useSession';
 import CybersecurityPanel from './components/CybersecurityPanel';
 import './App.css';
@@ -94,6 +94,14 @@ function LoadingFallback() {
   );
 }
 
+function isAdmin(rol) {
+  return rol && rol !== 'user' && rol !== 'cliente';
+}
+
+function adminRoute(rol, onSalir, navigate) {
+  return isAdmin(rol) ? <PantallaAdmin rol={rol} onSalir={onSalir} onNav={(path) => navigate(path)} /> : <SafeNavigate to="/" replace />;
+}
+
 /**
  * App root — now driven by URL routes instead of local state.
  *
@@ -112,8 +120,10 @@ function LoadingFallback() {
  */
 export default function App() {
   const [rol, setRol] = useState(() => {
-    // Restore admin session from stored token
-    return getAuthToken() ? 'admin' : null;
+    const token = getAuthToken();
+    if (!token) return null;
+    const userInfo = getUserInfo();
+    return userInfo ? userInfo.role : 'admin';
   });
   const navigate = useNavigate();
 
@@ -125,7 +135,11 @@ export default function App() {
    */
   const handleRol = (r) => {
     setRol(r);
-    navigate(r === 'admin' ? '/admin' : '/user', { replace: true });
+    if (r === 'user' || r === 'cliente') {
+      navigate('/user', { replace: true });
+    } else {
+      navigate('/admin', { replace: true });
+    }
   };
 
   const handleExit = () => {
@@ -196,7 +210,7 @@ export default function App() {
             !rol ? (
               <LoginScreen onRole={handleRol} />
             ) : (
-              <SafeNavigate to={rol === 'admin' ? '/admin' : '/user'} replace />
+              <SafeNavigate to={isAdmin(rol) ? '/admin' : '/user'} replace />
             )
           }
         />
@@ -225,162 +239,78 @@ export default function App() {
 
         <Route
           path="/admin"
-          element={
-            rol === 'admin' ? (
-              <PantallaAdmin onSalir={handleExit} onNav={(path) => navigate(path)} />
-            ) : (
-              <SafeNavigate to="/" replace />
-            )
-          }
+          element={adminRoute(rol, handleExit, navigate)}
         />
 
         <Route
           path="/admin/dashboard"
-          element={
-            rol === 'admin' ? (
-              <PantallaAdmin onSalir={handleExit} onNav={(path) => navigate(path)} />
-            ) : (
-              <SafeNavigate to="/" replace />
-            )
-          }
+          element={adminRoute(rol, handleExit, navigate)}
         />
 
         <Route
           path="/admin/room/:roomId"
-          element={
-            rol === 'admin' ? (
-              <PantallaAdmin onSalir={handleExit} onNav={(path) => navigate(path)} />
-            ) : (
-              <SafeNavigate to="/" replace />
-            )
-          }
+          element={adminRoute(rol, handleExit, navigate)}
         />
 
         <Route
           path="/admin/register"
-          element={
-            rol === 'admin' ? (
-              <PantallaAdmin onSalir={handleExit} onNav={(path) => navigate(path)} />
-            ) : (
-              <SafeNavigate to="/" replace />
-            )
-          }
+          element={adminRoute(rol, handleExit, navigate)}
         />
 
         <Route
           path="/admin/register/checkin"
-          element={
-            rol === 'admin' ? (
-              <PantallaAdmin onSalir={handleExit} onNav={(path) => navigate(path)} />
-            ) : (
-              <SafeNavigate to="/" replace />
-            )
-          }
+          element={adminRoute(rol, handleExit, navigate)}
         />
 
         <Route
           path="/admin/register/new"
-          element={
-            rol === 'admin' ? (
-              <PantallaAdmin onSalir={handleExit} onNav={(path) => navigate(path)} />
-            ) : (
-              <SafeNavigate to="/" replace />
-            )
-          }
+          element={adminRoute(rol, handleExit, navigate)}
         />
 
         <Route
           path="/admin/transactions"
-          element={
-            rol === 'admin' ? (
-              <PantallaAdmin onSalir={handleExit} onNav={(path) => navigate(path)} />
-            ) : (
-              <SafeNavigate to="/" replace />
-            )
-          }
+          element={adminRoute(rol, handleExit, navigate)}
         />
 
         <Route
           path="/admin/reservations"
-          element={
-            rol === 'admin' ? (
-              <PantallaAdmin onSalir={handleExit} onNav={(path) => navigate(path)} />
-            ) : (
-              <SafeNavigate to="/" replace />
-            )
-          }
+          element={adminRoute(rol, handleExit, navigate)}
         />
 
         <Route
           path="/admin/accounting"
-          element={
-            rol === 'admin' ? (
-              <PantallaAdmin onSalir={handleExit} onNav={(path) => navigate(path)} />
-            ) : (
-              <SafeNavigate to="/" replace />
-            )
-          }
+          element={adminRoute(rol, handleExit, navigate)}
         />
 
         <Route
           path="/admin/prices"
-          element={
-            rol === 'admin' ? (
-              <PantallaAdmin onSalir={handleExit} onNav={(path) => navigate(path)} />
-            ) : (
-              <SafeNavigate to="/" replace />
-            )
-          }
+          element={adminRoute(rol, handleExit, navigate)}
         />
 
         <Route
           path="/admin/users"
-          element={
-            rol === 'admin' ? (
-              <PantallaAdmin onSalir={handleExit} onNav={(path) => navigate(path)} />
-            ) : (
-              <SafeNavigate to="/" replace />
-            )
-          }
+          element={adminRoute(rol, handleExit, navigate)}
         />
 
         <Route
           path="/admin/history"
-          element={
-            rol === 'admin' ? (
-              <PantallaAdmin onSalir={handleExit} onNav={(path) => navigate(path)} />
-            ) : (
-              <SafeNavigate to="/" replace />
-            )
-          }
+          element={adminRoute(rol, handleExit, navigate)}
         />
 
         <Route
           path="/admin/security"
-          element={
-            rol === 'admin' ? (
-              <PantallaAdmin onSalir={handleExit} onNav={(path) => navigate(path)} />
-            ) : (
-              <SafeNavigate to="/" replace />
-            )
-          }
+          element={adminRoute(rol, handleExit, navigate)}
         />
 
         <Route
           path="/admin/reservaciones"
-          element={
-            rol === 'admin' ? (
-              <PantallaAdmin onSalir={handleExit} onNav={(path) => navigate(path)} />
-            ) : (
-              <SafeNavigate to="/" replace />
-            )
-          }
+          element={adminRoute(rol, handleExit, navigate)}
         />
 
         <Route
           path="/user"
           element={
-            rol === 'user' ? (
+            rol === 'user' || rol === 'cliente' ? (
               <UserView onExit={handleExit} />
             ) : (
               <SafeNavigate to="/" replace />
@@ -390,7 +320,7 @@ export default function App() {
         <Route
           path="/user/register"
           element={
-            rol === 'user' ? (
+            rol === 'user' || rol === 'cliente' ? (
               <PantallaCheckin onNav={(screen) => navigate(`/user/${screen}`)} />
             ) : (
               <SafeNavigate to="/" replace />
@@ -400,7 +330,7 @@ export default function App() {
         <Route
           path="/user/transactions"
           element={
-            rol === 'user' ? (
+            rol === 'user' || rol === 'cliente' ? (
               <PantallaConsumo onNav={(screen) => navigate(`/user/${screen}`)} />
             ) : (
               <SafeNavigate to="/" replace />
@@ -410,7 +340,7 @@ export default function App() {
         <Route
           path="/user/ver"
           element={
-            rol === 'user' ? (
+            rol === 'user' || rol === 'cliente' ? (
               <PantallaVer onNav={(screen) => navigate(`/user/${screen}`)} />
             ) : (
               <SafeNavigate to="/" replace />
@@ -420,7 +350,7 @@ export default function App() {
         <Route
           path="/user/checkout"
           element={
-            rol === 'user' ? (
+            rol === 'user' || rol === 'cliente' ? (
               <UserCheckout onExit={handleExit} />
             ) : (
               <SafeNavigate to="/" replace />

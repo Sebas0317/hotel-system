@@ -403,10 +403,12 @@ export async function deleteUser(id) {
 /**
  * Reset a user's password (admin only)
  */
-export async function resetUserPassword(id, newPassword) {
+export async function resetUserPassword(id, newPassword, twoFactorCode) {
+  const body = { newPassword };
+  if (twoFactorCode) body.twoFactorCode = twoFactorCode;
   return apiFetch(`/users/${id}/reset-password`, {
     method: 'POST',
-    body: { newPassword },
+    body,
   });
 }
 
@@ -433,6 +435,7 @@ export function setAuthToken(token) {
     localStorage.setItem('adminToken', token);
   } else {
     localStorage.removeItem('adminToken');
+    localStorage.removeItem('userInfo');
   }
 }
 
@@ -442,6 +445,31 @@ export function setAuthToken(token) {
  */
 export function getAuthToken() {
   return localStorage.getItem('adminToken');
+}
+
+/**
+ * Store user info (including role) for role-based UI
+ * @param {object} user
+ */
+export function setUserInfo(user) {
+  if (user) {
+    localStorage.setItem('userInfo', JSON.stringify(user));
+  } else {
+    localStorage.removeItem('userInfo');
+  }
+}
+
+/**
+ * Get stored user info
+ * @returns {object|null}
+ */
+export function getUserInfo() {
+  try {
+    const raw = localStorage.getItem('userInfo');
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
 }
 
 // ── Room API ──

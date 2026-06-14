@@ -1,6 +1,7 @@
 'use strict';
 
 const PERMISSIONS = {
+  owner: ['*:*'],
   admin: [
     'rooms:*', 'consumos:*', 'users:*', 'accounting:*',
     'reports:*', 'auth:*', 'backup:*', 'config:*',
@@ -15,21 +16,16 @@ const PERMISSIONS = {
     'rooms:read', 'consumos:read', 'accounting:*',
     'reports:*', 'history:read',
   ],
-  reception: [
-    'rooms:read', 'rooms:checkin',
-    'consumos:create', 'consumos:read',
-    'history:read', 'reservas:read',
-  ],
   cliente: [
     'rooms:read', 'consumos:read',
   ],
 };
 
 const ROLE_HIERARCHY = {
+  owner: 1000,
   admin: 100,
   operator: 60,
   analyst: 40,
-  reception: 20,
   cliente: 10,
 };
 
