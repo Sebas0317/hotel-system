@@ -10,10 +10,13 @@
  */
 function requireFields(...fields) {
   return (req, res, next) => {
-    const missing = fields.filter(f => !req.body[f]);
+    const missing = fields.filter(
+      (f) =>
+        req.body[f] === undefined || req.body[f] === null || req.body[f] === ''
+    );
     if (missing.length > 0) {
-      return res.status(400).json({ 
-        error: `Campos requeridos faltantes: ${missing.join(', ')}` 
+      return res.status(400).json({
+        error: `Campos requeridos faltantes: ${missing.join(', ')}`,
       });
     }
     next();
@@ -29,8 +32,8 @@ function validateEnum(field, values) {
   return (req, res, next) => {
     const val = req.body[field];
     if (val && !values.includes(val)) {
-      return res.status(400).json({ 
-        error: `Valor invalido para ${field}. Debe ser uno de: ${values.join(', ')}` 
+      return res.status(400).json({
+        error: `Valor invalido para ${field}. Debe ser uno de: ${values.join(', ')}`,
       });
     }
     next();
@@ -44,9 +47,14 @@ function validateEnum(field, values) {
 function validatePositiveNumber(field) {
   return (req, res, next) => {
     const val = req.body[field];
-    if (val && (typeof val !== 'number' || val <= 0)) {
-      return res.status(400).json({ 
-        error: `${field} debe ser un numero positivo` 
+    if (
+      val === undefined ||
+      val === null ||
+      typeof val !== 'number' ||
+      val <= 0
+    ) {
+      return res.status(400).json({
+        error: `${field} debe ser un numero positivo`,
       });
     }
     next();

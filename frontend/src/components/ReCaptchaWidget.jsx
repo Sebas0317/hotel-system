@@ -3,7 +3,11 @@ import ReCAPTCHA from 'react-google-recaptcha';
 
 const SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
 
-export default function ReCaptchaWidget({ onVerify, onExpire, theme = 'light' }) {
+export default function ReCaptchaWidget({
+  onVerify,
+  onExpire,
+  theme = 'light',
+}) {
   const ref = useRef(null);
 
   return (

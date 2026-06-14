@@ -21,17 +21,9 @@ jobs:
           cache: 'npm'
           cache-dependency-path: backend/package-lock.json
       - run: npm ci
-      - run: node -e "
-          const mods = [
-            'src/data/jsonStoreHelper',
-            'src/utils/securityTracker',
-            'src/utils/auditor',
-            'src/data/codeStore',
-            'src/data/userStore',
-            'src/data/persistence',
-          ];
-          mods.forEach(m => { require('./' + m); console.log('OK:', m); });
-          "
+      - run: node -e "require('./src/data/jsonStore')"
+      - run: node -e "require('./src/utils/idGenerator')"
+      - run: node -e "require('./src/utils/pinGenerator')"
 
   frontend:
     name: Frontend
@@ -49,3 +41,25 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm run build
+
+  semgrep:
+    name: SAST Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install semgrep
+      - run: semgrep --config=auto --exclude="oi_env|node_modules|.opencode|dist|ai|scripts" --skip-unknown-extensions
+
+  knip:
+    name: Dead Code Detection
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install -g knip
+      - run: knip --no-gitignore

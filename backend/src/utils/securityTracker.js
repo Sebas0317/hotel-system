@@ -8,25 +8,41 @@ const MAX_EVENTS = 1000;
 // In-memory store — primary for speed, persistence module as backup
 const memoryAttempts = [];
 const memoryEvents = [];
-let bootstrappedAttempts = false;
-let bootstrappedEvents = false;
+const _bootstrappedAttempts = false;
+const _bootstrappedEvents = false;
 
 const DEFAULTS = {
-  login: { maxAttempts: 5, lockoutMs: 15 * 60 * 1000, windowMs: 10 * 60 * 1000 },
-  '2fa': { maxAttempts: 5, lockoutMs: 15 * 60 * 1000, windowMs: 10 * 60 * 1000 },
-  code_verify: { maxAttempts: 5, lockoutMs: 15 * 60 * 1000, windowMs: 10 * 60 * 1000 },
-  recovery: { maxAttempts: 3, lockoutMs: 30 * 60 * 1000, windowMs: 15 * 60 * 1000 },
+  login: {
+    maxAttempts: 5,
+    lockoutMs: 15 * 60 * 1000,
+    windowMs: 10 * 60 * 1000,
+  },
+  '2fa': {
+    maxAttempts: 5,
+    lockoutMs: 15 * 60 * 1000,
+    windowMs: 10 * 60 * 1000,
+  },
+  code_verify: {
+    maxAttempts: 5,
+    lockoutMs: 15 * 60 * 1000,
+    windowMs: 10 * 60 * 1000,
+  },
+  recovery: {
+    maxAttempts: 3,
+    lockoutMs: 30 * 60 * 1000,
+    windowMs: 15 * 60 * 1000,
+  },
 };
 
-function now() { return Date.now(); }
+function now() {
+  return Date.now();
+}
 
 async function getAttempts() {
-  if (!bootstrappedAttempts) {
-    const data = await persistence.getSecurityAttempts();
-    memoryAttempts.length = 0;
-    memoryAttempts.push(...data);
-    bootstrappedAttempts = true;
-  }
+  // Always reload from persistence to share state across processes/instances (C18)
+  const data = await persistence.getSecurityAttempts();
+  memoryAttempts.length = 0;
+  memoryAttempts.push(...data);
   return memoryAttempts;
 }
 
@@ -39,12 +55,10 @@ async function saveAttempts(data) {
 }
 
 async function getEvents() {
-  if (!bootstrappedEvents) {
-    const data = await persistence.getSecurityEvents();
-    memoryEvents.length = 0;
-    memoryEvents.push(...data);
-    bootstrappedEvents = true;
-  }
+  // Always reload from persistence to share state across processes/instances (C18)
+  const data = await persistence.getSecurityEvents();
+  memoryEvents.length = 0;
+  memoryEvents.push(...data);
   return memoryEvents;
 }
 
@@ -64,7 +78,7 @@ async function recordAttempt({ userId, ip, action, success }) {
   const actionCfg = DEFAULTS[action] || DEFAULTS.login;
   const attempts = await getAttempts();
   const key = createKey(userId, ip, action);
-  const existing = attempts.find(a => a.key === key);
+  const existing = attempts.find((a) => a.key === key);
 
   if (success) {
     if (existing) {
@@ -104,7 +118,7 @@ async function recordAttempt({ userId, ip, action, success }) {
 
   await saveAttempts(attempts);
 
-  const entry = attempts.find(a => a.key === key);
+  const entry = attempts.find((a) => a.key === key);
   const blocked = entry.lockUntil > now();
   const remaining = Math.max(0, actionCfg.maxAttempts - entry.count);
 
@@ -115,9 +129,10 @@ async function isBlocked({ userId, ip, action }) {
   const actionCfg = DEFAULTS[action] || DEFAULTS.login;
   const attempts = await getAttempts();
   const key = createKey(userId, ip, action);
-  const entry = attempts.find(a => a.key === key);
+  const entry = attempts.find((a) => a.key === key);
 
-  if (!entry) return { blocked: false, remaining: actionCfg.maxAttempts, lockUntil: 0 };
+  if (!entry)
+    return { blocked: false, remaining: actionCfg.maxAttempts, lockUntil: 0 };
 
   if (entry.lockUntil > now()) {
     return { blocked: true, remaining: 0, lockUntil: entry.lockUntil };
@@ -137,7 +152,7 @@ async function isBlocked({ userId, ip, action }) {
 async function resetAttempts({ userId, ip, action }) {
   const attempts = await getAttempts();
   const key = createKey(userId, ip, action);
-  const idx = attempts.findIndex(a => a.key === key);
+  const idx = attempts.findIndex((a) => a.key === key);
   if (idx !== -1) {
     attempts[idx].count = 0;
     attempts[idx].lockUntil = 0;
@@ -147,10 +162,17 @@ async function resetAttempts({ userId, ip, action }) {
   }
 }
 
-async function logSecurityEvent({ type, userId, ip, action, detail, metadata }) {
+async function logSecurityEvent({
+  type,
+  userId,
+  ip,
+  action,
+  detail,
+  metadata,
+}) {
   const events = await getEvents();
   events.push({
-    id: `${Date.now()}-${require('crypto').randomBytes(3).toString('hex')}`,
+    id: `${Date.now()}-${require('node:crypto').randomBytes(3).toString('hex')}`,
     type,
     userId: userId || null,
     ip: ip || null,
@@ -166,32 +188,49 @@ async function logSecurityEvent({ type, userId, ip, action, detail, metadata }) 
 
   await saveEvents(events);
 
-  const logLevels = { block: 'warn', rate_limit: 'warn', failed_login: 'warn', account_locked: 'warn', suspicious: 'warn', success: 'info', info: 'info' };
+  const logLevels = {
+    block: 'warn',
+    rate_limit: 'warn',
+    failed_login: 'warn',
+    account_locked: 'warn',
+    suspicious: 'warn',
+    success: 'info',
+    info: 'info',
+  };
   const level = logLevels[type] || 'info';
-  logger[level]({ security: true, type, userId, ip, action, detail }, `Security: ${detail || type}`);
+  logger[level](
+    { security: true, type, userId, ip, action, detail },
+    `Security: ${detail || type}`
+  );
 }
 
 async function getSecurityEvents({ limit = 100, type, userId } = {}) {
   let events = await getEvents();
-  if (type) events = events.filter(e => e.type === type);
-  if (userId) events = events.filter(e => e.userId === userId);
+  if (type) events = events.filter((e) => e.type === type);
+  if (userId) events = events.filter((e) => e.userId === userId);
   return events.slice(-Math.min(limit, MAX_EVENTS)).reverse();
 }
 
 async function cleanupOldEntries() {
   const attempts = await getAttempts();
   const cutoff = now() - 7 * 24 * 60 * 60 * 1000;
-  const active = attempts.filter(a => {
+  const active = attempts.filter((a) => {
     if (a.lockUntil > now()) return true;
     const updated = new Date(a.updatedAt).getTime();
     return updated > cutoff;
   });
   if (active.length < attempts.length) {
-    await saveAttempts(active);
+    // Merge rather than replace: keep entries added by concurrent recordAttempt
+    const currentAttempts = await getAttempts();
+    const merged = active.concat(
+      currentAttempts.filter((c) => !active.find((a) => a.key === c.key))
+    );
+    await saveAttempts(merged);
   }
 }
 
-setInterval(cleanupOldEntries, 60 * 60 * 1000);
+const cleanupTimer = setInterval(cleanupOldEntries, 60 * 60 * 1000);
+if (cleanupTimer.unref) cleanupTimer.unref();
 
 module.exports = {
   recordAttempt,
@@ -200,4 +239,5 @@ module.exports = {
   logSecurityEvent,
   getSecurityEvents,
   DEFAULTS,
+  cleanupTimer,
 };

@@ -15,11 +15,21 @@ let transporter = null;
 function getConfig() {
   return {
     host: process.env.EMAIL_HOST || process.env.SMTP_HOST,
-    port: parseInt(process.env.EMAIL_PORT || process.env.SMTP_PORT || '587'),
+    port: parseInt(
+      process.env.EMAIL_PORT || process.env.SMTP_PORT || '587',
+      10
+    ),
     user: process.env.EMAIL_USER || process.env.SMTP_USER,
     pass: process.env.EMAIL_PASS || process.env.SMTP_PASS,
-    fromName: process.env.EMAIL_FROM_NAME || process.env.SMTP_FROM_NAME || 'EcoBosque Hotel',
-    fromAddr: process.env.EMAIL_FROM || process.env.SMTP_FROM || process.env.EMAIL_USER || process.env.SMTP_USER,
+    fromName:
+      process.env.EMAIL_FROM_NAME ||
+      process.env.SMTP_FROM_NAME ||
+      'EcoBosque Hotel',
+    fromAddr:
+      process.env.EMAIL_FROM ||
+      process.env.SMTP_FROM ||
+      process.env.EMAIL_USER ||
+      process.env.SMTP_USER,
     adminEmail: process.env.ADMIN_EMAIL,
   };
 }
@@ -39,7 +49,7 @@ function getTransporter() {
     port: cfg.port,
     secure: cfg.port === 465,
     auth: { user: cfg.user, pass: cfg.pass },
-    tls: { rejectUnauthorized: false },
+    tls: { rejectUnauthorized: process.env.NODE_ENV === 'production' },
   });
 
   return transporter;

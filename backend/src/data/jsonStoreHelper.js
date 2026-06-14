@@ -1,8 +1,8 @@
 'use strict';
 
-const fs = require('fs').promises;
-const path = require('path');
-const os = require('os');
+const fs = require('node:fs').promises;
+const path = require('node:path');
+const os = require('node:os');
 const logger = require('../utils/logger');
 
 const DEPLOY_DIR = path.resolve(__dirname, '..', '..');
@@ -40,7 +40,9 @@ async function readJsonFile(filePath, defaultVal = null) {
         const raw = await fs.readFile(src, 'utf8');
         const data = JSON.parse(raw);
         // Seed /tmp/ for future writes
-        await fs.writeFile(resolved, JSON.stringify(data, null, 2), 'utf8').catch(() => {});
+        await fs
+          .writeFile(resolved, JSON.stringify(data, null, 2), 'utf8')
+          .catch(() => {});
         logger.info(`Seeded ${path.basename(resolved)} from deployment dir`);
         return data;
       } catch {
@@ -57,12 +59,22 @@ async function readJsonFile(filePath, defaultVal = null) {
 
 async function writeJsonFile(filePath, data) {
   const resolved = validatePath(filePath);
-  const tmp = resolved + '.tmp';
+  const tmp = `${resolved}.tmp`;
   try {
     await fs.writeFile(tmp, JSON.stringify(data, null, 2), 'utf8');
+    let fd = null;
+    try {
+      fd = await fs.open(tmp, 'r');
+      await fd.sync();
+    } catch (syncErr) {
+      logger.warn({ err: syncErr, file: tmp }, 'fsync skipped');
+    } finally {
+      if (fd) await fd.close().catch(() => {});
+    }
     await fs.rename(tmp, resolved);
   } catch (err) {
     logger.warn({ err, file: filePath }, 'Error writing JSON file');
+    throw err;
   }
 }
 

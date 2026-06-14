@@ -1,1 +1,35 @@
-[]
+[
+  {
+    "id": "1781442532833-25e06a1f",
+    "userId": "1781442532829-41347d47",
+    "type": "email_verification",
+    "codeHash": "4e2bb96a2febe780e43e92bf541e4d5cc83b8d3ba38a0547b7035b122a863bcf",
+    "expiresAt": 1781442832833,
+    "attempts": 0,
+    "maxAttempts": 5,
+    "used": false,
+    "createdAt": "2026-06-14T13:08:52.833Z"
+  },
+  {
+    "id": "1781442687640-98986bd4",
+    "userId": "1781442687636-c57d437f",
+    "type": "email_verification",
+    "codeHash": "08f5a38e15e163287d8e4ac33c60e92a3eeaffcb5b4bc889985c21fc0eae0288",
+    "expiresAt": 1781442987640,
+    "attempts": 0,
+    "maxAttempts": 5,
+    "used": false,
+    "createdAt": "2026-06-14T13:11:27.640Z"
+  },
+  {
+    "id": "1781442722562-e2ae2fd2",
+    "userId": "1781442722558-e1e35cf2",
+    "type": "email_verification",
+    "codeHash": "e4e76fb660293d4304590d5e4f0630ecec1c7ebde4ff09f617275ebd3516dd48",
+    "expiresAt": 1781443022562,
+    "attempts": 0,
+    "maxAttempts": 5,
+    "used": false,
+    "createdAt": "2026-06-14T13:12:02.562Z"
+  }
+]

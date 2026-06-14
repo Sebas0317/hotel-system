@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchConsumos } from '../services/api';
-import { COP, FECHA } from '../utils/helpers';
 import { ESTADO_CFG } from '../constants';
-import { calcularCheckout } from '../utils/checkoutCalc';
 import { usePrices } from '../hooks/usePrices';
+import { fetchConsumos } from '../services/api';
+import { calcularCheckout } from '../utils/checkoutCalc';
+import { COP, FECHA } from '../utils/helpers';
 import HotelTitle from './HotelTitle';
 import PinGate from './PinGate';
 
@@ -17,12 +17,21 @@ export default function UserView({ onExit }) {
   useEffect(() => {
     if (room) {
       fetchConsumos(room.id)
-        .then(setConsumos)
+        .then((data) => {
+          setConsumos(data);
+        })
         .catch(() => setConsumos([]));
     }
   }, [room]);
 
-  const checkoutCalc = room ? calcularCheckout({ roomTipo: room.tipo, checkIn: room.checkIn, consumos, tarifas }) : null;
+  const checkoutCalc = room
+    ? calcularCheckout({
+        roomTipo: room.tipo,
+        checkIn: room.checkIn,
+        consumos,
+        tarifas,
+      })
+    : null;
   const totalAPagar = checkoutCalc?.total || 0;
   const pagado = room?.pago?.pagado || 0;
   const saldoPendiente = totalAPagar - pagado;
@@ -39,13 +48,17 @@ export default function UserView({ onExit }) {
         <div className="topbar-left flex items-center gap-2">
           <span className="topbar-logo text-xl"></span>
           <HotelTitle />
-          <span className="topbar-badge user text-xs">Habitacion #{room.numero}</span>
+          <span className="topbar-badge user text-xs">
+            Habitacion #{room.numero}
+          </span>
         </div>
         <div className="flex items-center gap-2">
           <button className="btn-salir text-sm" onClick={() => setRoom(null)}>
             Cambiar habitacion
           </button>
-          <button className="btn-salir text-sm" onClick={onExit}>Salir</button>
+          <button className="btn-salir text-sm" onClick={onExit}>
+            Salir
+          </button>
         </div>
       </header>
 
@@ -58,7 +71,14 @@ export default function UserView({ onExit }) {
                   <h2 className="rdp-title">Habitacion #{room.numero}</h2>
                   <p className="rdp-subtitle">{room.tipo}</p>
                 </div>
-                <div className="rdp-estado" style={{ color: cfg.color, background: cfg.bg, border: `1px solid ${cfg.border}` }}>
+                <div
+                  className="rdp-estado"
+                  style={{
+                    color: cfg.color,
+                    background: cfg.bg,
+                    border: `1px solid ${cfg.border}`,
+                  }}
+                >
                   {cfg.label}
                 </div>
               </div>
@@ -88,18 +108,26 @@ export default function UserView({ onExit }) {
                   <div className="rdp-payment-grid">
                     <div className="rdp-payment-item">
                       <span className="rdp-payment-label">Anticipo Pagado</span>
-                      <span className="rdp-payment-value text-green-600">{COP(room.pago.pagado)}</span>
+                      <span className="rdp-payment-value text-green-600">
+                        {COP(room.pago.pagado)}
+                      </span>
                     </div>
                     {saldoPendiente > 0 && (
                       <div className="rdp-payment-item">
-                        <span className="rdp-payment-label">Saldo por Pagar</span>
-                        <span className="rdp-payment-value text-red-600">{COP(saldoPendiente)}</span>
+                        <span className="rdp-payment-label">
+                          Saldo por Pagar
+                        </span>
+                        <span className="rdp-payment-value text-red-600">
+                          {COP(saldoPendiente)}
+                        </span>
                       </div>
                     )}
                     {saldoPendiente <= 0 && (
                       <div className="rdp-payment-item">
                         <span className="rdp-payment-label">Estado</span>
-                        <span className="rdp-payment-value text-green-600">✓ Cancelado</span>
+                        <span className="rdp-payment-value text-green-600">
+                          ✓ Cancelado
+                        </span>
                       </div>
                     )}
                   </div>
@@ -110,7 +138,11 @@ export default function UserView({ onExit }) {
                 <h3 className="rdp-section-title">Habitacion</h3>
                 <div className="rdp-room-charges">
                   <div className="rdp-charge-item">
-                    <span>Tarifa ({COP(checkoutCalc.tarifaNoche)} x {checkoutCalc.noches} noche{checkoutCalc.noches > 1 ? 's' : ''})</span>
+                    <span>
+                      Tarifa ({COP(checkoutCalc.tarifaNoche)} x{' '}
+                      {checkoutCalc.noches} noche
+                      {checkoutCalc.noches > 1 ? 's' : ''})
+                    </span>
                     <span>{COP(checkoutCalc.cargoHabitacion)}</span>
                   </div>
                 </div>
@@ -121,7 +153,10 @@ export default function UserView({ onExit }) {
               </div>
 
               <div className="rdp-section">
-                <h3 className="rdp-section-title">Consumos ({consumos.length} articulo{consumos.length !== 1 ? 's' : ''})</h3>
+                <h3 className="rdp-section-title">
+                  Consumos ({consumos.length} articulo
+                  {consumos.length !== 1 ? 's' : ''})
+                </h3>
                 {consumos.length === 0 ? (
                   <p className="rdp-empty">Sin consumos registrados</p>
                 ) : (
@@ -149,7 +184,10 @@ export default function UserView({ onExit }) {
                 </div>
               </div>
 
-              <button className="rdp-checkout-btn" onClick={() => navigate('/user/checkout')}>
+              <button
+                className="rdp-checkout-btn"
+                onClick={() => navigate('/user/checkout')}
+              >
                 Solicitar Check-out
               </button>
             </div>

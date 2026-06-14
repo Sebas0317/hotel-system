@@ -4,7 +4,6 @@
 @tailwind utilities;
 
 @layer base {
-
   html {
     @apply scroll-smooth scroll-pt-6;
     scrollbar-gutter: stable;
@@ -21,12 +20,12 @@
   }
 
   html::-webkit-scrollbar-thumb {
-    border-radius   : 2px;
+    border-radius: 2px;
     background-color: #a37d4c;
   }
 
   html::-webkit-scrollbar-track {
-    background-color: #FFFFFF;
+    background-color: #ffffff;
   }
 
   body {
@@ -73,9 +72,9 @@
     min-height: 600px;
   }
   @media (min-width: 960px) {
-  .heroSlider {
-    min-height: 860px;
-  }
+    .heroSlider {
+      min-height: 860px;
+    }
   }
 }
 
@@ -91,6 +90,6 @@
 .dropdown-panel *:focus-visible,
 .dropdown-trigger:focus,
 .dropdown-trigger:focus-visible {
-  outline: none !important;
-  box-shadow: none !important;
+  outline: none;
+  box-shadow: none;
 }

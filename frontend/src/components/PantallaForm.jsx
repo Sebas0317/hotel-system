@@ -1,5 +1,5 @@
-import HotelTitle from './HotelTitle';
 import { Building2 } from 'lucide-react';
+import HotelTitle from './HotelTitle';
 
 /**
  * PantallaForm — Shared layout wrapper for all reception sub-screens.
@@ -12,13 +12,15 @@ import { Building2 } from 'lucide-react';
  * @param {Function} [props.onVolver] - Back button handler (hides button if omitted)
  * @param {React.ReactNode} props.children - Screen content
  */
-export default function PantallaForm({ titulo, desc, onVolver, children, standalone = true }) {
+export default function PantallaForm({
+  titulo,
+  desc,
+  onVolver,
+  children,
+  standalone = true,
+}) {
   if (!standalone) {
-    return (
-      <div className="w-full max-w-6xl mx-auto space-y-4">
-        {children}
-      </div>
-    );
+    return <div className="w-full max-w-6xl mx-auto space-y-4">{children}</div>;
   }
 
   return (
@@ -29,12 +31,19 @@ export default function PantallaForm({ titulo, desc, onVolver, children, standal
           <HotelTitle />
         </div>
         {onVolver && (
-          <button className="btn-salir text-sm w-full sm:w-auto text-center" onClick={onVolver}>← Volver</button>
+          <button
+            className="btn-salir text-sm w-full sm:w-auto text-center"
+            onClick={onVolver}
+          >
+            ← Volver
+          </button>
         )}
       </header>
       <div className="form-content flex items-start justify-center p-4 sm:p-6">
         <div className="form-card w-full max-w-[1200px] p-6 sm:p-10">
-          <h2 className="form-titulo text-xl sm:text-2xl md:text-3xl mb-2">{titulo}</h2>
+          <h2 className="form-titulo text-xl sm:text-2xl md:text-3xl mb-2">
+            {titulo}
+          </h2>
           {desc && <p className="form-desc text-sm sm:text-base">{desc}</p>}
           {children}
         </div>

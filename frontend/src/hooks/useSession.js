@@ -1,8 +1,13 @@
-import { useEffect, useRef, useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 const EVENTS = ['mousedown', 'keydown', 'touchstart', 'scroll', 'click'];
 
-export function useSession({ timeout = 10 * 60 * 1000, onExpire, enabled = true, warningMs = 60 * 1000 }) {
+export function useSession({
+  timeout = 10 * 60 * 1000,
+  onExpire,
+  enabled = true,
+  warningMs = 60 * 1000,
+}) {
   const timerRef = useRef(null);
   const [remaining, setRemaining] = useState(timeout);
   const isWarning = remaining <= warningMs;
@@ -29,19 +34,21 @@ export function useSession({ timeout = 10 * 60 * 1000, onExpire, enabled = true,
       setRemaining(timeout);
     };
 
-    EVENTS.forEach(ev => document.addEventListener(ev, handleActivity, { passive: true }));
+    EVENTS.forEach((ev) =>
+      document.addEventListener(ev, handleActivity, { passive: true })
+    );
     handleActivity();
 
     return () => {
-      EVENTS.forEach(ev => document.removeEventListener(ev, handleActivity));
+      EVENTS.forEach((ev) => document.removeEventListener(ev, handleActivity));
     };
   }, [enabled, timeout, clear]);
 
   useEffect(() => {
     if (!enabled) return;
 
-    let interval = setInterval(() => {
-      setRemaining(prev => {
+    const interval = setInterval(() => {
+      setRemaining((prev) => {
         const next = prev - 1000;
         if (next <= 0) {
           clear();

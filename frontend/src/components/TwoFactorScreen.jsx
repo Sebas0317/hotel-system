@@ -1,5 +1,11 @@
-import { useState, useRef, useEffect } from 'react';
-import { ArrowLeft, Loader, AlertCircle, Shield, CheckCircle } from 'lucide-react';
+import {
+  AlertCircle,
+  ArrowLeft,
+  CheckCircle,
+  Loader,
+  Shield,
+} from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 import { verify2FA } from '../services/api';
 import HotelTitle from './HotelTitle';
 
@@ -33,7 +39,10 @@ export default function TwoFactorScreen({ userId, onVerified, onBack, email }) {
   };
 
   const handlePaste = (e) => {
-    const paste = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+    const paste = e.clipboardData
+      .getData('text')
+      .replace(/\D/g, '')
+      .slice(0, 6);
     if (paste.length === 6) {
       const newCode = paste.split('');
       setCode(newCode);
@@ -52,8 +61,8 @@ export default function TwoFactorScreen({ userId, onVerified, onBack, email }) {
     try {
       const result = await verify2FA(userId, fullCode);
       setSuccess(true);
-      await new Promise(r => setTimeout(r, 1200));
-      onVerified(result.token, result.usuario);
+      await new Promise((r) => setTimeout(r, 1200));
+      onVerified(null, result.usuario);
     } catch (e) {
       setError(e.message || 'Codigo invalido o expirado');
     } finally {
@@ -94,7 +103,8 @@ export default function TwoFactorScreen({ userId, onVerified, onBack, email }) {
               Verificacion en dos pasos
             </p>
             <p className="text-sm text-white/60 text-center mb-6">
-              Ingresa el codigo de 6 digitos enviado a{email ? ` ${email}` : ' tu correo'}
+              Ingresa el codigo de 6 digitos enviado a
+              {email ? ` ${email}` : ' tu correo'}
             </p>
 
             <div className="flex justify-center gap-2.5 mb-6">

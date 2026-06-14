@@ -21,3 +21,8 @@ backend/coverage/
 
 # Swagger
 backend/swagger.json
+
+# AI reports and config
+.ai-reports/
+semgrep-report.json
+.opencode/

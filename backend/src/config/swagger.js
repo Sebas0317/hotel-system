@@ -5,7 +5,7 @@
 'use strict';
 
 const swaggerJsdoc = require('swagger-jsdoc');
-const path = require('path');
+const path = require('node:path');
 
 const options = {
   definition: {
@@ -13,7 +13,8 @@ const options = {
     info: {
       title: 'EcoBosque Hotel System API',
       version: '1.0.0',
-      description: 'REST API for El Bosque Hotel Boutique - Room management, reservations, check-in/check-out, consumption tracking, and pricing.',
+      description:
+        'REST API for El Bosque Hotel Boutique - Room management, reservations, check-in/check-out, consumption tracking, and pricing.',
       contact: {
         name: 'EcoBosque Hotel',
         url: 'https://ecobosque.com',
@@ -53,10 +54,25 @@ const options = {
             piso: { type: 'integer', description: 'Floor number' },
             estado: {
               type: 'string',
-              enum: ['disponible', 'reservada', 'ocupada', 'limpieza', 'mantenimiento', 'fuera_servicio'],
+              enum: [
+                'disponible',
+                'reservada',
+                'ocupada',
+                'limpieza',
+                'mantenimiento',
+                'fuera_servicio',
+              ],
             },
-            huesped: { type: 'string', nullable: true, description: 'Guest name' },
-            pin: { type: 'string', nullable: true, description: '4-digit room PIN' },
+            huesped: {
+              type: 'string',
+              nullable: true,
+              description: 'Guest name',
+            },
+            pin: {
+              type: 'string',
+              nullable: true,
+              description: '4-digit room PIN',
+            },
             checkIn: { type: 'string', format: 'date-time', nullable: true },
             checkOut: { type: 'string', format: 'date-time', nullable: true },
           },
@@ -67,9 +83,18 @@ const options = {
           properties: {
             id: { type: 'string', description: 'Unique consumption ID' },
             roomId: { type: 'string', description: 'Room ID' },
-            descripcion: { type: 'string', description: 'Consumption description' },
-            categoria: { type: 'string', enum: ['restaurante', 'bar', 'servicios'] },
-            precio: { type: 'integer', description: 'Price in COP (Colombian Pesos)' },
+            descripcion: {
+              type: 'string',
+              description: 'Consumption description',
+            },
+            categoria: {
+              type: 'string',
+              enum: ['restaurante', 'bar', 'servicios'],
+            },
+            precio: {
+              type: 'integer',
+              description: 'Price in COP (Colombian Pesos)',
+            },
             fecha: { type: 'string', format: 'date-time' },
           },
         },
@@ -77,7 +102,11 @@ const options = {
           type: 'object',
           properties: {
             error: { type: 'string', description: 'Error message' },
-            details: { type: 'array', items: { type: 'object' }, description: 'Validation error details' },
+            details: {
+              type: 'array',
+              items: { type: 'object' },
+              description: 'Validation error details',
+            },
           },
         },
       },
@@ -89,7 +118,10 @@ const options = {
       { name: 'Consumos', description: 'Consumption tracking' },
       { name: 'History', description: 'Check-in/out history' },
       { name: 'State History', description: 'Room state change history' },
-      { name: 'Prices', description: 'Room rates and product prices (admin only)' },
+      {
+        name: 'Prices',
+        description: 'Room rates and product prices (admin only)',
+      },
     ],
   },
   // Path to API docs in route files

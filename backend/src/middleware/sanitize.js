@@ -9,7 +9,7 @@ function sanitizeString(value) {
   if (typeof value !== 'string') return value;
   return value
     .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-    .replace(/on\w+\s*=\s*["']?[^"'\s>]+["']?/gi, '')
+    .replace(/on\w+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi, '')
     .replace(/javascript\s*:/gi, '')
     .trim();
 }

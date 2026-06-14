@@ -1,27 +1,45 @@
-import { useState, useEffect, useCallback, memo } from 'react';
+import {
+  AlertTriangle,
+  Bed,
+  CheckCircle,
+  Leaf,
+  Plus,
+  Save,
+  Settings,
+  Trash2,
+} from 'lucide-react';
+import { memo, useCallback, useEffect, useState } from 'react';
+import { CATEGORIAS_CONSUMO } from '../constants';
 import { fetchPrices, updatePrices } from '../services/api';
 import { COP } from '../utils/helpers';
-import { CATEGORIAS_CONSUMO } from '../constants';
-import { AlertTriangle, CheckCircle, Settings, Leaf, Trash2, Save, Plus, Bed, X } from 'lucide-react';
 
 /**
  * Confirmation modal for saving price changes.
  */
 function ConfirmModal({ tarifas, productos, onConfirm, onCancel }) {
   const tarifaCount = Object.keys(tarifas).length;
-  const productCount = Object.values(productos).reduce((sum, items) => sum + items.length, 0);
+  const productCount = Object.values(productos).reduce(
+    (sum, items) => sum + items.length,
+    0
+  );
 
   return (
     <div className="pe-modal-overlay" onClick={onCancel}>
       <div className="pe-modal" onClick={(e) => e.stopPropagation()}>
-        <h4 className="pe-modal-title"><AlertTriangle className="w-5 h-5 inline mr-2" /> Confirmar Cambios de Precios</h4>
+        <h4 className="pe-modal-title">
+          <AlertTriangle className="w-5 h-5 inline mr-2" /> Confirmar Cambios de
+          Precios
+        </h4>
         <p className="pe-modal-desc">
-          Estás a punto de actualizar <strong>{tarifaCount} tarifas</strong> y <strong>{productCount} productos</strong>.
-          Estos cambios se aplicarán a todas las habitaciones y nuevos consumos.
+          Estás a punto de actualizar <strong>{tarifaCount} tarifas</strong> y{' '}
+          <strong>{productCount} productos</strong>. Estos cambios se aplicarán
+          a todas las habitaciones y nuevos consumos.
         </p>
         <div className="pe-modal-summary">
           <div className="pe-modal-section">
-            <h5 className="pe-modal-subtitle"><Bed className="w-4 h-4 inline mr-1" /> Tarifas por Noche</h5>
+            <h5 className="pe-modal-subtitle">
+              <Bed className="w-4 h-4 inline mr-1" /> Tarifas por Noche
+            </h5>
             {Object.entries(tarifas).map(([tipo, precio]) => (
               <div key={tipo} className="pe-modal-row">
                 <span>{tipo}</span>
@@ -31,10 +49,16 @@ function ConfirmModal({ tarifas, productos, onConfirm, onCancel }) {
           </div>
         </div>
         <div className="pe-modal-btns">
-          <button className="pe-modal-btn pe-modal-btn-confirm" onClick={onConfirm}>
+          <button
+            className="pe-modal-btn pe-modal-btn-confirm"
+            onClick={onConfirm}
+          >
             <CheckCircle className="w-4 h-4 inline mr-1" /> Si, Guardar Cambios
           </button>
-          <button className="pe-modal-btn pe-modal-btn-cancel" onClick={onCancel}>
+          <button
+            className="pe-modal-btn pe-modal-btn-cancel"
+            onClick={onCancel}
+          >
             Cancelar
           </button>
         </div>
@@ -64,16 +88,24 @@ function PriceEditor({ onUpdate, onNotify }) {
   useEffect(() => {
     let cancelled = false;
     fetchPrices()
-      .then((d) => { if (!cancelled) setData(d); })
-      .catch((e) => { if (!cancelled) setError(e.message); })
-      .finally(() => { if (!cancelled) setLoading(false); });
-    return () => { cancelled = true; };
+      .then((d) => {
+        if (!cancelled) setData(d);
+      })
+      .catch((e) => {
+        if (!cancelled) setError(e.message);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const updateTarifa = useCallback((tipo, value) => {
     setData((prev) => ({
       ...prev,
-      tarifas: { ...prev.tarifas, [tipo]: parseInt(value) || 0 },
+      tarifas: { ...prev.tarifas, [tipo]: parseInt(value, 10) || 0 },
     }));
   }, []);
 
@@ -91,7 +123,7 @@ function PriceEditor({ onUpdate, onNotify }) {
     setData((prev) => {
       const productos = { ...prev.productos };
       productos[categoria] = productos[categoria].map((item, i) =>
-        i === index ? { ...item, precio: parseInt(value) || 0 } : item
+        i === index ? { ...item, precio: parseInt(value, 10) || 0 } : item
       );
       return { ...prev, productos };
     });
@@ -100,7 +132,10 @@ function PriceEditor({ onUpdate, onNotify }) {
   const addProducto = useCallback((categoria) => {
     setData((prev) => {
       const productos = { ...prev.productos };
-      productos[categoria] = [...productos[categoria], { nombre: '', precio: 0 }];
+      productos[categoria] = [
+        ...productos[categoria],
+        { nombre: '', precio: 0 },
+      ];
       return { ...prev, productos };
     });
   }, []);
@@ -159,30 +194,56 @@ function PriceEditor({ onUpdate, onNotify }) {
   };
 
   if (loading) return <p className="pe-loading">Cargando precios...</p>;
-  if (!data) return <p className="pe-error">No se pudo cargar la configuración de precios</p>;
+  if (!data)
+    return (
+      <p className="pe-error">No se pudo cargar la configuración de precios</p>
+    );
 
   return (
     <div className="pe-container">
       <div className="pe-header">
         <div>
-          <h4 className="pe-title"><Settings className="w-5 h-5 inline mr-2 text-green-600" /> Gestión de Precios</h4>
-          <p className="pe-subtitle">Edita tarifas, nombres y precios de consumibles. Los cambios se aplican a todas las habitaciones.</p>
+          <h4 className="pe-title">
+            <Settings className="w-5 h-5 inline mr-2 text-green-600" /> Gestión
+            de Precios
+          </h4>
+          <p className="pe-subtitle">
+            Edita tarifas, nombres y precios de consumibles. Los cambios se
+            aplican a todas las habitaciones.
+          </p>
         </div>
         <button className="pe-save-btn" onClick={handleSave} disabled={saving}>
-          {saving ? 'Guardando...' : <><Save className="w-4 h-4 inline mr-1" /> Guardar Cambios</>}
+          {saving ? (
+            'Guardando...'
+          ) : (
+            <>
+              <Save className="w-4 h-4 inline mr-1" /> Guardar Cambios
+            </>
+          )}
         </button>
       </div>
 
-      {error && <div className="pe-error"><AlertTriangle className="w-4 h-4" /> {error}</div>}
+      {error && (
+        <div className="pe-error">
+          <AlertTriangle className="w-4 h-4" /> {error}
+        </div>
+      )}
 
       {/* Room Rates Section */}
       <div className="pe-section">
-        <h5 className="pe-section-title"><Leaf className="w-4 h-4 inline mr-1 text-green-500" /> Tarifas por Noche</h5>
-        <p className="pe-section-desc">Precio por noche para cada tipo de habitación. Todas las tarifas incluyen desayuno.</p>
+        <h5 className="pe-section-title">
+          <Leaf className="w-4 h-4 inline mr-1 text-green-500" /> Tarifas por
+          Noche
+        </h5>
+        <p className="pe-section-desc">
+          Precio por noche para cada tipo de habitación. Todas las tarifas
+          incluyen desayuno.
+        </p>
         <div className="pe-grid">
           {Object.entries(data.tarifas).map(([tipo, tarifa]) => {
             const precio = typeof tarifa === 'object' ? tarifa.precio : tarifa;
-            const descripcion = typeof tarifa === 'object' ? tarifa.descripcion : '';
+            const descripcion =
+              typeof tarifa === 'object' ? tarifa.descripcion : '';
             return (
               <div key={tipo} className="pe-field">
                 <label className="pe-field-label">{tipo}</label>
@@ -209,7 +270,10 @@ function PriceEditor({ onUpdate, onNotify }) {
           <div className="pe-section-header">
             <div>
               <h5 className="pe-section-title">{cat.label}</h5>
-              <p className="pe-section-desc">Precios de productos y servicios. Se muestran al registrar nuevos consumos.</p>
+              <p className="pe-section-desc">
+                Precios de productos y servicios. Se muestran al registrar
+                nuevos consumos.
+              </p>
             </div>
             <button className="pe-add-btn" onClick={() => addProducto(cat.key)}>
               <Plus className="w-4 h-4 inline mr-1" /> Agregar Producto
@@ -217,13 +281,18 @@ function PriceEditor({ onUpdate, onNotify }) {
           </div>
           <div className="pe-list">
             {data.productos[cat.key]?.map((item, i) => (
-              <div key={i} className={`pe-item ${!item.nombre.trim() ? 'pe-item-empty' : ''}`}>
+              <div
+                key={i}
+                className={`pe-item ${!item.nombre.trim() ? 'pe-item-empty' : ''}`}
+              >
                 <input
                   type="text"
                   className="pe-name-input"
                   placeholder="Nombre del producto"
                   value={item.nombre}
-                  onChange={(e) => updateProductoName(cat.key, i, e.target.value)}
+                  onChange={(e) =>
+                    updateProductoName(cat.key, i, e.target.value)
+                  }
                 />
                 <div className="pe-item-inputs">
                   <input
@@ -231,10 +300,14 @@ function PriceEditor({ onUpdate, onNotify }) {
                     className="pe-input"
                     placeholder="Precio"
                     value={item.precio || ''}
-                    onChange={(e) => updateProductoPrecio(cat.key, i, e.target.value)}
+                    onChange={(e) =>
+                      updateProductoPrecio(cat.key, i, e.target.value)
+                    }
                     min="1"
                   />
-                  <span className="pe-item-preview">{item.precio > 0 ? COP(item.precio) : '—'}</span>
+                  <span className="pe-item-preview">
+                    {item.precio > 0 ? COP(item.precio) : '—'}
+                  </span>
                 </div>
                 <button
                   className="pe-delete-btn"

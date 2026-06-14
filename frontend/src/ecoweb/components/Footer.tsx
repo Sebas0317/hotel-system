@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { LogoWhite } from "../assets";
+import { LogoWhite } from '../assets';
 
 /**
  * Site footer: dark background (bg-primary), logo link to home, dynamic year in copyright.
@@ -13,7 +13,9 @@ export default function Footer() {
           <LogoWhite />
         </Link>
         <div className="flex flex-col items-center">
-          <p>&copy; {new Date().getFullYear()}. Todos los derechos reservados.</p>
+          <p>
+            &copy; {new Date().getFullYear()}. Todos los derechos reservados.
+          </p>
         </div>
       </div>
     </footer>

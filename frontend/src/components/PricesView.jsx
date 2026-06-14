@@ -15,7 +15,13 @@ export default function PricesView() {
         onUpdate={() => showToast('success', 'Precios actualizados')}
         onNotify={showToast}
       />
-      {inlineToast && <Toast message={inlineToast.message} type={inlineToast.type} onDismiss={() => setInlineToast(null)} />}
+      {inlineToast && (
+        <Toast
+          message={inlineToast.message}
+          type={inlineToast.type}
+          onDismiss={() => setInlineToast(null)}
+        />
+      )}
     </>
   );
 }

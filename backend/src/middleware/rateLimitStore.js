@@ -26,10 +26,13 @@ class UpstashStore {
     this.prefix = prefix;
     this.windowMs = 60000;
     this.memoryFallback = new Map();
+    // Periodic cleanup of expired memory entries (C25)
+    this._cleanupTimer = setInterval(() => this.cleanupExpired(), 300000);
+    if (this._cleanupTimer.unref) this._cleanupTimer.unref();
   }
 
   async init(options) {
-    if (options && options.windowMs) this.windowMs = options.windowMs;
+    if (options?.windowMs) this.windowMs = options.windowMs;
   }
 
   async increment(key) {
@@ -46,18 +49,21 @@ class UpstashStore {
         return { totalHits: 1, resetTime };
       }
       entry.totalHits += 1;
-      return { totalHits: entry.totalHits, resetTime: new Date(entry.resetTime) };
+      return {
+        totalHits: entry.totalHits,
+        resetTime: new Date(entry.resetTime),
+      };
     }
 
     try {
-      const member = `${now}`;
+      const member = `${now}-${Math.random().toString(36).slice(2, 8)}`;
       const multi = redis.multi();
       multi.zadd(fullKey, { score: now, member });
       multi.zremrangebyscore(fullKey, 0, now - this.windowMs);
       multi.zcard(fullKey);
       multi.expire(fullKey, Math.ceil(this.windowMs / 1000) + 5);
       const results = await multi.exec();
-      const totalHits = results[3] || 0;
+      const totalHits = results[2] || 0;
       return { totalHits, resetTime };
     } catch {
       // Fall back to memory on Redis error (not recursive — direct memory access)
@@ -68,7 +74,10 @@ class UpstashStore {
         return { totalHits: 1, resetTime };
       }
       entry.totalHits += 1;
-      return { totalHits: entry.totalHits, resetTime: new Date(entry.resetTime) };
+      return {
+        totalHits: entry.totalHits,
+        resetTime: new Date(entry.resetTime),
+      };
     }
   }
 
@@ -80,18 +89,36 @@ class UpstashStore {
       return;
     }
     try {
-      const member = `${Date.now()}`;
+      const _member = `${Date.now()}`;
       await redis.zremrangebyrank(fullKey, -1, -1);
-    } catch { /* */ }
+    } catch {
+      /* */
+    }
   }
 
   async resetKey(key) {
     const fullKey = this.prefix + key;
     if (redisAvailable) {
-      try { await redis.del(fullKey); } catch { /* */ }
+      try {
+        await redis.del(fullKey);
+      } catch {
+        /* */
+      }
     }
     this.memoryFallback.delete(fullKey);
   }
+
+  /** Clean up expired entries from memory fallback (C25) */
+  cleanupExpired() {
+    const now = Date.now();
+    for (const [key, entry] of this.memoryFallback) {
+      if (now > entry.resetTime) {
+        this.memoryFallback.delete(key);
+      }
+    }
+  }
 }
+
+module.exports = { UpstashStore };
 
 module.exports = { UpstashStore };

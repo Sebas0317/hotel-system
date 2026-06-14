@@ -1,5 +1,5 @@
-import type { SliderSlide } from '../types';
 import images from '../assets';
+import type { SliderSlide } from '../types';
 
 // Options for Adults dropdown in BookForm; first char used for total guest count in RoomContext.
 export const adultsList: { name: string }[] = [

@@ -1,15 +1,26 @@
-import { useState, useEffect, useCallback } from 'react';
-import { DayPicker } from 'react-day-picker';
-import { format, addDays, eachDayOfInterval, isWithinInterval } from 'date-fns';
+import { addDays, eachDayOfInterval, format, isWithinInterval } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { fetchReservasByRoom, normalizeErrorMessage as safeErrorMessage } from '../services/api';
 import { BadgeCheck, BadgeX, Calendar, Users } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import { DayPicker } from 'react-day-picker';
+import {
+  fetchReservasByRoom,
+  normalizeErrorMessage as safeErrorMessage,
+} from '../services/api';
 import 'react-day-picker/style.css';
 
-const RoomCalendar = ({ roomId, roomNumero, modo = 'selection', onSelectDates, initialDates }) => {
+const RoomCalendar = ({
+  roomId,
+  roomNumero,
+  modo = 'selection',
+  onSelectDates,
+  initialDates,
+}) => {
   const [reservas, setReservas] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedRange, setSelectedRange] = useState(initialDates || { from: undefined, to: undefined });
+  const [selectedRange, setSelectedRange] = useState(
+    initialDates || { from: undefined, to: undefined }
+  );
   const [error, setError] = useState(null);
 
   const fetchReservas = useCallback(async () => {
@@ -17,7 +28,7 @@ const RoomCalendar = ({ roomId, roomNumero, modo = 'selection', onSelectDates, i
     try {
       setLoading(true);
       const data = await fetchReservasByRoom(roomId);
-      setReservas(data.filter(r => r.estado !== 'cancelada'));
+      setReservas(data.filter((r) => r.estado !== 'cancelada'));
       setError(null);
     } catch (e) {
       setError(safeErrorMessage(e));
@@ -35,22 +46,22 @@ const RoomCalendar = ({ roomId, roomNumero, modo = 'selection', onSelectDates, i
   }, [initialDates]);
 
   const occupiedDates = [];
-  reservas.forEach(r => {
+  reservas.forEach((r) => {
     const start = new Date(r.checkIn);
     const end = new Date(r.checkOut);
     const days = eachDayOfInterval({ start, end });
-    days.forEach(d => occupiedDates.push(d));
+    days.forEach((d) => occupiedDates.push(d));
   });
 
   const disabledDays = [
     { from: new Date(0), to: addDays(new Date(), -1) },
-    ...occupiedDates
+    ...occupiedDates,
   ];
 
   const handleSelect = (range) => {
     setSelectedRange(range);
     if (onSelectDates && range?.from && range?.to) {
-      const isValid = !occupiedDates.some(d => 
+      const isValid = !occupiedDates.some((d) =>
         isWithinInterval(d, { start: range.from, end: range.to })
       );
       if (isValid) {
@@ -75,9 +86,7 @@ const RoomCalendar = ({ roomId, roomNumero, modo = 'selection', onSelectDates, i
   return (
     <div className="room-calendar bg-white rounded-lg shadow-sm border p-4">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="font-semibold text-gray-800">
-          Habitación {roomNumero}
-        </h3>
+        <h3 className="font-semibold text-gray-800">Habitación {roomNumero}</h3>
         <span className="text-xs text-gray-500">
           {reservas.length} reserva(s) activa(s)
         </span>
@@ -106,17 +115,17 @@ const RoomCalendar = ({ roomId, roomNumero, modo = 'selection', onSelectDates, i
             className="room-calendar-picker"
             styles={{
               caption: { color: '#166534' },
-              head_cell: { color: '#6b7280' }
+              head_cell: { color: '#6b7280' },
             }}
             modifiers={{
-              reserved: occupiedDates
+              reserved: occupiedDates,
             }}
             modifiersStyles={{
               reserved: {
                 backgroundColor: '#fecaca',
                 color: '#dc2626',
-                borderRadius: '4px'
-              }
+                borderRadius: '4px',
+              },
             }}
           />
 
@@ -125,13 +134,19 @@ const RoomCalendar = ({ roomId, roomNumero, modo = 'selection', onSelectDates, i
               <div className="flex items-center gap-2 text-green-800">
                 <BadgeCheck className="w-4 h-4" />
                 <span className="text-sm font-medium">
-                  {format(selectedRange.from, 'dd MMM')} - {format(selectedRange.to, 'dd MMM yyyy')}
+                  {format(selectedRange.from, 'dd MMM')} -{' '}
+                  {format(selectedRange.to, 'dd MMM yyyy')}
                 </span>
               </div>
               <div className="flex items-center gap-4 mt-2 text-xs text-gray-600">
                 <span className="flex items-center gap-1">
                   <Users className="w-3 h-3" />
-                  {selectedRange.to && Math.ceil((selectedRange.to - selectedRange.from) / (1000 * 60 * 60 * 24))} noches
+                  {selectedRange.to &&
+                    Math.ceil(
+                      (selectedRange.to - selectedRange.from) /
+                        (1000 * 60 * 60 * 24)
+                    )}{' '}
+                  noches
                 </span>
               </div>
             </div>

@@ -9,20 +9,32 @@ export default function UserMenu({ onNavigate, onExit }) {
           <HotelTitle />
           <span className="topbar-badge user text-xs">User</span>
         </div>
-        <button className="btn-salir text-sm" onClick={onExit}>Exit</button>
+        <button className="btn-salir text-sm" onClick={onExit}>
+          Exit
+        </button>
       </header>
 
       <div className="usuario-content p-4 sm:p-6 max-w-[800px] mx-auto">
         <div className="menu-grid grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-          <button className="menu-card ver text-left p-5 sm:p-6" onClick={() => onNavigate('room')}>
+          <button
+            className="menu-card ver text-left p-5 sm:p-6"
+            onClick={() => onNavigate('room')}
+          >
             <span className="mc-icon text-3xl sm:text-4xl"></span>
             <span className="mc-title text-lg sm:text-xl">Room Status</span>
-            <span className="mc-desc text-sm sm:text-base">View transactions and account balance</span>
+            <span className="mc-desc text-sm sm:text-base">
+              View transactions and account balance
+            </span>
           </button>
-          <button className="menu-card checkout text-left p-5 sm:p-6" onClick={() => onNavigate('checkout')}>
+          <button
+            className="menu-card checkout text-left p-5 sm:p-6"
+            onClick={() => onNavigate('checkout')}
+          >
             <span className="mc-icon text-3xl sm:text-4xl"></span>
             <span className="mc-title text-lg sm:text-xl">Guest Checkout</span>
-            <span className="mc-desc text-sm sm:text-base">Process checkout and generate invoice</span>
+            <span className="mc-desc text-sm sm:text-base">
+              Process checkout and generate invoice
+            </span>
           </button>
         </div>
       </div>

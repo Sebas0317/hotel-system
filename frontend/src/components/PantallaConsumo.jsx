@@ -1,9 +1,15 @@
-import { useState, useCallback } from 'react';
-import { validarPin, createConsumo, safeText, normalizeErrorMessage as safeErrorMessage } from '../services/api';
-import { PRODUCTOS, CATEGORIAS_CONSUMO } from '../constants';
+import { AlertTriangle, CheckCircle } from 'lucide-react';
+import { useCallback, useState } from 'react';
+import { CATEGORIAS_CONSUMO, PRODUCTOS } from '../constants';
+import {
+  createConsumo,
+  normalizeErrorMessage as safeErrorMessage,
+  safeText,
+  setRoomToken,
+  validarPin,
+} from '../services/api';
 import { COP } from '../utils/helpers';
 import PantallaForm from './PantallaForm';
-import { AlertTriangle, CheckCircle, CreditCard } from 'lucide-react';
 import ReCaptchaWidget from './ReCaptchaWidget';
 
 /**
@@ -28,12 +34,14 @@ export default function PantallaConsumo({ onNav }) {
     if (!numero.trim() || !pin.trim()) {
       return setError('Ingresa número de habitación y PIN');
     }
-    if (!recaptchaToken && !captchaError) return setError('Completa la verificacion de seguridad');
+    if (!recaptchaToken && !captchaError)
+      return setError('Completa la verificacion de seguridad');
     setLoading(true);
     setError('');
     try {
       const data = await validarPin(numero.trim(), pin.trim(), recaptchaToken);
-      setRoom(data);
+      setRoomToken(data.roomToken);
+      setRoom(data.room);
       setStep(2);
     } catch (e) {
       setError(safeErrorMessage(e));
@@ -80,11 +88,21 @@ export default function PantallaConsumo({ onNav }) {
         <div className="exito-box">
           <CheckCircle className="w-16 h-16 text-green-600 mb-4" />
           <h3>Consumo registrado</h3>
-          <p className="exito-sub">Habitación #{safeText(room?.numero)} · {safeText(room?.huesped, 'Sin huésped')}</p>
-          <div className="consumo-chip"><strong>{form.descripcion}</strong><span>{COP(parseFloat(form.precio))}</span></div>
+          <p className="exito-sub">
+            Habitación #{safeText(room?.numero)} ·{' '}
+            {safeText(room?.huesped, 'Sin huésped')}
+          </p>
+          <div className="consumo-chip">
+            <strong>{form.descripcion}</strong>
+            <span>{COP(parseFloat(form.precio))}</span>
+          </div>
           <div className="btn-row">
-            <button className="btn-main-action" onClick={resetForm}>+ Otro consumo</button>
-            <button className="btn-sec-action" onClick={() => onNav('menu')}>← Menú</button>
+            <button className="btn-main-action" onClick={resetForm}>
+              + Otro consumo
+            </button>
+            <button className="btn-sec-action" onClick={() => onNav('menu')}>
+              ← Menú
+            </button>
           </div>
         </div>
       </PantallaForm>
@@ -94,27 +112,61 @@ export default function PantallaConsumo({ onNav }) {
   return (
     <PantallaForm
       titulo="Registrar Consumo"
-      desc={step === 1 ? 'Verifica la habitación con el PIN' : `Habitación #${safeText(room?.numero)} · ${safeText(room?.huesped, 'Sin huésped')}`}
+      desc={
+        step === 1
+          ? 'Verifica la habitación con el PIN'
+          : `Habitación #${safeText(room?.numero)} · ${safeText(room?.huesped, 'Sin huésped')}`
+      }
       onVolver={() => (step === 2 ? setStep(1) : onNav('menu'))}
     >
       {step === 1 && (
-        <form onSubmit={(e) => { e.preventDefault(); validar(); }}>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            validar();
+          }}
+        >
           <div className="form-group">
             <label>Número de habitación</label>
-            <input type="text" placeholder="Ej: 101" value={numero} onChange={(e) => setNumero(e.target.value)} />
+            <input
+              type="text"
+              placeholder="Ej: 101"
+              value={numero}
+              onChange={(e) => setNumero(e.target.value)}
+            />
           </div>
           <div className="form-group">
             <label>PIN de la habitación</label>
-            <input type="password" placeholder="4 dígitos" value={pin} onChange={(e) => setPin(e.target.value)} maxLength={4} />
+            <input
+              type="password"
+              placeholder="6 dígitos"
+              value={pin}
+              onChange={(e) => setPin(e.target.value)}
+              maxLength={6}
+            />
           </div>
           <div className="flex justify-center pt-2">
             <ReCaptchaWidget
-              onVerify={(token) => { setRecaptchaToken(token); setError(''); }}
-              onExpire={() => { setRecaptchaToken(null); setError('Verificacion expirada, intenta de nuevo'); }}
+              onVerify={(token) => {
+                setRecaptchaToken(token);
+                setError('');
+              }}
+              onExpire={() => {
+                setRecaptchaToken(null);
+                setError('Verificacion expirada, intenta de nuevo');
+              }}
             />
           </div>
-          {error && <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm mb-4"><AlertTriangle className="w-4 h-4 inline mr-1" /> {error}</div>}
-          <button className="btn-main-action" onClick={validar} disabled={loading || (!recaptchaToken && !captchaError)}>
+          {error && (
+            <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm mb-4">
+              <AlertTriangle className="w-4 h-4 inline mr-1" /> {error}
+            </div>
+          )}
+          <button
+            className="btn-main-action"
+            onClick={validar}
+            disabled={loading || (!recaptchaToken && !captchaError)}
+          >
             {loading ? 'Verificando...' : 'Verificar con PIN'}
           </button>
         </form>
@@ -140,7 +192,7 @@ export default function PantallaConsumo({ onNav }) {
 
           {/* Product catalog */}
           <div className="catalogo-scroll">
-            {PRODUCTOS[cat].map((p, i) => (
+            {(PRODUCTOS[cat] || []).map((p, i) => (
               <button
                 key={i}
                 className={`catalogo-item ${form.descripcion === p.nombre ? 'seleccionado' : ''}`}
@@ -156,19 +208,43 @@ export default function PantallaConsumo({ onNav }) {
           <div className="separador-manual">O escribe manualmente</div>
           <div className="form-group">
             <label>Descripción</label>
-            <input type="text" placeholder="Ej: Cóctel especial" value={form.descripcion} onChange={(e) => setForm({ ...form, descripcion: e.target.value })} />
+            <input
+              type="text"
+              placeholder="Ej: Cóctel especial"
+              value={form.descripcion}
+              onChange={(e) =>
+                setForm({ ...form, descripcion: e.target.value })
+              }
+            />
           </div>
           <div className="form-group">
             <label>Precio (COP)</label>
-            <input type="number" placeholder="Ej: 25000" value={form.precio} onChange={(e) => setForm({ ...form, precio: e.target.value })} min="0" />
+            <input
+              type="number"
+              placeholder="Ej: 25000"
+              value={form.precio}
+              onChange={(e) => setForm({ ...form, precio: e.target.value })}
+              min="0"
+            />
           </div>
-          {error && <div className="error-message"><AlertTriangle className="w-4 h-4" /> {error}</div>}
+          {error && (
+            <div className="error-message">
+              <AlertTriangle className="w-4 h-4" /> {error}
+            </div>
+          )}
           <button
             className="btn-main-action"
             onClick={registrar}
             disabled={loading || !form.descripcion || !form.precio}
           >
-            {loading ? 'Guardando...' : <>Registrar {form.descripcion ? `"${form.descripcion}"` : 'consumo'}</>}
+            {loading ? (
+              'Guardando...'
+            ) : (
+              <>
+                Registrar{' '}
+                {form.descripcion ? `"${form.descripcion}"` : 'consumo'}
+              </>
+            )}
           </button>
         </>
       )}

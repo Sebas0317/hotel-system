@@ -20,7 +20,7 @@ function hashString(str) {
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
     const char = str.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
+    hash = (hash << 5) - hash + char;
     hash |= 0;
   }
   return Math.abs(hash);
@@ -41,16 +41,26 @@ export function generarConsumosMock(room) {
   const checkInDate = new Date(room.checkIn);
 
   for (let i = 0; i < numConsumos; i++) {
-    const catIndex = Math.floor(seededRandom(seed, i * 3 + 1) * categorias.length);
+    const catIndex = Math.floor(
+      seededRandom(seed, i * 3 + 1) * categorias.length
+    );
     const categoria = categorias[catIndex];
     const productos = SAMPLE_CONSUMOS[categoria];
-    const prodIndex = Math.floor(seededRandom(seed, i * 3 + 2) * productos.length);
+    const prodIndex = Math.floor(
+      seededRandom(seed, i * 3 + 2) * productos.length
+    );
     const producto = productos[prodIndex];
 
-    const daysSinceCheckIn = Math.max(0, Math.floor(seededRandom(seed, i * 3 + 3) * 5));
+    const daysSinceCheckIn = Math.max(
+      0,
+      Math.floor(seededRandom(seed, i * 3 + 3) * 5)
+    );
     const fecha = new Date(checkInDate);
     fecha.setDate(fecha.getDate() + daysSinceCheckIn);
-    fecha.setHours(8 + Math.floor(seededRandom(seed, i * 5 + 4) * 14), Math.floor(seededRandom(seed, i * 5 + 5) * 60));
+    fecha.setHours(
+      8 + Math.floor(seededRandom(seed, i * 5 + 4) * 14),
+      Math.floor(seededRandom(seed, i * 5 + 5) * 60)
+    );
 
     consumos.push({
       id: `${room.id}-mock-${i}`,
@@ -71,9 +81,10 @@ export function calcularFechaDisponible(room) {
   if (!room.checkIn) return null;
 
   const seed = hashString(room.id);
-  const nights = room.estado === 'ocupada'
-    ? Math.floor(seededRandom(seed, 100) * 7) + 1
-    : Math.floor(seededRandom(seed, 101) * 5) + 1;
+  const nights =
+    room.estado === 'ocupada'
+      ? Math.floor(seededRandom(seed, 100) * 7) + 1
+      : Math.floor(seededRandom(seed, 101) * 5) + 1;
 
   const fecha = new Date(room.checkIn);
   fecha.setDate(fecha.getDate() + nights);

@@ -1,10 +1,10 @@
-import { Drawer as VaulDrawer } from 'vaul';
 import { X } from 'lucide-react';
+import { Drawer as VaulDrawer } from 'vaul';
 
 /**
  * MobileDrawer - Slide-out drawer for mobile navigation
  * Uses Vaul for smooth animations
- * 
+ *
  * @param {Object} props
  * @param {boolean} props.open - Open state
  * @param {Function} props.onClose - Close handler
@@ -21,13 +21,14 @@ export function MobileDrawer({ open, onClose, children, title }) {
             <VaulDrawer.Title className="text-lg font-semibold">
               {title || 'Menu'}
             </VaulDrawer.Title>
-            <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full">
+            <button
+              onClick={onClose}
+              className="p-2 hover:bg-gray-100 rounded-full"
+            >
               <X className="w-5 h-5" />
             </button>
           </div>
-          <div className="flex-1 overflow-y-auto p-4">
-            {children}
-          </div>
+          <div className="flex-1 overflow-y-auto p-4">{children}</div>
         </VaulDrawer.Content>
       </VaulDrawer.Portal>
     </VaulDrawer.Root>

@@ -1,11 +1,11 @@
-import { jsPDF } from 'jspdf';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import jsPDF from 'jspdf';
 
 /**
  * InvoicePDF - Generate PDF invoices for checkout
  * Uses jsPDF for client-side PDF generation
- * 
+ *
  * @param {Object} invoice - Invoice data
  * @returns {jsPDF} - PDF document
  */
@@ -20,7 +20,9 @@ export function generateInvoicePDF(invoice) {
 
   doc.setFontSize(12);
   doc.setFont('helvetica', 'normal');
-  doc.text('Sistema de Gestion Hotelera', pageWidth / 2, 28, { align: 'center' });
+  doc.text('Sistema de Gestion Hotelera', pageWidth / 2, 28, {
+    align: 'center',
+  });
 
   // Divider
   doc.setDrawColor(34, 197, 94);
@@ -33,20 +35,30 @@ export function generateInvoicePDF(invoice) {
 
   doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
-  
+
   const details = [
     { label: 'Habitacion', value: invoice.numero },
     { label: 'Huesped', value: invoice.huesped },
     { label: 'Documento', value: invoice.documento },
-    { label: 'Fecha Check-in', value: invoice.checkIn ? format(new Date(invoice.checkIn), 'PP', { locale: es }) : '-' },
-    { label: 'Fecha Check-out', value: invoice.checkOut ? format(new Date(invoice.checkOut), 'PP', { locale: es }) : '-' },
+    {
+      label: 'Fecha Check-in',
+      value: invoice.checkIn
+        ? format(new Date(invoice.checkIn), 'PP', { locale: es })
+        : '-',
+    },
+    {
+      label: 'Fecha Check-out',
+      value: invoice.checkOut
+        ? format(new Date(invoice.checkOut), 'PP', { locale: es })
+        : '-',
+    },
     { label: 'Noches', value: invoice.noches },
   ];
 
   let y = 65;
-  details.forEach(d => {
+  details.forEach((d) => {
     doc.setFont('helvetica', 'bold');
-    doc.text(d.label + ':', 20, y);
+    doc.text(`${d.label}:`, 20, y);
     doc.setFont('helvetica', 'normal');
     doc.text(d.value, 70, y);
     y += 8;
@@ -71,8 +83,13 @@ export function generateInvoicePDF(invoice) {
 
   // Add line items
   if (invoice.habitacion) {
-    doc.text('Habitacion x ' + invoice.noches + ' noche(s)', 20, y);
-    doc.text('$ ' + invoice.habitacion.toLocaleString('es-CO'), pageWidth - 50, y, { align: 'right' });
+    doc.text(`Habitacion x ${invoice.noches} noche(s)`, 20, y);
+    doc.text(
+      `$ ${invoice.habitacion.toLocaleString('es-CO')}`,
+      pageWidth - 50,
+      y,
+      { align: 'right' }
+    );
     y += 8;
   }
 
@@ -81,9 +98,11 @@ export function generateInvoicePDF(invoice) {
     doc.text('Consumos:', 20, y);
     y += 8;
 
-    invoice.consumos.forEach(c => {
+    invoice.consumos.forEach((c) => {
       doc.text(c.descripcion, 25, y);
-      doc.text('$ ' + c.precio.toLocaleString('es-CO'), pageWidth - 50, y, { align: 'right' });
+      doc.text(`$ ${c.precio.toLocaleString('es-CO')}`, pageWidth - 50, y, {
+        align: 'right',
+      });
       y += 7;
     });
   }
@@ -95,13 +114,25 @@ export function generateInvoicePDF(invoice) {
 
   doc.setFontSize(14);
   doc.setFont('helvetica', 'bold');
-  doc.text('TOTAL: $ ' + invoice.total.toLocaleString('es-CO'), pageWidth - 50, y, { align: 'right' });
+  doc.text(
+    `TOTAL: $ ${invoice.total.toLocaleString('es-CO')}`,
+    pageWidth - 50,
+    y,
+    { align: 'right' }
+  );
 
   // Footer
   doc.setFontSize(8);
   doc.setFont('helvetica', 'normal');
-  doc.text('Generado: ' + format(new Date(), 'PPpp', { locale: es }), pageWidth / 2, 280, { align: 'center' });
-  doc.text('EcoBosque Hotel - Sistema de Gestion', pageWidth / 2, 285, { align: 'center' });
+  doc.text(
+    `Generado: ${format(new Date(), 'PPpp', { locale: es })}`,
+    pageWidth / 2,
+    280,
+    { align: 'center' }
+  );
+  doc.text('EcoBosque Hotel - Sistema de Gestion', pageWidth / 2, 285, {
+    align: 'center',
+  });
 
   return doc;
 }

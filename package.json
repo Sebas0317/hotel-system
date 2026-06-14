@@ -22,6 +22,7 @@
   },
   "homepage": "https://github.com/Sebas0317/hotel-system#readme",
   "devDependencies": {
+    "@biomejs/biome": "2.5.0",
     "@lhci/cli": "^0.15.1",
     "lighthouse": "^13.1.0"
   }

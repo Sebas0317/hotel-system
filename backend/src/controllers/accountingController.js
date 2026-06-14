@@ -13,15 +13,15 @@ const logger = require('../utils/logger');
 
 function formatDate(date, formatStr = 'PP') {
   const d = typeof date === 'string' ? parseISO(date) : date;
-  if (!d || isNaN(d.getTime())) return '';
+  if (!d || Number.isNaN(d.getTime())) return '';
   return format(d, formatStr, { locale: es });
 }
 
-function formatDateTime(date) {
+function _formatDateTime(date) {
   return formatDate(date, 'PPp');
 }
 
-function formatShortDate(date) {
+function _formatShortDate(date) {
   return formatDate(date, 'P');
 }
 
@@ -36,7 +36,7 @@ function getStatusLabel(status) {
     reservada: 'Reservada',
     limpieza: 'En Limpieza',
     mantenimiento: 'En Mantenimiento',
-    fuera_servicio: 'Fuera de Servicio'
+    fuera_servicio: 'Fuera de Servicio',
   };
   return labels[status] || status;
 }
@@ -44,48 +44,96 @@ function getStatusLabel(status) {
 function fmtDate(dateStr) {
   if (!dateStr) return '';
   const d = new Date(dateStr);
-  return d.toLocaleDateString('es-CO', { 
-    year: 'numeric', 
-    month: '2-digit', 
-    day: '2-digit' 
+  return d.toLocaleDateString('es-CO', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
   });
 }
 
-async function getAccountingSummary(req, res) {
+async function getAccountingSummary(_req, res) {
   try {
     const rooms = await getRooms();
     const history = await getHistory();
-    const historyArray = Array.isArray(history) ? history : (history.reservas || []);
+    const historyArray = Array.isArray(history)
+      ? history
+      : history.reservas || [];
 
     const totalRooms = rooms.length;
-    const occupied = rooms.filter(r => r.estado === 'ocupada');
-    const available = rooms.filter(r => r.estado === 'disponible');
-    const reserved = rooms.filter(r => r.estado === 'reservada');
-    const limpieza = rooms.filter(r => r.estado === 'limpieza');
-    const mantenimiento = rooms.filter(r => r.estado === 'mantenimiento');
+    const occupied = rooms.filter((r) => r.estado === 'ocupada');
+    const available = rooms.filter((r) => r.estado === 'disponible');
+    const reserved = rooms.filter((r) => r.estado === 'reservada');
+    const limpieza = rooms.filter((r) => r.estado === 'limpieza');
+    const mantenimiento = rooms.filter((r) => r.estado === 'mantenimiento');
 
-    const currentRevenue = occupied.reduce((sum, r) => sum + (r.tarifa || 0) * (r.noches || 1), 0);
-    const completedStays = historyArray.filter(h => h.tipo !== 'cambio_estado' && h.checkIn && h.checkOut);
-    const historicalRevenue = completedStays.reduce((sum, h) => sum + (h.tarifa || 0) * (h.noches || 1), 0);
+    const currentRevenue = occupied.reduce((sum, r) => {
+      const nights =
+        r.checkIn && r.checkOut
+          ? Math.max(
+              1,
+              Math.ceil(
+                (new Date(r.checkOut) - new Date(r.checkIn)) /
+                  (1000 * 60 * 60 * 24)
+              )
+            )
+          : r.noches || 1;
+      return sum + (r.tarifa || 0) * nights;
+    }, 0);
+    const completedStays = historyArray.filter(
+      (h) => h.tipo !== 'cambio_estado' && h.checkIn && h.checkOut
+    );
+    const historicalRevenue = completedStays.reduce((sum, h) => {
+      const nights =
+        h.checkIn && h.checkOut
+          ? Math.max(
+              1,
+              Math.ceil(
+                (new Date(h.checkOut) - new Date(h.checkIn)) /
+                  (1000 * 60 * 60 * 24)
+              )
+            )
+          : h.noches || 1;
+      return sum + (h.tarifa || 0) * nights;
+    }, 0);
 
     const revenueByType = {};
-    occupied.forEach(r => {
-      if (!revenueByType[r.tipo]) revenueByType[r.tipo] = { tipo: r.tipo, revenue: 0, count: 0 };
-      revenueByType[r.tipo].revenue += (r.tarifa || 0) * (r.noches || 1);
+    occupied.forEach((r) => {
+      if (!revenueByType[r.tipo])
+        revenueByType[r.tipo] = { tipo: r.tipo, revenue: 0, count: 0 };
+      const nights =
+        r.checkIn && r.checkOut
+          ? Math.max(
+              1,
+              Math.ceil(
+                (new Date(r.checkOut) - new Date(r.checkIn)) /
+                  (1000 * 60 * 60 * 24)
+              )
+            )
+          : r.noches || 1;
+      revenueByType[r.tipo].revenue += (r.tarifa || 0) * nights;
       revenueByType[r.tipo].count++;
     });
 
     const revenueByService = {};
-    historyArray.filter(h => h.consumos && Array.isArray(h.consumos)).forEach(h => {
-      h.consumos.forEach(c => {
-        if (!revenueByService[c.categoria]) revenueByService[c.categoria] = { categoria: c.categoria, total: 0, count: 0 };
-        revenueByService[c.categoria].total += c.precio || 0;
-        revenueByService[c.categoria].count++;
+    historyArray
+      .filter((h) => h.consumos && Array.isArray(h.consumos))
+      .forEach((h) => {
+        h.consumos.forEach((c) => {
+          if (!revenueByService[c.categoria])
+            revenueByService[c.categoria] = {
+              categoria: c.categoria,
+              total: 0,
+              count: 0,
+            };
+          revenueByService[c.categoria].total += c.precio || 0;
+          revenueByService[c.categoria].count++;
+        });
       });
-    });
 
-    const occupancyRate = totalRooms > 0 ? Math.round((occupied.length / totalRooms) * 100) : 0;
-    const avgDailyRate = occupied.length > 0 ? Math.round(currentRevenue / occupied.length) : 0;
+    const occupancyRate =
+      totalRooms > 0 ? Math.round((occupied.length / totalRooms) * 100) : 0;
+    const avgDailyRate =
+      occupied.length > 0 ? Math.round(currentRevenue / occupied.length) : 0;
 
     res.json({
       summary: {
@@ -111,51 +159,124 @@ async function getAccountingSummary(req, res) {
   }
 }
 
-async function exportReport(req, res) {
+async function exportReport(_req, res) {
   try {
     const rooms = await getRooms();
     const history = await getHistory();
-    const historyArray = Array.isArray(history) ? history : (history.reservas || []);
+    const historyArray = Array.isArray(history)
+      ? history
+      : history.reservas || [];
 
     const wb = XLSX.utils.book_new();
 
     // Helper functions
-    const addHeader = (sheet, title, subtitle) => {
+    const _addHeader = (sheet, _title, _subtitle) => {
       sheet['!rows'] = [{ hpx: 30 }, { hpx: 20 }];
     };
 
     // Sheet 1: Resumen Ejecutivo
-    const occupied = rooms.filter(r => r.estado === 'ocupada');
-    const available = rooms.filter(r => r.estado === 'disponible');
-    const reserved = rooms.filter(r => r.estado === 'reservada');
-    const limpieza = rooms.filter(r => r.estado === 'limpieza');
-    const mantenimiento = rooms.filter(r => r.estado === 'mantenimiento');
-    const totalRevenue = occupied.reduce((sum, r) => sum + (r.tarifa || 0) * (r.noches || 1), 0);
-    const completedStays = historyArray.filter(h => h.tipo !== 'cambio_estado' && h.checkIn && h.checkOut);
-    const historicalRevenue = completedStays.reduce((sum, h) => sum + (h.tarifa || 0) * (h.noches || 1), 0);
-    const occupancyRate = rooms.length > 0 ? Math.round((occupied.length / rooms.length) * 100) : 0;
+    const occupied = rooms.filter((r) => r.estado === 'ocupada');
+    const available = rooms.filter((r) => r.estado === 'disponible');
+    const reserved = rooms.filter((r) => r.estado === 'reservada');
+    const limpieza = rooms.filter((r) => r.estado === 'limpieza');
+    const mantenimiento = rooms.filter((r) => r.estado === 'mantenimiento');
+    const totalRevenue = occupied.reduce((sum, r) => {
+      const nights =
+        r.checkIn && r.checkOut
+          ? Math.max(
+              1,
+              Math.ceil(
+                (new Date(r.checkOut) - new Date(r.checkIn)) /
+                  (1000 * 60 * 60 * 24)
+              )
+            )
+          : r.noches || 1;
+      return sum + (r.tarifa || 0) * nights;
+    }, 0);
+    const completedStays = historyArray.filter(
+      (h) => h.tipo !== 'cambio_estado' && h.checkIn && h.checkOut
+    );
+    const historicalRevenue = completedStays.reduce((sum, h) => {
+      const nights =
+        h.checkIn && h.checkOut
+          ? Math.max(
+              1,
+              Math.ceil(
+                (new Date(h.checkOut) - new Date(h.checkIn)) /
+                  (1000 * 60 * 60 * 24)
+              )
+            )
+          : h.noches || 1;
+      return sum + (h.tarifa || 0) * nights;
+    }, 0);
+    const occupancyRate =
+      rooms.length > 0 ? Math.round((occupied.length / rooms.length) * 100) : 0;
 
-const executiveSummary = [
+    const executiveSummary = [
       ['RESUMEN EJECUTIVO - ECO BOSQUE HOTEL BOUTIQUE'],
       [`Fecha de Generacion: ${formatDate(new Date(), 'PPpp')}`],
       [],
       ['KPIs PRINCIPALES'],
       ['Metrica', 'Valor', 'Descripcion'],
       ['Total Habitaciones', rooms.length, 'Capacidad total del hotel'],
-      ['Tasa de Ocupacion', `${occupancyRate}%`, `${occupied.length} de ${rooms.length} habitaciones`],
-      ['💰 Revenue Actual', `$${totalRevenue.toLocaleString('es-CO')}`, 'Revenue de habitaciones ocupadas'],
-      ['📈 Revenue Histórico', `$${historicalRevenue.toLocaleString('es-CO')}`, 'Revenue de estadías completadas'],
-      ['💵 Revenue Total', `$${(totalRevenue + historicalRevenue).toLocaleString('es-CO')}`, 'Revenue actual + histórico'],
-      ['🏠 Tarifa Promedio/Día', `$${Math.round(totalRevenue / (occupied.length || 1)).toLocaleString('es-CO')}`, 'Promedio por habitación'],
-      ['✅ Estadías Completadas', completedStays.length, 'Total de huéspedes que completaron stay'],
+      [
+        'Tasa de Ocupacion',
+        `${occupancyRate}%`,
+        `${occupied.length} de ${rooms.length} habitaciones`,
+      ],
+      [
+        '💰 Revenue Actual',
+        `$${totalRevenue.toLocaleString('es-CO')}`,
+        'Revenue de habitaciones ocupadas',
+      ],
+      [
+        '📈 Revenue Histórico',
+        `$${historicalRevenue.toLocaleString('es-CO')}`,
+        'Revenue de estadías completadas',
+      ],
+      [
+        '💵 Revenue Total',
+        `$${(totalRevenue + historicalRevenue).toLocaleString('es-CO')}`,
+        'Revenue actual + histórico',
+      ],
+      [
+        '🏠 Tarifa Promedio/Día',
+        `$${Math.round(totalRevenue / (occupied.length || 1)).toLocaleString('es-CO')}`,
+        'Promedio por habitación',
+      ],
+      [
+        '✅ Estadías Completadas',
+        completedStays.length,
+        'Total de huéspedes que completaron stay',
+      ],
       [],
       ['📊 DETALLE POR ESTADO'],
       ['Estado', 'Cantidad', 'Porcentaje'],
-      ['Ocupadas', occupied.length, `${rooms.length > 0 ? Math.round((occupied.length / rooms.length) * 100) : 0}%`],
-      ['Disponibles', available.length, `${rooms.length > 0 ? Math.round((available.length / rooms.length) * 100) : 0}%`],
-      ['Reservadas', reserved.length, `${rooms.length > 0 ? Math.round((reserved.length / rooms.length) * 100) : 0}%`],
-      ['En Limpieza', limpieza.length, `${rooms.length > 0 ? Math.round((limpieza.length / rooms.length) * 100) : 0}%`],
-      ['En Mantenimiento', mantenimiento.length, `${rooms.length > 0 ? Math.round((mantenimiento.length / rooms.length) * 100) : 0}%`],
+      [
+        'Ocupadas',
+        occupied.length,
+        `${rooms.length > 0 ? Math.round((occupied.length / rooms.length) * 100) : 0}%`,
+      ],
+      [
+        'Disponibles',
+        available.length,
+        `${rooms.length > 0 ? Math.round((available.length / rooms.length) * 100) : 0}%`,
+      ],
+      [
+        'Reservadas',
+        reserved.length,
+        `${rooms.length > 0 ? Math.round((reserved.length / rooms.length) * 100) : 0}%`,
+      ],
+      [
+        'En Limpieza',
+        limpieza.length,
+        `${rooms.length > 0 ? Math.round((limpieza.length / rooms.length) * 100) : 0}%`,
+      ],
+      [
+        'En Mantenimiento',
+        mantenimiento.length,
+        `${rooms.length > 0 ? Math.round((mantenimiento.length / rooms.length) * 100) : 0}%`,
+      ],
     ];
 
     const wsExec = XLSX.utils.aoa_to_sheet(executiveSummary);
@@ -167,25 +288,50 @@ const executiveSummary = [
       ['DETALLE COMPLETO DE HABITACIONES'],
       [`Generado: ${formatDate(new Date())}`],
       [],
-      ['#', 'Tipo', 'Estado', 'Huesped', 'Documento', 'Check-in', 'Check-out', 'Noches', 'Tarifa/Noche', 'Total'],
-      ...rooms.map(r => [
+      [
+        '#',
+        'Tipo',
+        'Estado',
+        'Huesped',
+        'Documento',
+        'Check-in',
+        'Check-out',
+        'Noches',
+        'Tarifa/Noche',
+        'Total',
+      ],
+      ...rooms.map((r) => [
         r.numero,
         r.tipo,
         getStatusLabel(r.estado),
         r.huesped || '-',
         r.documento || '-',
         r.checkIn ? fmtDate(r.checkIn) : '-',
-        r.checkOut ? fmtDate(r.checkOut) : (r.noches ? `Planificado: ${r.noches} días` : '-'),
+        r.checkOut
+          ? fmtDate(r.checkOut)
+          : r.noches
+            ? `Planificado: ${r.noches} días`
+            : '-',
         r.noches || '-',
         r.tarifa ? `$${r.tarifa.toLocaleString('es-CO')}` : '-',
-        r.tarifa && r.noches ? `$${(r.tarifa * r.noches).toLocaleString('es-CO')}` : '-',
+        r.tarifa && r.noches
+          ? `$${(r.tarifa * r.noches).toLocaleString('es-CO')}`
+          : '-',
       ]),
     ];
 
     const wsRooms = XLSX.utils.aoa_to_sheet(allRoomsDetailed);
     wsRooms['!cols'] = [
-      { wch: 8 }, { wch: 25 }, { wch: 15 }, { wch: 25 }, { wch: 15 },
-      { wch: 15 }, { wch: 15 }, { wch: 10 }, { wch: 15 }, { wch: 15 }
+      { wch: 8 },
+      { wch: 25 },
+      { wch: 15 },
+      { wch: 25 },
+      { wch: 15 },
+      { wch: 15 },
+      { wch: 15 },
+      { wch: 10 },
+      { wch: 15 },
+      { wch: 15 },
     ];
     XLSX.utils.book_append_sheet(wb, wsRooms, '📋 Habitaciones');
 
@@ -194,8 +340,20 @@ const executiveSummary = [
       ['🔴 HABITACIONES OCUPADAS - DETALLE'],
       [`Generado: ${new Date().toLocaleDateString('es-CO')}`],
       [],
-      ['#', 'Tipo', 'Huésped', 'Documento', 'Teléfono', 'Email', 'Check-in', 'Check-out', 'Noches', 'Tarifa/Día', 'Total'],
-      ...occupied.map(r => [
+      [
+        '#',
+        'Tipo',
+        'Huésped',
+        'Documento',
+        'Teléfono',
+        'Email',
+        'Check-in',
+        'Check-out',
+        'Noches',
+        'Tarifa/Día',
+        'Total',
+      ],
+      ...occupied.map((r) => [
         r.numero,
         r.tipo,
         r.huesped || '-',
@@ -206,23 +364,45 @@ const executiveSummary = [
         r.checkOut ? fmtDate(r.checkOut) : '-',
         r.noches || 1,
         r.tarifa ? `$${r.tarifa.toLocaleString('es-CO')}` : '-',
-        (r.tarifa && r.noches) ? `$${(r.tarifa * r.noches).toLocaleString('es-CO')}` : '-',
+        r.tarifa && r.noches
+          ? `$${(r.tarifa * r.noches).toLocaleString('es-CO')}`
+          : '-',
       ]),
     ];
 
     const wsOccupied = XLSX.utils.aoa_to_sheet(occupiedRooms);
     wsOccupied['!cols'] = [
-      { wch: 8 }, { wch: 25 }, { wch: 25 }, { wch: 15 }, { wch: 15 },
-      { wch: 30 }, { wch: 15 }, { wch: 15 }, { wch: 10 }, { wch: 15 }, { wch: 15 }
+      { wch: 8 },
+      { wch: 25 },
+      { wch: 25 },
+      { wch: 15 },
+      { wch: 15 },
+      { wch: 30 },
+      { wch: 15 },
+      { wch: 15 },
+      { wch: 10 },
+      { wch: 15 },
+      { wch: 15 },
     ];
     XLSX.utils.book_append_sheet(wb, wsOccupied, '🔴 Ocupadas');
 
     // Sheet 4: Revenue por Tipo
     const revenueByType = {};
-    occupied.forEach(r => {
-      if (!revenueByType[r.tipo]) revenueByType[r.tipo] = { tipo: r.tipo, count: 0, revenue: 0 };
+    occupied.forEach((r) => {
+      if (!revenueByType[r.tipo])
+        revenueByType[r.tipo] = { tipo: r.tipo, count: 0, revenue: 0 };
       revenueByType[r.tipo].count++;
-      revenueByType[r.tipo].revenue += (r.tarifa || 0) * (r.noches || 1);
+      const nights =
+        r.checkIn && r.checkOut
+          ? Math.max(
+              1,
+              Math.ceil(
+                (new Date(r.checkOut) - new Date(r.checkIn)) /
+                  (1000 * 60 * 60 * 24)
+              )
+            )
+          : r.noches || 1;
+      revenueByType[r.tipo].revenue += (r.tarifa || 0) * nights;
     });
 
     const revenueTypeData = [
@@ -230,14 +410,19 @@ const executiveSummary = [
       [`Generado: ${new Date().toLocaleDateString('es-CO')}`],
       [],
       ['Tipo de Habitación', 'Habitaciones', 'Ingresos', '% del Total'],
-      ...Object.values(revenueByType).map(item => [
+      ...Object.values(revenueByType).map((item) => [
         item.tipo,
         item.count,
         `$${item.revenue.toLocaleString('es-CO')}`,
         `${totalRevenue > 0 ? Math.round((item.revenue / totalRevenue) * 100) : 0}%`,
       ]),
       [],
-      ['TOTAL', Object.values(revenueByType).reduce((sum, i) => sum + i.count, 0), `$${totalRevenue.toLocaleString('es-CO')}`, '100%'],
+      [
+        'TOTAL',
+        Object.values(revenueByType).reduce((sum, i) => sum + i.count, 0),
+        `$${totalRevenue.toLocaleString('es-CO')}`,
+        '100%',
+      ],
     ];
 
     const wsRevenue = XLSX.utils.aoa_to_sheet(revenueTypeData);
@@ -249,8 +434,19 @@ const executiveSummary = [
       ['📜 HISTORIAL DE RESERVACIONES'],
       [`Generado: ${new Date().toLocaleDateString('es-CO')}`],
       [],
-      ['Huésped', 'Documento', 'Teléfono', 'Email', 'Habitación', 'Check-in', 'Check-out', 'Noches', 'Tarifa', 'Total'],
-      ...completedStays.map(h => [
+      [
+        'Huésped',
+        'Documento',
+        'Teléfono',
+        'Email',
+        'Habitación',
+        'Check-in',
+        'Check-out',
+        'Noches',
+        'Tarifa',
+        'Total',
+      ],
+      ...completedStays.map((h) => [
         h.huesped || '-',
         h.documento || '-',
         h.telefono || '-',
@@ -260,34 +456,51 @@ const executiveSummary = [
         h.checkOut ? fmtDate(h.checkOut) : '-',
         h.noches || 1,
         h.tarifa ? `$${h.tarifa.toLocaleString('es-CO')}` : '-',
-        h.tarifa && h.noches ? `$${(h.tarifa * h.noches).toLocaleString('es-CO')}` : '-',
+        h.tarifa && h.noches
+          ? `$${(h.tarifa * h.noches).toLocaleString('es-CO')}`
+          : '-',
       ]),
     ];
 
     const wsHistory = XLSX.utils.aoa_to_sheet(reservationsData);
     wsHistory['!cols'] = [
-      { wch: 25 }, { wch: 15 }, { wch: 15 }, { wch: 30 },
-      { wch: 12 }, { wch: 15 }, { wch: 15 }, { wch: 10 }, { wch: 15 }, { wch: 15 }
+      { wch: 25 },
+      { wch: 15 },
+      { wch: 15 },
+      { wch: 30 },
+      { wch: 12 },
+      { wch: 15 },
+      { wch: 15 },
+      { wch: 10 },
+      { wch: 15 },
+      { wch: 15 },
     ];
     XLSX.utils.book_append_sheet(wb, wsHistory, '📜 Historial');
 
     // Sheet 6: Servicios/Consumos
     const servicesByRoom = {};
-    historyArray.filter(h => h.consumos && Array.isArray(h.consumos)).forEach(h => {
-      h.consumos.forEach(c => {
-        const key = h.numero || 'Unknown';
-        if (!servicesByRoom[key]) servicesByRoom[key] = { room: key, huesped: h.huesped, servicios: [] };
-        servicesByRoom[key].servicios.push(c);
+    historyArray
+      .filter((h) => h.consumos && Array.isArray(h.consumos))
+      .forEach((h) => {
+        h.consumos.forEach((c) => {
+          const key = h.numero || 'Unknown';
+          if (!servicesByRoom[key])
+            servicesByRoom[key] = {
+              room: key,
+              huesped: h.huesped,
+              servicios: [],
+            };
+          servicesByRoom[key].servicios.push(c);
+        });
       });
-    });
 
     const serviciosData = [
       ['🍽️ REGISTRO DE SERVICIOS/CONSUMOS'],
       [`Generado: ${new Date().toLocaleDateString('es-CO')}`],
       [],
       ['Habitación', 'Huésped', 'Categoría', 'Descripción', 'Precio'],
-      ...Object.values(servicesByRoom).flatMap(item =>
-        item.servicios.map(s => [
+      ...Object.values(servicesByRoom).flatMap((item) =>
+        item.servicios.map((s) => [
           item.room,
           item.huesped || '-',
           s.categoria || '-',
@@ -299,7 +512,11 @@ const executiveSummary = [
 
     const wsServices = XLSX.utils.aoa_to_sheet(serviciosData);
     wsServices['!cols'] = [
-      { wch: 12 }, { wch: 25 }, { wch: 15 }, { wch: 35 }, { wch: 15 }
+      { wch: 12 },
+      { wch: 25 },
+      { wch: 15 },
+      { wch: 35 },
+      { wch: 15 },
     ];
     XLSX.utils.book_append_sheet(wb, wsServices, '🍽️ Servicios');
 
@@ -307,8 +524,11 @@ const executiveSummary = [
     const buffer = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
 
     const fileName = `EcoBosque_Reporte_Contable_${formatFileDate(new Date())}.xlsx`;
-    
-    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+
+    res.setHeader(
+      'Content-Type',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    );
     res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
     res.send(buffer);
   } catch (err) {

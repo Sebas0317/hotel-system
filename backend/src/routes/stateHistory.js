@@ -2,7 +2,11 @@
 
 const express = require('express');
 const router = express.Router();
-const { getAllStateHistory, addStateChange, getStateHistoryByRoom } = require('../controllers/stateHistoryController');
+const {
+  getAllStateHistory,
+  addStateChange,
+  getStateHistoryByRoom,
+} = require('../controllers/stateHistoryController');
 
 router.get('/', getAllStateHistory);
 router.post('/', addStateChange);

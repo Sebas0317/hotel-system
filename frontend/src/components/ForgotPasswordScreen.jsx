@@ -1,7 +1,18 @@
-import { useState, useEffect } from 'react';
-import { ArrowLeft, Mail, Lock, CheckCircle, Loader, AlertCircle } from 'lucide-react';
+import {
+  AlertCircle,
+  ArrowLeft,
+  CheckCircle,
+  Loader,
+  Lock,
+  Mail,
+} from 'lucide-react';
+import { useEffect, useState } from 'react';
+import {
+  changePassword,
+  requestPasswordRecovery,
+  verifyRecoveryCode,
+} from '../services/api';
 import HotelTitle from './HotelTitle';
-import { requestPasswordRecovery, verifyRecoveryCode, changePassword } from '../services/api';
 
 export default function ForgotPasswordScreen({ onBack }) {
   const [step, setStep] = useState('email');
@@ -17,7 +28,7 @@ export default function ForgotPasswordScreen({ onBack }) {
 
   useEffect(() => {
     if (cooldown > 0) {
-      const t = setInterval(() => setCooldown(c => Math.max(0, c - 1)), 1000);
+      const t = setInterval(() => setCooldown((c) => Math.max(0, c - 1)), 1000);
       return () => clearInterval(t);
     }
   }, [cooldown]);
@@ -27,7 +38,7 @@ export default function ForgotPasswordScreen({ onBack }) {
     setLoading(true);
     setError('');
     try {
-      const result = await requestPasswordRecovery(identifier);
+      const _result = await requestPasswordRecovery(identifier);
       setStep('codigo');
       setCooldown(60);
     } catch (e) {
@@ -38,7 +49,10 @@ export default function ForgotPasswordScreen({ onBack }) {
   };
 
   const handleVerificarCodigo = async () => {
-    if (codigo.length !== 6) { setError('Ingresa el codigo de 6 digitos'); return; }
+    if (codigo.length !== 6) {
+      setError('Ingresa el codigo de 6 digitos');
+      return;
+    }
     setLoading(true);
     setError('');
     try {
@@ -55,8 +69,14 @@ export default function ForgotPasswordScreen({ onBack }) {
   };
 
   const handleCambiar = async () => {
-    if (nuevaContrasena.length < 8) { setError('La contrasena debe tener al menos 8 caracteres'); return; }
-    if (nuevaContrasena !== confirmarContrasena) { setError('Las contrasenas no coinciden'); return; }
+    if (nuevaContrasena.length < 8) {
+      setError('La contrasena debe tener al menos 8 caracteres');
+      return;
+    }
+    if (nuevaContrasena !== confirmarContrasena) {
+      setError('Las contrasenas no coinciden');
+      return;
+    }
     setLoading(true);
     setError('');
     try {
@@ -81,8 +101,12 @@ export default function ForgotPasswordScreen({ onBack }) {
               <CheckCircle className="w-8 h-8 text-green-400" />
             </div>
           </div>
-          <h2 className="text-xl font-bold text-white mb-2">Contrasena actualizada</h2>
-          <p className="text-white/60 mb-6">Tu contrasena se ha cambiado exitosamente.</p>
+          <h2 className="text-xl font-bold text-white mb-2">
+            Contrasena actualizada
+          </h2>
+          <p className="text-white/60 mb-6">
+            Tu contrasena se ha cambiado exitosamente.
+          </p>
           <button
             onClick={onBack}
             className="w-full py-3 rounded-xl font-semibold bg-green-600 hover:bg-green-500 text-white transition-colors"
@@ -108,17 +132,23 @@ export default function ForgotPasswordScreen({ onBack }) {
         {step === 'email' && (
           <div className="space-y-4">
             <p className="text-sm text-white/60 text-center">
-              Ingresa tu usuario o correo para recibir un codigo de recuperacion.
+              Ingresa tu usuario o correo para recibir un codigo de
+              recuperacion.
             </p>
             <div>
-              <label className="block text-xs font-medium text-white/60 mb-1.5">Usuario o correo</label>
+              <label className="block text-xs font-medium text-white/60 mb-1.5">
+                Usuario o correo
+              </label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
                 <input
                   type="text"
                   value={identifier}
-                  onChange={e => { setIdentifier(e.target.value); setError(''); }}
-                  onKeyDown={e => e.key === 'Enter' && handleSolicitar()}
+                  onChange={(e) => {
+                    setIdentifier(e.target.value);
+                    setError('');
+                  }}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSolicitar()}
                   placeholder="admin@ecobosque.com"
                   className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/30 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500/50 transition-all"
                 />
@@ -153,8 +183,11 @@ export default function ForgotPasswordScreen({ onBack }) {
                 type="text"
                 inputMode="numeric"
                 value={codigo}
-                onChange={e => { setCodigo(e.target.value.replace(/\D/g, '').slice(0, 6)); setError(''); }}
-                onKeyDown={e => e.key === 'Enter' && handleVerificarCodigo()}
+                onChange={(e) => {
+                  setCodigo(e.target.value.replace(/\D/g, '').slice(0, 6));
+                  setError('');
+                }}
+                onKeyDown={(e) => e.key === 'Enter' && handleVerificarCodigo()}
                 placeholder="000000"
                 maxLength={6}
                 className="w-full text-center text-2xl tracking-[0.5em] px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/30 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500/50 transition-all"
@@ -195,26 +228,36 @@ export default function ForgotPasswordScreen({ onBack }) {
               Ingresa tu nueva contrasena.
             </p>
             <div>
-              <label className="block text-xs font-medium text-white/60 mb-1.5">Nueva contrasena</label>
+              <label className="block text-xs font-medium text-white/60 mb-1.5">
+                Nueva contrasena
+              </label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
                 <input
                   type="password"
                   value={nuevaContrasena}
-                  onChange={e => { setNuevaContrasena(e.target.value); setError(''); }}
+                  onChange={(e) => {
+                    setNuevaContrasena(e.target.value);
+                    setError('');
+                  }}
                   placeholder="Min. 8 caracteres"
                   className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/30 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500/50 transition-all"
                 />
               </div>
             </div>
             <div>
-              <label className="block text-xs font-medium text-white/60 mb-1.5">Confirmar contrasena</label>
+              <label className="block text-xs font-medium text-white/60 mb-1.5">
+                Confirmar contrasena
+              </label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
                 <input
                   type="password"
                   value={confirmarContrasena}
-                  onChange={e => { setConfirmarContrasena(e.target.value); setError(''); }}
+                  onChange={(e) => {
+                    setConfirmarContrasena(e.target.value);
+                    setError('');
+                  }}
                   placeholder="Repite la contrasena"
                   className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/30 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500/50 transition-all"
                 />

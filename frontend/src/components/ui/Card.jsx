@@ -11,7 +11,10 @@ export function Card({ className = '', children, ...props }) {
 
 export function CardHeader({ className = '', children, ...props }) {
   return (
-    <div className={`flex flex-col space-y-1.5 p-6 ${className}`.trim()} {...props}>
+    <div
+      className={`flex flex-col space-y-1.5 p-6 ${className}`.trim()}
+      {...props}
+    >
       {children}
     </div>
   );
@@ -46,7 +49,10 @@ export function CardContent({ className = '', children, ...props }) {
 
 export function CardFooter({ className = '', children, ...props }) {
   return (
-    <div className={`flex items-center p-6 pt-0 ${className}`.trim()} {...props}>
+    <div
+      className={`flex items-center p-6 pt-0 ${className}`.trim()}
+      {...props}
+    >
       {children}
     </div>
   );

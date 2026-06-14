@@ -1,13 +1,34 @@
-import { useState, useEffect } from 'react';
-import { fetchAccountingSummary, downloadAccountingReport } from '../services/api';
-import { COP } from '../utils/helpers';
-import { Card, CardHeader, CardTitle, CardContent } from './ui/Card';
-import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import {
-  Receipt, XCircle, Loader, Download, TrendingUp,
-  DollarSign, BarChart3, CheckCircle2,
-  Home, UtensilsCrossed
+  BarChart3,
+  CheckCircle2,
+  DollarSign,
+  Download,
+  Home,
+  Loader,
+  Receipt,
+  TrendingUp,
+  UtensilsCrossed,
+  XCircle,
 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts';
+import {
+  downloadAccountingReport,
+  fetchAccountingSummary,
+} from '../services/api';
+import { COP } from '../utils/helpers';
+import { Card, CardContent, CardHeader, CardTitle } from './ui/Card';
 
 const SERVICE_COLORS = ['#22c55e', '#3b82f6', '#f59e0b', '#8b5cf6', '#ef4444'];
 
@@ -20,16 +41,19 @@ export default function AccountingView() {
   useEffect(() => {
     let cancelled = false;
     fetchAccountingSummary()
-      .then(result => {
+      .then((result) => {
         if (!cancelled) setData(result);
       })
-      .catch(err => {
-        if (!cancelled) setError(err.message || 'Error al cargar datos contables');
+      .catch((err) => {
+        if (!cancelled)
+          setError(err.message || 'Error al cargar datos contables');
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
       });
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const handleExport = async () => {
@@ -65,11 +89,13 @@ export default function AccountingView() {
     );
   }
 
-  const { summary, revenueByType, revenueByService, completedStays } = data || {};
+  const { summary, revenueByType, revenueByService, completedStays } =
+    data || {};
   if (!summary) return null;
 
   // Format large numbers
   const formatM = (v) => {
+    if (v == null) return '$0';
     if (v >= 1000000) return `$${(v / 1000000).toFixed(1)}M`;
     if (v >= 1000) return `$${(v / 1000).toFixed(0)}k`;
     return `$${v}`;
@@ -84,7 +110,9 @@ export default function AccountingView() {
             <h1 className="text-2xl font-bold text-gray-900">
               <Receipt className="w-8 h-8 inline mr-2" /> Contabilidad
             </h1>
-            <p className="text-sm text-gray-500 mt-1">Resumen financiero y reportes descargables</p>
+            <p className="text-sm text-gray-500 mt-1">
+              Resumen financiero y reportes descargables
+            </p>
           </div>
           <button
             onClick={handleExport}
@@ -112,7 +140,9 @@ export default function AccountingView() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-500">Tasa de Ocupación</p>
-                  <p className="text-2xl font-bold text-green-600">{summary.occupancyRate}%</p>
+                  <p className="text-2xl font-bold text-green-600">
+                    {summary.occupancyRate}%
+                  </p>
                 </div>
                 <TrendingUp className="w-6 h-6" />
               </div>
@@ -124,7 +154,9 @@ export default function AccountingView() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-500">Revenue Actual</p>
-                  <p className="text-xl font-bold text-blue-600">{formatM(summary.currentRevenue)}</p>
+                  <p className="text-xl font-bold text-blue-600">
+                    {formatM(summary.currentRevenue)}
+                  </p>
                 </div>
                 <DollarSign className="w-6 h-6" />
               </div>
@@ -136,7 +168,9 @@ export default function AccountingView() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-500">Revenue Histórico</p>
-                  <p className="text-xl font-bold text-yellow-600">{formatM(summary.historicalRevenue)}</p>
+                  <p className="text-xl font-bold text-yellow-600">
+                    {formatM(summary.historicalRevenue)}
+                  </p>
                 </div>
                 <BarChart3 className="w-6 h-6" />
               </div>
@@ -148,7 +182,9 @@ export default function AccountingView() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-500">Estadías Completadas</p>
-                  <p className="text-2xl font-bold text-purple-600">{completedStays || 0}</p>
+                  <p className="text-2xl font-bold text-purple-600">
+                    {completedStays || 0}
+                  </p>
                 </div>
                 <CheckCircle2 className="w-6 h-6" />
               </div>
@@ -172,20 +208,28 @@ export default function AccountingView() {
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-green-600">Ocupadas</span>
-                  <span className="font-bold text-green-600">{summary.occupied}</span>
+                  <span className="font-bold text-green-600">
+                    {summary.occupied}
+                  </span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-blue-600">Disponibles</span>
-                  <span className="font-bold text-blue-600">{summary.available}</span>
+                  <span className="font-bold text-blue-600">
+                    {summary.available}
+                  </span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-yellow-600">Reservadas</span>
-                  <span className="font-bold text-yellow-600">{summary.reserved}</span>
+                  <span className="font-bold text-yellow-600">
+                    {summary.reserved}
+                  </span>
                 </div>
                 <div className="pt-2 border-t border-gray-200">
                   <div className="flex justify-between text-sm">
                     <span className="font-semibold">Tarifa Promedio/Día</span>
-                    <span className="font-bold text-green-700">{COP(summary.avgDailyRate)}</span>
+                    <span className="font-bold text-green-700">
+                      {COP(summary.avgDailyRate)}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -196,7 +240,8 @@ export default function AccountingView() {
           <Card>
             <CardHeader>
               <CardTitle>
-                <DollarSign className="w-4 h-4 inline mr-1" /> Revenue por Tipo de Habitacion
+                <DollarSign className="w-4 h-4 inline mr-1" /> Revenue por Tipo
+                de Habitacion
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -204,7 +249,11 @@ export default function AccountingView() {
                 <BarChart data={revenueByType || []}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                   <XAxis dataKey="tipo" stroke="#6b7280" fontSize={10} />
-                  <YAxis stroke="#6b7280" fontSize={10} tickFormatter={(v) => formatM(v)} />
+                  <YAxis
+                    stroke="#6b7280"
+                    fontSize={10}
+                    tickFormatter={(v) => formatM(v)}
+                  />
                   <Tooltip formatter={(v) => COP(v)} />
                   <Bar dataKey="revenue" fill="#3b82f6" radius={[6, 6, 0, 0]} />
                 </BarChart>
@@ -218,7 +267,8 @@ export default function AccountingView() {
           <Card className="mb-6">
             <CardHeader>
               <CardTitle>
-                <UtensilsCrossed className="w-4 h-4 inline mr-1" /> Ingresos por Servicio
+                <UtensilsCrossed className="w-4 h-4 inline mr-1" /> Ingresos por
+                Servicio
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -232,10 +282,15 @@ export default function AccountingView() {
                       cx="50%"
                       cy="50%"
                       outerRadius={90}
-                      label={({ categoria, percent }) => `${categoria} ${(percent * 100).toFixed(0)}%`}
+                      label={({ categoria, percent }) =>
+                        `${categoria} ${(percent * 100).toFixed(0)}%`
+                      }
                     >
-                      {revenueByService.map((entry, index) => (
-                        <Cell key={index} fill={SERVICE_COLORS[index % SERVICE_COLORS.length]} />
+                      {revenueByService.map((_entry, index) => (
+                        <Cell
+                          key={index}
+                          fill={SERVICE_COLORS[index % SERVICE_COLORS.length]}
+                        />
                       ))}
                     </Pie>
                     <Tooltip formatter={(v) => COP(v)} />
@@ -243,16 +298,33 @@ export default function AccountingView() {
                 </ResponsiveContainer>
 
                 <div className="space-y-2">
-                  <h4 className="text-sm font-semibold text-gray-700 mb-3">Detalle por Categoría</h4>
+                  <h4 className="text-sm font-semibold text-gray-700 mb-3">
+                    Detalle por Categoría
+                  </h4>
                   {revenueByService.map((s, i) => (
-                    <div key={i} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div
+                      key={i}
+                      className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                    >
                       <div className="flex items-center gap-2">
-                        <span className="w-3 h-3 rounded-full" style={{ background: SERVICE_COLORS[i % SERVICE_COLORS.length] }} />
-                        <span className="text-sm font-medium capitalize">{s.categoria}</span>
+                        <span
+                          className="w-3 h-3 rounded-full"
+                          style={{
+                            background:
+                              SERVICE_COLORS[i % SERVICE_COLORS.length],
+                          }}
+                        />
+                        <span className="text-sm font-medium capitalize">
+                          {s.categoria}
+                        </span>
                       </div>
                       <div className="text-right">
-                        <p className="text-sm font-bold text-gray-900">{COP(s.total)}</p>
-                        <p className="text-xs text-gray-500">{s.count} transacciones</p>
+                        <p className="text-sm font-bold text-gray-900">
+                          {COP(s.total)}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {s.count} transacciones
+                        </p>
                       </div>
                     </div>
                   ))}
@@ -267,10 +339,14 @@ export default function AccountingView() {
           <div className="flex items-start gap-3">
             <Download className="w-5 h-5" />
             <div>
-              <p className="text-sm font-medium text-blue-900">Reporte Descargable</p>
+              <p className="text-sm font-medium text-blue-900">
+                Reporte Descargable
+              </p>
               <p className="text-xs text-blue-700 mt-1">
-                El archivo Excel incluye 3 hojas: Resumen Financiero, Habitaciones Ocupadas (detalle completo), 
-                e Historial de Reservaciones. Compatible con Excel, Google Sheets y LibreOffice.
+                El archivo Excel incluye 3 hojas: Resumen Financiero,
+                Habitaciones Ocupadas (detalle completo), e Historial de
+                Reservaciones. Compatible con Excel, Google Sheets y
+                LibreOffice.
               </p>
             </div>
           </div>

@@ -1,6 +1,17 @@
 'use strict';
 
-const { format, formatDistanceToNow, parseISO, differenceInDays, addDays, startOfDay, endOfDay, isAfter, isBefore, isValid } = require('date-fns');
+const {
+  format,
+  formatDistanceToNow,
+  parseISO,
+  differenceInDays,
+  addDays,
+  startOfDay,
+  endOfDay,
+  isAfter,
+  isBefore,
+  isValid,
+} = require('date-fns');
 const { es } = require('date-fns/locale');
 
 function formatDate(date, formatStr = 'PP') {
@@ -25,7 +36,7 @@ function timeAgo(date) {
 function nightsBetween(checkIn, checkOut) {
   const start = typeof checkIn === 'string' ? parseISO(checkIn) : checkIn;
   const end = typeof checkOut === 'string' ? parseISO(checkOut) : checkOut;
-  return differenceInDays(end, start);
+  return Math.max(0, differenceInDays(end, start));
 }
 
 function addDaysToDate(date, days) {
@@ -70,5 +81,5 @@ module.exports = {
   format,
   differenceInDays,
   addDays,
-  isValid
+  isValid,
 };

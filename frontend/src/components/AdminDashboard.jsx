@@ -1,17 +1,45 @@
-import { useState, useMemo } from 'react';
 import {
-  LineChart, Line, BarChart, Bar, PieChart, Pie, Cell,
-  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
-  AreaChart, Area
-} from 'recharts';
-import {
-  Home, Building2, TrendingUp, CheckCircle, DollarSign, CircleDot,
-  Calendar, Sparkles, Wrench, BarChart3, Search, Tag, UtensilsCrossed, ClipboardList, ChevronDown
+  Building2,
+  Calendar,
+  CheckCircle,
+  ChevronDown,
+  CircleDot,
+  ClipboardList,
+  DollarSign,
+  Home,
+  Search,
+  Sparkles,
+  Tag,
+  TrendingUp,
+  UtensilsCrossed,
+  Wrench,
 } from 'lucide-react';
-import { Card, CardHeader, CardTitle, CardContent } from './ui/Card';
+import { useMemo, useState } from 'react';
+import {
+  Area,
+  AreaChart,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts';
+import { Card, CardContent, CardHeader, CardTitle } from './ui/Card';
 
 // ── Theme colors ──
-const COLORS = ['#22c55e', '#3b82f6', '#f59e0b', '#8b5cf6', '#ef4444', '#06b6d4'];
+const COLORS = [
+  '#22c55e',
+  '#3b82f6',
+  '#f59e0b',
+  '#8b5cf6',
+  '#ef4444',
+  '#06b6d4',
+];
 const ROOM_COLORS = {
   'Suite Bosque': '#22c55e',
   'Suite Sunset': '#f59e0b',
@@ -22,23 +50,70 @@ const ROOM_COLORS = {
   'Cabaña Familiar en Bote': '#ec4899',
 };
 
-const formatCOP = (v) => v ? `$${Number(v).toLocaleString('es-CO')}` : '$0';
+const formatCOP = (v) => (v ? `$${Number(v).toLocaleString('es-CO')}` : '$0');
 const formatPct = (v) => `${v}%`;
+
+// ── Month label helper ──
+const monthLabelMap = {
+  0: 'Enero',
+  1: 'Febrero',
+  2: 'Marzo',
+  3: 'Abril',
+  4: 'Mayo',
+  5: 'Junio',
+  6: 'Julio',
+  7: 'Agosto',
+  8: 'Septiembre',
+  9: 'Octubre',
+  10: 'Noviembre',
+  11: 'Diciembre',
+  Ene: 'Enero',
+  Feb: 'Febrero',
+  Mar: 'Marzo',
+  Abr: 'Abril',
+  May: 'Mayo',
+  Jun: 'Junio',
+  Jul: 'Julio',
+  Ago: 'Agosto',
+  Sep: 'Septiembre',
+  Oct: 'Octubre',
+  Nov: 'Noviembre',
+  Dic: 'Diciembre',
+};
+const getMonthLabel = (v) => monthLabelMap[v] || v;
 
 // ── Filter Bar ──
 function FilterBar({ filters, onFilterChange, roomTypes }) {
-  const setFilter = (key, value) => onFilterChange({ ...filters, [key]: value });
-  const clearAll = () => onFilterChange({ month: 'all', roomType: 'all', status: 'all', consumoCat: 'all' });
-  const activeCount = [filters.month, filters.roomType, filters.status, filters.consumoCat].filter(v => v !== 'all').length;
+  const setFilter = (key, value) =>
+    onFilterChange({ ...filters, [key]: value });
+  const clearAll = () =>
+    onFilterChange({
+      month: 'all',
+      roomType: 'all',
+      status: 'all',
+      consumoCat: 'all',
+    });
+  const activeCount = [
+    filters.month,
+    filters.roomType,
+    filters.status,
+    filters.consumoCat,
+  ].filter((v) => v !== 'all').length;
 
   const months = [
     { value: 'all', label: 'Todos los meses' },
-    { value: '0', label: 'Enero' }, { value: '1', label: 'Febrero' },
-    { value: '2', label: 'Marzo' }, { value: '3', label: 'Abril' },
-    { value: '4', label: 'Mayo' }, { value: '5', label: 'Junio' },
-    { value: '6', label: 'Julio' }, { value: '7', label: 'Agosto' },
-    { value: '8', label: 'Septiembre' }, { value: '9', label: 'Octubre' },
-    { value: '10', label: 'Noviembre' }, { value: '11', label: 'Diciembre' },
+    { value: '0', label: 'Enero' },
+    { value: '1', label: 'Febrero' },
+    { value: '2', label: 'Marzo' },
+    { value: '3', label: 'Abril' },
+    { value: '4', label: 'Mayo' },
+    { value: '5', label: 'Junio' },
+    { value: '6', label: 'Julio' },
+    { value: '7', label: 'Agosto' },
+    { value: '8', label: 'Septiembre' },
+    { value: '9', label: 'Octubre' },
+    { value: '10', label: 'Noviembre' },
+    { value: '11', label: 'Diciembre' },
   ];
 
   const statuses = [
@@ -53,9 +128,14 @@ function FilterBar({ filters, onFilterChange, roomTypes }) {
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-6">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-semibold text-gray-700"><Search className="w-4 h-4 inline mr-1" /> Filtros del Dashboard</h3>
+        <h3 className="text-sm font-semibold text-gray-700">
+          <Search className="w-4 h-4 inline mr-1" /> Filtros del Dashboard
+        </h3>
         {activeCount > 0 && (
-          <button onClick={clearAll} className="px-3 py-1.5 text-xs bg-red-50 text-red-600 hover:bg-red-100 rounded-lg font-medium transition-colors border border-red-200">
+          <button
+            onClick={clearAll}
+            className="px-3 py-1.5 text-xs bg-red-50 text-red-600 hover:bg-red-100 rounded-lg font-medium transition-colors border border-red-200"
+          >
             Limpiar ({activeCount})
           </button>
         )}
@@ -65,10 +145,14 @@ function FilterBar({ filters, onFilterChange, roomTypes }) {
           <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
           <select
             value={filters.month}
-            onChange={e => setFilter('month', e.target.value)}
+            onChange={(e) => setFilter('month', e.target.value)}
             className="w-full pl-10 pr-8 py-2.5 border border-gray-200 rounded-lg text-sm bg-gray-50 hover:bg-white focus:bg-white focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all appearance-none cursor-pointer"
           >
-            {months.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
+            {months.map((m) => (
+              <option key={m.value} value={m.value}>
+                {m.label}
+              </option>
+            ))}
           </select>
           <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
         </div>
@@ -77,11 +161,15 @@ function FilterBar({ filters, onFilterChange, roomTypes }) {
           <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
           <select
             value={filters.roomType}
-            onChange={e => setFilter('roomType', e.target.value)}
+            onChange={(e) => setFilter('roomType', e.target.value)}
             className="w-full pl-10 pr-8 py-2.5 border border-gray-200 rounded-lg text-sm bg-gray-50 hover:bg-white focus:bg-white focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all appearance-none cursor-pointer"
           >
             <option value="all">Todos los tipos</option>
-            {roomTypes.map(t => <option key={t} value={t}>{t}</option>)}
+            {roomTypes.map((t) => (
+              <option key={t} value={t}>
+                {t}
+              </option>
+            ))}
           </select>
           <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
         </div>
@@ -90,10 +178,14 @@ function FilterBar({ filters, onFilterChange, roomTypes }) {
           <CircleDot className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
           <select
             value={filters.status}
-            onChange={e => setFilter('status', e.target.value)}
+            onChange={(e) => setFilter('status', e.target.value)}
             className="w-full pl-10 pr-8 py-2.5 border border-gray-200 rounded-lg text-sm bg-gray-50 hover:bg-white focus:bg-white focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all appearance-none cursor-pointer"
           >
-            {statuses.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+            {statuses.map((s) => (
+              <option key={s.value} value={s.value}>
+                {s.label}
+              </option>
+            ))}
           </select>
           <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
         </div>
@@ -105,14 +197,54 @@ function FilterBar({ filters, onFilterChange, roomTypes }) {
 // ── Stat Cards ──
 function StatCards({ stats }) {
   const cards = [
-    { label: 'Total Habitaciones', value: stats.total, icon: Building2, color: 'text-gray-600' },
-    { label: 'Ocupación', value: `${stats.ocupacionPct}%`, icon: TrendingUp, color: 'text-green-600' },
-    { label: 'Disponibles', value: stats.disponibles, icon: CheckCircle, color: 'text-blue-600' },
-    { label: 'Revenue Estimado', value: formatCOP(stats.revenue), icon: DollarSign, color: 'text-yellow-600' },
-    { label: 'Ocupadas', value: stats.ocupadas, icon: CircleDot, color: 'text-orange-600' },
-    { label: 'Reservadas', value: stats.reservadas, icon: Calendar, color: 'text-purple-600' },
-    { label: 'En Limpieza', value: stats.limpieza, icon: Sparkles, color: 'text-pink-600' },
-    { label: 'Mantenimiento', value: stats.mantenimiento, icon: Wrench, color: 'text-red-600' },
+    {
+      label: 'Total Habitaciones',
+      value: stats.total,
+      icon: Building2,
+      color: 'text-gray-600',
+    },
+    {
+      label: 'Ocupación',
+      value: `${stats.ocupacionPct}%`,
+      icon: TrendingUp,
+      color: 'text-green-600',
+    },
+    {
+      label: 'Disponibles',
+      value: stats.disponibles,
+      icon: CheckCircle,
+      color: 'text-blue-600',
+    },
+    {
+      label: 'Revenue Estimado',
+      value: formatCOP(stats.revenue),
+      icon: DollarSign,
+      color: 'text-yellow-600',
+    },
+    {
+      label: 'Ocupadas',
+      value: stats.ocupadas,
+      icon: CircleDot,
+      color: 'text-orange-600',
+    },
+    {
+      label: 'Reservadas',
+      value: stats.reservadas,
+      icon: Calendar,
+      color: 'text-purple-600',
+    },
+    {
+      label: 'En Limpieza',
+      value: stats.limpieza,
+      icon: Sparkles,
+      color: 'text-pink-600',
+    },
+    {
+      label: 'Mantenimiento',
+      value: stats.mantenimiento,
+      icon: Wrench,
+      color: 'text-red-600',
+    },
   ];
 
   return (
@@ -141,16 +273,20 @@ function OccupancyAreaChart({ data, onBarClick }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle><TrendingUp className="w-4 h-4 inline mr-1" /> Ocupación Mensual</CardTitle>
-        <p className="text-xs text-gray-500 font-normal mt-1">Click en un mes para filtrar</p>
+        <CardTitle>
+          <TrendingUp className="w-4 h-4 inline mr-1" /> Ocupación Mensual
+        </CardTitle>
+        <p className="text-xs text-gray-500 font-normal mt-1">
+          Click en un mes para filtrar
+        </p>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>
           <AreaChart data={data}>
             <defs>
               <linearGradient id="colorOcup" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#22c55e" stopOpacity={0.3}/>
-                <stop offset="95%" stopColor="#22c55e" stopOpacity={0}/>
+                <stop offset="5%" stopColor="#22c55e" stopOpacity={0.3} />
+                <stop offset="95%" stopColor="#22c55e" stopOpacity={0} />
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
@@ -166,7 +302,7 @@ function OccupancyAreaChart({ data, onBarClick }) {
               dot={{ r: 4, fill: '#22c55e', cursor: 'pointer' }}
               activeDot={{ r: 6 }}
               onClick={(d) => {
-                if (d && d.mes) {
+                if (d?.mes) {
                   if (activeMonth === d.mes) {
                     setActiveMonth(null);
                     if (onBarClick) onBarClick('month', 'all');
@@ -219,14 +355,26 @@ function RevenueBarChart({ data, onBarClick }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle><DollarSign className="w-4 h-4 inline mr-1" /> Revenue por Tipo de Habitacion</CardTitle>
-        <p className="text-xs text-gray-500 font-normal mt-1">Click en una barra para filtrar</p>
+        <CardTitle>
+          <DollarSign className="w-4 h-4 inline mr-1" /> Revenue por Tipo de
+          Habitacion
+        </CardTitle>
+        <p className="text-xs text-gray-500 font-normal mt-1">
+          Click en una barra para filtrar
+        </p>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={data}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-            <XAxis dataKey="tipo" stroke="#6b7280" fontSize={11} angle={-20} textAnchor="end" height={60} />
+            <XAxis
+              dataKey="tipo"
+              stroke="#6b7280"
+              fontSize={11}
+              angle={-20}
+              textAnchor="end"
+              height={60}
+            />
             <YAxis stroke="#6b7280" fontSize={12} tickFormatter={formatCOP} />
             <Tooltip
               formatter={(v) => formatCOP(v)}
@@ -262,9 +410,14 @@ function RevenueBarChart({ data, onBarClick }) {
                   }
                 }}
               >
-                <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ background: ROOM_COLORS[d.tipo] || '#3b82f6' }} />
+                <span
+                  className="w-3 h-3 rounded-full flex-shrink-0"
+                  style={{ background: ROOM_COLORS[d.tipo] || '#3b82f6' }}
+                />
                 <span className="truncate">{d.tipo}</span>
-                <span className="ml-auto font-medium">{formatCOP(d.revenue)}</span>
+                <span className="ml-auto font-medium">
+                  {formatCOP(d.revenue)}
+                </span>
               </button>
             );
           })}
@@ -279,16 +432,16 @@ function StatusDonut({ data, onBarClick }) {
   const [activeStatus, setActiveStatus] = useState(null);
   const total = data.reduce((s, d) => s + d.value, 0);
   const COLORS_MAP = {
-    'disponible': '#22c55e',
-    'ocupada': '#f97316',
-    'reservada': '#3b82f6',
-    'limpieza': '#a855f7',
-    'mantenimiento': '#ef4444',
-    'fuera_servicio': '#6b7280',
+    disponible: '#22c55e',
+    ocupada: '#f97316',
+    reservada: '#3b82f6',
+    limpieza: '#a855f7',
+    mantenimiento: '#ef4444',
+    fuera_servicio: '#6b7280',
   };
 
   const handleSliceClick = (entry) => {
-    if (entry && entry.name) {
+    if (entry?.name) {
       if (activeStatus === entry.name) {
         setActiveStatus(null);
         if (onBarClick) onBarClick('status', 'all');
@@ -302,8 +455,12 @@ function StatusDonut({ data, onBarClick }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle><Tag className="w-4 h-4 inline mr-1" /> Estado de Habitaciones</CardTitle>
-        <p className="text-xs text-gray-500 font-normal mt-1">Click para filtrar por estado</p>
+        <CardTitle>
+          <Tag className="w-4 h-4 inline mr-1" /> Estado de Habitaciones
+        </CardTitle>
+        <p className="text-xs text-gray-500 font-normal mt-1">
+          Click para filtrar por estado
+        </p>
       </CardHeader>
       <CardContent className="flex flex-col items-center">
         <ResponsiveContainer width="100%" height={250}>
@@ -321,7 +478,10 @@ function StatusDonut({ data, onBarClick }) {
               cursor="pointer"
             >
               {data.map((entry, i) => (
-                <Cell key={i} fill={COLORS_MAP[entry.name] || COLORS[i % COLORS.length]} />
+                <Cell
+                  key={i}
+                  fill={COLORS_MAP[entry.name] || COLORS[i % COLORS.length]}
+                />
               ))}
             </Pie>
             <Tooltip formatter={(v) => `${v} habitaciones`} />
@@ -338,9 +498,14 @@ function StatusDonut({ data, onBarClick }) {
               className="flex items-center gap-2 text-xs hover:bg-gray-50 rounded px-1 py-0.5 cursor-pointer w-full"
               onClick={() => handleSliceClick({ name: d.name })}
             >
-              <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ background: COLORS_MAP[d.name] || COLORS[i] }} />
+              <span
+                className="w-3 h-3 rounded-full flex-shrink-0"
+                style={{ background: COLORS_MAP[d.name] || COLORS[i] }}
+              />
               <span className="text-gray-600 truncate">{d.name}</span>
-              <span className="font-semibold text-gray-900 ml-auto">{d.value}</span>
+              <span className="font-semibold text-gray-900 ml-auto">
+                {d.value}
+              </span>
             </button>
           ))}
         </div>
@@ -356,8 +521,13 @@ function ConsumosPieChart({ data, onBarClick }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle><UtensilsCrossed className="w-4 h-4 inline mr-1" /> Consumos por Categoría</CardTitle>
-        <p className="text-xs text-gray-500 font-normal mt-1">Click en una categoría para filtrar</p>
+        <CardTitle>
+          <UtensilsCrossed className="w-4 h-4 inline mr-1" /> Consumos por
+          Categoría
+        </CardTitle>
+        <p className="text-xs text-gray-500 font-normal mt-1">
+          Click en una categoría para filtrar
+        </p>
       </CardHeader>
       <CardContent className="flex flex-col items-center">
         <ResponsiveContainer width="100%" height={280}>
@@ -371,7 +541,7 @@ function ConsumosPieChart({ data, onBarClick }) {
               outerRadius={100}
               paddingAngle={3}
               onClick={(entry) => {
-                if (entry && entry.name) {
+                if (entry?.name) {
                   if (activeCat === entry.name) {
                     setActiveCat(null);
                     if (onBarClick) onBarClick('consumoCat', 'all');
@@ -383,8 +553,11 @@ function ConsumosPieChart({ data, onBarClick }) {
               }}
               cursor="pointer"
             >
-              {data.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+              {data.map((_entry, index) => (
+                <Cell
+                  key={`cell-${index}`}
+                  fill={COLORS[index % COLORS.length]}
+                />
               ))}
             </Pie>
             <Tooltip formatter={(v) => formatCOP(v)} />
@@ -412,9 +585,14 @@ function ConsumosPieChart({ data, onBarClick }) {
                   }
                 }}
               >
-                <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ background: COLORS[i % COLORS.length] }} />
+                <span
+                  className="w-3 h-3 rounded-full flex-shrink-0"
+                  style={{ background: COLORS[i % COLORS.length] }}
+                />
                 <span className="truncate">{d.name}</span>
-                <span className="ml-auto font-medium">{formatCOP(d.value)}</span>
+                <span className="ml-auto font-medium">
+                  {formatCOP(d.value)}
+                </span>
               </button>
             );
           })}
@@ -426,15 +604,24 @@ function ConsumosPieChart({ data, onBarClick }) {
 
 // ── Main Dashboard ──
 export function AdminDashboard({ rooms = [], consumos = [] }) {
-  const [filters, setFilters] = useState({ month: 'all', roomType: 'all', status: 'all', consumoCat: 'all' });
+  const [filters, setFilters] = useState({
+    month: 'all',
+    roomType: 'all',
+    status: 'all',
+    consumoCat: 'all',
+  });
 
   // Extract unique room types
-  const roomTypes = useMemo(() => [...new Set(rooms.map(r => r.tipo).filter(Boolean))], [rooms]);
+  const roomTypes = useMemo(
+    () => [...new Set(rooms.map((r) => r.tipo).filter(Boolean))],
+    [rooms]
+  );
 
   // Filter rooms
   const filteredRooms = useMemo(() => {
-    return rooms.filter(r => {
-      if (filters.roomType !== 'all' && r.tipo !== filters.roomType) return false;
+    return rooms.filter((r) => {
+      if (filters.roomType !== 'all' && r.tipo !== filters.roomType)
+        return false;
       if (filters.status !== 'all' && r.estado !== filters.status) return false;
       return true;
     });
@@ -443,23 +630,53 @@ export function AdminDashboard({ rooms = [], consumos = [] }) {
   // Stats
   const stats = useMemo(() => {
     const total = filteredRooms.length;
-    const ocupadas = filteredRooms.filter(r => r.estado === 'ocupada').length;
-    const disponibles = filteredRooms.filter(r => r.estado === 'disponible').length;
-    const reservadas = filteredRooms.filter(r => r.estado === 'reservada').length;
-    const limpieza = filteredRooms.filter(r => r.estado === 'limpieza').length;
-    const mantenimiento = filteredRooms.filter(r => r.estado === 'mantenimiento').length;
+    const ocupadas = filteredRooms.filter((r) => r.estado === 'ocupada').length;
+    const disponibles = filteredRooms.filter(
+      (r) => r.estado === 'disponible'
+    ).length;
+    const reservadas = filteredRooms.filter(
+      (r) => r.estado === 'reservada'
+    ).length;
+    const limpieza = filteredRooms.filter(
+      (r) => r.estado === 'limpieza'
+    ).length;
+    const mantenimiento = filteredRooms.filter(
+      (r) => r.estado === 'mantenimiento'
+    ).length;
     const ocupacionPct = total > 0 ? Math.round((ocupadas / total) * 100) : 0;
 
     const revenue = filteredRooms
-      .filter(r => r.estado === 'ocupada')
+      .filter((r) => r.estado === 'ocupada')
       .reduce((sum, r) => sum + (r.tarifa || 0), 0);
 
-    return { total, ocupadas, disponibles, reservadas, limpieza, mantenimiento, ocupacionPct, revenue };
+    return {
+      total,
+      ocupadas,
+      disponibles,
+      reservadas,
+      limpieza,
+      mantenimiento,
+      ocupacionPct,
+      revenue,
+    };
   }, [filteredRooms]);
 
   // Occupancy data - use actual recent months
   const occupancyData = useMemo(() => {
-    const monthNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+    const monthNames = [
+      'Ene',
+      'Feb',
+      'Mar',
+      'Abr',
+      'May',
+      'Jun',
+      'Jul',
+      'Ago',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dic',
+    ];
     const now = new Date();
     const currentMonth = now.getMonth();
     const base = stats.ocupacionPct || 75;
@@ -471,19 +688,21 @@ export function AdminDashboard({ rooms = [], consumos = [] }) {
       months.push(monthNames[m]);
     }
 
-    return months.map((mes, i) => ({
+    return months.map((mes) => ({
       mes,
-      ocupacion: Math.min(100, Math.max(20, base + Math.sin(i * 0.6) * 12)),
-    })).map(d => ({ ...d, ocupacion: Math.round(d.ocupacion) }));
+      ocupacion: Math.round(base),
+    }));
   }, [stats.ocupacionPct]);
 
   // Revenue by room type (from filtered rooms)
   const revenueByType = useMemo(() => {
     const map = {};
-    filteredRooms.filter(r => r.estado === 'ocupada').forEach(r => {
-      if (!map[r.tipo]) map[r.tipo] = { tipo: r.tipo, revenue: 0 };
-      map[r.tipo].revenue += r.tarifa || 0;
-    });
+    filteredRooms
+      .filter((r) => r.estado === 'ocupada')
+      .forEach((r) => {
+        if (!map[r.tipo]) map[r.tipo] = { tipo: r.tipo, revenue: 0 };
+        map[r.tipo].revenue += r.tarifa || 0;
+      });
     const data = Object.values(map);
     if (data.length === 0) {
       // Fallback sample data
@@ -499,7 +718,7 @@ export function AdminDashboard({ rooms = [], consumos = [] }) {
   // Status data for donut
   const statusData = useMemo(() => {
     const map = {};
-    filteredRooms.forEach(r => {
+    filteredRooms.forEach((r) => {
       map[r.estado] = (map[r.estado] || 0) + 1;
     });
     return Object.entries(map).map(([name, value]) => ({ name, value }));
@@ -509,7 +728,7 @@ export function AdminDashboard({ rooms = [], consumos = [] }) {
   const consumosData = useMemo(() => {
     if (consumos.length > 0) {
       const map = {};
-      consumos.forEach(c => {
+      consumos.forEach((c) => {
         map[c.categoria] = (map[c.categoria] || 0) + c.precio;
       });
       return Object.entries(map).map(([name, value]) => ({ name, value }));
@@ -523,7 +742,7 @@ export function AdminDashboard({ rooms = [], consumos = [] }) {
   }, [consumos]);
 
   const handleFilterFromChart = (filterKey, value) => {
-    setFilters(prev => ({
+    setFilters((prev) => ({
       ...prev,
       [filterKey]: prev[filterKey] === value ? 'all' : value,
     }));
@@ -532,27 +751,42 @@ export function AdminDashboard({ rooms = [], consumos = [] }) {
   return (
     <div>
       {/* Filter Bar */}
-      <FilterBar filters={filters} onFilterChange={setFilters} roomTypes={roomTypes} />
+      <FilterBar
+        filters={filters}
+        onFilterChange={setFilters}
+        roomTypes={roomTypes}
+      />
 
       {/* Stat Cards */}
       <StatCards stats={stats} />
 
       {/* Charts Grid - Row 1 */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">
-        <OccupancyAreaChart data={occupancyData} onBarClick={handleFilterFromChart} />
-        <RevenueBarChart data={revenueByType} onBarClick={handleFilterFromChart} />
+        <OccupancyAreaChart
+          data={occupancyData}
+          onBarClick={handleFilterFromChart}
+        />
+        <RevenueBarChart
+          data={revenueByType}
+          onBarClick={handleFilterFromChart}
+        />
       </div>
 
       {/* Charts Grid - Row 2 */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         <StatusDonut data={statusData} onBarClick={handleFilterFromChart} />
-        <ConsumosPieChart data={consumosData} onBarClick={handleFilterFromChart} />
+        <ConsumosPieChart
+          data={consumosData}
+          onBarClick={handleFilterFromChart}
+        />
       </div>
 
       {/* Habitaciones Detalle */}
       <Card className="mb-6">
         <CardHeader>
-          <CardTitle><Home className="w-4 h-4 inline mr-1" /> Estado de Habitaciones</CardTitle>
+          <CardTitle>
+            <Home className="w-4 h-4 inline mr-1" /> Estado de Habitaciones
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -562,28 +796,55 @@ export function AdminDashboard({ rooms = [], consumos = [] }) {
             </div>
             <div className="text-sm">
               <span className="text-orange-600">Ocupadas</span>
-              <p className="text-xl font-bold text-orange-600">{stats.ocupadas}</p>
+              <p className="text-xl font-bold text-orange-600">
+                {stats.ocupadas}
+              </p>
             </div>
             <div className="text-sm">
               <span className="text-blue-600">Disponibles</span>
-              <p className="text-xl font-bold text-blue-600">{stats.disponibles}</p>
+              <p className="text-xl font-bold text-blue-600">
+                {stats.disponibles}
+              </p>
             </div>
             <div className="text-sm">
               <span className="text-purple-600">Reservadas</span>
-              <p className="text-xl font-bold text-purple-600">{stats.reservadas}</p>
+              <p className="text-xl font-bold text-purple-600">
+                {stats.reservadas}
+              </p>
             </div>
           </div>
         </CardContent>
       </Card>
 
       {/* Active filter indicator */}
-      {filters.month !== 'all' || filters.roomType !== 'all' || filters.status !== 'all' || filters.consumoCat !== 'all' ? (
+      {filters.month !== 'all' ||
+      filters.roomType !== 'all' ||
+      filters.status !== 'all' ||
+      filters.consumoCat !== 'all' ? (
         <div className="bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 text-sm text-blue-700">
           <span className="font-medium">Filtros activos:</span>
-          {filters.month !== 'all' && <span className="ml-2"><Calendar className="w-4 h-4 inline mr-1" /> {filters.month}</span>}
-          {filters.roomType !== 'all' && <span className="ml-2"><Building2 className="w-4 h-4 inline mr-1" /> {filters.roomType}</span>}
-          {filters.status !== 'all' && <span className="ml-2"><ClipboardList className="w-4 h-4 inline mr-1" /> {filters.status}</span>}
-          {filters.consumoCat !== 'all' && <span className="ml-2"><UtensilsCrossed className="w-4 h-4 inline mr-1" /> {filters.consumoCat}</span>}
+          {filters.month !== 'all' && (
+            <span className="ml-2">
+              <Calendar className="w-4 h-4 inline mr-1" />{' '}
+              {getMonthLabel(filters.month)}
+            </span>
+          )}
+          {filters.roomType !== 'all' && (
+            <span className="ml-2">
+              <Building2 className="w-4 h-4 inline mr-1" /> {filters.roomType}
+            </span>
+          )}
+          {filters.status !== 'all' && (
+            <span className="ml-2">
+              <ClipboardList className="w-4 h-4 inline mr-1" /> {filters.status}
+            </span>
+          )}
+          {filters.consumoCat !== 'all' && (
+            <span className="ml-2">
+              <UtensilsCrossed className="w-4 h-4 inline mr-1" />{' '}
+              {filters.consumoCat}
+            </span>
+          )}
         </div>
       ) : null}
     </div>

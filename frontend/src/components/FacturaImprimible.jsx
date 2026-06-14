@@ -1,8 +1,8 @@
+import { Building2, CheckCircle, Package, Printer } from 'lucide-react';
 import { useRef } from 'react';
 import { useReactToPrint } from 'react-to-print';
-import { Printer, Building2, Package, CheckCircle } from 'lucide-react';
+import { CAT_ICONS, METODOS_PAGO } from '../constants';
 import { COP, FECHA } from '../utils/helpers';
-import { METODOS_PAGO, CAT_ICONS } from '../constants';
 
 /**
  * FacturaImprimible — Printable invoice component.
@@ -18,7 +18,6 @@ export default function FacturaImprimible({ factura }) {
 
   const { handlePrint } = useReactToPrint({
     contentRef: printRef,
-    content: () => document.getElementById('factura-print'),
   });
 
   return (
@@ -63,7 +62,9 @@ export default function FacturaImprimible({ factura }) {
             )}
             <div className="factura-info-row">
               <span>Habitación:</span>
-              <strong>#{factura.numero} ({factura.tipo})</strong>
+              <strong>
+                #{factura.numero} ({factura.tipo})
+              </strong>
             </div>
             <div className="factura-info-row">
               <span>Check-in:</span>
@@ -91,7 +92,9 @@ export default function FacturaImprimible({ factura }) {
             <tbody>
               <tr>
                 <td>Habitación {factura.tipo}</td>
-                <td>{factura.noches} noche{factura.noches > 1 ? 's' : ''}</td>
+                <td>
+                  {factura.noches} noche{factura.noches > 1 ? 's' : ''}
+                </td>
                 <td>{COP(factura.tarifaNoche)}</td>
                 <td>{COP(factura.cargoHabitacion)}</td>
               </tr>
@@ -116,7 +119,12 @@ export default function FacturaImprimible({ factura }) {
                 {factura.consumos.map((c) => (
                   <tr key={c.id}>
                     <td>{FECHA(c.fecha)}</td>
-                    <td>{CAT_ICONS[c.categoria] || <Package className="w-3 h-3" />} {c.categoria}</td>
+                    <td>
+                      {CAT_ICONS[c.categoria] || (
+                        <Package className="w-3 h-3" />
+                      )}{' '}
+                      {c.categoria}
+                    </td>
                     <td>{c.descripcion}</td>
                     <td>{COP(c.precio)}</td>
                   </tr>
@@ -146,7 +154,12 @@ export default function FacturaImprimible({ factura }) {
         <div className="factura-section factura-payment">
           <div className="factura-info-row">
             <span>Método de pago:</span>
-            <strong>{metodoLabel?.icon} {metodoLabel?.label}</strong>
+            <strong>
+              {metodoLabel?.icon ? (
+                <metodoLabel.icon className="w-4 h-4 inline mr-1" />
+              ) : null}{' '}
+              {metodoLabel?.label}
+            </strong>
           </div>
           <div className="factura-info-row">
             <span>Valor recibido:</span>
@@ -162,8 +175,13 @@ export default function FacturaImprimible({ factura }) {
 
         {/* Footer */}
         <div className="factura-footer">
-          <p><CheckCircle className="w-4 h-4 inline mr-1" /> Cuenta cerrada — Habitación disponible para nuevos huéspedes</p>
-          <p className="factura-gracias">¡Gracias por su estadía en EcoBosque!</p>
+          <p>
+            <CheckCircle className="w-4 h-4 inline mr-1" /> Cuenta cerrada —
+            Habitación disponible para nuevos huéspedes
+          </p>
+          <p className="factura-gracias">
+            ¡Gracias por su estadía en EcoBosque!
+          </p>
         </div>
       </div>
     </div>

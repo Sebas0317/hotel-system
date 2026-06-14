@@ -1,15 +1,15 @@
 import {
-  FaWifi,
-  FaCoffee,
   FaBath,
-  FaParking,
-  FaSwimmingPool,
-  FaHotdog,
-  FaStopwatch,
   FaCocktail,
+  FaCoffee,
+  FaHotdog,
+  FaParking,
+  FaStopwatch,
+  FaSwimmingPool,
+  FaWifi,
 } from 'react-icons/fa';
-import type { Room } from '../types';
 import images from '../assets';
+import type { Room } from '../types';
 
 const facilities = [
   { name: 'Wifi', icon: FaWifi },
@@ -23,14 +23,22 @@ const facilities = [
 ];
 
 const descriptions: Record<string, string> = {
-  'Suite Bosque': 'Suite con jacuzzi privado y arquitectura en madera y bambú sostenible. Vista al bosque tropical conbalcón privado.',
-  'Suite Sunset': 'Suite con orientación solar optimizada para vistas premium del atardecer. Jacuzzi privado y amenidades exclusivas.',
-  'Suite Edén': 'Suite con ducha exterior y acceso a jardín privado. Ambiente natural único con terraza privada.',
-  'Habitación Pareja': 'Habitación para parejas con control climático e internet inalámbrico. Acogedora y funcional.',
-  'Habitación Doble Estándar': 'Habitación estándar con cama king, control climático, TV pantalla plana y baño privado.',
-  'Habitación Cuádruple Estándar': 'Habitación familiar para 4 personas con control climático y televisión. Espacio cómodo para todos.',
-  'Cabaña Familiar en Bote': 'Estructura única sobre el agua con 3 literas, capacidad para 6 personas. Experiencia inigualable.',
-  'Cabaña Premium': 'Cabaña premium con todas las amenidades del hotel, jacuzzi privado y vista panorámica al lago.',
+  'Suite Bosque':
+    'Suite con jacuzzi privado y arquitectura en madera y bambú sostenible. Vista al bosque tropical conbalcón privado.',
+  'Suite Sunset':
+    'Suite con orientación solar optimizada para vistas premium del atardecer. Jacuzzi privado y amenidades exclusivas.',
+  'Suite Edén':
+    'Suite con ducha exterior y acceso a jardín privado. Ambiente natural único con terraza privada.',
+  'Habitación Pareja':
+    'Habitación para parejas con control climático e internet inalámbrico. Acogedora y funcional.',
+  'Habitación Doble Estándar':
+    'Habitación estándar con cama king, control climático, TV pantalla plana y baño privado.',
+  'Habitación Cuádruple Estándar':
+    'Habitación familiar para 4 personas con control climático y televisión. Espacio cómodo para todos.',
+  'Cabaña Familiar en Bote':
+    'Estructura única sobre el agua con 3 literas, capacidad para 6 personas. Experiencia inigualable.',
+  'Cabaña Premium':
+    'Cabaña premium con todas las amenidades del hotel, jacuzzi privado y vista panorámica al lago.',
 };
 
 export const roomData: Room[] = [

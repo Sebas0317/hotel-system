@@ -43,7 +43,7 @@ const swaggerSpecs = require('./src/config/swagger');
 
 // Import middleware
 const { requestLogger, errorHandler, notFoundHandler } = require('./src/middleware/errorHandler');
-const { requireAuth } = require('./src/middleware/auth');
+const { requireAuth, csrfProtection } = require('./src/middleware/auth');
 const { sanitizeBody } = require('./src/middleware/sanitize');
 const { requestTimeout } = require('./src/middleware/requestTimeout');
 const cookieParser = require('cookie-parser');
@@ -132,7 +132,7 @@ app.use(cors({
   },
   credentials: true,
   methods: ['GET', 'POST', 'PATCH', 'PUT'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Protection'],
   exposedHeaders: ['X-RateLimit-Limit', 'X-RateLimit-Remaining', 'X-RateLimit-Reset'],
   maxAge: 600,
 }));
@@ -157,6 +157,7 @@ app.use(express.urlencoded({ extended: false, limit: '500kb' }));
 app.use(cookieParser());
 
 app.use(sanitizeBody);
+app.use(csrfProtection);
 
 // ── RATE LIMITING ──
 // Global rate limiter (applied to all routes)
@@ -227,12 +228,20 @@ app.use('/v1/users', authRateLimiter, usersRoutes);
 app.use('/users', authRateLimiter, usersRoutes);
 
 // ── BACKUP MANAGEMENT (admin only) ──
-app.post('/admin/backup', requireAuth, async (_req, res) => {
+function requireAdminRole(req, res, next) {
+  const allowed = ['admin', 'owner'];
+  if (!req.user || !allowed.includes(req.user.role)) {
+    return res.status(403).json({ error: 'Solo administradores pueden realizar esta accion' });
+  }
+  next();
+}
+
+app.post('/admin/backup', requireAuth, requireAdminRole, async (_req, res) => {
   try {
     const result = await createBackup();
     res.json({ message: 'Backup created successfully', ...result });
   } catch (error) {
-    res.status(500).json({ error: 'Backup failed', message: error.message });
+    res.status(500).json({ error: 'Error interno al crear backup' });
   }
 });
 
@@ -242,7 +251,18 @@ app.use(errorHandler);
 
 // ── START HTTP SERVER ──
 let server;
-server = app.listen(PORT, '0.0.0.0', () => {
+
+async function runStartupTasks() {
+  if (process.env.NODE_ENV === 'test') return;
+  try {
+    await persistence.bootstrapFromFiles();
+  } catch (err) {
+    logger.warn({ err }, 'Redis bootstrap failed (non-critical)');
+  }
+}
+
+runStartupTasks().then(() => {
+  server = app.listen(PORT, '0.0.0.0', () => {
     // Initialize WebSocket server for real-time updates
     initWebSocket(server);
 
@@ -303,13 +323,16 @@ server = app.listen(PORT, '0.0.0.0', () => {
         logger.warn({ err }, 'Owner user seed failed (non-critical)');
       });
 
-      // Bootstrap Redis from JSON files on first cold start
-      persistence.bootstrapFromFiles().catch(err => {
-        logger.warn({ err }, 'Redis bootstrap failed (non-critical)');
-      });
     }
   });
+});
 
 module.exports = app; // Export for Vercel serverless
 module.exports.app = app;
-module.exports.server = server; // Export for testing
+
+// Live getter so tests can access `server` even though it's assigned asynchronously
+Object.defineProperty(module.exports, 'server', {
+  get: () => server,
+  enumerable: true,
+  configurable: true,
+});

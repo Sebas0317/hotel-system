@@ -1,13 +1,25 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
-import { fetchReservaciones, checkIn, cancelReservation } from '../services/api';
-import { COP, FECHA } from '../utils/helpers';
+import {
+  AlertTriangle,
+  BarChart3,
+  Bell,
+  Calendar,
+  CheckCircle,
+  Circle,
+  ClipboardList,
+  Mail,
+  Phone,
+  Trash2,
+} from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { usePrices } from '../hooks/usePrices';
+import {
+  cancelReservation,
+  checkIn,
+  fetchReservaciones,
+} from '../services/api';
+import { COP, FECHA } from '../utils/helpers';
 import PantallaForm from './PantallaForm';
 import { Toast } from './RoomActions';
-import {
-  ClipboardList, BarChart3, Calendar, AlertTriangle, Mail, Bell,
-  Trash2, CheckCircle, Phone
-} from 'lucide-react';
 
 export default function PantallaReservaciones({ onNav }) {
   const [data, setData] = useState([]);
@@ -31,12 +43,26 @@ export default function PantallaReservaciones({ onNav }) {
     }
   }, []);
 
-  useEffect(() => { refresh(); }, [refresh]);
+  useEffect(() => {
+    refresh();
+  }, [refresh]);
 
   const handleCheckIn = async (reserv) => {
     try {
-      await checkIn({ numero: reserv.numero, huesped: reserv.huesped, tipo: reserv.tipo });
-      setToast({ type: 'success', message: `Check-in confirmado — Habitación #${reserv.numero}` });
+      await checkIn({
+        numero: reserv.numero,
+        huesped: reserv.huesped,
+        tipo: reserv.tipo,
+        documento: reserv.documento,
+        email: reserv.email,
+        telefono: reserv.telefono,
+        noches: reserv.noches,
+        checkOut: reserv.checkOut,
+      });
+      setToast({
+        type: 'success',
+        message: `Check-in confirmado — Habitación #${reserv.numero}`,
+      });
       refresh();
     } catch (e) {
       setToast({ type: 'error', message: e.message });
@@ -47,7 +73,10 @@ export default function PantallaReservaciones({ onNav }) {
   const handleCancel = async (reserv) => {
     try {
       await cancelReservation(reserv.id);
-      setToast({ type: 'success', message: `Reserva cancelada — Habitación #${reserv.numero}` });
+      setToast({
+        type: 'success',
+        message: `Reserva cancelada — Habitación #${reserv.numero}`,
+      });
       refresh();
     } catch (e) {
       setToast({ type: 'error', message: e.message });
@@ -55,7 +84,7 @@ export default function PantallaReservaciones({ onNav }) {
     setConfirmAction(null);
   };
 
-  const tarifaNoche = (tipo) => tarifas[tipo] || 80000;
+  const tarifaNoche = (tipo) => tarifas[tipo]?.precio ?? tarifas[tipo] ?? 80000;
 
   const calendarData = useMemo(() => {
     const today = new Date();
@@ -68,7 +97,7 @@ export default function PantallaReservaciones({ onNav }) {
       const dayReservs = data.filter((r) => {
         const checkIn = r.checkIn?.split('T')[0];
         const checkOut = r.checkOut?.split('T')[0];
-        return dateStr >= checkIn && dateStr <= checkOut;
+        return dateStr >= checkIn && dateStr < checkOut;
       });
       days.push({ date: d, dateStr, reservs: dayReservs });
     }
@@ -84,18 +113,34 @@ export default function PantallaReservaciones({ onNav }) {
       desc={`${data.length} registros activos (${upcoming.length} reservadas, ${occupied.length} ocupadas)`}
       onVolver={() => onNav('menu')}
     >
-      {toast && <Toast message={toast.message} type={toast.type} onDismiss={() => setToast(null)} />}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onDismiss={() => setToast(null)}
+        />
+      )}
 
       <div className="res-view-toggle">
-        <button className={`res-view-btn ${view === 'table' ? 'activo' : ''}`} onClick={() => setView('table')}>
+        <button
+          className={`res-view-btn ${view === 'table' ? 'activo' : ''}`}
+          onClick={() => setView('table')}
+        >
           <BarChart3 className="w-4 h-4 mr-1" /> Tabla
         </button>
-        <button className={`res-view-btn ${view === 'calendar' ? 'activo' : ''}`} onClick={() => setView('calendar')}>
+        <button
+          className={`res-view-btn ${view === 'calendar' ? 'activo' : ''}`}
+          onClick={() => setView('calendar')}
+        >
           <Calendar className="w-4 h-4 mr-1" /> Calendario
         </button>
       </div>
 
-      {error && <div className="p-3 mb-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm"><AlertTriangle className="w-4 h-4 inline mr-1" /> {error}</div>}
+      {error && (
+        <div className="p-3 mb-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+          <AlertTriangle className="w-4 h-4 inline mr-1" /> {error}
+        </div>
+      )}
 
       {loading ? (
         <p className="res-loading">Cargando reservaciones...</p>
@@ -108,7 +153,10 @@ export default function PantallaReservaciones({ onNav }) {
         <div className="res-table-container">
           {upcoming.length > 0 && (
             <>
-              <h4 className="res-section-title"><ClipboardList className="w-4 h-4 inline mr-1" /> Proximas Reservaciones ({upcoming.length})</h4>
+              <h4 className="res-section-title">
+                <ClipboardList className="w-4 h-4 inline mr-1" /> Proximas
+                Reservaciones ({upcoming.length})
+              </h4>
               <div className="res-table-wrap">
                 <table className="res-table">
                   <thead>
@@ -126,10 +174,17 @@ export default function PantallaReservaciones({ onNav }) {
                   <tbody>
                     {upcoming.map((r) => (
                       <tr key={r.id} className="res-row res-row-reservada">
-                        <td className="res-cell-num"><strong>{r.numero}</strong></td>
+                        <td className="res-cell-num">
+                          <strong>{r.numero}</strong>
+                        </td>
                         <td>
                           <div className="res-guest-name">{r.huesped}</div>
-                          {r.telefono && <div className="res-phone"><Phone className="w-3 h-3 inline mr-1" /> {r.telefono}</div>}
+                          {r.telefono && (
+                            <div className="res-phone">
+                              <Phone className="w-3 h-3 inline mr-1" />{' '}
+                              {r.telefono}
+                            </div>
+                          )}
                         </td>
                         <td>{r.tipo}</td>
                         <td>{FECHA(r.checkIn)}</td>
@@ -137,10 +192,20 @@ export default function PantallaReservaciones({ onNav }) {
                         <td>{r.noches}</td>
                         <td>{COP(tarifaNoche(r.tipo) * (r.noches || 1))}</td>
                         <td className="res-actions">
-                          <button className="res-btn res-btn-checkin" onClick={() => setConfirmAction({ type: 'checkin', data: r })}>
+                          <button
+                            className="res-btn res-btn-checkin"
+                            onClick={() =>
+                              setConfirmAction({ type: 'checkin', data: r })
+                            }
+                          >
                             <Bell className="w-4 h-4 inline mr-1" /> Check-in
                           </button>
-                          <button className="res-btn res-btn-cancel" onClick={() => setConfirmAction({ type: 'cancel', data: r })}>
+                          <button
+                            className="res-btn res-btn-cancel"
+                            onClick={() =>
+                              setConfirmAction({ type: 'cancel', data: r })
+                            }
+                          >
                             <Trash2 className="w-4 h-4" />
                           </button>
                         </td>
@@ -154,7 +219,10 @@ export default function PantallaReservaciones({ onNav }) {
 
           {occupied.length > 0 && (
             <>
-              <h4 className="res-section-title"><Circle className="w-4 h-4 inline mr-1 text-red-500" /> Habitaciones Ocupadas ({occupied.length})</h4>
+              <h4 className="res-section-title">
+                <Circle className="w-4 h-4 inline mr-1 text-red-500" />{' '}
+                Habitaciones Ocupadas ({occupied.length})
+              </h4>
               <div className="res-table-wrap">
                 <table className="res-table">
                   <thead>
@@ -171,10 +239,17 @@ export default function PantallaReservaciones({ onNav }) {
                   <tbody>
                     {occupied.map((r) => (
                       <tr key={r.id} className="res-row res-row-ocupada">
-                        <td className="res-cell-num"><strong>{r.numero}</strong></td>
+                        <td className="res-cell-num">
+                          <strong>{r.numero}</strong>
+                        </td>
                         <td>
                           <div className="res-guest-name">{r.huesped}</div>
-                          {r.telefono && <div className="res-phone"><Phone className="w-3 h-3 inline mr-1" /> {r.telefono}</div>}
+                          {r.telefono && (
+                            <div className="res-phone">
+                              <Phone className="w-3 h-3 inline mr-1" />{' '}
+                              {r.telefono}
+                            </div>
+                          )}
                         </td>
                         <td>{r.tipo}</td>
                         <td>{FECHA(r.checkIn)}</td>
@@ -194,14 +269,15 @@ export default function PantallaReservaciones({ onNav }) {
       ) : (
         <div className="res-calendar">
           {calendarData.map((day) => (
-            <div key={day.dateStr} className={`res-cal-day ${day.reservs.length > 0 ? 'has-events' : ''}`}>
+            <div
+              key={day.dateStr}
+              className={`res-cal-day ${day.reservs.length > 0 ? 'has-events' : ''}`}
+            >
               <div className="res-cal-date">
                 <span className="res-cal-day-name">
                   {day.date.toLocaleDateString('es-CO', { weekday: 'short' })}
                 </span>
-                <span className="res-cal-day-num">
-                  {day.date.getDate()}
-                </span>
+                <span className="res-cal-day-num">{day.date.getDate()}</span>
               </div>
               {day.reservs.length > 0 ? (
                 <div className="res-cal-events">
@@ -210,7 +286,11 @@ export default function PantallaReservaciones({ onNav }) {
                       <span className="res-cal-event-room">{r.numero}</span>
                       <span className="res-cal-event-guest">{r.huesped}</span>
                       <span className={`res-cal-event-status ${r.estado}`}>
-                        {r.estado === 'reservada' ? <ClipboardList className="w-3 h-3" /> : <Circle className="w-3 h-3 fill-current" />}
+                        {r.estado === 'reservada' ? (
+                          <ClipboardList className="w-3 h-3" />
+                        ) : (
+                          <Circle className="w-3 h-3 fill-current" />
+                        )}
                       </span>
                     </div>
                   ))}
@@ -224,10 +304,21 @@ export default function PantallaReservaciones({ onNav }) {
       )}
 
       {confirmAction && (
-        <div className="pe-modal-overlay" onClick={() => setConfirmAction(null)}>
+        <div
+          className="pe-modal-overlay"
+          onClick={() => setConfirmAction(null)}
+        >
           <div className="pe-modal" onClick={(e) => e.stopPropagation()}>
             <h4 className="pe-modal-title">
-              {confirmAction.type === 'checkin' ? <><Bell className="w-5 h-5 inline mr-2" /> Confirmar Check-in</> : <><Trash2 className="w-5 h-5 inline mr-2" /> Cancelar Reserva</>}
+              {confirmAction.type === 'checkin' ? (
+                <>
+                  <Bell className="w-5 h-5 inline mr-2" /> Confirmar Check-in
+                </>
+              ) : (
+                <>
+                  <Trash2 className="w-5 h-5 inline mr-2" /> Cancelar Reserva
+                </>
+              )}
             </h4>
             <p className="pe-modal-desc">
               {confirmAction.type === 'checkin'
@@ -237,11 +328,27 @@ export default function PantallaReservaciones({ onNav }) {
             <div className="pe-modal-btns">
               <button
                 className={`pe-modal-btn ${confirmAction.type === 'checkin' ? 'pe-modal-btn-confirm' : 'pe-modal-btn-cancel'}`}
-                onClick={() => confirmAction.type === 'checkin' ? handleCheckIn(confirmAction.data) : handleCancel(confirmAction.data)}
+                onClick={() =>
+                  confirmAction.type === 'checkin'
+                    ? handleCheckIn(confirmAction.data)
+                    : handleCancel(confirmAction.data)
+                }
               >
-                {confirmAction.type === 'checkin' ? <><CheckCircle className="w-4 h-4 inline mr-1" /> Confirmar Check-in</> : <><Trash2 className="w-4 h-4 inline mr-1" /> Cancelar Reserva</>}
+                {confirmAction.type === 'checkin' ? (
+                  <>
+                    <CheckCircle className="w-4 h-4 inline mr-1" /> Confirmar
+                    Check-in
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-4 h-4 inline mr-1" /> Cancelar Reserva
+                  </>
+                )}
               </button>
-              <button className="pe-modal-btn pe-modal-btn-cancel" onClick={() => setConfirmAction(null)}>
+              <button
+                className="pe-modal-btn pe-modal-btn-cancel"
+                onClick={() => setConfirmAction(null)}
+              >
                 Volver
               </button>
             </div>

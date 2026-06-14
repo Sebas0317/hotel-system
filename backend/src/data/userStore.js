@@ -1,11 +1,21 @@
 'use strict';
 
 const bcrypt = require('bcryptjs');
-const crypto = require('crypto');
+const crypto = require('node:crypto');
 const persistence = require('./persistence');
 const logger = require('../utils/logger');
 
 const ROLES = ['owner', 'admin', 'operator', 'analyst', 'cliente'];
+
+// Write lock to serialize read-modify-write cycles (C27, C28)
+const userWriteLocks = new Map();
+function withUserLock(key, fn) {
+  if (!userWriteLocks.has(key)) userWriteLocks.set(key, Promise.resolve());
+  const prev = userWriteLocks.get(key);
+  const next = prev.then(fn, fn);
+  userWriteLocks.set(key, next);
+  return next;
+}
 
 async function getUsers() {
   return persistence.getUsers();
@@ -17,76 +27,112 @@ async function saveUsers(users) {
 
 async function findUserById(id) {
   const users = await getUsers();
-  return users.find(u => u.id === id) || null;
+  return users.find((u) => u.id === id) || null;
 }
 
 async function findUserByEmail(email) {
   const users = await getUsers();
-  return users.find(u => u.email === email) || null;
+  return users.find((u) => u.email === email) || null;
 }
 
 async function findUserByUsername(username) {
   const users = await getUsers();
-  return users.find(u => u.username === username) || null;
+  return users.find((u) => u.username === username) || null;
 }
 
 async function findUserByEmailOrUsername(identifier) {
   const users = await getUsers();
-  return users.find(u => u.email === identifier || u.username === identifier) || null;
+  return (
+    users.find((u) => u.email === identifier || u.username === identifier) ||
+    null
+  );
 }
 
-async function createUser({ username, email, password, firstName, lastName, role = 'cliente', isActive = true }) {
-  const users = await getUsers();
-  const passwordHash = await bcrypt.hash(password, 12);
-  const now = new Date().toISOString();
+async function createUser({
+  username,
+  email,
+  password,
+  firstName,
+  lastName,
+  role = 'cliente',
+  isActive = true,
+}) {
+  return withUserLock('_create', async () => {
+    const users = await getUsers();
 
-  const user = {
-    id: `${Date.now()}-${crypto.randomBytes(4).toString('hex')}`,
-    username,
-    email,
-    passwordHash,
-    firstName: firstName || '',
-    lastName: lastName || '',
-    avatar: null,
-    role,
-    isActive,
-    emailVerified: false,
-    twoFactorEnabled: false,
-    lastLogin: null,
-    lastIp: null,
-    createdAt: now,
-    updatedAt: now,
-  };
+    // Internal uniqueness check — prevents race between two concurrent registrations (D28)
+    if (users.some((u) => u.email === email)) {
+      const err = new Error('Ya existe un usuario con ese email o username');
+      err.statusCode = 409;
+      throw err;
+    }
+    if (users.some((u) => u.username === username)) {
+      const err = new Error('Ya existe un usuario con ese email o username');
+      err.statusCode = 409;
+      throw err;
+    }
 
-  users.push(user);
-  await saveUsers(users);
+    const passwordHash = await bcrypt.hash(password, 12);
+    const now = new Date().toISOString();
 
-  const { passwordHash: _, ...safeUser } = user;
-  return safeUser;
+    const user = {
+      id: `${Date.now()}-${crypto.randomBytes(4).toString('hex')}`,
+      username,
+      email,
+      passwordHash,
+      firstName: firstName || '',
+      lastName: lastName || '',
+      avatar: null,
+      role,
+      isActive,
+      emailVerified: false,
+      twoFactorEnabled: false,
+      lastLogin: null,
+      lastIp: null,
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    users.push(user);
+    await saveUsers(users);
+
+    const { passwordHash: _, ...safeUser } = user;
+    return safeUser;
+  });
 }
 
 async function updateUser(id, updates) {
-  const users = await getUsers();
-  const index = users.findIndex(u => u.id === id);
-  if (index === -1) return null;
+  return withUserLock(id, async () => {
+    const users = await getUsers();
+    const index = users.findIndex((u) => u.id === id);
+    if (index === -1) return null;
 
-  const allowed = ['firstName', 'lastName', 'avatar', 'role', 'isActive', 'emailVerified', 'twoFactorEnabled'];
-  for (const key of allowed) {
-    if (updates[key] !== undefined) {
-      users[index][key] = updates[key];
+    const allowed = [
+      'firstName',
+      'lastName',
+      'avatar',
+      'role',
+      'isActive',
+      'emailVerified',
+      'twoFactorEnabled',
+    ];
+    for (const key of allowed) {
+      if (updates[key] !== undefined) {
+        users[index][key] = updates[key];
+      }
     }
-  }
 
-  users[index].updatedAt = new Date().toISOString();
-  await saveUsers(users);
+    users[index].updatedAt = new Date().toISOString();
+    await saveUsers(users);
 
-  const { passwordHash: _, ...safeUser } = users[index];
-  return safeUser;
+    const { passwordHash: _, ...safeUser } = users[index];
+    return safeUser;
+  });
 }
 
 async function deleteUser(id, callerRole = null) {
   const users = await getUsers();
-  const index = users.findIndex(u => u.id === id);
+  const index = users.findIndex((u) => u.id === id);
   if (index === -1) return { deleted: false, reason: 'not_found' };
 
   const targetRole = users[index].role;
@@ -108,10 +154,21 @@ async function deleteUser(id, callerRole = null) {
   return { deleted: true };
 }
 
+// Dummy bcrypt hash for constant-time comparison when user doesn't exist.
+// Prevents timing oracle attacks (C9).
+// Real bcrypt hash of 'dummy' — ensures bcrypt.compare() spends ~100ms
+// instead of throwing on invalid format.
+const DUMMY_HASH =
+  '$2b$10$IKgqw.s8.kinJQ6AEZGS..wJmDo14ZJpuZGzOQxifDCg5XrBbqTBe';
+
 async function verifyPassword(identifier, password) {
   const user = await findUserByEmailOrUsername(identifier);
-  if (!user) return { valid: false, user: null };
-  if (!user.isActive) return { valid: false, user: null, reason: 'Cuenta desactivada' };
+  if (!user) {
+    await bcrypt.compare(password, DUMMY_HASH);
+    return { valid: false, user: null };
+  }
+  if (!user.isActive)
+    return { valid: false, user: null, reason: 'Cuenta desactivada' };
 
   try {
     const valid = await bcrypt.compare(password, user.passwordHash);
@@ -124,7 +181,7 @@ async function verifyPassword(identifier, password) {
 
 async function changePassword(id, newPassword) {
   const users = await getUsers();
-  const index = users.findIndex(u => u.id === id);
+  const index = users.findIndex((u) => u.id === id);
   if (index === -1) return false;
 
   users[index].passwordHash = await bcrypt.hash(newPassword, 12);
@@ -138,7 +195,7 @@ async function seedAdminUser() {
   const adminEmail = process.env.ADMIN_EMAIL || 'admin@ecobosque.com';
   const adminPassword = process.env.ADMIN_PASSWORD;
 
-  const existing = users.find(u => u.role === 'admin');
+  const existing = users.find((u) => u.role === 'admin');
   if (existing) {
     if (adminPassword) {
       const match = await bcrypt.compare(adminPassword, existing.passwordHash);
@@ -157,7 +214,7 @@ async function seedAdminUser() {
     return existing;
   }
 
-  const existingEmail = users.find(u => u.email === adminEmail);
+  const existingEmail = users.find((u) => u.email === adminEmail);
   if (existingEmail) {
     return updateUser(existingEmail.id, { role: 'admin', emailVerified: true });
   }
@@ -167,7 +224,7 @@ async function seedAdminUser() {
     return null;
   }
 
-  const users2 = await getUsers();
+  const _users2 = await getUsers();
   const safeUser2 = await createUser({
     username: 'admin',
     email: adminEmail,
@@ -186,7 +243,7 @@ async function seedAdminUser() {
 
 async function updateLastLogin(id, ip) {
   const users = await getUsers();
-  const index = users.findIndex(u => u.id === id);
+  const index = users.findIndex((u) => u.id === id);
   if (index === -1) return;
 
   users[index].lastLogin = new Date().toISOString();
@@ -207,9 +264,10 @@ function sanitizeUsers(users) {
 
 async function seedOwnerUser() {
   const users = await getUsers();
-  const ownerEmail = process.env.OWNER_EMAIL || 'sebastiansandoval12371@gmail.com';
+  const ownerEmail =
+    process.env.OWNER_EMAIL || 'sebastiansandoval12371@gmail.com';
 
-  const existing = users.find(u => u.email === ownerEmail);
+  const existing = users.find((u) => u.email === ownerEmail);
   if (existing) {
     if (existing.role !== 'owner') {
       return updateUser(existing.id, { role: 'owner', emailVerified: true });
@@ -220,12 +278,15 @@ async function seedOwnerUser() {
     return existing;
   }
 
-  const existingOwnerByRole = users.find(u => u.role === 'owner');
+  const existingOwnerByRole = users.find((u) => u.role === 'owner');
   if (existingOwnerByRole) return existingOwnerByRole;
 
-  const ownerPassword = process.env.OWNER_PASSWORD || process.env.ADMIN_PASSWORD;
+  const ownerPassword =
+    process.env.OWNER_PASSWORD || process.env.ADMIN_PASSWORD;
   if (!ownerPassword) {
-    logger.error('No se puede crear usuario owner: OWNER_PASSWORD o ADMIN_PASSWORD no configurado');
+    logger.error(
+      'No se puede crear usuario owner: OWNER_PASSWORD o ADMIN_PASSWORD no configurado'
+    );
     return null;
   }
   const safeUser = await createUser({
@@ -254,16 +315,27 @@ async function countByRole() {
 
 async function getActiveCount() {
   const users = await getUsers();
-  return users.filter(u => u.isActive).length;
+  return users.filter((u) => u.isActive).length;
 }
 
 module.exports = {
   ROLES,
-  getUsers, saveUsers,
-  findUserById, findUserByEmail, findUserByUsername, findUserByEmailOrUsername,
-  createUser, updateUser, deleteUser,
-  verifyPassword, changePassword,
-  seedAdminUser, seedOwnerUser, updateLastLogin,
-  sanitizeUser, sanitizeUsers,
-  countByRole, getActiveCount,
+  getUsers,
+  saveUsers,
+  findUserById,
+  findUserByEmail,
+  findUserByUsername,
+  findUserByEmailOrUsername,
+  createUser,
+  updateUser,
+  deleteUser,
+  verifyPassword,
+  changePassword,
+  seedAdminUser,
+  seedOwnerUser,
+  updateLastLogin,
+  sanitizeUser,
+  sanitizeUsers,
+  countByRole,
+  getActiveCount,
 };

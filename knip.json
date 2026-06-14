@@ -1,0 +1,26 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "entry": [
+    "backend/server.js",
+    "frontend/src/main.jsx",
+    "EcoWeb/src/main.tsx"
+  ],
+  "project": [
+    "backend/src/**",
+    "frontend/src/**",
+    "EcoWeb/src/**"
+  ],
+  "ignoreDependencies": [
+    "chrome-launcher"
+  ],
+  "ignore": [
+    "oi_env/**",
+    "frontend/dist/**",
+    "EcoWeb/dist/**",
+    "node_modules/**",
+    ".opencode/**",
+    "ai/**",
+    "prompt/**",
+    "scripts/**"
+  ]
+}

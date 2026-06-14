@@ -1,5 +1,5 @@
-import { AdultsDropdown, CheckIn, CheckOut, KidsDropdown } from './index';
 import { useRoomContext } from '../context/RoomContext';
+import { AdultsDropdown, CheckIn, CheckOut, KidsDropdown } from './index';
 
 /**
  * Booking form: check-in/out dates and guest counts. Submit triggers room filter (handleCheck).
@@ -24,7 +24,11 @@ export default function BookForm() {
         <div className="flex-1 min-w-0 border-r w-full">
           <KidsDropdown />
         </div>
-        <button type="submit" className="btn btn-primary" onClick={(e) => handleCheck(e)}>
+        <button
+          type="submit"
+          className="btn btn-primary"
+          onClick={(e) => handleCheck(e)}
+        >
           Buscar Ahora
         </button>
       </div>

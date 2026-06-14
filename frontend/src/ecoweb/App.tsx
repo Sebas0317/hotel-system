@@ -1,8 +1,8 @@
 import { Route, Routes } from 'react-router-dom';
 import { Footer, Header, PageNotFound } from './components';
+import { RoomContext } from './context/RoomContext';
 import Home from './pages/Home';
 import RoomDetails from './pages/RoomDetails';
-import { RoomContext } from './context/RoomContext';
 
 /**
  * Root app: router with Header/Footer and routes for Home, RoomDetails and 404.

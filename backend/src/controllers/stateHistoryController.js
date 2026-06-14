@@ -10,14 +10,17 @@ async function getAllStateHistory(_req, res) {
     res.json(cambios);
   } catch (err) {
     logger.error('Error getting state history', { error: err.message });
-    res.status(500).json({ error: 'Error interno al obtener historial de estados' });
+    res
+      .status(500)
+      .json({ error: 'Error interno al obtener historial de estados' });
   }
 }
 
 async function addStateChange(req, res) {
   try {
     const cambios = await getStateHistory();
-    const { roomId, numero, estadoAnterior, estadoNuevo, huesped, timestamp } = req.body;
+    const { roomId, numero, estadoAnterior, estadoNuevo, huesped, timestamp } =
+      req.body;
 
     const entry = {
       id: generateId(),
@@ -34,18 +37,24 @@ async function addStateChange(req, res) {
     res.json(entry);
   } catch (err) {
     logger.error('Error adding state change', { error: err.message });
-    res.status(500).json({ error: 'Error interno al agregar cambio de estado' });
+    res
+      .status(500)
+      .json({ error: 'Error interno al agregar cambio de estado' });
   }
 }
 
 async function getStateHistoryByRoom(req, res) {
   try {
     const cambios = await getStateHistory();
-    const roomHistory = cambios.filter(c => c.roomId === req.params.roomId || c.numero === req.params.roomId);
+    const roomHistory = cambios.filter(
+      (c) => c.roomId === req.params.roomId || c.numero === req.params.roomId
+    );
     res.json(roomHistory);
   } catch (err) {
     logger.error('Error getting room state history', { error: err.message });
-    res.status(500).json({ error: 'Error interno al obtener historial de habitación' });
+    res
+      .status(500)
+      .json({ error: 'Error interno al obtener historial de habitación' });
   }
 }
 

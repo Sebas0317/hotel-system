@@ -17,7 +17,10 @@ export const COP = (n) =>
  */
 export const FECHA = (iso) =>
   iso
-    ? new Date(iso).toLocaleString('es-CO', { dateStyle: 'short', timeStyle: 'short' })
+    ? new Date(iso).toLocaleString('es-CO', {
+        dateStyle: 'short',
+        timeStyle: 'short',
+      })
     : '—';
 
 /**
@@ -26,7 +29,9 @@ export const FECHA = (iso) =>
  * @returns {number} Sum of all prices
  */
 export const calcularTotal = (items) =>
-  Array.isArray(items) ? items.reduce((sum, item) => sum + (item.precio || 0), 0) : 0;
+  Array.isArray(items)
+    ? items.reduce((sum, item) => sum + (item.precio || 0), 0)
+    : 0;
 
 /**
  * Groups rooms by floor (piso) or by type if piso is 0 (Cabañas)
@@ -38,10 +43,13 @@ export const agruparPorPiso = (rooms) => {
   const grupos = {};
   rooms.forEach((room) => {
     // Robust check for floor 0 (Cabañas) using loose equality or explicit check
-    const isCabana = room.piso === 0 || room.piso === '0' || room.tipo?.toLowerCase().includes('cabana');
-    const piso = isCabana ? '0' : (room.piso || '1');
+    const isCabana =
+      room.piso === 0 ||
+      room.piso === '0' ||
+      room.tipo?.toLowerCase().includes('cabana');
+    const piso = isCabana ? '0' : room.piso != null ? String(room.piso) : '?';
     const label = piso === '0' ? '0' : String(piso);
-    
+
     if (!grupos[label]) {
       grupos[label] = [];
     }

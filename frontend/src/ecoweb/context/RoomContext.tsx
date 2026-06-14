@@ -1,6 +1,12 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
-import type { RoomContextValue } from '../types';
+import {
+  createContext,
+  type ReactNode,
+  useContext,
+  useEffect,
+  useState,
+} from 'react';
 import { roomData } from '../data';
+import type { RoomContextValue } from '../types';
 
 // Context holds room list, loading, guest counts, and filter/reset actions.
 // Default null; Provider in RoomContext() sets the value.

@@ -14,13 +14,12 @@ const TEST_USER = {
 };
 
 let app;
-let server;
+let serverModule;
 let authCookie;
 
 beforeAll(async () => {
-  const serverModule = await import('../server.js');
+  serverModule = await import('../server.js');
   app = serverModule.app;
-  server = serverModule.server;
 });
 
 // ── Health Check ──
@@ -160,5 +159,5 @@ describe('Rate Limiting', () => {
 
 // ── Cleanup ──
 afterAll(() => {
-  server.close();
+  if (serverModule.server) serverModule.server.close();
 });

@@ -1,29 +1,71 @@
-import { useState, useEffect, useMemo } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  AlertTriangle,
+  CheckCircle,
+  Key,
+  Loader,
+  RefreshCw,
+  Search,
+  Shield,
+  ShieldOff,
+  Smartphone,
+  Trash2,
+  User,
+  UserPlus,
+  Users,
+  X,
+  XCircle,
+} from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { toast as sonnerToast } from 'sonner';
 import {
-  Users, Search, UserPlus, Shield, ShieldOff, Trash2, Key, X,
-  Mail, CheckCircle, XCircle, Filter, MoreHorizontal, RefreshCw,
-  Loader, AlertTriangle, User, ChevronDown, Download, Smartphone,
-} from 'lucide-react';
-import {
-  fetchUsers, fetchUserRoles, fetchUserStats,
-  createUser, updateUser, deleteUser, resetUserPassword,
+  createUser,
+  deleteUser,
+  fetchUserStats,
+  fetchUsers,
+  resetUserPassword,
+  updateUser,
 } from '../services/api';
-import { COP } from '../utils/helpers';
 
 const ROLE_CONFIG = {
-  owner: { label: 'Owner', color: 'text-yellow-600', bg: 'bg-yellow-50', border: 'border-yellow-200' },
-  admin: { label: 'Admin', color: 'text-red-600', bg: 'bg-red-50', border: 'border-red-200' },
-  operator: { label: 'Operador', color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-200' },
-  analyst: { label: 'Analista', color: 'text-purple-600', bg: 'bg-purple-50', border: 'border-purple-200' },
-  cliente: { label: 'Cliente', color: 'text-green-600', bg: 'bg-green-50', border: 'border-green-200' },
+  owner: {
+    label: 'Owner',
+    color: 'text-yellow-600',
+    bg: 'bg-yellow-50',
+    border: 'border-yellow-200',
+  },
+  admin: {
+    label: 'Admin',
+    color: 'text-red-600',
+    bg: 'bg-red-50',
+    border: 'border-red-200',
+  },
+  operator: {
+    label: 'Operador',
+    color: 'text-blue-600',
+    bg: 'bg-blue-50',
+    border: 'border-blue-200',
+  },
+  analyst: {
+    label: 'Analista',
+    color: 'text-purple-600',
+    bg: 'bg-purple-50',
+    border: 'border-purple-200',
+  },
+  cliente: {
+    label: 'Cliente',
+    color: 'text-green-600',
+    bg: 'bg-green-50',
+    border: 'border-green-200',
+  },
 };
 
 function RoleBadge({ role }) {
   const cfg = ROLE_CONFIG[role] || ROLE_CONFIG.cliente;
   return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${cfg.bg} ${cfg.color}`}>
+    <span
+      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${cfg.bg} ${cfg.color}`}
+    >
       {cfg.label}
     </span>
   );
@@ -45,11 +87,19 @@ function UserFormModal({ isOpen, onClose, onSuccess }) {
     if (!username.trim() || !email.trim() || !password.trim()) {
       return setError('Completa los campos requeridos');
     }
-    if (password.length < 8) return setError('La contrasena debe tener al menos 8 caracteres');
+    if (password.length < 8)
+      return setError('La contrasena debe tener al menos 8 caracteres');
     setLoading(true);
     setError('');
     try {
-      const result = await createUser({ username, email, password, firstName, lastName, role });
+      const _result = await createUser({
+        username,
+        email,
+        password,
+        firstName,
+        lastName,
+        role,
+      });
       sonnerToast.success('Usuario creado exitosamente');
       onSuccess();
       onClose();
@@ -61,11 +111,20 @@ function UserFormModal({ isOpen, onClose, onSuccess }) {
   };
 
   return (
-    <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/50" onClick={onClose}>
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6" onClick={e => e.stopPropagation()}>
+    <div
+      className="fixed inset-0 z-[300] flex items-center justify-center bg-black/50"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-lg font-bold text-gray-900">Nuevo usuario</h3>
-          <button onClick={onClose} className="p-1.5 hover:bg-gray-100 rounded-lg">
+          <button
+            onClick={onClose}
+            className="p-1.5 hover:bg-gray-100 rounded-lg"
+          >
             <X className="w-5 h-5 text-gray-400" />
           </button>
         </div>
@@ -73,19 +132,25 @@ function UserFormModal({ isOpen, onClose, onSuccess }) {
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">Nombre</label>
+              <label className="block text-xs font-medium text-gray-500 mb-1">
+                Nombre
+              </label>
               <input
-                type="text" value={firstName}
-                onChange={e => setFirstName(e.target.value)}
+                type="text"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
                 className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-500"
                 placeholder="Juan"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">Apellido</label>
+              <label className="block text-xs font-medium text-gray-500 mb-1">
+                Apellido
+              </label>
               <input
-                type="text" value={lastName}
-                onChange={e => setLastName(e.target.value)}
+                type="text"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
                 className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-500"
                 placeholder="Perez"
               />
@@ -93,40 +158,51 @@ function UserFormModal({ isOpen, onClose, onSuccess }) {
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">Usuario *</label>
+            <label className="block text-xs font-medium text-gray-500 mb-1">
+              Usuario *
+            </label>
             <input
-              type="text" value={username}
-              onChange={e => setUsername(e.target.value)}
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-500"
               placeholder="juanperez"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">Correo *</label>
+            <label className="block text-xs font-medium text-gray-500 mb-1">
+              Correo *
+            </label>
             <input
-              type="email" value={email}
-              onChange={e => setEmail(e.target.value)}
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-500"
               placeholder="juan@ejemplo.com"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">Contrasena *</label>
+            <label className="block text-xs font-medium text-gray-500 mb-1">
+              Contrasena *
+            </label>
             <input
-              type="password" value={password}
-              onChange={e => setPassword(e.target.value)}
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-500"
               placeholder="Min. 8 caracteres"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">Rol</label>
+            <label className="block text-xs font-medium text-gray-500 mb-1">
+              Rol
+            </label>
             <select
               value={role}
-              onChange={e => setRole(e.target.value)}
+              onChange={(e) => setRole(e.target.value)}
               className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-500"
             >
               <option value="cliente">Cliente</option>
@@ -145,7 +221,10 @@ function UserFormModal({ isOpen, onClose, onSuccess }) {
         </div>
 
         <div className="mt-6 flex gap-3">
-          <button onClick={onClose} className="flex-1 py-2.5 rounded-lg text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors">
+          <button
+            onClick={onClose}
+            className="flex-1 py-2.5 rounded-lg text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors"
+          >
             Cancelar
           </button>
           <button
@@ -153,7 +232,11 @@ function UserFormModal({ isOpen, onClose, onSuccess }) {
             disabled={loading}
             className="flex-1 py-2.5 rounded-lg text-sm font-medium text-white bg-green-600 hover:bg-green-500 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
           >
-            {loading ? <Loader className="w-4 h-4 animate-spin" /> : <UserPlus className="w-4 h-4" />}
+            {loading ? (
+              <Loader className="w-4 h-4 animate-spin" />
+            ) : (
+              <UserPlus className="w-4 h-4" />
+            )}
             {loading ? 'Creando...' : 'Crear usuario'}
           </button>
         </div>
@@ -189,7 +272,14 @@ function EditUserModal({ isOpen, onClose, user, onSuccess }) {
     setLoading(true);
     setError('');
     try {
-      await updateUser(user.id, { role, isActive, emailVerified, twoFactorEnabled, firstName, lastName });
+      await updateUser(user.id, {
+        role,
+        isActive,
+        emailVerified,
+        twoFactorEnabled,
+        firstName,
+        lastName,
+      });
       sonnerToast.success('Usuario actualizado');
       onSuccess();
       onClose();
@@ -201,14 +291,23 @@ function EditUserModal({ isOpen, onClose, user, onSuccess }) {
   };
 
   return (
-    <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/50" onClick={onClose}>
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6" onClick={e => e.stopPropagation()}>
+    <div
+      className="fixed inset-0 z-[300] flex items-center justify-center bg-black/50"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="flex items-center justify-between mb-6">
           <div>
             <h3 className="text-lg font-bold text-gray-900">Editar usuario</h3>
             <p className="text-sm text-gray-500">{user.email}</p>
           </div>
-          <button onClick={onClose} className="p-1.5 hover:bg-gray-100 rounded-lg">
+          <button
+            onClick={onClose}
+            className="p-1.5 hover:bg-gray-100 rounded-lg"
+          >
             <X className="w-5 h-5 text-gray-400" />
           </button>
         </div>
@@ -216,27 +315,38 @@ function EditUserModal({ isOpen, onClose, user, onSuccess }) {
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">Nombre</label>
+              <label className="block text-xs font-medium text-gray-500 mb-1">
+                Nombre
+              </label>
               <input
-                type="text" value={firstName}
-                onChange={e => setFirstName(e.target.value)}
+                type="text"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
                 className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500/50"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">Apellido</label>
+              <label className="block text-xs font-medium text-gray-500 mb-1">
+                Apellido
+              </label>
               <input
-                type="text" value={lastName}
-                onChange={e => setLastName(e.target.value)}
+                type="text"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
                 className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500/50"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">Rol</label>
-            <select value={role} onChange={e => setRole(e.target.value)}
-              className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500/50">
+            <label className="block text-xs font-medium text-gray-500 mb-1">
+              Rol
+            </label>
+            <select
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+              className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500/50"
+            >
               <option value="cliente">Cliente</option>
               <option value="operator">Operador</option>
               <option value="analyst">Analista</option>
@@ -246,38 +356,54 @@ function EditUserModal({ isOpen, onClose, user, onSuccess }) {
 
           <div className="space-y-3">
             <label className="flex items-center justify-between p-3 bg-gray-50 rounded-lg cursor-pointer">
-              <span className="text-sm font-medium text-gray-700">Cuenta activa</span>
+              <span className="text-sm font-medium text-gray-700">
+                Cuenta activa
+              </span>
               <button
                 onClick={() => setIsActive(!isActive)}
                 className={`w-11 h-6 rounded-full transition-colors relative ${isActive ? 'bg-green-500' : 'bg-gray-300'}`}
               >
-                <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${isActive ? 'translate-x-5.5 left-0.5' : 'left-0.5'}`} />
+                <span
+                  className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${isActive ? 'translate-x-5 left-0.5' : 'left-0.5'}`}
+                />
               </button>
             </label>
 
             <label className="flex items-center justify-between p-3 bg-gray-50 rounded-lg cursor-pointer">
               <div>
-                <span className="text-sm font-medium text-gray-700">Correo verificado</span>
-                <p className="text-xs text-gray-400">El usuario confirmo su correo</p>
+                <span className="text-sm font-medium text-gray-700">
+                  Correo verificado
+                </span>
+                <p className="text-xs text-gray-400">
+                  El usuario confirmo su correo
+                </p>
               </div>
               <button
                 onClick={() => setEmailVerified(!emailVerified)}
                 className={`w-11 h-6 rounded-full transition-colors relative ${emailVerified ? 'bg-green-500' : 'bg-gray-300'}`}
               >
-                <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${emailVerified ? 'translate-x-5.5 left-0.5' : 'left-0.5'}`} />
+                <span
+                  className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${emailVerified ? 'translate-x-5 left-0.5' : 'left-0.5'}`}
+                />
               </button>
             </label>
 
             <label className="flex items-center justify-between p-3 bg-gray-50 rounded-lg cursor-pointer">
               <div>
-                <span className="text-sm font-medium text-gray-700">2FA activado</span>
-                <p className="text-xs text-gray-400">Autenticacion en dos pasos</p>
+                <span className="text-sm font-medium text-gray-700">
+                  2FA activado
+                </span>
+                <p className="text-xs text-gray-400">
+                  Autenticacion en dos pasos
+                </p>
               </div>
               <button
                 onClick={() => setTwoFactorEnabled(!twoFactorEnabled)}
                 className={`w-11 h-6 rounded-full transition-colors relative ${twoFactorEnabled ? 'bg-green-500' : 'bg-gray-300'}`}
               >
-                <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${twoFactorEnabled ? 'translate-x-5.5 left-0.5' : 'left-0.5'}`} />
+                <span
+                  className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${twoFactorEnabled ? 'translate-x-5 left-0.5' : 'left-0.5'}`}
+                />
               </button>
             </label>
           </div>
@@ -291,7 +417,10 @@ function EditUserModal({ isOpen, onClose, user, onSuccess }) {
         </div>
 
         <div className="mt-6 flex gap-3">
-          <button onClick={onClose} className="flex-1 py-2.5 rounded-lg text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200">
+          <button
+            onClick={onClose}
+            className="flex-1 py-2.5 rounded-lg text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200"
+          >
             Cancelar
           </button>
           <button
@@ -319,13 +448,20 @@ function ResetPasswordModal({ isOpen, onClose, user }) {
   if (!isOpen || !user) return null;
 
   const handleReset = async () => {
-    if (newPassword.length < 8) return setError('La contrasena debe tener al menos 8 caracteres');
-    if (newPassword !== confirmPassword) return setError('Las contrasenas no coinciden');
-    if (requires2FA && twoFactorCode.length !== 6) return setError('Ingresa el codigo 2FA de 6 digitos');
+    if (newPassword.length < 8)
+      return setError('La contrasena debe tener al menos 8 caracteres');
+    if (newPassword !== confirmPassword)
+      return setError('Las contrasenas no coinciden');
+    if (requires2FA && twoFactorCode.length !== 6)
+      return setError('Ingresa el codigo 2FA de 6 digitos');
     setLoading(true);
     setError('');
     try {
-      await resetUserPassword(user.id, newPassword, requires2FA ? twoFactorCode : undefined);
+      await resetUserPassword(
+        user.id,
+        newPassword,
+        requires2FA ? twoFactorCode : undefined
+      );
       sonnerToast.success('Contrasena restablecida');
       onClose();
     } catch (e) {
@@ -340,33 +476,52 @@ function ResetPasswordModal({ isOpen, onClose, user }) {
   };
 
   return (
-    <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/50" onClick={onClose}>
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6" onClick={e => e.stopPropagation()}>
+    <div
+      className="fixed inset-0 z-[300] flex items-center justify-center bg-black/50"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h3 className="text-lg font-bold text-gray-900">Restablecer contrasena</h3>
-            <p className="text-sm text-gray-500">{user.username} — {user.email}</p>
+            <h3 className="text-lg font-bold text-gray-900">
+              Restablecer contrasena
+            </h3>
+            <p className="text-sm text-gray-500">
+              {user.username} — {user.email}
+            </p>
           </div>
-          <button onClick={onClose} className="p-1.5 hover:bg-gray-100 rounded-lg">
+          <button
+            onClick={onClose}
+            className="p-1.5 hover:bg-gray-100 rounded-lg"
+          >
             <X className="w-5 h-5 text-gray-400" />
           </button>
         </div>
 
         <div className="space-y-4">
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">Nueva contrasena</label>
+            <label className="block text-xs font-medium text-gray-500 mb-1">
+              Nueva contrasena
+            </label>
             <input
-              type="password" value={newPassword}
-              onChange={e => setNewPassword(e.target.value)}
+              type="password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
               className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500/50"
               placeholder="Min. 8 caracteres"
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">Confirmar contrasena</label>
+            <label className="block text-xs font-medium text-gray-500 mb-1">
+              Confirmar contrasena
+            </label>
             <input
-              type="password" value={confirmPassword}
-              onChange={e => setConfirmPassword(e.target.value)}
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
               className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500/50"
               placeholder="Repite la contrasena"
             />
@@ -379,8 +534,13 @@ function ResetPasswordModal({ isOpen, onClose, user }) {
                 Codigo 2FA (enviado a tu correo)
               </label>
               <input
-                type="text" value={twoFactorCode}
-                onChange={e => setTwoFactorCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                type="text"
+                value={twoFactorCode}
+                onChange={(e) =>
+                  setTwoFactorCode(
+                    e.target.value.replace(/\D/g, '').slice(0, 6)
+                  )
+                }
                 className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500/50 tracking-[0.5em] text-center font-mono text-lg"
                 placeholder="000000"
                 maxLength={6}
@@ -400,7 +560,10 @@ function ResetPasswordModal({ isOpen, onClose, user }) {
         </div>
 
         <div className="mt-6 flex gap-3">
-          <button onClick={onClose} className="flex-1 py-2.5 rounded-lg text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200">
+          <button
+            onClick={onClose}
+            className="flex-1 py-2.5 rounded-lg text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200"
+          >
             Cancelar
           </button>
           <button
@@ -408,7 +571,11 @@ function ResetPasswordModal({ isOpen, onClose, user }) {
             disabled={loading}
             className="flex-1 py-2.5 rounded-lg text-sm font-medium text-white bg-amber-600 hover:bg-amber-500 disabled:opacity-50 flex items-center justify-center gap-2"
           >
-            {loading ? <Loader className="w-4 h-4 animate-spin" /> : <Key className="w-4 h-4" />}
+            {loading ? (
+              <Loader className="w-4 h-4 animate-spin" />
+            ) : (
+              <Key className="w-4 h-4" />
+            )}
             {loading ? 'Restableciendo...' : 'Restablecer'}
           </button>
         </div>
@@ -439,22 +606,36 @@ function ConfirmDeleteModal({ isOpen, onClose, user, onSuccess }) {
   };
 
   return (
-    <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/50" onClick={onClose}>
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6" onClick={e => e.stopPropagation()}>
+    <div
+      className="fixed inset-0 z-[300] flex items-center justify-center bg-black/50"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="flex justify-center mb-4">
           <div className="w-14 h-14 rounded-full bg-red-100 flex items-center justify-center">
             <AlertTriangle className="w-7 h-7 text-red-600" />
           </div>
         </div>
-        <h3 className="text-lg font-bold text-gray-900 text-center mb-2">Eliminar usuario</h3>
+        <h3 className="text-lg font-bold text-gray-900 text-center mb-2">
+          Eliminar usuario
+        </h3>
         <p className="text-sm text-gray-500 text-center mb-6">
-          Esta accion no se puede deshacer. Se eliminara a <strong>{user.username}</strong> ({user.email}).
+          Esta accion no se puede deshacer. Se eliminara a{' '}
+          <strong>{user.username}</strong> ({user.email}).
         </p>
         {error && (
-          <div className="mb-4 text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg p-3">{error}</div>
+          <div className="mb-4 text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg p-3">
+            {error}
+          </div>
         )}
         <div className="flex gap-3">
-          <button onClick={onClose} className="flex-1 py-2.5 rounded-lg text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200">
+          <button
+            onClick={onClose}
+            className="flex-1 py-2.5 rounded-lg text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200"
+          >
             Cancelar
           </button>
           <button
@@ -462,7 +643,11 @@ function ConfirmDeleteModal({ isOpen, onClose, user, onSuccess }) {
             disabled={loading}
             className="flex-1 py-2.5 rounded-lg text-sm font-medium text-white bg-red-600 hover:bg-red-500 disabled:opacity-50 flex items-center justify-center gap-2"
           >
-            {loading ? <Loader className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+            {loading ? (
+              <Loader className="w-4 h-4 animate-spin" />
+            ) : (
+              <Trash2 className="w-4 h-4" />
+            )}
             {loading ? 'Eliminando...' : 'Eliminar'}
           </button>
         </div>
@@ -480,9 +665,15 @@ export default function PantallaUsuarios({ userRole = 'admin' }) {
   const [resetPwdUser, setResetPwdUser] = useState(null);
   const [deleteUserState, setDeleteUserState] = useState(null);
 
-  const { data: users = [], isLoading, error, refetch } = useQuery({
+  const {
+    data: users = [],
+    isLoading,
+    error,
+    refetch,
+  } = useQuery({
     queryKey: ['users', search, roleFilter],
-    queryFn: () => fetchUsers({ search, role: roleFilter || undefined, sort: 'created' }),
+    queryFn: () =>
+      fetchUsers({ search, role: roleFilter || undefined, sort: 'created' }),
     staleTime: 10000,
   });
 
@@ -500,7 +691,10 @@ export default function PantallaUsuarios({ userRole = 'admin' }) {
 
   const formatDate = (iso) => {
     if (!iso) return '—';
-    return new Date(iso).toLocaleString('es-CO', { dateStyle: 'short', timeStyle: 'short' });
+    return new Date(iso).toLocaleString('es-CO', {
+      dateStyle: 'short',
+      timeStyle: 'short',
+    });
   };
 
   return (
@@ -510,7 +704,9 @@ export default function PantallaUsuarios({ userRole = 'admin' }) {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Usuarios</h1>
           <p className="text-sm text-gray-500">
-            {stats ? `${stats.total} usuarios (${stats.activos} activos)` : 'Gestion de cuentas'}
+            {stats
+              ? `${stats.total} usuarios (${stats.activos} activos)`
+              : 'Gestion de cuentas'}
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -535,9 +731,16 @@ export default function PantallaUsuarios({ userRole = 'admin' }) {
       {stats && (
         <div className="grid grid-cols-4 gap-4 mb-6">
           {Object.entries(ROLE_CONFIG).map(([key, cfg]) => (
-            <div key={key} className={`rounded-xl border ${cfg.border} ${cfg.bg} p-4`}>
-              <p className={`text-2xl font-bold ${cfg.color}`}>{stats.porRol[key] || 0}</p>
-              <p className={`text-xs font-medium ${cfg.color} opacity-70`}>{cfg.label}</p>
+            <div
+              key={key}
+              className={`rounded-xl border ${cfg.border} ${cfg.bg} p-4`}
+            >
+              <p className={`text-2xl font-bold ${cfg.color}`}>
+                {stats.porRol[key] || 0}
+              </p>
+              <p className={`text-xs font-medium ${cfg.color} opacity-70`}>
+                {cfg.label}
+              </p>
             </div>
           ))}
         </div>
@@ -550,14 +753,14 @@ export default function PantallaUsuarios({ userRole = 'admin' }) {
           <input
             type="text"
             value={search}
-            onChange={e => setSearch(e.target.value)}
+            onChange={(e) => setSearch(e.target.value)}
             placeholder="Buscar por nombre, usuario o correo..."
             className="w-full pl-9 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-500"
           />
         </div>
         <select
           value={roleFilter}
-          onChange={e => setRoleFilter(e.target.value)}
+          onChange={(e) => setRoleFilter(e.target.value)}
           className="px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500/50"
         >
           <option value="">Todos los roles</option>
@@ -575,21 +778,41 @@ export default function PantallaUsuarios({ userRole = 'admin' }) {
             <table className="w-full text-sm">
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-200">
-                  <th className="text-left px-4 py-3 font-semibold text-gray-600">Usuario</th>
-                  <th className="text-left px-4 py-3 font-semibold text-gray-600">Email</th>
-                  <th className="text-center px-4 py-3 font-semibold text-gray-600">Rol</th>
-                  <th className="text-center px-4 py-3 font-semibold text-gray-600">Estado</th>
-                  <th className="text-right px-4 py-3 font-semibold text-gray-600">Acciones</th>
+                  <th className="text-left px-4 py-3 font-semibold text-gray-600">
+                    Usuario
+                  </th>
+                  <th className="text-left px-4 py-3 font-semibold text-gray-600">
+                    Email
+                  </th>
+                  <th className="text-center px-4 py-3 font-semibold text-gray-600">
+                    Rol
+                  </th>
+                  <th className="text-center px-4 py-3 font-semibold text-gray-600">
+                    Estado
+                  </th>
+                  <th className="text-right px-4 py-3 font-semibold text-gray-600">
+                    Acciones
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {[1,2,3,4].map(i => (
+                {[1, 2, 3, 4].map((i) => (
                   <tr key={i}>
-                    <td className="px-4 py-3"><div className="h-4 w-36 animate-pulse bg-gray-200 rounded" /></td>
-                    <td className="px-4 py-3"><div className="h-4 w-52 animate-pulse bg-gray-200 rounded" /></td>
-                    <td className="px-4 py-3"><div className="h-4 w-20 animate-pulse bg-gray-200 rounded mx-auto" /></td>
-                    <td className="px-4 py-3"><div className="h-4 w-16 animate-pulse bg-gray-200 rounded mx-auto" /></td>
-                    <td className="px-4 py-3"><div className="h-4 w-24 animate-pulse bg-gray-200 rounded ml-auto" /></td>
+                    <td className="px-4 py-3">
+                      <div className="h-4 w-36 animate-pulse bg-gray-200 rounded" />
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="h-4 w-52 animate-pulse bg-gray-200 rounded" />
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="h-4 w-20 animate-pulse bg-gray-200 rounded mx-auto" />
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="h-4 w-16 animate-pulse bg-gray-200 rounded mx-auto" />
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="h-4 w-24 animate-pulse bg-gray-200 rounded ml-auto" />
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -597,7 +820,9 @@ export default function PantallaUsuarios({ userRole = 'admin' }) {
           </div>
         </div>
       ) : error ? (
-        <div className="text-center py-16 text-red-500">Error al cargar usuarios</div>
+        <div className="text-center py-16 text-red-500">
+          Error al cargar usuarios
+        </div>
       ) : users.length === 0 ? (
         <div className="text-center py-16">
           <Users className="w-12 h-12 text-gray-300 mx-auto mb-3" />
@@ -609,18 +834,34 @@ export default function PantallaUsuarios({ userRole = 'admin' }) {
             <table className="w-full text-sm">
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-200">
-                  <th className="text-left px-4 py-3 font-semibold text-gray-600">Usuario</th>
-                  <th className="text-left px-4 py-3 font-semibold text-gray-600">Correo</th>
-                  <th className="text-left px-4 py-3 font-semibold text-gray-600">Rol</th>
-                  <th className="text-center px-4 py-3 font-semibold text-gray-600">Estado</th>
-                  <th className="text-center px-4 py-3 font-semibold text-gray-600">2FA</th>
-                  <th className="text-left px-4 py-3 font-semibold text-gray-600">Ultimo acceso</th>
-                  <th className="text-left px-4 py-3 font-semibold text-gray-600">Creado</th>
-                  <th className="text-center px-4 py-3 font-semibold text-gray-600">Acciones</th>
+                  <th className="text-left px-4 py-3 font-semibold text-gray-600">
+                    Usuario
+                  </th>
+                  <th className="text-left px-4 py-3 font-semibold text-gray-600">
+                    Correo
+                  </th>
+                  <th className="text-left px-4 py-3 font-semibold text-gray-600">
+                    Rol
+                  </th>
+                  <th className="text-center px-4 py-3 font-semibold text-gray-600">
+                    Estado
+                  </th>
+                  <th className="text-center px-4 py-3 font-semibold text-gray-600">
+                    2FA
+                  </th>
+                  <th className="text-left px-4 py-3 font-semibold text-gray-600">
+                    Ultimo acceso
+                  </th>
+                  <th className="text-left px-4 py-3 font-semibold text-gray-600">
+                    Creado
+                  </th>
+                  <th className="text-center px-4 py-3 font-semibold text-gray-600">
+                    Acciones
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {users.map(u => (
+                {users.map((u) => (
                   <tr key={u.id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2.5">
@@ -629,14 +870,18 @@ export default function PantallaUsuarios({ userRole = 'admin' }) {
                         </div>
                         <div>
                           <p className="font-medium text-gray-900">
-                            {u.firstName || u.lastName ? `${u.firstName || ''} ${u.lastName || ''}`.trim() : u.username}
+                            {u.firstName || u.lastName
+                              ? `${u.firstName || ''} ${u.lastName || ''}`.trim()
+                              : u.username}
                           </p>
                           <p className="text-xs text-gray-400">@{u.username}</p>
                         </div>
                       </div>
                     </td>
                     <td className="px-4 py-3 text-gray-500">{u.email}</td>
-                    <td className="px-4 py-3"><RoleBadge role={u.role} /></td>
+                    <td className="px-4 py-3">
+                      <RoleBadge role={u.role} />
+                    </td>
                     <td className="px-4 py-3 text-center">
                       {u.isActive ? (
                         <span className="inline-flex items-center gap-1 text-xs text-green-700 bg-green-50 px-2 py-0.5 rounded-full">
@@ -655,8 +900,12 @@ export default function PantallaUsuarios({ userRole = 'admin' }) {
                         <ShieldOff className="w-4 h-4 text-gray-300 mx-auto" />
                       )}
                     </td>
-                    <td className="px-4 py-3 text-xs text-gray-400">{formatDate(u.lastLogin)}</td>
-                    <td className="px-4 py-3 text-xs text-gray-400">{formatDate(u.createdAt)}</td>
+                    <td className="px-4 py-3 text-xs text-gray-400">
+                      {formatDate(u.lastLogin)}
+                    </td>
+                    <td className="px-4 py-3 text-xs text-gray-400">
+                      {formatDate(u.createdAt)}
+                    </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-center gap-1">
                         <button
@@ -664,8 +913,18 @@ export default function PantallaUsuarios({ userRole = 'admin' }) {
                           className="p-1.5 hover:bg-blue-50 rounded-lg text-blue-600"
                           title="Editar"
                         >
-                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                            />
                           </svg>
                         </button>
                         <button
@@ -675,7 +934,8 @@ export default function PantallaUsuarios({ userRole = 'admin' }) {
                         >
                           <Key className="w-4 h-4" />
                         </button>
-                        {(u.role !== 'admin' && u.role !== 'owner') || userRole === 'owner' ? (
+                        {(u.role !== 'admin' && u.role !== 'owner') ||
+                        userRole === 'owner' ? (
                           <button
                             onClick={() => setDeleteUserState(u)}
                             className="p-1.5 hover:bg-red-50 rounded-lg text-red-500"
@@ -698,13 +958,18 @@ export default function PantallaUsuarios({ userRole = 'admin' }) {
       <UserFormModal
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
-        onSuccess={() => { refetch(); queryClient.invalidateQueries({ queryKey: ['user-stats'] }); }}
+        onSuccess={() => {
+          refetch();
+          queryClient.invalidateQueries({ queryKey: ['user-stats'] });
+        }}
       />
       <EditUserModal
         isOpen={!!editUser}
         onClose={() => setEditUser(null)}
         user={editUser}
-        onSuccess={() => { refetch(); }}
+        onSuccess={() => {
+          refetch();
+        }}
       />
       <ResetPasswordModal
         isOpen={!!resetPwdUser}
@@ -715,7 +980,10 @@ export default function PantallaUsuarios({ userRole = 'admin' }) {
         isOpen={!!deleteUserState}
         onClose={() => setDeleteUserState(null)}
         user={deleteUserState}
-        onSuccess={() => { refetch(); queryClient.invalidateQueries({ queryKey: ['user-stats'] }); }}
+        onSuccess={() => {
+          refetch();
+          queryClient.invalidateQueries({ queryKey: ['user-stats'] });
+        }}
       />
     </div>
   );

@@ -1,15 +1,28 @@
-import { useState } from 'react';
-import { useNavigate, useLocation, useParams } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import {
-  Mail, Lock, Eye, EyeOff, LogIn, UserPlus,
-  ArrowLeft, Loader, CheckCircle, AlertCircle,
+  AlertCircle,
+  ArrowLeft,
+  CheckCircle,
+  Eye,
+  EyeOff,
+  Loader,
+  Lock,
+  LogIn,
+  Mail,
+  UserPlus,
 } from 'lucide-react';
-import { loginAdmin, setUserInfo, registerUser, normalizeErrorMessage as safeErrorMessage } from '../services/api';
-import ReCaptchaWidget from './ReCaptchaWidget';
-import HotelTitle from './HotelTitle';
-import TwoFactorScreen from './TwoFactorScreen';
+import { useState } from 'react';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import {
+  loginAdmin,
+  registerUser,
+  normalizeErrorMessage as safeErrorMessage,
+  setUserInfo,
+} from '../services/api';
 import ForgotPasswordScreen from './ForgotPasswordScreen';
+import HotelTitle from './HotelTitle';
+import ReCaptchaWidget from './ReCaptchaWidget';
+import TwoFactorScreen from './TwoFactorScreen';
 
 // ── Animated Background ──
 
@@ -100,7 +113,9 @@ function AnimatedInput({
       )}
       <div className="relative group">
         {Icon && (
-          <Icon className={`absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors duration-300 ${focused ? 'text-emerald-400' : 'text-white/30'}`} />
+          <Icon
+            className={`absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors duration-300 ${focused ? 'text-emerald-400' : 'text-white/30'}`}
+          />
         )}
         <input
           type={type}
@@ -117,7 +132,9 @@ function AnimatedInput({
             ${focused ? 'border-emerald-500/60 shadow-[0_0_20px_-5px_rgba(52,211,153,0.3)]' : 'border-white/10 hover:border-white/20'}
           `}
         />
-        <div className={`absolute bottom-0 left-4 right-4 h-px bg-gradient-to-r from-transparent via-emerald-400/50 to-transparent scale-x-0 transition-transform duration-500 ${focused ? 'scale-x-100' : ''}`} />
+        <div
+          className={`absolute bottom-0 left-4 right-4 h-px bg-gradient-to-r from-transparent via-emerald-400/50 to-transparent scale-x-0 transition-transform duration-500 ${focused ? 'scale-x-100' : ''}`}
+        />
         {rightElement}
       </div>
     </div>
@@ -131,14 +148,19 @@ function AnimatedButton({ onClick, disabled, loading, icon: Icon, children }) {
     <motion.button
       onClick={onClick}
       disabled={disabled}
-      whileHover={!disabled ? { scale: 1.02, boxShadow: '0 0 30px -5px rgba(52,211,153,0.4)' } : {}}
+      whileHover={
+        !disabled
+          ? { scale: 1.02, boxShadow: '0 0 30px -5px rgba(52,211,153,0.4)' }
+          : {}
+      }
       whileTap={!disabled ? { scale: 0.98 } : {}}
       className={`
         relative w-full py-3 rounded-xl font-semibold flex items-center justify-center gap-2
         transition-all duration-300 overflow-hidden group
-        ${disabled
-          ? 'bg-emerald-700/50 text-white/40 cursor-not-allowed'
-          : 'bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white shadow-lg shadow-emerald-900/30'
+        ${
+          disabled
+            ? 'bg-emerald-700/50 text-white/40 cursor-not-allowed'
+            : 'bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white shadow-lg shadow-emerald-900/30'
         }
       `}
     >
@@ -201,7 +223,11 @@ const containerVariants = {
 
 const itemVariants = {
   hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] } },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] },
+  },
 };
 
 // ── Login Routes ──
@@ -243,7 +269,9 @@ function RoleCards({ onSelectAdmin, onSelectUser }) {
               className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] p-5 text-left transition-all duration-300 hover:border-emerald-500/30 hover:bg-white/[0.06] hover:shadow-lg hover:shadow-emerald-900/10"
             >
               <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 group-hover:bg-emerald-400/10 transition-all duration-500" />
-              <span className="relative block text-lg sm:text-xl font-extrabold text-white mb-1">Admin</span>
+              <span className="relative block text-lg sm:text-xl font-extrabold text-white mb-1">
+                Admin
+              </span>
               <span className="relative block text-sm text-white/40 group-hover:text-white/60 transition-colors">
                 Gestion hotelera — Habitaciones, tarifas y reportes
               </span>
@@ -256,7 +284,9 @@ function RoleCards({ onSelectAdmin, onSelectUser }) {
               className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] p-5 text-left transition-all duration-300 hover:border-emerald-500/30 hover:bg-white/[0.06] hover:shadow-lg hover:shadow-emerald-900/10"
             >
               <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 group-hover:bg-emerald-400/10 transition-all duration-500" />
-              <span className="relative block text-lg sm:text-xl font-extrabold text-white mb-1">Recepcion</span>
+              <span className="relative block text-lg sm:text-xl font-extrabold text-white mb-1">
+                Recepcion
+              </span>
               <span className="relative block text-sm text-white/40 group-hover:text-white/60 transition-colors">
                 Registro de huespedes — Transacciones y check-out
               </span>
@@ -295,11 +325,11 @@ function AdminLogin({ onBack, onRole }) {
   const [registered, setRegistered] = useState(false);
   const [registeredEmail, setRegisteredEmail] = useState('');
 
-
   const handleLogin = async () => {
     if (!identifier.trim()) return setError('Ingresa tu usuario o correo');
     if (!password.trim()) return setError('Ingresa tu contrasena');
-    if (!recaptchaToken && !captchaError) return setError('Completa la verificacion de seguridad');
+    if (!recaptchaToken && !captchaError)
+      return setError('Completa la verificacion de seguridad');
     setLoading(true);
     setError('');
     try {
@@ -329,8 +359,10 @@ function AdminLogin({ onBack, onRole }) {
     if (!username.trim()) return setError('Ingresa un nombre de usuario');
     if (!email.trim()) return setError('Ingresa tu correo');
     if (!password.trim()) return setError('Ingresa una contrasena');
-    if (password.length < 8) return setError('La contrasena debe tener al menos 8 caracteres');
-    if (password !== confirmPassword) return setError('Las contrasenas no coinciden');
+    if (password.length < 8)
+      return setError('La contrasena debe tener al menos 8 caracteres');
+    if (password !== confirmPassword)
+      return setError('Las contrasenas no coinciden');
 
     setLoading(true);
     setError('');
@@ -344,8 +376,6 @@ function AdminLogin({ onBack, onRole }) {
       setLoading(false);
     }
   };
-
-
 
   const switchMode = () => {
     setError('');
@@ -371,12 +401,21 @@ function AdminLogin({ onBack, onRole }) {
             >
               <CheckCircle className="w-8 h-8 text-emerald-400" />
             </motion.div>
-            <h2 className="text-xl font-bold text-white mb-2">Registro exitoso</h2>
+            <h2 className="text-xl font-bold text-white mb-2">
+              Registro exitoso
+            </h2>
             <p className="text-white/50 mb-6">
-              Se ha enviado un codigo de verificacion a <strong className="text-white/70">{registeredEmail}</strong>.
+              Se ha enviado un codigo de verificacion a{' '}
+              <strong className="text-white/70">{registeredEmail}</strong>.
               Revisa tu bandeja de entrada para verificar tu correo.
             </p>
-            <AnimatedButton onClick={() => { setRegistered(false); setIdentifier(email); setMode('login'); }}>
+            <AnimatedButton
+              onClick={() => {
+                setRegistered(false);
+                setIdentifier(email);
+                setMode('login');
+              }}
+            >
               Ir a iniciar sesion
             </AnimatedButton>
           </GlassCard>
@@ -408,7 +447,10 @@ function AdminLogin({ onBack, onRole }) {
                 animate="visible"
                 exit={{ opacity: 0, y: -20, transition: { duration: 0.2 } }}
               >
-                <motion.p variants={itemVariants} className="text-xs font-semibold uppercase tracking-[0.15em] text-white/40 mb-6 text-center">
+                <motion.p
+                  variants={itemVariants}
+                  className="text-xs font-semibold uppercase tracking-[0.15em] text-white/40 mb-6 text-center"
+                >
                   Inicio de sesion
                 </motion.p>
 
@@ -416,8 +458,11 @@ function AdminLogin({ onBack, onRole }) {
                   <AnimatedInput
                     icon={Mail}
                     value={identifier}
-                    onChange={e => { setIdentifier(e.target.value); setError(''); }}
-                    onKeyDown={e => e.key === 'Enter' && handleLogin()}
+                    onChange={(e) => {
+                      setIdentifier(e.target.value);
+                      setError('');
+                    }}
+                    onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
                     placeholder="admin@ecobosque.com"
                     label="Usuario o correo"
                   />
@@ -425,8 +470,11 @@ function AdminLogin({ onBack, onRole }) {
                     icon={Lock}
                     type={showPassword ? 'text' : 'password'}
                     value={password}
-                    onChange={e => { setPassword(e.target.value); setError(''); }}
-                    onKeyDown={e => e.key === 'Enter' && handleLogin()}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      setError('');
+                    }}
+                    onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
                     placeholder="••••••••"
                     label="Contrasena"
                     rightElement={
@@ -435,16 +483,29 @@ function AdminLogin({ onBack, onRole }) {
                         onClick={() => setShowPassword(!showPassword)}
                         className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors"
                       >
-                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        {showPassword ? (
+                          <EyeOff className="w-4 h-4" />
+                        ) : (
+                          <Eye className="w-4 h-4" />
+                        )}
                       </button>
                     }
                   />
                 </motion.div>
 
-                <motion.div variants={itemVariants} className="flex justify-center my-4">
+                <motion.div
+                  variants={itemVariants}
+                  className="flex justify-center my-4"
+                >
                   <ReCaptchaWidget
-                    onVerify={(token) => { setRecaptchaToken(token); setError(''); }}
-                    onExpire={() => { setRecaptchaToken(null); setError('Verificacion expirada, intenta de nuevo'); }}
+                    onVerify={(token) => {
+                      setRecaptchaToken(token);
+                      setError('');
+                    }}
+                    onExpire={() => {
+                      setRecaptchaToken(null);
+                      setError('Verificacion expirada, intenta de nuevo');
+                    }}
                   />
                 </motion.div>
 
@@ -461,16 +522,30 @@ function AdminLogin({ onBack, onRole }) {
                 </AnimatePresence>
 
                 <motion.div variants={itemVariants} className="mt-6">
-                  <AnimatedButton onClick={handleLogin} disabled={loading || (!recaptchaToken && !captchaError)} loading={loading} icon={LogIn}>
+                  <AnimatedButton
+                    onClick={handleLogin}
+                    disabled={loading || (!recaptchaToken && !captchaError)}
+                    loading={loading}
+                    icon={LogIn}
+                  >
                     {loading ? 'Autenticando...' : 'Iniciar sesion'}
                   </AnimatedButton>
                 </motion.div>
 
-                <motion.div variants={itemVariants} className="mt-4 flex flex-col items-center gap-3">
-                  <AnimatedLink onClick={() => navigate('/forgot', { replace: true })}>
+                <motion.div
+                  variants={itemVariants}
+                  className="mt-4 flex flex-col items-center gap-3"
+                >
+                  <AnimatedLink
+                    onClick={() => navigate('/forgot', { replace: true })}
+                  >
                     Olvide mi contrasena
                   </AnimatedLink>
-                  <AnimatedLink onClick={switchMode} icon={UserPlus} color="emerald-400">
+                  <AnimatedLink
+                    onClick={switchMode}
+                    icon={UserPlus}
+                    color="emerald-400"
+                  >
                     Crear nueva cuenta
                   </AnimatedLink>
                 </motion.div>
@@ -483,7 +558,10 @@ function AdminLogin({ onBack, onRole }) {
                 animate="visible"
                 exit={{ opacity: 0, y: -20, transition: { duration: 0.2 } }}
               >
-                <motion.p variants={itemVariants} className="text-xs font-semibold uppercase tracking-[0.15em] text-white/40 mb-6 text-center">
+                <motion.p
+                  variants={itemVariants}
+                  className="text-xs font-semibold uppercase tracking-[0.15em] text-white/40 mb-6 text-center"
+                >
                   Crear cuenta nueva
                 </motion.p>
 
@@ -491,13 +569,13 @@ function AdminLogin({ onBack, onRole }) {
                   <div className="grid grid-cols-2 gap-3">
                     <AnimatedInput
                       value={firstName}
-                      onChange={e => setFirstName(e.target.value)}
+                      onChange={(e) => setFirstName(e.target.value)}
                       placeholder="Juan"
                       label="Nombre"
                     />
                     <AnimatedInput
                       value={lastName}
-                      onChange={e => setLastName(e.target.value)}
+                      onChange={(e) => setLastName(e.target.value)}
                       placeholder="Perez"
                       label="Apellido"
                     />
@@ -505,7 +583,10 @@ function AdminLogin({ onBack, onRole }) {
                   <AnimatedInput
                     icon={Mail}
                     value={username}
-                    onChange={e => { setUsername(e.target.value); setError(''); }}
+                    onChange={(e) => {
+                      setUsername(e.target.value);
+                      setError('');
+                    }}
                     placeholder="juanperez"
                     label="Nombre de usuario"
                   />
@@ -513,7 +594,10 @@ function AdminLogin({ onBack, onRole }) {
                     icon={Mail}
                     type="email"
                     value={email}
-                    onChange={e => { setEmail(e.target.value); setError(''); }}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      setError('');
+                    }}
                     placeholder="juan@ejemplo.com"
                     label="Correo electronico"
                   />
@@ -521,7 +605,10 @@ function AdminLogin({ onBack, onRole }) {
                     icon={Lock}
                     type={showPassword ? 'text' : 'password'}
                     value={password}
-                    onChange={e => { setPassword(e.target.value); setError(''); }}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      setError('');
+                    }}
                     placeholder="Min. 8 caracteres"
                     label="Contrasena"
                     rightElement={
@@ -530,7 +617,11 @@ function AdminLogin({ onBack, onRole }) {
                         onClick={() => setShowPassword(!showPassword)}
                         className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors"
                       >
-                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        {showPassword ? (
+                          <EyeOff className="w-4 h-4" />
+                        ) : (
+                          <Eye className="w-4 h-4" />
+                        )}
                       </button>
                     }
                   />
@@ -538,7 +629,10 @@ function AdminLogin({ onBack, onRole }) {
                     icon={Lock}
                     type={showPassword ? 'text' : 'password'}
                     value={confirmPassword}
-                    onChange={e => { setConfirmPassword(e.target.value); setError(''); }}
+                    onChange={(e) => {
+                      setConfirmPassword(e.target.value);
+                      setError('');
+                    }}
                     placeholder="Repite la contrasena"
                     label="Confirmar contrasena"
                   />
@@ -557,12 +651,20 @@ function AdminLogin({ onBack, onRole }) {
                 </AnimatePresence>
 
                 <motion.div variants={itemVariants} className="mt-6">
-                  <AnimatedButton onClick={handleRegister} disabled={loading} loading={loading} icon={UserPlus}>
+                  <AnimatedButton
+                    onClick={handleRegister}
+                    disabled={loading}
+                    loading={loading}
+                    icon={UserPlus}
+                  >
                     {loading ? 'Creando cuenta...' : 'Crear cuenta'}
                   </AnimatedButton>
                 </motion.div>
 
-                <motion.div variants={itemVariants} className="mt-4 text-center">
+                <motion.div
+                  variants={itemVariants}
+                  className="mt-4 text-center"
+                >
                   <AnimatedLink onClick={switchMode} icon={ArrowLeft}>
                     Ya tengo cuenta
                   </AnimatedLink>
@@ -623,7 +725,11 @@ function TwoFactorRoute({ onRole }) {
 // ── Forgot Password Route ──
 function ForgotRoute() {
   const navigate = useNavigate();
-  return <ForgotPasswordScreen onBack={() => navigate('/login/admin', { replace: true })} />;
+  return (
+    <ForgotPasswordScreen
+      onBack={() => navigate('/login/admin', { replace: true })}
+    />
+  );
 }
 
 // ── Main Login Router ──
@@ -633,7 +739,12 @@ export default function LoginScreen({ onRole }) {
   const path = location.pathname;
 
   if (path === '/login/admin' || path.startsWith('/login/admin/')) {
-    return <AdminLogin onRole={onRole} onBack={() => navigate('/login', { replace: true })} />;
+    return (
+      <AdminLogin
+        onRole={onRole}
+        onBack={() => navigate('/login', { replace: true })}
+      />
+    );
   }
 
   if (path === '/login/forgot' || path === '/forgot') {

@@ -1,5 +1,5 @@
-import { useMemo, useState, useCallback } from 'react';
 import Fuse from 'fuse.js';
+import { useCallback, useMemo, useState } from 'react';
 
 const fuseOptions = {
   keys: ['numero', 'huesped', 'documento', 'tipo', 'estado'],
@@ -19,7 +19,7 @@ export function useSearch(items, options = {}) {
 
   const results = useMemo(() => {
     if (!query.trim()) return items;
-    return fuse.search(query).map(result => result.item);
+    return fuse.search(query).map((result) => result.item);
   }, [query, fuse, items]);
 
   return {
@@ -31,16 +31,25 @@ export function useSearch(items, options = {}) {
 }
 
 export function useFuseSearch(items, options = {}) {
-  const { keys = fuseOptions.keys, threshold = fuseOptions.threshold } = options;
-  
+  const { keys = fuseOptions.keys, threshold = fuseOptions.threshold } =
+    options;
+
   const fuseInstance = useMemo(() => {
-    return new Fuse(items, { keys, threshold, ignoreLocation: true, findAllMatches: true });
+    return new Fuse(items, {
+      keys,
+      threshold,
+      ignoreLocation: true,
+      findAllMatches: true,
+    });
   }, [items, keys, threshold]);
 
-  const search = useCallback((searchTerm) => {
-    if (!searchTerm || !searchTerm.trim()) return items;
-    return fuseInstance.search(searchTerm).map(result => result.item);
-  }, [fuseInstance, items]);
+  const search = useCallback(
+    (searchTerm) => {
+      if (!searchTerm?.trim()) return items;
+      return fuseInstance.search(searchTerm).map((result) => result.item);
+    },
+    [fuseInstance, items]
+  );
 
   return { search, fuse: fuseInstance };
 }

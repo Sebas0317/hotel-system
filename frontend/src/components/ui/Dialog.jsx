@@ -1,5 +1,5 @@
-import { createContext, useContext } from 'react';
 import { AnimatePresence } from 'framer-motion';
+import { createContext, useContext } from 'react';
 
 const DialogContext = createContext({
   open: false,
@@ -16,11 +16,11 @@ export function Dialog({ open, onOpenChange, children }) {
 
 export function DialogTrigger({ children, asChild = false }) {
   const { onOpenChange } = useContext(DialogContext);
-  
+
   if (asChild) {
     return <>{children({ onClick: () => onOpenChange(true) })}</>;
   }
-  
+
   return (
     <span onClick={() => onOpenChange(true)} className="cursor-pointer">
       {children}
@@ -30,7 +30,7 @@ export function DialogTrigger({ children, asChild = false }) {
 
 export function DialogContent({ className = '', children }) {
   const { open, onOpenChange } = useContext(DialogContext);
-  
+
   return (
     <AnimatePresence>
       {open && (
@@ -40,7 +40,7 @@ export function DialogContent({ className = '', children }) {
             className="fixed inset-0 z-50 bg-black/50"
             onClick={() => onOpenChange(false)}
           />
-          
+
           {/* Dialog */}
           <div
             className={`fixed left-[50%] top-[50%] z-50 translate-x-[-50%] translate-y-[-50%] 
@@ -55,8 +55,18 @@ export function DialogContent({ className = '', children }) {
                          transition-opacity focus:outline-none focus:ring-2 focus:ring-accent"
               aria-label="Close"
             >
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <svg
+                className="h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
             {children}
@@ -69,7 +79,10 @@ export function DialogContent({ className = '', children }) {
 
 export function DialogHeader({ className = '', children, ...props }) {
   return (
-    <div className={`flex flex-col space-y-1.5 text-center sm:text-left ${className}`.trim()} {...props}>
+    <div
+      className={`flex flex-col space-y-1.5 text-center sm:text-left ${className}`.trim()}
+      {...props}
+    >
       {children}
     </div>
   );

@@ -1,6 +1,6 @@
 'use strict';
 
-const path = require('path');
+const _path = require('node:path');
 
 /**
  * Blocks access to sensitive file patterns:
@@ -28,7 +28,12 @@ const SENSITIVE_PATTERNS = [
 
 function blockSensitiveFiles(req, res, next) {
   const urlPath = req.path.toLowerCase();
-  const decodedPath = decodeURIComponent(urlPath);
+  let decodedPath;
+  try {
+    decodedPath = decodeURIComponent(urlPath);
+  } catch {
+    return res.status(400).json({ error: 'Invalid URL encoding' });
+  }
 
   for (const pattern of SENSITIVE_PATTERNS) {
     if (pattern.test(decodedPath)) {

@@ -25,7 +25,7 @@
     ],
     "descripcion": "Suite con jacuzzi privado y arquitectura en madera y bambú sostenible",
     "tarifa": 350000,
-    "documento": "4664518728",
+    "documento": null,
     "observaciones": "",
     "adultos": 1,
     "ninos": 0,
@@ -82,7 +82,7 @@
     "ninos": 0,
     "tieneMascota": false,
     "nombreMascota": "",
-    "reservationId": "RES-202604-B8S1"
+    "reservationId": null
   },
   {
     "id": "ss-201",
@@ -172,7 +172,7 @@
       }
     ],
     "checkOutAt": "2026-04-12T02:12:32.835Z",
-    "reservationId": "RES-202606-34WT",
+    "reservationId": null,
     "solicitudCheckout": {
       "fecha": "2026-06-12",
       "hora": "2026-06-12T15:19:31.246Z"
@@ -192,7 +192,7 @@
     "pin": "9294",
     "checkIn": "2026-04-03T00:43:01.620Z",
     "checkOut": "2026-04-04T00:43:01.620Z",
-    "noches": 10,
+    "noches": 1,
     "mascotas": false,
     "amenidades": [
       "ducha_exterior",
@@ -224,13 +224,13 @@
     "capacidad": 2,
     "piso": 3,
     "estado": "disponible",
-    "huesped": "Cameron Marquardt",
-    "telefono": "754.699.0345 x37220",
-    "email": "cameron.marquardt@hotmail.com",
+    "huesped": null,
+    "telefono": null,
+    "email": null,
     "pin": null,
-    "checkIn": "2026-04-04T00:38:17.657Z",
-    "checkOut": "2026-04-09T00:38:17.657Z",
-    "noches": 5,
+    "checkIn": null,
+    "checkOut": null,
+    "noches": null,
     "mascotas": false,
     "amenidades": [
       "ducha_exterior",
@@ -241,10 +241,10 @@
     ],
     "descripcion": "Suite con ducha exterior y acceso a jardín privado",
     "tarifa": 480000,
-    "documento": "7546416970",
-    "observaciones": "",
-    "adultos": 2,
-    "ninos": 1,
+    "documento": null,
+    "observaciones": null,
+    "adultos": null,
+    "ninos": null,
     "tieneMascota": false,
     "nombreMascota": ""
   },
@@ -256,13 +256,13 @@
     "capacidad": 2,
     "piso": 4,
     "estado": "disponible",
-    "huesped": "Hannah Wyman",
-    "telefono": "(430) 773-3867 x749",
-    "email": "hannah.wyman@yahoo.com",
+    "huesped": null,
+    "telefono": null,
+    "email": null,
     "pin": null,
-    "checkIn": "2026-04-07T00:38:17.657Z",
-    "checkOut": "2026-04-10T00:38:17.657Z",
-    "noches": 5,
+    "checkIn": null,
+    "checkOut": null,
+    "noches": null,
     "mascotas": true,
     "amenidades": [
       "wifi",
@@ -360,13 +360,8 @@
     "pin": "2739",
     "checkIn": "2026-04-03T00:43:01.620Z",
     "checkOut": "2026-04-08T00:43:01.620Z",
-    "noches": 10,
+    "noches": 5,
     "mascotas": true,
-    "pago": {
-      "metodo": "efectivo",
-      "total": 360000,
-      "pagado": 360000
-    },
     "amenidades": [
       "wifi",
       "ac",
@@ -464,13 +459,8 @@
     "pin": "6048",
     "checkIn": "2026-04-04T00:43:01.620Z",
     "checkOut": "2026-04-06T00:43:01.620Z",
-    "noches": 9,
+    "noches": 2,
     "mascotas": false,
-    "pago": {
-      "metodo": "tarjeta",
-      "total": 1100000,
-      "pagado": 1100000
-    },
     "amenidades": [
       "wifi",
       "vista_lago",

@@ -24,7 +24,8 @@ export function clearRoomToken() {
  */
 export class ApiError extends Error {
   constructor(message, status = 500) {
-    const safeMessage = typeof message === 'string' ? message : 'Error inesperado';
+    const safeMessage =
+      typeof message === 'string' ? message : 'Error inesperado';
     super(safeMessage);
     this.status = status;
     this.name = 'ApiError';
@@ -42,7 +43,13 @@ export function safeText(value, fallback = '') {
       try {
         const primitive = value.valueOf();
         const pt = typeof primitive;
-        if (primitive !== value && (pt === 'string' || pt === 'number' || pt === 'boolean' || pt === 'bigint')) {
+        if (
+          primitive !== value &&
+          (pt === 'string' ||
+            pt === 'number' ||
+            pt === 'boolean' ||
+            pt === 'bigint')
+        ) {
           return String(primitive);
         }
       } catch {
@@ -71,7 +78,9 @@ function normalizeRoom(room, index = 0) {
   const piso =
     typeof rawPiso === 'number'
       ? rawPiso
-      : (typeof rawPiso === 'string' && rawPiso.trim() !== '' && Number.isFinite(Number(rawPiso)))
+      : typeof rawPiso === 'string' &&
+          rawPiso.trim() !== '' &&
+          Number.isFinite(Number(rawPiso))
         ? Number(rawPiso)
         : safeText(rawPiso, '1');
 
@@ -128,7 +137,11 @@ function normalizeReserva(reserva, index = 0) {
 
 export function normalizeErrorMessage(input, fallback = 'Request failed') {
   if (typeof input === 'string') return input;
-  if (typeof input === 'number' || typeof input === 'boolean' || typeof input === 'bigint') {
+  if (
+    typeof input === 'number' ||
+    typeof input === 'boolean' ||
+    typeof input === 'bigint'
+  ) {
     return String(input);
   }
   if (input && typeof input === 'object') {
@@ -152,8 +165,8 @@ export function normalizeErrorMessage(input, fallback = 'Request failed') {
  */
 export async function checkHealth() {
   try {
-    const response = await fetch(`${API_BASE}/health`, { 
-      signal: AbortSignal.timeout(5000) 
+    const response = await fetch(`${API_BASE}/health`, {
+      signal: AbortSignal.timeout(5000),
     });
     return response.ok;
   } catch {
@@ -171,11 +184,12 @@ export async function checkHealth() {
 async function apiFetch(endpoint, options = {}, timeout = 10000) {
   const url = `${API_BASE}${endpoint}`;
   const config = {
+    ...options,
     headers: {
       'Content-Type': 'application/json',
+      ...options.headers,
     },
     credentials: 'include',
-    ...options,
     body: options.body ? JSON.stringify(options.body) : undefined,
     signal: AbortSignal.timeout(timeout),
   };
@@ -214,7 +228,10 @@ async function apiFetch(endpoint, options = {}, timeout = 10000) {
     if (err.name === 'TimeoutError' || err.name === 'AbortError') {
       throw new ApiError('Request timed out', 408);
     }
-    throw new ApiError(normalizeErrorMessage(err?.message ?? err, 'Error de red'), 500);
+    throw new ApiError(
+      normalizeErrorMessage(err?.message ?? err, 'Error de red'),
+      500
+    );
   }
 }
 
@@ -225,7 +242,7 @@ async function apiFetch(endpoint, options = {}, timeout = 10000) {
  * @param {string} identifier - Email or username
  * @param {string} password - Password
  * @param {string} [recaptchaToken] - Google reCAPTCHA token
- * @returns {Promise<{token?: string, requires2FA?: boolean, userId?: string, usuario?: object}>}
+ * @returns {Promise<{requires2FA?: boolean, userId?: string, usuario?: object}>}
  */
 export async function loginAdmin(identifier, password, recaptchaToken) {
   return apiFetch('/auth/login', {
@@ -284,7 +301,11 @@ export async function verifyRecoveryCode(identifier, code) {
   });
 }
 
-export async function changePassword(nuevaContrasena, resetToken, currentPassword) {
+export async function changePassword(
+  nuevaContrasena,
+  resetToken,
+  currentPassword
+) {
   return apiFetch('/auth/recovery/cambiar', {
     method: 'POST',
     body: { nuevaContrasena, resetToken, currentPassword },
@@ -308,7 +329,13 @@ export async function toggle2FA(userId) {
  * @param {string} [params.lastName]
  * @returns {Promise<{mensaje: string, usuario: object, requiereVerificarCorreo: boolean}>}
  */
-export async function registerUser({ username, email, password, firstName, lastName }) {
+export async function registerUser({
+  username,
+  email,
+  password,
+  firstName,
+  lastName,
+}) {
   return apiFetch('/auth/register', {
     method: 'POST',
     body: { username, email, password, firstName, lastName },
@@ -470,7 +497,9 @@ export async function logout() {
  */
 export async function fetchRooms() {
   const data = await apiFetch('/rooms');
-  return Array.isArray(data) ? data.map((room, i) => normalizeRoom(room, i)) : [];
+  return Array.isArray(data)
+    ? data.map((room, i) => normalizeRoom(room, i))
+    : [];
 }
 
 /**
@@ -479,7 +508,9 @@ export async function fetchRooms() {
  */
 export async function fetchReservaciones() {
   const data = await apiFetch('/rooms/reservaciones');
-  return Array.isArray(data) ? data.map((room, i) => normalizeRoom(room, i)) : [];
+  return Array.isArray(data)
+    ? data.map((room, i) => normalizeRoom(room, i))
+    : [];
 }
 
 export async function fetchReservas(pagination) {
@@ -491,12 +522,15 @@ export async function fetchReservas(pagination) {
     endpoint += `?${params.toString()}`;
   }
   const data = await apiFetch(endpoint);
-  return Array.isArray(data) ? data.map((reserva, i) => normalizeReserva(reserva, i)) : [];
+  const items = Array.isArray(data) ? data : data?.data || [];
+  return items.map((reserva, i) => normalizeReserva(reserva, i));
 }
 
 export async function fetchReservasByRoom(roomId) {
   const data = await apiFetch(`/reservas/room/${roomId}`);
-  return Array.isArray(data) ? data.map((reserva, i) => normalizeReserva(reserva, i)) : [];
+  return Array.isArray(data)
+    ? data.map((reserva, i) => normalizeReserva(reserva, i))
+    : [];
 }
 
 export async function fetchReservasByDateRange(start, end) {
@@ -538,7 +572,7 @@ export async function checkOutReserva(id) {
 /**
  * Validate room PIN
  * @param {string} numero - Room number
- * @param {string} pin - 4-digit PIN
+ * @param {string} pin - 6-digit PIN
  * @param {string} [recaptchaToken] - Google reCAPTCHA token
  * @returns {Promise<object>} Room data
  */
@@ -649,7 +683,12 @@ export async function updateRoomStatus(roomId, estado) {
  * @param {string} params.categoria - Category
  * @returns {Promise<Object>} Created consumption object
  */
-export async function createConsumo({ roomId, descripcion, precio, categoria }) {
+export async function createConsumo({
+  roomId,
+  descripcion,
+  precio,
+  categoria,
+}) {
   return apiFetch('/consumos', {
     method: 'POST',
     body: { roomId, descripcion, precio, categoria },
@@ -676,7 +715,9 @@ export async function fetchConsumos(roomId, pagination) {
   const token = getRoomToken();
   if (token) headers['x-room-token'] = token;
   const data = await apiFetch(endpoint, { headers });
-  return Array.isArray(data) ? data.map((consumo, i) => normalizeConsumo(consumo, i)) : [];
+  return Array.isArray(data)
+    ? data.map((consumo, i) => normalizeConsumo(consumo, i))
+    : [];
 }
 
 // ── Prices API ──
@@ -706,25 +747,41 @@ export async function updatePrices(prices) {
  * @param {Object} params - Check-in parameters
  * @returns {Promise<Object>} Updated room object
  */
-export async function checkIn({ numero, huesped, tipo, email, telefono, documento, noches, checkIn: checkInDate, checkOut, observaciones, adultos, ninos, tieneMascota, nombreMascota, personasAdicionales }) {
+export async function checkIn({
+  numero,
+  huesped,
+  tipo,
+  email,
+  telefono,
+  documento,
+  noches,
+  checkIn: checkInDate,
+  checkOut,
+  observaciones,
+  adultos,
+  ninos,
+  tieneMascota,
+  nombreMascota,
+  personasAdicionales,
+}) {
   return apiFetch('/rooms/checkin', {
     method: 'POST',
-    body: { 
-      numero, 
-      huesped, 
-      tipo, 
-      email, 
-      telefono, 
-      documento, 
-      noches, 
-      checkIn: checkInDate, 
-      checkOut, 
-      observaciones, 
-      adultos, 
-      ninos, 
-      tieneMascota, 
-      nombreMascota, 
-      personasAdicionales 
+    body: {
+      numero,
+      huesped,
+      tipo,
+      email,
+      telefono,
+      documento,
+      noches,
+      checkIn: checkInDate,
+      checkOut,
+      observaciones,
+      adultos,
+      ninos,
+      tieneMascota,
+      nombreMascota,
+      personasAdicionales,
     },
   });
 }
@@ -851,13 +908,15 @@ function sanitizeCSV(value) {
 export function downloadLoginLogsCSV(logs) {
   if (!logs || logs.length === 0) return;
   const headers = ['Fecha/Hora', 'IP', 'User Agent', 'País'];
-  const rows = logs.map(l => [
+  const rows = logs.map((l) => [
     l.timestamp ? new Date(l.timestamp).toLocaleString('es-CO') : '',
     l.ip || '',
     l.userAgent || '',
     l.country || '',
   ]);
-  const csv = [headers, ...rows].map(r => r.map(sanitizeCSV).join(',')).join('\n');
+  const csv = [headers, ...rows]
+    .map((r) => r.map(sanitizeCSV).join(','))
+    .join('\n');
   const blob = new Blob([csv], { type: 'text/csv' });
   const url = window.URL.createObjectURL(blob);
   const a = document.createElement('a');

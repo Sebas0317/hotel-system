@@ -1,11 +1,11 @@
-import { useParams, useNavigate } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { FaCheck } from 'react-icons/fa';
+import { useNavigate, useParams } from 'react-router-dom';
 import { fetchRooms } from '../../services/api';
 import { COP } from '../../utils/helpers';
-import { ScrollToTop } from '../shared/ScrollToTop';
 import { AdultsDropdown, CheckIn, CheckOut, KidsDropdown } from '../components';
 import { hotelRules as originalHotelRules } from '../data';
-import { FaCheck } from 'react-icons/fa';
+import { ScrollToTop } from '../shared/ScrollToTop';
 
 // Amenity icons for ecoweb - consolidated with main app constants
 const AMENIDADES = {
@@ -46,12 +46,13 @@ export default function RoomDetails() {
   useEffect(() => {
     fetchRooms()
       .then((rooms) => {
-        const index = parseInt(id) - 1;
-        const found = rooms.find((r, i) => 
-          i === index ||
-          r.id === id || 
-          r.numero === id ||
-          r.tipo.toLowerCase().replace(/ /g, '-') === id.toLowerCase()
+        const index = parseInt(id, 10) - 1;
+        const found = rooms.find(
+          (r, i) =>
+            i === index ||
+            r.id === id ||
+            r.numero === id ||
+            r.tipo.toLowerCase().replace(/ /g, '-') === id.toLowerCase()
         );
         setRoom(found);
       })
@@ -79,8 +80,8 @@ export default function RoomDetails() {
         <ScrollToTop />
         <div className="container mx-auto max-w-7xl py-24 text-center">
           <p className="text-2xl">Habitación no encontrada</p>
-          <button 
-            onClick={() => navigate('/landing')} 
+          <button
+            onClick={() => navigate('/landing')}
             className="mt-4 text-accent hover:underline"
           >
             Volver a habitaciones
@@ -90,7 +91,16 @@ export default function RoomDetails() {
     );
   }
 
-  const { tipo, descripcion, capacidad, precio, tarifa, amenidades, numero, camas } = room;
+  const {
+    tipo,
+    descripcion,
+    capacidad,
+    precio,
+    tarifa,
+    amenidades,
+    numero,
+    camas,
+  } = room;
   const price = precio || tarifa || 0;
 
   return (
@@ -108,26 +118,31 @@ export default function RoomDetails() {
           <div className="w-full h-full text-justify">
             <h2 className="h2">{tipo}</h2>
             <p className="mb-8">{descripcion}</p>
-            
+
             <div className="mt-12">
               <h3 className="h3 mb-3"></h3>
               <p className="mb-12">
-                Disfruta de una experiencia única en nuestra {tipo}. 
-                Con todas las comodidades que necesitas para una estadía inolvidable.
+                Disfruta de una experiencia única en nuestra {tipo}. Con todas
+                las comodidades que necesitas para una estadía inolvidable.
               </p>
-              
+
               {amenidades && amenidades.length > 0 && (
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-12">
                   {amenidades.map((a, index) => {
                     const amenidad = AMENIDADES[a];
                     return (
-                      <div 
-                        key={index} 
+                      <div
+                        key={index}
                         className="flex items-center gap-3 bg-white/10 backdrop-blur-sm px-4 py-3 rounded-xl border border-white/20"
                       >
-                        <span className="text-2xl">{amenidad?.icono || '✓'}</span>
+                        <span className="text-2xl">
+                          {amenidad?.icono || '✓'}
+                        </span>
                         <span className="text-sm text-white/90">
-                          {amenidad?.label || a.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                          {amenidad?.label ||
+                            a
+                              .replace(/_/g, ' ')
+                              .replace(/\b\w/g, (l) => l.toUpperCase())}
                         </span>
                       </div>
                     );
@@ -162,7 +177,8 @@ export default function RoomDetails() {
             <div>
               <h3 className="h3">Hotel Rules</h3>
               <p className="mb-6 text-justify">
-                Por favor respeta las normas del hotel durante tu estadía para garantizar una experiencia agradable para todos.
+                Por favor respeta las normas del hotel durante tu estadía para
+                garantizar una experiencia agradable para todos.
               </p>
               <ul className="flex flex-col gap-y-4">
                 {originalHotelRules.map(({ rules }, idx) => (

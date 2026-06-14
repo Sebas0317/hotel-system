@@ -1,6 +1,6 @@
 'use strict';
 
-const crypto = require('crypto');
+const crypto = require('node:crypto');
 
 /**
  * Generates unique IDs using a combination of timestamp and random suffix

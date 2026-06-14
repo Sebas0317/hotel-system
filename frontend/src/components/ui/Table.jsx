@@ -1,7 +1,10 @@
 export function Table({ className = '', children, ...props }) {
   return (
     <div className="relative w-full overflow-auto">
-      <table className={`w-full caption-bottom text-sm ${className}`.trim()} {...props}>
+      <table
+        className={`w-full caption-bottom text-sm ${className}`.trim()}
+        {...props}
+      >
         {children}
       </table>
     </div>
@@ -18,7 +21,10 @@ export function TableHeader({ className = '', children, ...props }) {
 
 export function TableBody({ className = '', children, ...props }) {
   return (
-    <tbody className={`[&_tr:last-child]:border-0 ${className}`.trim()} {...props}>
+    <tbody
+      className={`[&_tr:last-child]:border-0 ${className}`.trim()}
+      {...props}
+    >
       {children}
     </tbody>
   );
@@ -26,7 +32,10 @@ export function TableBody({ className = '', children, ...props }) {
 
 export function TableFooter({ className = '', children, ...props }) {
   return (
-    <tfoot className={`border-t bg-gray-50 font-medium [&>tr]:last:border-b-0 ${className}`.trim()} {...props}>
+    <tfoot
+      className={`border-t bg-gray-50 font-medium [&>tr]:last:border-b-0 ${className}`.trim()}
+      {...props}
+    >
       {children}
     </tfoot>
   );
@@ -67,7 +76,10 @@ export function TableCell({ className = '', children, ...props }) {
 
 export function TableCaption({ className = '', children, ...props }) {
   return (
-    <caption className={`mt-4 text-sm text-gray-500 ${className}`.trim()} {...props}>
+    <caption
+      className={`mt-4 text-sm text-gray-500 ${className}`.trim()}
+      {...props}
+    >
       {children}
     </caption>
   );

@@ -39,7 +39,10 @@ const logger = pino({
   ...baseConfig,
   transport: isProduction
     ? { target: 'pino/file', options: { destination: 1 } }
-    : { target: 'pino-pretty', options: { colorize: true, translateTime: 'SYS:standard' } },
+    : {
+        target: 'pino-pretty',
+        options: { colorize: true, translateTime: 'SYS:standard' },
+      },
 });
 
 // Export Express middleware
@@ -48,7 +51,7 @@ const pinoHttp = require('pino-http');
 const httpLogger = pinoHttp({
   logger,
   quietReqLogger: true, // Less verbose in tests
-  customLogLevel: function customLogLevel(req, res, err) {
+  customLogLevel: function customLogLevel(_req, res, _err) {
     if (res.statusCode >= 500) return 'error';
     if (res.statusCode >= 400) return 'warn';
     if (res.statusCode >= 300) return 'silent';
@@ -64,11 +67,11 @@ const httpLogger = pinoHttp({
     }),
   },
   // Skip logging during tests to avoid Supertest conflicts
-  customSuccessMessage: (req, res) => {
+  customSuccessMessage: (req, _res) => {
     if (process.env.NODE_ENV === 'test') return null;
     return `${req.method} ${req.url} completed`;
   },
-  customErrorMessage: (req, res, err) => {
+  customErrorMessage: (req, _res, err) => {
     if (process.env.NODE_ENV === 'test') return null;
     return `${req.method} ${req.url} failed: ${err?.message || 'unknown error'}`;
   },

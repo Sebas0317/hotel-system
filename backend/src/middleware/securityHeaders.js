@@ -18,12 +18,21 @@ function securityHeaders(_req, res, next) {
   res.setHeader('X-XSS-Protection', '1; mode=block');
 
   // Cache-Control for API responses (prevent caching of sensitive data)
-  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.setHeader(
+    'Cache-Control',
+    'no-store, no-cache, must-revalidate, proxy-revalidate'
+  );
   res.setHeader('Pragma', 'no-cache');
   res.setHeader('Expires', '0');
 
   // Remove Server header (best-effort)
   res.removeHeader('X-Powered-By');
+
+  // Permissions Policy (C26)
+  res.setHeader(
+    'Permissions-Policy',
+    'camera=(), microphone=(), geolocation=(), interest-cohort=()'
+  );
 
   next();
 }

@@ -1,7 +1,7 @@
-import { useRoomContext } from '../context/RoomContext';
-import { BsChevronDown } from 'react-icons/bs';
-import { adultsList } from '../data';
 import { Menu } from '@headlessui/react';
+import { BsChevronDown } from 'react-icons/bs';
+import { useRoomContext } from '../context/RoomContext';
+import { adultsList } from '../data';
 
 /**
  * Dropdown to select number of adults. Uses Headless UI Menu and RoomContext.

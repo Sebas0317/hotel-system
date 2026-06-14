@@ -33,7 +33,7 @@ function errorHandler(err, req, res, _next) {
     // Allow known application errors through, but strip any path info
     message = err.message
       .replace(/C:\\[\w\\.-]+/gi, '[path redacted]') // Windows paths
-      .replace(/\/[\w/.-]+/g, '[path redacted]')     // Unix paths
+      .replace(/(?:\/[a-zA-Z][\w.-]*(?:\/[\w.-]+)+)/g, '[path redacted]') // Unix paths
       .trim();
   } else {
     message = 'Error desconocido';
@@ -51,7 +51,7 @@ function errorHandler(err, req, res, _next) {
  * 404 handler for undefined routes
  * Generic response - no route information exposed
  */
-function notFoundHandler(req, res) {
+function notFoundHandler(_req, res) {
   res.status(404).json({ error: 'Recurso no encontrado' });
 }
 
@@ -63,7 +63,7 @@ function requestLogger(req, res, next) {
   const start = Date.now();
 
   // Log only safe metadata
-  const safeMeta = {
+  const _safeMeta = {
     method: req.method,
     url: req.originalUrl,
     ip: req.ip,
@@ -71,7 +71,7 @@ function requestLogger(req, res, next) {
 
   const originalEnd = res.end;
 
-  res.end = function(...args) {
+  res.end = (...args) => {
     const duration = Date.now() - start;
     const logLevel = res.statusCode >= 400 ? 'warn' : 'debug';
     logger[logLevel](`${req.method} ${req.originalUrl}`, {

@@ -1,0 +1,54 @@
+{
+  "review": {
+    "threshold": 70,
+    "maxMajor": 5,
+    "maxRounds": 5,
+    "model": "",
+    "maxDiffLines": 1500,
+    "customRules": [
+      "PINs must be 4-digit strings, generated with crypto.randomFillSync, compared as strings not numbers",
+      "Currency is COP — prices must be integers, never floats or decimals",
+      "IDs must be string format: `${timestamp}-${random}`",
+      "Backend uses CommonJS (require/module.exports). Do not use ESM import/export in backend/",
+      "Frontend uses ESM (import/export). Do not use require() in frontend/",
+      "Validate all request body fields before use — check for null/undefined/type",
+      "Wrap all async route handlers in try/catch with next(error)",
+      "Do not use res.status().send() or res.json() without return to stop execution",
+      "Validate payment methods against METODOS_PAGO constants before checkout",
+      "Validate room estado against ESTADO_CFG constants before state transitions",
+      "Check for race conditions in jsonStore.js file operations — use file locks",
+      "Auth middleware must verify JWT signature, expiration, and payload structure",
+      "PIN validation must track and limit failed attempts (max 3-5)",
+      "CheckIn must generate room PIN before saving room state",
+      "Checkout must calculate total from consumos + room price, not arbitrary input",
+      "Error responses must include 'error' key with descriptive message",
+      "Do not expose internal details (file paths, stack traces) in error responses",
+      "Validate dates are valid ISO strings before Date operations",
+      "Room number must be a positive integer string",
+      "Validate huesped field is non-empty string on check-in"
+    ]
+  },
+  "fix": {
+    "safetyMinRatio": 0.5
+  },
+  "test": {
+    "enabled": false,
+    "stack": "auto",
+    "maxCases": 8
+  },
+  "report": {
+    "format": "html",
+    "outputDir": ".ai-reports",
+    "open": false
+  },
+  "ignore": [
+    "node_modules/**",
+    "dist/**",
+    "*.min.js",
+    "*.lock",
+    "oi_env/**",
+    ".opencode/**",
+    "ai/**",
+    "prompt/**"
+  ]
+}

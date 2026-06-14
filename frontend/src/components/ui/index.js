@@ -1,25 +1,33 @@
 // shadcn/ui components - Manual setup for JSX project
-export { Button } from './Button';
-export { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from './Card';
+
+export { Alert, AlertDescription, AlertTitle } from './Alert';
 export { Badge } from './Badge';
+export { Button } from './Button';
+export {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from './Card';
 export {
   Dialog,
-  DialogTrigger,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
   DialogDescription,
   DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
 } from './Dialog';
+export { Skeleton } from './Skeleton';
 export {
   Table,
-  TableHeader,
   TableBody,
-  TableFooter,
-  TableRow,
-  TableHead,
-  TableCell,
   TableCaption,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from './Table';
-export { Skeleton } from './Skeleton';
-export { Alert, AlertTitle, AlertDescription } from './Alert';

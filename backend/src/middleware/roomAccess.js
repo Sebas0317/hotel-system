@@ -13,20 +13,21 @@
  */
 const jwt = require('jsonwebtoken');
 const logger = require('../utils/logger');
-const crypto = require('crypto');
+const crypto = require('node:crypto');
 
 function getJwtSecret() {
   if (process.env.JWT_SECRET) return process.env.JWT_SECRET;
-  logger.error('JWT_SECRET no configurado en roomAccess. Usando secreto temporal.');
+  logger.error(
+    'JWT_SECRET no configurado en roomAccess. Usando secreto temporal.'
+  );
   return crypto.randomBytes(64).toString('hex');
 }
 
 function generateRoomToken(roomId, numero) {
-  return jwt.sign(
-    { roomId, numero, type: 'room' },
-    getJwtSecret(),
-    { expiresIn: '2h', algorithm: 'HS256' }
-  );
+  return jwt.sign({ roomId, numero, type: 'room' }, getJwtSecret(), {
+    expiresIn: '2h',
+    algorithm: 'HS256',
+  });
 }
 
 function requireRoomAccess(req, res, next) {
@@ -49,9 +50,13 @@ function requireRoomAccess(req, res, next) {
     next();
   } catch (err) {
     logger.warn('Room token verification failed', {
-      error: err.name, ip: req.ip, path: req.originalUrl,
+      error: err.name,
+      ip: req.ip,
+      path: req.originalUrl,
     });
-    return res.status(401).json({ error: 'Token de habitacion invalido o expirado' });
+    return res
+      .status(401)
+      .json({ error: 'Token de habitacion invalido o expirado' });
   }
 }
 

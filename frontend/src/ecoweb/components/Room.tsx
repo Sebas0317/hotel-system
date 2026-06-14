@@ -48,7 +48,9 @@ export default function Room({ room }: RoomProps) {
         <Link to={`/landing/room/${id}`}>
           <h3 className="h3">{name}</h3>
         </Link>
-        <p className="max-w-[300px] mx-auto mb-3 lg:mb-6">{description.slice(0, 56)}..</p>
+        <p className="max-w-[300px] mx-auto mb-3 lg:mb-6">
+          {description.slice(0, 56)}..
+        </p>
       </div>
       <Link
         to={`/landing/room/${id}`}

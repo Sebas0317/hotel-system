@@ -3,22 +3,36 @@
 const PERMISSIONS = {
   owner: ['*:*'],
   admin: [
-    'rooms:*', 'consumos:*', 'users:*', 'accounting:*',
-    'reports:*', 'auth:*', 'backup:*', 'config:*',
-    'history:*', 'reservas:*',
+    'rooms:*',
+    'consumos:*',
+    'users:*',
+    'accounting:*',
+    'reports:*',
+    'auth:*',
+    'backup:*',
+    'config:*',
+    'history:*',
+    'reservas:*',
   ],
   operator: [
-    'rooms:read', 'rooms:write', 'rooms:checkin',
-    'consumos:*', 'accounting:read', 'reports:read',
-    'history:read', 'reservas:read', 'reservas:write',
+    'rooms:read',
+    'rooms:write',
+    'rooms:checkin',
+    'consumos:*',
+    'accounting:read',
+    'reports:read',
+    'history:read',
+    'reservas:read',
+    'reservas:write',
   ],
   analyst: [
-    'rooms:read', 'consumos:read', 'accounting:*',
-    'reports:*', 'history:read',
+    'rooms:read',
+    'consumos:read',
+    'accounting:*',
+    'reports:*',
+    'history:read',
   ],
-  cliente: [
-    'rooms:read', 'consumos:read',
-  ],
+  cliente: ['rooms:read', 'consumos:read'],
 };
 
 const ROLE_HIERARCHY = {
@@ -55,6 +69,9 @@ function getPermissions(role) {
 }
 
 module.exports = {
-  PERMISSIONS, ROLE_HIERARCHY,
-  hasPermission, roleAtLeast, getPermissions,
+  PERMISSIONS,
+  ROLE_HIERARCHY,
+  hasPermission,
+  roleAtLeast,
+  getPermissions,
 };

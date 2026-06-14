@@ -16,7 +16,14 @@ const HotelTitle = memo(function HotelTitle({ variant = 'topbar', onClick }) {
     return <h2 className="text-xl font-bold text-green-700">EcoBosque</h2>;
   }
   if (onClick) {
-    return <span className="topbar-title cursor-pointer hover:text-green-600" onClick={onClick}>EcoBosque</span>;
+    return (
+      <span
+        className="topbar-title cursor-pointer hover:text-green-600"
+        onClick={onClick}
+      >
+        EcoBosque
+      </span>
+    );
   }
   return <span className="topbar-title">EcoBosque</span>;
 });

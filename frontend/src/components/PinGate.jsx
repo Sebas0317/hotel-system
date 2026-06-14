@@ -1,9 +1,14 @@
+import { AlertCircle, ArrowRight, Key, Shield } from 'lucide-react';
 import { useState } from 'react';
-import { validarPin } from '../services/api';
+import { setRoomToken, validarPin } from '../services/api';
 import ReCaptchaWidget from './ReCaptchaWidget';
-import { Key, Shield, AlertCircle, ArrowRight } from 'lucide-react';
 
-export default function PinGate({ onAccess, onBack, title = 'Acceso a Habitacion', description = 'Ingresa el numero de habitacion y PIN que recibiste al hacer check-in' }) {
+export default function PinGate({
+  onAccess,
+  onBack,
+  title = 'Acceso a Habitacion',
+  description = 'Ingresa el numero de habitacion y PIN que recibiste al hacer check-in',
+}) {
   const [numero, setNumero] = useState('');
   const [pin, setPin] = useState('');
   const [error, setError] = useState('');
@@ -13,14 +18,17 @@ export default function PinGate({ onAccess, onBack, title = 'Acceso a Habitacion
 
   const handleSubmit = async (e) => {
     e?.preventDefault();
-    if (!numero.trim() || !pin.trim()) return setError('Ingresa numero de habitacion y PIN');
-    if (!recaptchaToken && !captchaError) return setError('Completa la verificacion de seguridad');
+    if (!numero.trim() || !pin.trim())
+      return setError('Ingresa numero de habitacion y PIN');
+    if (!recaptchaToken && !captchaError)
+      return setError('Completa la verificacion de seguridad');
     setLoading(true);
     setError('');
     try {
-      const room = await validarPin(numero.trim(), pin.trim(), recaptchaToken);
+      const data = await validarPin(numero.trim(), pin.trim(), recaptchaToken);
+      setRoomToken(data.roomToken);
       setRecaptchaToken(null);
-      onAccess(room);
+      onAccess(data.room);
     } catch (e) {
       setError(e.message || 'PIN o numero de habitacion incorrecto');
       setRecaptchaToken(null);
@@ -54,30 +62,39 @@ export default function PinGate({ onAccess, onBack, title = 'Acceso a Habitacion
           )}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1.5">Numero de habitacion</label>
+              <label className="block text-xs font-medium text-gray-500 mb-1.5">
+                Numero de habitacion
+              </label>
               <div className="relative">
                 <Key className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <input
                   type="text"
                   value={numero}
-                  onChange={e => { setNumero(e.target.value); setError(''); }}
+                  onChange={(e) => {
+                    setNumero(e.target.value);
+                    setError('');
+                  }}
                   placeholder="Ej: 101"
                   className="w-full pl-10 pr-4 py-3 bg-gray-50/50 border border-gray-200/60 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 transition-all duration-200"
-                  autoFocus
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1.5">PIN de la habitacion</label>
+              <label className="block text-xs font-medium text-gray-500 mb-1.5">
+                PIN de la habitacion
+              </label>
               <div className="relative">
                 <Shield className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <input
                   type="password"
                   value={pin}
-                  onChange={e => { setPin(e.target.value); setError(''); }}
-                  placeholder="4 digitos"
-                  maxLength={4}
+                  onChange={(e) => {
+                    setPin(e.target.value);
+                    setError('');
+                  }}
+                  placeholder="6 digitos"
+                  maxLength={6}
                   className="w-full pl-10 pr-4 py-3 bg-gray-50/50 border border-gray-200/60 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 transition-all duration-200 tracking-[0.3em] text-center font-bold"
                 />
               </div>
@@ -85,8 +102,14 @@ export default function PinGate({ onAccess, onBack, title = 'Acceso a Habitacion
 
             <div className="flex justify-center pt-2">
               <ReCaptchaWidget
-                onVerify={(token) => { setRecaptchaToken(token); setError(''); }}
-                onExpire={() => { setRecaptchaToken(null); setError('Verificacion expirada, intenta de nuevo'); }}
+                onVerify={(token) => {
+                  setRecaptchaToken(token);
+                  setError('');
+                }}
+                onExpire={() => {
+                  setRecaptchaToken(null);
+                  setError('Verificacion expirada, intenta de nuevo');
+                }}
               />
             </div>
 

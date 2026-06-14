@@ -77,9 +77,19 @@ function agregarReservas(dias = 14, reservasPorDia = 3) {
   console.log(`\n📋 Resumen de reservas generadas:`);
   console.log(`   - Total reservas: ${reservasCreadas.length}`);
   console.log(`   - Habitaciones usadas: ${[...new Set(reservasCreadas.map(r => r.numero))].length}`);
-  console.log(`\n💾 Las reservas se han almacenado en rooms.json`);
-  console.log(`   (Nota: En un sistema real, las reservas se guardarian en un archivo separado)\n`);
-  
+
+  // Write reservations to disk
+  const reservasFile = path.join(__dirname, '../reservas.json');
+  let existingReservas = [];
+  if (fs.existsSync(reservasFile)) {
+    existingReservas = JSON.parse(fs.readFileSync(reservasFile, 'utf8'));
+  }
+  const todasReservas = [...existingReservas, ...reservasCreadas];
+  fs.writeFileSync(reservasFile, JSON.stringify(todasReservas, null, 2), 'utf8');
+
+  console.log(`\n💾 Reservas guardadas en ${reservasFile}`);
+  console.log(`   Total en archivo: ${todasReservas.length}\n`);
+
   return reservasCreadas;
 }
 

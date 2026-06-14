@@ -6,13 +6,19 @@
  */
 'use strict';
 
-const fs = require('fs').promises;
-const path = require('path');
+const fs = require('node:fs').promises;
+const path = require('node:path');
 const { logger } = require('./logger');
 
 const DATA_DIR = path.join(__dirname, '../..');
 const BACKUP_DIR = path.join(DATA_DIR, 'backups');
-const JSON_FILES = ['rooms.json', 'consumos.json', 'history.json', 'stateHistory.json', 'prices.json'];
+const JSON_FILES = [
+  'rooms.json',
+  'consumos.json',
+  'history.json',
+  'stateHistory.json',
+  'prices.json',
+];
 const MAX_BACKUPS = 10; // Keep last 10 backups per file
 
 /**
@@ -33,7 +39,14 @@ const SCHEMAS = {
         piso: 'number',
         estado: 'string',
       },
-      validStates: ['disponible', 'reservada', 'ocupada', 'limpieza', 'mantenimiento', 'fuera_servicio'],
+      validStates: [
+        'disponible',
+        'reservada',
+        'ocupada',
+        'limpieza',
+        'mantenimiento',
+        'fuera_servicio',
+      ],
     },
   },
   'consumos.json': {
@@ -113,8 +126,13 @@ function validateJSON(filename, data) {
     result.valid = false;
     return result;
   }
-  if (schema.type === 'object' && (typeof data !== 'object' || Array.isArray(data))) {
-    result.errors.push(`Expected object but got ${Array.isArray(data) ? 'array' : typeof data}`);
+  if (
+    schema.type === 'object' &&
+    (typeof data !== 'object' || Array.isArray(data))
+  ) {
+    result.errors.push(
+      `Expected object but got ${Array.isArray(data) ? 'array' : typeof data}`
+    );
     result.valid = false;
     return result;
   }
@@ -126,7 +144,9 @@ function validateJSON(filename, data) {
       if (schema.objectKey && Array.isArray(data[schema.objectKey])) {
         data = data[schema.objectKey];
       } else {
-        result.warnings.push(`Expected object with '${schema.objectKey}' key or direct array`);
+        result.warnings.push(
+          `Expected object with '${schema.objectKey}' key or direct array`
+        );
       }
     } else {
       result.errors.push(`Expected array or object but got ${typeof data}`);
@@ -136,19 +156,26 @@ function validateJSON(filename, data) {
   }
 
   // Validate array items
-  if ((schema.type === 'array' || schema.type === 'array-or-object') && schema.itemShape) {
+  if (
+    (schema.type === 'array' || schema.type === 'array-or-object') &&
+    schema.itemShape
+  ) {
     data.forEach((item, index) => {
       if (typeof item !== 'object' || item === null) {
-        result.errors.push(`Item ${index}: expected object but got ${typeof item}`);
+        result.errors.push(
+          `Item ${index}: expected object but got ${typeof item}`
+        );
         result.valid = false;
         return;
       }
 
       // Check required fields
       if (schema.itemShape.required) {
-        schema.itemShape.required.forEach(field => {
+        schema.itemShape.required.forEach((field) => {
           if (!(field in item)) {
-            result.errors.push(`Item ${index}: missing required field "${field}"`);
+            result.errors.push(
+              `Item ${index}: missing required field "${field}"`
+            );
             result.valid = false;
           }
         });
@@ -156,11 +183,19 @@ function validateJSON(filename, data) {
 
       // Check field types
       if (schema.itemShape.types) {
-        Object.entries(schema.itemShape.types).forEach(([field, expectedType]) => {
-          if (field in item && item[field] !== null && typeof item[field] !== expectedType) {
-            result.warnings.push(`Item ${index}: field "${field}" expected ${expectedType} but got ${typeof item[field]}`);
+        Object.entries(schema.itemShape.types).forEach(
+          ([field, expectedType]) => {
+            if (
+              field in item &&
+              item[field] !== null &&
+              typeof item[field] !== expectedType
+            ) {
+              result.warnings.push(
+                `Item ${index}: field "${field}" expected ${expectedType} but got ${typeof item[field]}`
+              );
+            }
           }
-        });
+        );
       }
 
       // Check valid states
@@ -174,7 +209,9 @@ function validateJSON(filename, data) {
       // Check valid categories
       if (schema.itemShape.validCategories && 'categoria' in item) {
         if (!schema.itemShape.validCategories.includes(item.categoria)) {
-          result.errors.push(`Item ${index}: invalid categoria "${item.categoria}"`);
+          result.errors.push(
+            `Item ${index}: invalid categoria "${item.categoria}"`
+          );
           result.valid = false;
         }
       }
@@ -192,11 +229,20 @@ function validateJSON(filename, data) {
  * Validate all JSON files. Returns report object.
  */
 async function validateAll() {
-  const report = { timestamp: new Date().toISOString(), files: {}, overall: true };
+  const report = {
+    timestamp: new Date().toISOString(),
+    files: {},
+    overall: true,
+  };
 
   for (const file of JSON_FILES) {
     const filePath = path.join(DATA_DIR, file);
-    const fileReport = { exists: false, valid: false, errors: [], warnings: [] };
+    const fileReport = {
+      exists: false,
+      valid: false,
+      errors: [],
+      warnings: [],
+    };
 
     try {
       await fs.access(filePath);
@@ -205,7 +251,9 @@ async function validateAll() {
       const content = await fs.readFile(filePath, 'utf-8');
       const data = JSON.parse(content);
       fileReport.parsable = true;
-      fileReport.itemCount = Array.isArray(data) ? data.length : Object.keys(data).length;
+      fileReport.itemCount = Array.isArray(data)
+        ? data.length
+        : Object.keys(data).length;
 
       const validation = validateJSON(file, data);
       fileReport.valid = validation.valid;
@@ -257,7 +305,7 @@ async function cleanupOldBackups(filename) {
     const prefix = filename.replace('.json', '_');
     const files = await fs.readdir(BACKUP_DIR);
     const matching = files
-      .filter(f => f.startsWith(prefix) && f.endsWith('.json'))
+      .filter((f) => f.startsWith(prefix) && f.endsWith('.json'))
       .sort()
       .reverse();
 
@@ -280,7 +328,7 @@ async function repairFromBackup(filename) {
     const prefix = filename.replace('.json', '_');
     const files = await fs.readdir(BACKUP_DIR);
     const matching = files
-      .filter(f => f.startsWith(prefix) && f.endsWith('.json'))
+      .filter((f) => f.startsWith(prefix) && f.endsWith('.json'))
       .sort()
       .reverse();
 
@@ -313,21 +361,33 @@ async function startupValidation() {
       continue;
     }
     if (!info.parsable) {
-      logger.error({ file }, 'JSON parse error — attempting repair from backup');
+      logger.error(
+        { file },
+        'JSON parse error — attempting repair from backup'
+      );
       const repair = await repairFromBackup(file);
       if (repair.success) {
-        logger.info({ file, restoredFrom: repair.restoredFrom }, 'JSON file restored from backup');
+        logger.info(
+          { file, restoredFrom: repair.restoredFrom },
+          'JSON file restored from backup'
+        );
       } else {
         logger.error({ file, error: repair.error }, 'JSON file repair failed');
       }
       continue;
     }
     if (!info.valid) {
-      logger.error({ file, errors: info.errors }, 'JSON schema validation failed');
+      logger.error(
+        { file, errors: info.errors },
+        'JSON schema validation failed'
+      );
       // Auto-repair
       const repair = await repairFromBackup(file);
       if (repair.success) {
-        logger.info({ file, restoredFrom: repair.restoredFrom }, 'JSON file restored from backup');
+        logger.info(
+          { file, restoredFrom: repair.restoredFrom },
+          'JSON file restored from backup'
+        );
       }
       continue;
     }

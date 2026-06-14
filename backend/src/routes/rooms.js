@@ -11,10 +11,13 @@ const express = require('express');
 const router = express.Router();
 const roomController = require('../controllers/roomController');
 const { requireFields, validateEnum } = require('../middleware/validation');
-const { requireAuth } = require('../middleware/auth');
+const { requireAuth, requireRole } = require('../middleware/auth');
 const { requireRecaptcha } = require('../middleware/recaptcha');
 const { requireRoomAccess } = require('../middleware/roomAccess');
-const { writeRateLimiter, pinRateLimiter } = require('../middleware/rateLimiters');
+const {
+  writeRateLimiter,
+  pinRateLimiter,
+} = require('../middleware/rateLimiters');
 
 const METODOS_PAGO = ['efectivo', 'tarjeta', 'transferencia'];
 
@@ -27,7 +30,12 @@ router.get('/', roomController.getAllRooms);
 router.get('/stats', roomController.getRoomStats);
 
 // GET /rooms/reservaciones - List all reservations
-router.get('/reservaciones', requireAuth, roomController.getReservaciones);
+router.get(
+  '/reservaciones',
+  requireAuth,
+  requireRole('admin', 'owner', 'operator'),
+  roomController.getReservaciones
+);
 
 // POST /rooms/checkin - Check in a guest
 router.post(
@@ -81,7 +89,11 @@ router.post(
   requireAuth,
   writeRateLimiter,
   requireFields('metodoPago'),
-  validateEnum('metodoPago', METODOS_PAGO, 'Método de pago inválido. Debe ser: efectivo, tarjeta o transferencia'),
+  validateEnum(
+    'metodoPago',
+    METODOS_PAGO,
+    'Método de pago inválido. Debe ser: efectivo, tarjeta o transferencia'
+  ),
   roomController.checkout
 );
 

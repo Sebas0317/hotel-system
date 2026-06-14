@@ -6,13 +6,22 @@
 'use strict';
 
 const cron = require('node-cron');
-const fs = require('fs').promises;
-const path = require('path');
+const fs = require('node:fs').promises;
+const path = require('node:path');
 const { logger } = require('./logger');
 
 const BACKUP_DIR = path.join(__dirname, '../../backups');
 const DATA_DIR = path.join(__dirname, '../..');
-const DATA_FILES = ['rooms.json', 'consumos.json', 'history.json', 'stateHistory.json', 'prices.json'];
+const DATA_FILES = [
+  'rooms.json',
+  'consumos.json',
+  'history.json',
+  'stateHistory.json',
+  'prices.json',
+  'users.json',
+  'reservas.json',
+  'codes.json',
+];
 const MAX_BACKUP_DAYS = 30;
 
 /**
@@ -20,7 +29,10 @@ const MAX_BACKUP_DAYS = 30;
  */
 async function createBackup() {
   try {
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+    const timestamp = new Date()
+      .toISOString()
+      .replace(/[:.]/g, '-')
+      .slice(0, 19);
     const backupDir = path.join(BACKUP_DIR, timestamp);
 
     // Create backup directory
@@ -54,13 +66,14 @@ async function createBackup() {
 async function cleanupOldBackups() {
   try {
     const backups = await fs.readdir(BACKUP_DIR);
-    
-    if (backups.length <= MAX_BACKUP_DAYS) {
+    const backupDirs = backups.filter((b) => /^\d{4}-\d{2}-\d{2}T/.test(b));
+
+    if (backupDirs.length <= MAX_BACKUP_DAYS) {
       return; // No cleanup needed
     }
 
     // Sort by name (timestamp) and remove oldest
-    const sorted = backups.sort();
+    const sorted = backupDirs.sort();
     const toRemove = sorted.slice(0, sorted.length - MAX_BACKUP_DAYS);
 
     for (const dir of toRemove) {
@@ -80,7 +93,7 @@ async function listBackups() {
   try {
     const backups = await fs.readdir(BACKUP_DIR);
     return backups.sort().reverse();
-  } catch (error) {
+  } catch (_error) {
     return [];
   }
 }
@@ -91,7 +104,7 @@ async function listBackups() {
 async function restoreBackup(timestamp) {
   try {
     const backupDir = path.join(BACKUP_DIR, timestamp);
-    
+
     // Verify backup exists
     await fs.access(backupDir);
 
@@ -117,16 +130,19 @@ async function restoreBackup(timestamp) {
 }
 
 // Schedule daily backup at 2:00 AM
-cron.schedule('0 2 * * *', async () => {
-  logger.info('Starting scheduled backup');
-  try {
-    await createBackup();
-    await cleanupOldBackups();
-    logger.info('Scheduled backup completed');
-  } catch (error) {
-    logger.error({ err: error }, 'Scheduled backup failed');
-  }
-});
+if (process.env.NODE_ENV !== 'test') {
+  cron.schedule('0 2 * * *', async () => {
+    logger.info('Starting scheduled backup');
+    try {
+      await createBackup();
+      await cleanupOldBackups();
+      logger.info('Scheduled backup completed');
+    } catch (error) {
+      logger.error({ err: error }, 'Scheduled backup failed');
+    }
+  });
+}
+})
 
 // Export for manual trigger via API
 module.exports = {

@@ -1,15 +1,32 @@
-import { useMemo, useCallback, useState, useEffect, memo } from 'react';
-import { useLocation, useNavigate, Outlet } from 'react-router-dom';
-import { useRooms } from '../hooks/useRooms';
-import { useRoomSync } from '../hooks/useRoomSync';
-import { ESTADO_CFG } from '../constants';
-import { fetchLastLogin, fetchLoginLogs, downloadLoginLogsCSV } from '../services/api';
-import HotelTitle from './HotelTitle';
 import {
-  LayoutDashboard, Home, ClipboardPen, CreditCard, Receipt, DollarSign,
-  Calendar, ChevronDown, Download,
-  DoorOpen, ClipboardList, Users, ChevronRight, Bell, History, Shield
+  Bell,
+  Calendar,
+  ChevronDown,
+  ChevronRight,
+  ClipboardList,
+  ClipboardPen,
+  CreditCard,
+  DollarSign,
+  DoorOpen,
+  Download,
+  History,
+  Home,
+  LayoutDashboard,
+  Receipt,
+  Shield,
+  Users,
 } from 'lucide-react';
+import { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { ESTADO_CFG } from '../constants';
+import { useRoomSync } from '../hooks/useRoomSync';
+import { useRooms } from '../hooks/useRooms';
+import {
+  downloadLoginLogsCSV,
+  fetchLastLogin,
+  fetchLoginLogs,
+} from '../services/api';
+import HotelTitle from './HotelTitle';
 
 function getNavItems(rol) {
   const all = [
@@ -25,17 +42,32 @@ function getNavItems(rol) {
     { key: 'security', label: 'Seguridad', icon: Shield },
   ];
   if (rol === 'analyst') {
-    return all.filter(i => i.key === 'dashboard' || i.key === 'accounting');
+    return all.filter((i) => i.key === 'dashboard' || i.key === 'accounting');
   }
   if (rol === 'operator') {
-    return all.filter(i => ['dashboard', 'rooms', 'register', 'transactions', 'reservations', 'prices', 'history'].includes(i.key));
+    return all.filter((i) =>
+      [
+        'dashboard',
+        'rooms',
+        'register',
+        'transactions',
+        'reservations',
+        'prices',
+        'history',
+      ].includes(i.key)
+    );
   }
   return all;
 }
 
 const NAV_ITEMS = getNavItems('admin');
 
-const AdminTopbar = memo(function AdminTopbar({ onSalir, onNavigate, rooms = [], onRoomSelect }) {
+const AdminTopbar = memo(function AdminTopbar({
+  onSalir,
+  onNavigate,
+  rooms = [],
+  onRoomSelect,
+}) {
   const [notifOpen, setNotifOpen] = useState(false);
   const [lastLogin, setLastLogin] = useState(null);
   const [logsOpen, setLogsOpen] = useState(false);
@@ -44,13 +76,15 @@ const AdminTopbar = memo(function AdminTopbar({ onSalir, onNavigate, rooms = [],
   const [nowMs, setNowMs] = useState(0);
 
   useEffect(() => {
-    fetchLastLogin().then(r => {
-      if (r && r.lastLogin) setLastLogin(r.lastLogin);
-    }).catch(() => {});
+    fetchLastLogin()
+      .then((r) => {
+        if (r?.lastLogin) setLastLogin(r.lastLogin);
+      })
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
-    const updateNow = () => setNowMs(new Date().getTime());
+    const updateNow = () => setNowMs(Date.now());
     updateNow();
     const timer = setInterval(updateNow, 60000);
     return () => clearInterval(timer);
@@ -62,7 +96,7 @@ const AdminTopbar = memo(function AdminTopbar({ onSalir, onNavigate, rooms = [],
     if (opening && logs.length === 0) {
       setLogsLoading(true);
       fetchLoginLogs(50)
-        .then(data => setLogs(data || []))
+        .then((data) => setLogs(data || []))
         .catch(() => {})
         .finally(() => setLogsLoading(false));
     }
@@ -151,7 +185,9 @@ const AdminTopbar = memo(function AdminTopbar({ onSalir, onNavigate, rooms = [],
         >
           <HotelTitle variant="topbar" />
         </button>
-        <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider hidden sm:inline bg-gray-100 px-2 py-1 rounded">Admin</span>
+        <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider hidden sm:inline bg-gray-100 px-2 py-1 rounded">
+          Admin
+        </span>
         {lastLogin && (
           <span className="text-xs text-gray-400 hidden lg:inline">
             Ultimo acceso: {formatTimeAgo(lastLogin.timestamp)}
@@ -175,17 +211,27 @@ const AdminTopbar = memo(function AdminTopbar({ onSalir, onNavigate, rooms = [],
 
           {notifOpen && (
             <>
-              <div className="fixed inset-0 z-40" onClick={() => setNotifOpen(false)} />
+              <div
+                className="fixed inset-0 z-40"
+                onClick={() => setNotifOpen(false)}
+              />
               <div className="absolute right-0 top-full mt-1 w-80 bg-white rounded-xl shadow-xl border border-gray-200 z-50 max-h-96 overflow-y-auto">
                 <div className="p-3 border-b border-gray-100 flex items-center justify-between">
-                  <h3 className="text-sm font-semibold text-gray-900">Notificaciones</h3>
+                  <h3 className="text-sm font-semibold text-gray-900">
+                    Notificaciones
+                  </h3>
                   {notifications.length > 0 && (
-                    <span className="text-xs text-gray-400">{notifications.length} pendiente{notifications.length !== 1 ? 's' : ''}</span>
+                    <span className="text-xs text-gray-400">
+                      {notifications.length} pendiente
+                      {notifications.length !== 1 ? 's' : ''}
+                    </span>
                   )}
                 </div>
 
                 {notifications.length === 0 ? (
-                  <div className="p-6 text-center text-gray-400 text-sm">Sin notificaciones</div>
+                  <div className="p-6 text-center text-gray-400 text-sm">
+                    Sin notificaciones
+                  </div>
                 ) : (
                   <div className="divide-y divide-gray-50">
                     {notifications.map((n) => (
@@ -194,12 +240,20 @@ const AdminTopbar = memo(function AdminTopbar({ onSalir, onNavigate, rooms = [],
                         onClick={() => handleNotifClick(n)}
                         className="w-full text-left p-3 hover:bg-gray-50 transition-colors flex items-start gap-3 border-none cursor-pointer"
                       >
-                        <span className="text-lg shrink-0 mt-0.5">{n.icon}</span>
+                        <span className="text-lg shrink-0 mt-0.5">
+                          {n.icon}
+                        </span>
                         <div className="min-w-0 flex-1">
-                          <div className={`text-xs font-semibold ${n.color}`}>{n.label}</div>
-                          <div className="text-sm text-gray-900 truncate">{n.detail}</div>
+                          <div className={`text-xs font-semibold ${n.color}`}>
+                            {n.label}
+                          </div>
+                          <div className="text-sm text-gray-900 truncate">
+                            {n.detail}
+                          </div>
                           {n.time && (
-                            <div className="text-[11px] text-gray-400 mt-0.5">{formatTimeAgo(n.time)}</div>
+                            <div className="text-[11px] text-gray-400 mt-0.5">
+                              {formatTimeAgo(n.time)}
+                            </div>
                           )}
                         </div>
                       </button>
@@ -209,7 +263,10 @@ const AdminTopbar = memo(function AdminTopbar({ onSalir, onNavigate, rooms = [],
 
                 <div className="p-2 border-t border-gray-100">
                   <button
-                    onClick={() => { setNotifOpen(false); onNavigate('rooms'); }}
+                    onClick={() => {
+                      setNotifOpen(false);
+                      onNavigate('rooms');
+                    }}
                     className="w-full text-xs py-2 text-gray-600 hover:bg-gray-100 rounded text-center"
                   >
                     Ver todas las habitaciones
@@ -227,15 +284,22 @@ const AdminTopbar = memo(function AdminTopbar({ onSalir, onNavigate, rooms = [],
           >
             <ClipboardList className="w-4 h-4" />
             <span className="hidden sm:inline">Logs</span>
-            <ChevronDown className={`w-3 h-3 transition-transform ${logsOpen ? 'rotate-180' : ''}`} />
+            <ChevronDown
+              className={`w-3 h-3 transition-transform ${logsOpen ? 'rotate-180' : ''}`}
+            />
           </button>
 
           {logsOpen && (
             <>
-              <div className="fixed inset-0 z-40" onClick={() => setLogsOpen(false)} />
+              <div
+                className="fixed inset-0 z-40"
+                onClick={() => setLogsOpen(false)}
+              />
               <div className="absolute right-0 top-full mt-1 w-80 bg-white rounded-xl shadow-xl border border-gray-200 z-50 max-h-96 overflow-y-auto">
                 <div className="p-3 border-b border-gray-100 flex items-center justify-between">
-                  <h3 className="text-sm font-semibold text-gray-900">Registro de Accesos</h3>
+                  <h3 className="text-sm font-semibold text-gray-900">
+                    Registro de Accesos
+                  </h3>
                   {logs.length > 0 && (
                     <button
                       onClick={() => downloadLoginLogsCSV(logs)}
@@ -247,21 +311,35 @@ const AdminTopbar = memo(function AdminTopbar({ onSalir, onNavigate, rooms = [],
                 </div>
 
                 {logsLoading ? (
-                  <div className="p-4 text-center text-gray-400 text-sm">Cargando...</div>
+                  <div className="p-4 text-center text-gray-400 text-sm">
+                    Cargando...
+                  </div>
                 ) : logs.length === 0 ? (
-                  <div className="p-4 text-center text-gray-400 text-sm">Sin registros</div>
+                  <div className="p-4 text-center text-gray-400 text-sm">
+                    Sin registros
+                  </div>
                 ) : (
                   <div className="divide-y divide-gray-50">
                     {logs.map((log, i) => (
                       <div key={log.id || i} className="p-3 hover:bg-gray-50">
                         <div className="flex items-center justify-between">
                           <span className="text-xs font-medium text-gray-900">
-                            {log.timestamp ? new Date(log.timestamp).toLocaleString('es-CO') : ''}
+                            {log.timestamp
+                              ? new Date(log.timestamp).toLocaleString('es-CO')
+                              : ''}
                           </span>
-                          {i === 0 && <span className="text-xs bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full">Actual</span>}
+                          {i === 0 && (
+                            <span className="text-xs bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full">
+                              Actual
+                            </span>
+                          )}
                         </div>
-                        <div className="text-xs text-gray-500 mt-1 font-mono">{log.ip || 'N/A'}</div>
-                        <div className="text-xs text-gray-400 truncate mt-0.5">{log.country || ''}</div>
+                        <div className="text-xs text-gray-500 mt-1 font-mono">
+                          {log.ip || 'N/A'}
+                        </div>
+                        <div className="text-xs text-gray-400 truncate mt-0.5">
+                          {log.country || ''}
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -269,13 +347,19 @@ const AdminTopbar = memo(function AdminTopbar({ onSalir, onNavigate, rooms = [],
 
                 <div className="p-2 border-t border-gray-100 grid grid-cols-2 gap-1">
                   <button
-                    onClick={() => { setLogsOpen(false); onNavigate('history'); }}
+                    onClick={() => {
+                      setLogsOpen(false);
+                      onNavigate('history');
+                    }}
                     className="text-xs px-2 py-1.5 text-gray-600 hover:bg-gray-100 rounded text-center"
                   >
                     <ClipboardList className="w-3 h-3 inline" /> Historial
                   </button>
                   <button
-                    onClick={() => { setLogsOpen(false); onNavigate('reservations'); }}
+                    onClick={() => {
+                      setLogsOpen(false);
+                      onNavigate('reservations');
+                    }}
                     className="text-xs px-2 py-1.5 text-gray-600 hover:bg-gray-100 rounded text-center"
                   >
                     <Calendar className="w-3 h-3 inline" /> Reservaciones
@@ -299,12 +383,16 @@ const AdminTopbar = memo(function AdminTopbar({ onSalir, onNavigate, rooms = [],
   );
 });
 
-const AdminNav = memo(function AdminNav({ activeView, onNavigate, items = NAV_ITEMS }) {
+const AdminNav = memo(function AdminNav({
+  activeView,
+  onNavigate,
+  items = NAV_ITEMS,
+}) {
   return (
     <nav className="bg-white/90 backdrop-blur-lg border-b border-gray-200/50 sticky top-[58px] z-50">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex items-center gap-1 py-2 overflow-x-auto scrollbar-hide">
-          {items.map(item => (
+          {items.map((item) => (
             <button
               key={item.key}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-all duration-300 ${
@@ -314,8 +402,8 @@ const AdminNav = memo(function AdminNav({ activeView, onNavigate, items = NAV_IT
               }`}
               onClick={() => onNavigate(item.key)}
             >
-                {item.icon && <item.icon className="text-lg" />}
-                <span className="hidden sm:inline">{item.label}</span>
+              {item.icon && <item.icon className="text-lg" />}
+              <span className="hidden sm:inline">{item.label}</span>
             </button>
           ))}
         </div>
@@ -337,7 +425,11 @@ export default function AdminShell({ rol = 'admin', onSalir }) {
     if (path.includes('/admin/room/')) return 'rooms';
     if (path.includes('/admin/register')) return 'register';
     if (path.includes('/admin/transactions')) return 'transactions';
-    if (path.includes('/admin/reservations') || path.includes('/admin/reservaciones')) return 'reservations';
+    if (
+      path.includes('/admin/reservations') ||
+      path.includes('/admin/reservaciones')
+    )
+      return 'reservations';
     if (path.includes('/admin/accounting')) return 'accounting';
     if (path.includes('/admin/prices')) return 'prices';
     if (path.includes('/admin/users')) return 'users';
@@ -358,51 +450,86 @@ export default function AdminShell({ rol = 'admin', onSalir }) {
 
   useEffect(() => {
     const titles = {
-      dashboard: 'Dashboard', rooms: 'Habitaciones', register: 'Registro',
-      transactions: 'Transacciones', reservations: 'Reservaciones',
-      accounting: 'Contabilidad', prices: 'Precios', users: 'Usuarios',
-      history: 'Historial', security: 'Seguridad',
+      dashboard: 'Dashboard',
+      rooms: 'Habitaciones',
+      register: 'Registro',
+      transactions: 'Transacciones',
+      reservations: 'Reservaciones',
+      accounting: 'Contabilidad',
+      prices: 'Precios',
+      users: 'Usuarios',
+      history: 'Historial',
+      security: 'Seguridad',
     };
     document.title = `${titles[activeView] || 'Admin'} | EcoBosque Hotel`;
   }, [activeView]);
 
   const breadcrumbs = useMemo(() => {
     const items = [{ label: 'Admin', path: '/admin' }];
-    if (activeView === 'dashboard') items.push({ label: 'Dashboard', path: '/admin/dashboard' });
-    else if (activeView === 'rooms') items.push({ label: 'Habitaciones', path: '/admin' });
-    else if (activeView === 'register') items.push({ label: 'Registro', path: '/admin/register' });
-    else if (activeView === 'transactions') items.push({ label: 'Transacciones', path: '/admin/transactions' });
-    else if (activeView === 'reservations') items.push({ label: 'Reservaciones', path: '/admin/reservations' });
-    else if (activeView === 'accounting') items.push({ label: 'Contabilidad', path: '/admin/accounting' });
-    else if (activeView === 'prices') items.push({ label: 'Precios', path: '/admin/prices' });
-    else if (activeView === 'users') items.push({ label: 'Usuarios', path: '/admin/users' });
-    else if (activeView === 'history') items.push({ label: 'Historial', path: '/admin/history' });
-    else if (activeView === 'security') items.push({ label: 'Seguridad', path: '/admin/security' });
-    if (selectedRoomId) items.push({ label: `Habitacion #${selectedRoomId}`, path: `/admin/room/${selectedRoomId}` });
+    if (activeView === 'dashboard')
+      items.push({ label: 'Dashboard', path: '/admin/dashboard' });
+    else if (activeView === 'rooms')
+      items.push({ label: 'Habitaciones', path: '/admin' });
+    else if (activeView === 'register')
+      items.push({ label: 'Registro', path: '/admin/register' });
+    else if (activeView === 'transactions')
+      items.push({ label: 'Transacciones', path: '/admin/transactions' });
+    else if (activeView === 'reservations')
+      items.push({ label: 'Reservaciones', path: '/admin/reservations' });
+    else if (activeView === 'accounting')
+      items.push({ label: 'Contabilidad', path: '/admin/accounting' });
+    else if (activeView === 'prices')
+      items.push({ label: 'Precios', path: '/admin/prices' });
+    else if (activeView === 'users')
+      items.push({ label: 'Usuarios', path: '/admin/users' });
+    else if (activeView === 'history')
+      items.push({ label: 'Historial', path: '/admin/history' });
+    else if (activeView === 'security')
+      items.push({ label: 'Seguridad', path: '/admin/security' });
+    if (selectedRoomId)
+      items.push({
+        label: `Habitacion #${selectedRoomId}`,
+        path: `/admin/room/${selectedRoomId}`,
+      });
     return items;
   }, [activeView, selectedRoomId]);
 
-  const navigateTo = useCallback((view) => {
-    const paths = {
-      dashboard: '/admin/dashboard', rooms: '/admin', register: '/admin/register',
-      transactions: '/admin/transactions', reservations: '/admin/reservations',
-      accounting: '/admin/accounting', prices: '/admin/prices', users: '/admin/users',
-      history: '/admin/history', security: '/admin/security',
-    };
-    navigate(paths[view] || '/admin');
-  }, [navigate]);
+  const navigateTo = useCallback(
+    (view) => {
+      const paths = {
+        dashboard: '/admin/dashboard',
+        rooms: '/admin',
+        register: '/admin/register',
+        transactions: '/admin/transactions',
+        reservations: '/admin/reservations',
+        accounting: '/admin/accounting',
+        prices: '/admin/prices',
+        users: '/admin/users',
+        history: '/admin/history',
+        security: '/admin/security',
+      };
+      navigate(paths[view] || '/admin');
+    },
+    [navigate]
+  );
 
-  const handleNavigate = useCallback((view) => { navigateTo(view); }, [navigateTo]);
+  const handleNavigate = useCallback(
+    (view) => {
+      navigateTo(view);
+    },
+    [navigateTo]
+  );
 
-  const handleSelectRoom = useCallback((roomId) => {
-    const current = getRoomIdFromPath(window.location.pathname);
-    navigate(current === roomId ? '/admin' : `/admin/room/${roomId}`);
-  }, [navigate]);
+  const handleSelectRoom = useCallback(
+    (roomId) => {
+      const current = getRoomIdFromPath(window.location.pathname);
+      navigate(current === roomId ? '/admin' : `/admin/room/${roomId}`);
+    },
+    [navigate, getRoomIdFromPath]
+  );
 
-  useRoomSync({
-    interval: 15000,
-    enabled: false,
-    onChange: (changes) => {
+  const handleRoomChanges = useCallback(
+    (changes) => {
       if (!changes?.length) return;
       refresh();
       changes.forEach((change) => {
@@ -411,15 +538,25 @@ export default function AdminShell({ rol = 'admin', onSalir }) {
           guest: `Habitacion #${change.room.numero}: huesped actualizado`,
           added: `Nueva habitacion #${change.room.numero} registrada`,
         };
-        setInlineToast({ type: 'info', message: labels[change.type] || 'Habitacion actualizada' });
+        setInlineToast({
+          type: 'info',
+          message: labels[change.type] || 'Habitacion actualizada',
+        });
       });
     },
+    [refresh]
+  );
+
+  useRoomSync({
+    interval: 15000,
+    enabled: false,
+    onChange: handleRoomChanges,
   });
 
   const renderBreadcrumbs = () => (
     <div className="flex items-center gap-2 text-xs text-gray-500 mb-4 px-1">
       {breadcrumbs.map((crumb, i) => (
-        <span key={crumb.path + '-' + i} className="flex items-center gap-1.5">
+        <span key={`${crumb.path}-${i}`} className="flex items-center gap-1.5">
           {i > 0 && <ChevronRight className="w-3 h-3 text-gray-300" />}
           {i < breadcrumbs.length - 1 ? (
             <button
@@ -439,8 +576,16 @@ export default function AdminShell({ rol = 'admin', onSalir }) {
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-emerald-50/40">
-        <AdminTopbar onSalir={onSalir} onNavigate={handleNavigate} rooms={rooms} onRoomSelect={handleSelectRoom} />
-        <div className="flex items-center justify-center" style={{ minHeight: '60vh' }}>
+        <AdminTopbar
+          onSalir={onSalir}
+          onNavigate={handleNavigate}
+          rooms={rooms}
+          onRoomSelect={handleSelectRoom}
+        />
+        <div
+          className="flex items-center justify-center"
+          style={{ minHeight: '60vh' }}
+        >
           <p className="text-gray-400 text-lg">Cargando habitaciones...</p>
         </div>
       </div>
@@ -449,11 +594,33 @@ export default function AdminShell({ rol = 'admin', onSalir }) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-emerald-50/40">
-      <AdminTopbar onSalir={onSalir} onNavigate={handleNavigate} rooms={rooms} onRoomSelect={handleSelectRoom} />
-      <AdminNav activeView={activeView} onNavigate={handleNavigate} items={navItems} />
+      <AdminTopbar
+        onSalir={onSalir}
+        onNavigate={handleNavigate}
+        rooms={rooms}
+        onRoomSelect={handleSelectRoom}
+      />
+      <AdminNav
+        activeView={activeView}
+        onNavigate={handleNavigate}
+        items={navItems}
+      />
       {renderBreadcrumbs()}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <Outlet context={{ rooms, loading, refresh, rol, onSalir, handleNavigate, handleSelectRoom, selectedRoomId, inlineToast, setInlineToast }} />
+        <Outlet
+          context={{
+            rooms,
+            loading,
+            refresh,
+            rol,
+            onSalir,
+            handleNavigate,
+            handleSelectRoom,
+            selectedRoomId,
+            inlineToast,
+            setInlineToast,
+          }}
+        />
       </div>
     </div>
   );

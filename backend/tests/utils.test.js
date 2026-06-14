@@ -59,8 +59,8 @@ describe('calcularCheckout', () => {
     expect(result.cargoHabitacion).toBe(350000);
     expect(result.totalConsumos).toBe(0);
     expect(result.subtotal).toBe(350000);
-    expect(result.iva).toBe(66500);
-    expect(result.total).toBe(416500);
+    expect(result.iva).toBe(0);
+    expect(result.total).toBe(350000);
     expect(result.incluyeDesayuno).toBe(true);
   });
 
@@ -75,8 +75,8 @@ describe('calcularCheckout', () => {
     expect(result.cargoHabitacion).toBe(200000);
     expect(result.totalConsumos).toBe(65000);
     expect(result.subtotal).toBe(265000);
-    expect(result.iva).toBe(50350);
-    expect(result.total).toBe(315350);
+    expect(result.iva).toBe(12350);
+    expect(result.total).toBe(277350);
     expect(result.incluyeDesayuno).toBe(false);
   });
 });

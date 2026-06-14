@@ -1,9 +1,19 @@
-import { CheckCircle, User, ArrowLeft } from 'lucide-react';
+import { ArrowLeft, CheckCircle, User } from 'lucide-react';
 import PantallaForm from './PantallaForm';
 
-export default function CheckinTypeStep({ standalone, onNav, onSelectCheckin, onSelectNew }) {
+export default function CheckinTypeStep({
+  standalone,
+  onNav,
+  onSelectCheckin,
+  onSelectNew,
+}) {
   return (
-    <PantallaForm standalone={standalone} titulo="Registrar Huesped" desc="Selecciona el tipo de registro" onVolver={() => onNav('menu')}>
+    <PantallaForm
+      standalone={standalone}
+      titulo="Registrar Huesped"
+      desc="Selecciona el tipo de registro"
+      onVolver={() => onNav('menu')}
+    >
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <button
           onClick={onSelectCheckin}
@@ -15,9 +25,15 @@ export default function CheckinTypeStep({ standalone, onNav, onSelectCheckin, on
             </div>
             <ArrowLeft className="w-5 h-5 text-blue-400 group-hover:translate-x-1 transition-transform" />
           </div>
-          <h3 className="text-lg font-bold text-gray-900 mb-1">Realizar Check-in</h3>
-          <p className="text-sm text-gray-500">Huéspedes con reserva previa confirmada</p>
-          <div className="mt-3 text-xs text-blue-600 font-medium">Ver habitaciones reservadas →</div>
+          <h3 className="text-lg font-bold text-gray-900 mb-1">
+            Realizar Check-in
+          </h3>
+          <p className="text-sm text-gray-500">
+            Huéspedes con reserva previa confirmada
+          </p>
+          <div className="mt-3 text-xs text-blue-600 font-medium">
+            Ver habitaciones reservadas →
+          </div>
         </button>
 
         <button
@@ -30,9 +46,13 @@ export default function CheckinTypeStep({ standalone, onNav, onSelectCheckin, on
             </div>
             <ArrowLeft className="w-5 h-5 text-green-400 group-hover:translate-x-1 transition-transform" />
           </div>
-          <h3 className="text-lg font-bold text-gray-900 mb-1">Registro Nuevo</h3>
+          <h3 className="text-lg font-bold text-gray-900 mb-1">
+            Registro Nuevo
+          </h3>
           <p className="text-sm text-gray-500">Registro sin reserva previa</p>
-          <div className="mt-3 text-xs text-green-600 font-medium">Ver habitaciones disponibles →</div>
+          <div className="mt-3 text-xs text-green-600 font-medium">
+            Ver habitaciones disponibles →
+          </div>
         </button>
       </div>
     </PantallaForm>

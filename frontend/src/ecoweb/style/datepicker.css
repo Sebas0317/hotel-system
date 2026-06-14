@@ -44,9 +44,11 @@
 
 .react-datepicker-popper {
   padding-top: 0;
-  margin-top: -8px !important; /* Remove gap: align calendar flush with filter bar */
+  margin-top: -8px; /* Remove gap: align calendar flush with filter bar */
   z-index: 100;
-  transition: opacity 0.2s ease-out, transform 0.2s ease-out;
+  transition:
+    opacity 0.2s ease-out,
+    transform 0.2s ease-out;
 }
 .react-datepicker-popper[data-placement^="bottom"] {
   padding-top: 0;
@@ -111,8 +113,8 @@
 
 /* Day row: white bg, dark text; minimal gap (cancel lib margin-bottom: -8px) */
 .react-datepicker .react-datepicker__day-names {
-  margin-bottom: 0 !important;
-  padding: 0.35rem 0 0 !important;
+  margin-bottom: 0;
+  padding: 0.35rem 0 0;
   line-height: 1.7rem;
   background: #fff;
   color: #000;
@@ -122,21 +124,21 @@
   color: #000;
 }
 .react-datepicker .react-datepicker__month {
-  margin-top: 0 !important;
-  padding-top: 0 !important;
+  margin-top: 0;
+  padding-top: 0;
 }
 
 /* Fade previous/next month dates for better visual distinction */
 .react-datepicker__day--outside-month {
-  color: #9ca3af !important;
+  color: #9ca3af;
   opacity: 0.85;
 }
 
 /* Full-width popper inside reservation form (RoomDetails) */
 .datepicker-popper-fullwidth {
-  position: absolute !important;
-  width: var(--datepicker-popper-width, 100%) !important;
-  min-width: var(--datepicker-popper-width, 100%) !important;
-  left: 0 !important;
-  right: 0 !important;
+  position: absolute;
+  width: var(--datepicker-popper-width, 100%);
+  min-width: var(--datepicker-popper-width, 100%);
+  left: 0;
+  right: 0;
 }

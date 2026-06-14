@@ -8,7 +8,12 @@ const variants = {
   info: 'bg-blue-600 text-white',
 };
 
-export function Badge({ className = '', variant = 'default', children, ...props }) {
+export function Badge({
+  className = '',
+  variant = 'default',
+  children,
+  ...props
+}) {
   return (
     <span
       className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors ${variants[variant]} ${className}`.trim()}

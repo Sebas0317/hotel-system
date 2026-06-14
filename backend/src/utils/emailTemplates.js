@@ -1,6 +1,6 @@
 'use strict';
 
-const BASE_STYLE = `
+const _BASE_STYLE = `
   body { margin: 0; padding: 0; background-color: #f5f5f5; font-family: 'Segoe UI', Arial, sans-serif; }
   .container { max-width: 560px; margin: 0 auto; padding: 32px 24px; }
   .card { background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
@@ -55,7 +55,9 @@ ${content}
 }
 
 function verificationEmail(code, expiresInMin = 5) {
-  return wrap('Verifica tu correo', `
+  return wrap(
+    'Verifica tu correo',
+    `
     <h2 style="color:#1a1a1a;font-size:18px;margin:0 0 12px;">Verifica tu direccion de correo</h2>
     <p style="color:#555;font-size:14px;line-height:1.6;margin:0 0 16px;">
       Gracias por registrarte en EcoBosque Hotel. Usa el siguiente codigo para verificar tu direccion de correo electronico:
@@ -69,11 +71,14 @@ function verificationEmail(code, expiresInMin = 5) {
     <p style="color:#999;font-size:12px;margin:16px 0 0;">
       Si no creaste una cuenta, ignora este mensaje.
     </p>
-  `);
+  `
+  );
 }
 
 function recoveryEmail(code, expiresInMin = 10) {
-  return wrap('Recuperacion de contrasena', `
+  return wrap(
+    'Recuperacion de contrasena',
+    `
     <h2 style="color:#1a1a1a;font-size:18px;margin:0 0 12px;">Recuperacion de contrasena</h2>
     <p style="color:#555;font-size:14px;line-height:1.6;margin:0 0 16px;">
       Has solicitado restablecer tu contrasena de administrador. Ingresa el siguiente codigo para continuar:
@@ -87,11 +92,14 @@ function recoveryEmail(code, expiresInMin = 10) {
     <div class="alert" style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:12px 16px;color:#991b1b;font-size:13px;margin:16px 0;">
       Si no solicitaste este cambio, ignora este mensaje y tu contrasena seguira siendo la misma.
     </div>
-  `);
+  `
+  );
 }
 
 function twoFactorEmail(code, expiresInMin = 5) {
-  return wrap('Codigo de verificacion 2FA', `
+  return wrap(
+    'Codigo de verificacion 2FA',
+    `
     <h2 style="color:#1a1a1a;font-size:18px;margin:0 0 12px;">Codigo de verificacion</h2>
     <p style="color:#555;font-size:14px;line-height:1.6;margin:0 0 16px;">
       Se ha iniciado sesion en tu cuenta de administrador. Ingresa el siguiente codigo para completar el acceso:
@@ -105,11 +113,14 @@ function twoFactorEmail(code, expiresInMin = 5) {
     <p style="color:#999;font-size:12px;margin:16px 0 0;">
       Por seguridad, no compartas este codigo con nadie.
     </p>
-  `);
+  `
+  );
 }
 
 function passwordChangedEmail() {
-  return wrap('Contrasena actualizada', `
+  return wrap(
+    'Contrasena actualizada',
+    `
     <h2 style="color:#1a1a1a;font-size:18px;margin:0 0 12px;">Contrasena actualizada exitosamente</h2>
     <p style="color:#555;font-size:14px;line-height:1.6;margin:0 0 16px;">
       Te confirmamos que tu contrasena de administrador ha sido cambiada exitosamente.
@@ -117,11 +128,14 @@ function passwordChangedEmail() {
     <div class="alert" style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:12px 16px;color:#166534;font-size:13px;margin:16px 0;">
       Si realizaste este cambio, no necesitas hacer nada mas. Si no lo hiciste, contacta al soporte del sistema inmediatamente.
     </div>
-  `);
+  `
+  );
 }
 
 function welcomeEmail(email) {
-  return wrap('Bienvenido a EcoBosque', `
+  return wrap(
+    'Bienvenido a EcoBosque',
+    `
     <h2 style="color:#1a1a1a;font-size:18px;margin:0 0 12px;">Bienvenido al panel de administracion</h2>
     <p style="color:#555;font-size:14px;line-height:1.6;margin:0 0 16px;">
       La cuenta de administrador ha sido registrada con el correo <strong>${email}</strong>.
@@ -129,7 +143,14 @@ function welcomeEmail(email) {
     <p style="color:#555;font-size:14px;line-height:1.6;margin:0 0 16px;">
       Ya puedes iniciar sesion y gestionar el hotel. Te recomendamos activar la verificacion en dos pasos (2FA) para mayor seguridad.
     </p>
-  `);
+  `
+  );
 }
 
-module.exports = { verificationEmail, recoveryEmail, twoFactorEmail, passwordChangedEmail, welcomeEmail };
+module.exports = {
+  verificationEmail,
+  recoveryEmail,
+  twoFactorEmail,
+  passwordChangedEmail,
+  welcomeEmail,
+};

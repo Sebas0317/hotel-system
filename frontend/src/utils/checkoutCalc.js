@@ -2,7 +2,7 @@
  * Checkout calculation utility (frontend version).
  * Computes room charges, consumos total, IVA, and grand total.
  * Mirrors backend/src/utils/checkoutCalc.js for consistent totals.
- * 
+ *
  * All tariffs include breakfast.
  *
  * @param {Object} params
@@ -12,7 +12,12 @@
  * @param {Object} [params.tarifas] - Live tariff map from backend { [tipo]: { precio, incluyeDesayuno } }
  * @returns {Object} { tarifaNoche, noches, cargoHabitacion, totalConsumos, subtotal, iva, total, incluyeDesayuno }
  */
-export function calcularCheckout({ roomTipo, checkIn, consumos = [], tarifas = {} }) {
+export function calcularCheckout({
+  roomTipo,
+  checkIn,
+  consumos = [],
+  tarifas = {},
+}) {
   const roomTarifa = tarifas[roomTipo];
   const tarifaNoche = roomTarifa?.precio || 200000;
   const incluyeDesayuno = roomTarifa?.incluyeDesayuno ?? true;
@@ -21,13 +26,16 @@ export function calcularCheckout({ roomTipo, checkIn, consumos = [], tarifas = {
   if (checkIn) {
     const checkInDate = new Date(checkIn);
     const now = new Date();
-    noches = Math.max(1, Math.ceil((now - checkInDate) / (1000 * 60 * 60 * 24)));
+    noches = Math.max(
+      1,
+      Math.ceil((now - checkInDate) / (1000 * 60 * 60 * 24))
+    );
   }
 
   const cargoHabitacion = tarifaNoche * noches;
   const totalConsumos = consumos.reduce((sum, c) => sum + (c.precio || 0), 0);
   const subtotal = cargoHabitacion + totalConsumos;
-  const iva = Math.round(subtotal * 0.19);
+  const iva = Math.round(totalConsumos * 0.19);
   const total = subtotal + iva;
 
   return {

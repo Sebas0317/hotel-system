@@ -1,14 +1,39 @@
-import { useState, useEffect, memo } from 'react';
-import { checkIn, checkout, cancelReservation, createConsumo, reservar, updateGuest, updateRoomStatus } from '../services/api';
-import { PRODUCTOS, CATEGORIAS_CONSUMO, CAT_ICONS, METODOS_PAGO, ESTADO_CFG } from '../constants';
-import { COP, FECHA } from '../utils/helpers';
-import { calcularCheckout } from '../utils/checkoutCalc';
+import {
+  AlertTriangle,
+  Bed,
+  Bell,
+  Calendar,
+  CheckCircle,
+  ClipboardList,
+  CreditCard,
+  Edit2,
+  Info,
+  Plus,
+  RefreshCw,
+  Save,
+  Trash2,
+  UtensilsCrossed,
+  XCircle,
+} from 'lucide-react';
+import { memo, useEffect, useState } from 'react';
+import {
+  CATEGORIAS_CONSUMO,
+  ESTADO_CFG,
+  METODOS_PAGO,
+  PRODUCTOS,
+} from '../constants';
 import { usePrices } from '../hooks/usePrices';
 import {
-  CheckCircle, XCircle, Info, AlertTriangle, Search, Calendar, User, Phone, Mail,
-  DollarSign, CreditCard, Building2, Clock, Package, UtensilsCrossed, MapPin, Edit2,
-  Trash2, X, RefreshCw, Plus, Save, Bed, Utensils, Wallet, Bell, KeyRound, Ban, ClipboardList
-} from 'lucide-react';
+  cancelReservation,
+  checkIn,
+  checkout,
+  createConsumo,
+  reservar,
+  updateGuest,
+  updateRoomStatus,
+} from '../services/api';
+import { calcularCheckout } from '../utils/checkoutCalc';
+import { COP } from '../utils/helpers';
 
 /**
  * Toast notification component — shows a temporary success/error message.
@@ -23,8 +48,17 @@ function Toast({ message, type, onDismiss }) {
 
   return (
     <div className="toast-overlay" onClick={onDismiss}>
-      <div className={`toast-box toast-${type}`} onClick={(e) => e.stopPropagation()}>
-        {type === 'success' ? <CheckCircle className="w-5 h-5" /> : type === 'error' ? <XCircle className="w-5 h-5" /> : <Info className="w-5 h-5" />}
+      <div
+        className={`toast-box toast-${type}`}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {type === 'success' ? (
+          <CheckCircle className="w-5 h-5" />
+        ) : type === 'error' ? (
+          <XCircle className="w-5 h-5" />
+        ) : (
+          <Info className="w-5 h-5" />
+        )}
         <span>{message}</span>
       </div>
     </div>
@@ -40,12 +74,14 @@ function ReservationForm({ room, onAction, onRefresh, onCancel }) {
     huesped: '',
     telefono: '',
     email: '',
+    documento: '',
     noches: 3,
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const updateField = (field, value) => setForm((prev) => ({ ...prev, [field]: value }));
+  const updateField = (field, value) =>
+    setForm((prev) => ({ ...prev, [field]: value }));
 
   const checkInDate = new Date();
   const checkOutDate = new Date(checkInDate);
@@ -53,7 +89,8 @@ function ReservationForm({ room, onAction, onRefresh, onCancel }) {
 
   const handleReservar = async () => {
     if (!form.huesped.trim()) return setError('Ingresa el nombre del huésped');
-    if (form.noches < 1 || form.noches > 30) return setError('Noches debe ser entre 1 y 30');
+    if (form.noches < 1 || form.noches > 30)
+      return setError('Noches debe ser entre 1 y 30');
     setLoading(true);
     setError('');
     try {
@@ -61,9 +98,13 @@ function ReservationForm({ room, onAction, onRefresh, onCancel }) {
         huesped: form.huesped.trim(),
         telefono: form.telefono.trim(),
         email: form.email.trim(),
+        documento: form.documento.trim(),
         noches: form.noches,
       });
-      onAction('success', `Reserva creada para ${form.huesped} — Habitación #${room.numero}`);
+      onAction(
+        'success',
+        `Reserva creada para ${form.huesped} — Habitación #${room.numero}`
+      );
       onRefresh();
     } catch (e) {
       setError(e.message);
@@ -74,32 +115,86 @@ function ReservationForm({ room, onAction, onRefresh, onCancel }) {
 
   return (
     <div className="ra-form">
-      <h4 className="ra-form-title"><ClipboardList className="w-4 h-4 inline mr-1" /> Nueva Reserva</h4>
+      <h4 className="ra-form-title">
+        <ClipboardList className="w-4 h-4 inline mr-1" /> Nueva Reserva
+      </h4>
       <div className="ra-field">
         <label>Nombre del huésped</label>
-        <input type="text" placeholder="Ej: María López" value={form.huesped} onChange={(e) => updateField('huesped', e.target.value)} />
+        <input
+          type="text"
+          placeholder="Ej: María López"
+          value={form.huesped}
+          onChange={(e) => updateField('huesped', e.target.value)}
+        />
       </div>
       <div className="ra-field">
         <label>Teléfono</label>
-        <input type="tel" placeholder="Ej: 310 123 4567" value={form.telefono} onChange={(e) => updateField('telefono', e.target.value)} />
+        <input
+          type="tel"
+          placeholder="Ej: 310 123 4567"
+          value={form.telefono}
+          onChange={(e) => updateField('telefono', e.target.value)}
+        />
       </div>
       <div className="ra-field">
         <label>Email</label>
-        <input type="email" placeholder="Ej: maria@email.com" value={form.email} onChange={(e) => updateField('email', e.target.value)} />
+        <input
+          type="email"
+          placeholder="Ej: maria@email.com"
+          value={form.email}
+          onChange={(e) => updateField('email', e.target.value)}
+        />
+      </div>
+      <div className="ra-field">
+        <label>Documento</label>
+        <input
+          type="text"
+          placeholder="Ej: CC 123456789"
+          value={form.documento}
+          onChange={(e) => updateField('documento', e.target.value)}
+        />
       </div>
       <div className="ra-field">
         <label>Noches de estadía</label>
-        <input type="number" min="1" max="30" value={form.noches} onChange={(e) => updateField('noches', parseInt(e.target.value) || 1)} />
+        <input
+          type="number"
+          min="1"
+          max="30"
+          value={form.noches}
+          onChange={(e) =>
+            updateField('noches', parseInt(e.target.value, 10) || 1)
+          }
+        />
       </div>
       <div className="ra-dates-preview">
-        <span><Calendar className="w-3 h-3 inline mr-1" /> {checkInDate.toLocaleDateString('es-CO')} → {checkOutDate.toLocaleDateString('es-CO')}</span>
+        <span>
+          <Calendar className="w-3 h-3 inline mr-1" />{' '}
+          {checkInDate.toLocaleDateString('es-CO')} →{' '}
+          {checkOutDate.toLocaleDateString('es-CO')}
+        </span>
       </div>
-      {error && <div className="ra-error"><AlertTriangle className="w-4 h-4 inline mr-1" /> {error}</div>}
+      {error && (
+        <div className="ra-error">
+          <AlertTriangle className="w-4 h-4 inline mr-1" /> {error}
+        </div>
+      )}
       <div className="ra-btn-row">
-        <button className="ra-btn ra-btn-primary" onClick={handleReservar} disabled={loading}>
-          {loading ? 'Procesando...' : <><CheckCircle className="w-4 h-4 inline mr-1" /> Confirmar Reserva</>}
+        <button
+          className="ra-btn ra-btn-primary"
+          onClick={handleReservar}
+          disabled={loading}
+        >
+          {loading ? (
+            'Procesando...'
+          ) : (
+            <>
+              <CheckCircle className="w-4 h-4 inline mr-1" /> Confirmar Reserva
+            </>
+          )}
         </button>
-        <button className="ra-btn ra-btn-secondary" onClick={onCancel}>Cancelar</button>
+        <button className="ra-btn ra-btn-secondary" onClick={onCancel}>
+          Cancelar
+        </button>
       </div>
     </div>
   );
@@ -118,10 +213,12 @@ function GuestEditor({ room, onAction, onRefresh, onCancel }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const updateField = (field, value) => setForm((prev) => ({ ...prev, [field]: value }));
+  const updateField = (field, value) =>
+    setForm((prev) => ({ ...prev, [field]: value }));
 
   const handleUpdate = async () => {
-    if (!form.huesped.trim()) return setError('El nombre del huésped es requerido');
+    if (!form.huesped.trim())
+      return setError('El nombre del huésped es requerido');
     setLoading(true);
     setError('');
     try {
@@ -130,7 +227,10 @@ function GuestEditor({ room, onAction, onRefresh, onCancel }) {
         telefono: form.telefono.trim(),
         email: form.email.trim(),
       });
-      onAction('success', `Datos del huésped actualizados — Habitación #${room.numero}`);
+      onAction(
+        'success',
+        `Datos del huésped actualizados — Habitación #${room.numero}`
+      );
       onRefresh();
     } catch (e) {
       setError(e.message);
@@ -141,25 +241,55 @@ function GuestEditor({ room, onAction, onRefresh, onCancel }) {
 
   return (
     <div className="ra-form">
-      <h4 className="ra-form-title"><Edit2 className="w-4 h-4 inline mr-1" /> Editar Datos del Huesped</h4>
+      <h4 className="ra-form-title">
+        <Edit2 className="w-4 h-4 inline mr-1" /> Editar Datos del Huesped
+      </h4>
       <div className="ra-field">
         <label>Nombre del huésped</label>
-        <input type="text" value={form.huesped} onChange={(e) => updateField('huesped', e.target.value)} />
+        <input
+          type="text"
+          value={form.huesped}
+          onChange={(e) => updateField('huesped', e.target.value)}
+        />
       </div>
       <div className="ra-field">
         <label>Teléfono</label>
-        <input type="tel" value={form.telefono} onChange={(e) => updateField('telefono', e.target.value)} />
+        <input
+          type="tel"
+          value={form.telefono}
+          onChange={(e) => updateField('telefono', e.target.value)}
+        />
       </div>
       <div className="ra-field">
         <label>Email</label>
-        <input type="email" value={form.email} onChange={(e) => updateField('email', e.target.value)} />
+        <input
+          type="email"
+          value={form.email}
+          onChange={(e) => updateField('email', e.target.value)}
+        />
       </div>
-      {error && <div className="ra-error"><AlertTriangle className="w-4 h-4 inline mr-1" /> {error}</div>}
+      {error && (
+        <div className="ra-error">
+          <AlertTriangle className="w-4 h-4 inline mr-1" /> {error}
+        </div>
+      )}
       <div className="ra-btn-row">
-        <button className="ra-btn ra-btn-primary" onClick={handleUpdate} disabled={loading}>
-          {loading ? 'Guardando...' : <><Save className="w-4 h-4 inline mr-1" /> Guardar Cambios</>}
+        <button
+          className="ra-btn ra-btn-primary"
+          onClick={handleUpdate}
+          disabled={loading}
+        >
+          {loading ? (
+            'Guardando...'
+          ) : (
+            <>
+              <Save className="w-4 h-4 inline mr-1" /> Guardar Cambios
+            </>
+          )}
         </button>
-        <button className="ra-btn ra-btn-secondary" onClick={onCancel}>Cancelar</button>
+        <button className="ra-btn ra-btn-secondary" onClick={onCancel}>
+          Cancelar
+        </button>
       </div>
     </div>
   );
@@ -175,13 +305,18 @@ function StatusEditor({ room, onAction, onRefresh, onCancel }) {
   const [error, setError] = useState('');
 
   const handleUpdate = async () => {
-    if (estado === room.estado) return setError('Selecciona un estado diferente');
-    if (estado === 'ocupada') return setError('No se puede cambiar directamente a ocupada');
+    if (estado === room.estado)
+      return setError('Selecciona un estado diferente');
+    if (estado === 'ocupada')
+      return setError('No se puede cambiar directamente a ocupada');
     setLoading(true);
     setError('');
     try {
       await updateRoomStatus(room.id, estado);
-      onAction('success', `Estado actualizado a "${estado}" — Habitación #${room.numero}`);
+      onAction(
+        'success',
+        `Estado actualizado a "${estado}" — Habitación #${room.numero}`
+      );
       onRefresh();
     } catch (e) {
       setError(e.message);
@@ -207,16 +342,23 @@ function StatusEditor({ room, onAction, onRefresh, onCancel }) {
     ocupada: ['disponible', 'limpieza', 'mantenimiento', 'reservada'],
   };
 
-  const OPERATIONAL_STATES = (ALLOWED_FROM_CURRENT[room.estado] || ['disponible']).map(key => {
-    const state = ALL_STATES.find(s => s.key === key);
+  const OPERATIONAL_STATES = (
+    ALLOWED_FROM_CURRENT[room.estado] || ['disponible']
+  ).map((key) => {
+    const state = ALL_STATES.find((s) => s.key === key);
     return state || { key, label: key };
   });
 
   return (
     <div className="ra-form">
-      <h4 className="ra-form-title"><RefreshCw className="w-4 h-4 inline mr-1" /> Modificar Estado</h4>
+      <h4 className="ra-form-title">
+        <RefreshCw className="w-4 h-4 inline mr-1" /> Modificar Estado
+      </h4>
       <div className="ra-field">
-        <label>Estado actual: <strong>{ESTADO_CFG[room.estado]?.label || room.estado}</strong></label>
+        <label>
+          Estado actual:{' '}
+          <strong>{ESTADO_CFG[room.estado]?.label || room.estado}</strong>
+        </label>
         <div className="ra-status-options">
           {OPERATIONAL_STATES.map((s) => {
             const cfg = ESTADO_CFG[s.key];
@@ -224,7 +366,11 @@ function StatusEditor({ room, onAction, onRefresh, onCancel }) {
               <button
                 key={s.key}
                 className={`ra-status-btn ${s.key} ${estado === s.key ? 'activo' : ''}`}
-                style={estado === s.key ? { borderColor: cfg?.dot, background: cfg?.bg } : {}}
+                style={
+                  estado === s.key
+                    ? { borderColor: cfg?.dot, background: cfg?.bg }
+                    : {}
+                }
                 onClick={() => setEstado(s.key)}
               >
                 {s.label}
@@ -233,12 +379,28 @@ function StatusEditor({ room, onAction, onRefresh, onCancel }) {
           })}
         </div>
       </div>
-      {error && <div className="ra-error"><AlertTriangle className="w-4 h-4 inline mr-1" /> {error}</div>}
+      {error && (
+        <div className="ra-error">
+          <AlertTriangle className="w-4 h-4 inline mr-1" /> {error}
+        </div>
+      )}
       <div className="ra-btn-row">
-        <button className="ra-btn ra-btn-primary" onClick={handleUpdate} disabled={loading}>
-          {loading ? 'Guardando...' : <><Save className="w-4 h-4 inline mr-1" /> Guardar Cambio</>}
+        <button
+          className="ra-btn ra-btn-primary"
+          onClick={handleUpdate}
+          disabled={loading}
+        >
+          {loading ? (
+            'Guardando...'
+          ) : (
+            <>
+              <Save className="w-4 h-4 inline mr-1" /> Guardar Cambio
+            </>
+          )}
         </button>
-        <button className="ra-btn ra-btn-secondary" onClick={onCancel}>Cancelar</button>
+        <button className="ra-btn ra-btn-secondary" onClick={onCancel}>
+          Cancelar
+        </button>
       </div>
     </div>
   );
@@ -261,7 +423,8 @@ function ConsumoManager({ room, onAction, onRefresh }) {
   const catalogo = productos[cat] || PRODUCTOS[cat] || [];
 
   const registrar = async () => {
-    if (!form.descripcion || !form.precio) return setError('Completa descripción y precio');
+    if (!form.descripcion || !form.precio)
+      return setError('Completa descripción y precio');
     setLoading(true);
     setError('');
     try {
@@ -283,17 +446,29 @@ function ConsumoManager({ room, onAction, onRefresh }) {
 
   return (
     <div className="ra-consumo-manager">
-      <h4 className="ra-form-title"><Plus className="w-4 h-4 inline mr-1" /> Agregar Consumo</h4>
+      <h4 className="ra-form-title">
+        <Plus className="w-4 h-4 inline mr-1" /> Agregar Consumo
+      </h4>
       <div className="ra-cat-tabs">
         {CATEGORIAS_CONSUMO.map((c) => (
-          <button key={c.key} className={`ra-cat-tab ${cat === c.key ? 'activo' : ''}`} onClick={() => setCat(c.key)}>
+          <button
+            key={c.key}
+            className={`ra-cat-tab ${cat === c.key ? 'activo' : ''}`}
+            onClick={() => setCat(c.key)}
+          >
             {c.label}
           </button>
         ))}
       </div>
       <div className="ra-catalogo-mini">
         {catalogo.slice(0, 5).map((p, i) => (
-          <button key={i} className={`ra-cat-item ${form.descripcion === p.nombre ? 'seleccionado' : ''}`} onClick={() => setForm({ descripcion: p.nombre, precio: String(p.precio) })}>
+          <button
+            key={i}
+            className={`ra-cat-item ${form.descripcion === p.nombre ? 'seleccionado' : ''}`}
+            onClick={() =>
+              setForm({ descripcion: p.nombre, precio: String(p.precio) })
+            }
+          >
             <span>{p.nombre}</span>
             <span className="ra-cat-precio">{COP(p.precio)}</span>
           </button>
@@ -301,15 +476,41 @@ function ConsumoManager({ room, onAction, onRefresh }) {
       </div>
       <div className="ra-field">
         <label>Descripción</label>
-        <input type="text" placeholder="O escribe manualmente..." value={form.descripcion} onChange={(e) => setForm({ ...form, descripcion: e.target.value })} />
+        <input
+          type="text"
+          placeholder="O escribe manualmente..."
+          value={form.descripcion}
+          onChange={(e) => setForm({ ...form, descripcion: e.target.value })}
+        />
       </div>
       <div className="ra-field">
         <label>Precio (COP)</label>
-        <input type="number" placeholder="Ej: 25000" value={form.precio} onChange={(e) => setForm({ ...form, precio: e.target.value })} min="0" />
+        <input
+          type="number"
+          placeholder="Ej: 25000"
+          value={form.precio}
+          onChange={(e) => setForm({ ...form, precio: e.target.value })}
+          min="0"
+        />
       </div>
-      {error && <div className="ra-error"><AlertTriangle className="w-4 h-4 inline mr-1" /> {error}</div>}
-      <button className="ra-btn ra-btn-primary" onClick={registrar} disabled={loading || !form.descripcion || !form.precio}>
-        {loading ? 'Guardando...' : <><CheckCircle className="w-4 h-4 inline mr-1" /> Registrar {form.descripcion ? `"${form.descripcion}"` : 'consumo'}</>}
+      {error && (
+        <div className="ra-error">
+          <AlertTriangle className="w-4 h-4 inline mr-1" /> {error}
+        </div>
+      )}
+      <button
+        className="ra-btn ra-btn-primary"
+        onClick={registrar}
+        disabled={loading || !form.descripcion || !form.precio}
+      >
+        {loading ? (
+          'Guardando...'
+        ) : (
+          <>
+            <CheckCircle className="w-4 h-4 inline mr-1" /> Registrar{' '}
+            {form.descripcion ? `"${form.descripcion}"` : 'consumo'}
+          </>
+        )}
       </button>
     </div>
   );
@@ -346,7 +547,10 @@ function CheckoutPanel({ room, consumos, onAction, onRefresh }) {
     try {
       const valorFinal = metodoPago === 'efectivo' ? recibido : totals.total;
       await checkout(room.id, { metodoPago, valorRecibido: valorFinal });
-      onAction('success', `Checkout completado — Habitación #${room.numero} — Total: ${COP(totals.total)}`);
+      onAction(
+        'success',
+        `Checkout completado — Habitación #${room.numero} — Total: ${COP(totals.total)}`
+      );
       onRefresh();
     } catch (e) {
       setError(e.message);
@@ -357,20 +561,28 @@ function CheckoutPanel({ room, consumos, onAction, onRefresh }) {
 
   return (
     <div className="ra-checkout">
-      <h4 className="ra-form-title"><CreditCard className="w-4 h-4 inline mr-1" /> Check-out</h4>
+      <h4 className="ra-form-title">
+        <CreditCard className="w-4 h-4 inline mr-1" /> Check-out
+      </h4>
 
       {/* Breakdown */}
       <div className="ra-breakdown">
+        <div className="ra-breakdown-row">
+          <span className="flex items-center gap-1">
+            <Bed className="w-3 h-3 inline mr-1" /> Habitacion x {totals.noches}{' '}
+            noche{totals.noches > 1 ? 's' : ''}
+          </span>
+          <strong>{COP(totals.cargoHabitacion)}</strong>
+        </div>
+        {totals.totalConsumos > 0 && (
           <div className="ra-breakdown-row">
-            <span className="flex items-center gap-1"><Bed className="w-3 h-3 inline mr-1" /> Habitacion x {totals.noches} noche{totals.noches > 1 ? 's' : ''}</span>
-            <strong>{COP(totals.cargoHabitacion)}</strong>
+            <span className="flex items-center gap-1">
+              <UtensilsCrossed className="w-3 h-3 inline mr-1" /> Consumos (
+              {consumos.length})
+            </span>
+            <strong>{COP(totals.totalConsumos)}</strong>
           </div>
-          {totals.totalConsumos > 0 && (
-            <div className="ra-breakdown-row">
-              <span className="flex items-center gap-1"><UtensilsCrossed className="w-3 h-3 inline mr-1" /> Consumos ({consumos.length})</span>
-              <strong>{COP(totals.totalConsumos)}</strong>
-            </div>
-          )}
+        )}
         <div className="ra-breakdown-row ra-breakdown-subtotal">
           <span>Subtotal</span>
           <strong>{COP(totals.subtotal)}</strong>
@@ -388,8 +600,18 @@ function CheckoutPanel({ room, consumos, onAction, onRefresh }) {
       {/* Payment methods */}
       <div className="ra-metodos">
         {METODOS_PAGO.map((m) => (
-          <button key={m.key} className={`ra-metodo-btn ${metodoPago === m.key ? 'activo' : ''}`} onClick={() => { setMetodoPago(m.key); setValorRecibido(''); }}>
-            <span className="flex items-center justify-center">{m.icon && <m.icon className="w-4 h-4" />}</span><span>{m.label}</span>
+          <button
+            key={m.key}
+            className={`ra-metodo-btn ${metodoPago === m.key ? 'activo' : ''}`}
+            onClick={() => {
+              setMetodoPago(m.key);
+              setValorRecibido('');
+            }}
+          >
+            <span className="flex items-center justify-center">
+              {m.icon && <m.icon className="w-4 h-4" />}
+            </span>
+            <span>{m.label}</span>
           </button>
         ))}
       </div>
@@ -398,17 +620,22 @@ function CheckoutPanel({ room, consumos, onAction, onRefresh }) {
       {metodoPago === 'efectivo' && (
         <div className="ra-field">
           <label>Valor recibido (COP)</label>
-          <input 
-            type="number" 
-            step="1" 
-            min="0" 
-            placeholder={`Mín. ${totals.total.toLocaleString('es-CO')}`} 
-            value={valorRecibido} 
+          <input
+            type="number"
+            step="1"
+            min="0"
+            placeholder={`Mín. ${totals.total.toLocaleString('es-CO')}`}
+            value={valorRecibido}
             onChange={(e) => setValorRecibido(e.target.value)}
-            onKeyDown={(e) => { if (e.key === 'ArrowUp' || e.key === 'ArrowDown') e.preventDefault(); }}
+            onKeyDown={(e) => {
+              if (e.key === 'ArrowUp' || e.key === 'ArrowDown')
+                e.preventDefault();
+            }}
           />
           {valorRecibido && (
-            <div className={`ra-cambio ${cambio >= 0 ? 'positivo' : 'negativo'}`}>
+            <div
+              className={`ra-cambio ${cambio >= 0 ? 'positivo' : 'negativo'}`}
+            >
               {cambio > 0 && `Cambio: ${COP(cambio)}`}
               {cambio < 0 && `Falta: ${COP(Math.abs(cambio))}`}
               {cambio === 0 && `Pago exacto`}
@@ -417,8 +644,20 @@ function CheckoutPanel({ room, consumos, onAction, onRefresh }) {
         </div>
       )}
 
-      {error && <div className="ra-error"><AlertTriangle className="w-4 h-4 inline mr-1" /> {error}</div>}
-      <button className="ra-btn ra-btn-danger" onClick={handleCheckout} disabled={loading || (metodoPago === 'efectivo' && (recibido < totals.total || !valorRecibido))}>
+      {error && (
+        <div className="ra-error">
+          <AlertTriangle className="w-4 h-4 inline mr-1" /> {error}
+        </div>
+      )}
+      <button
+        className="ra-btn ra-btn-danger"
+        onClick={handleCheckout}
+        disabled={
+          loading ||
+          (metodoPago === 'efectivo' &&
+            (recibido < totals.total || !valorRecibido))
+        }
+      >
         {loading ? 'Procesando...' : 'Confirmar Check-out'}
       </button>
     </div>
@@ -444,17 +683,37 @@ function RoomActions({ room, consumos, onAction, onRefresh }) {
   // ── AVAILABLE: Show "Hacer Reserva" + "Modificar Estado" buttons ──
   if (estado === 'disponible') {
     if (activeForm === 'reserva') {
-      return <ReservationForm room={room} onAction={onAction} onRefresh={onRefresh} onCancel={() => setActiveForm(null)} />;
+      return (
+        <ReservationForm
+          room={room}
+          onAction={onAction}
+          onRefresh={onRefresh}
+          onCancel={() => setActiveForm(null)}
+        />
+      );
     }
     if (activeForm === 'edit-status') {
-      return <StatusEditor room={room} onAction={onAction} onRefresh={onRefresh} onCancel={() => setActiveForm(null)} />;
+      return (
+        <StatusEditor
+          room={room}
+          onAction={onAction}
+          onRefresh={onRefresh}
+          onCancel={() => setActiveForm(null)}
+        />
+      );
     }
     return (
       <div className="ra-section">
-        <button className="ra-btn ra-btn-primary ra-btn-full" onClick={() => setActiveForm('reserva')}>
+        <button
+          className="ra-btn ra-btn-primary ra-btn-full"
+          onClick={() => setActiveForm('reserva')}
+        >
           <ClipboardList className="w-4 h-4 inline mr-1" /> Hacer Reserva
         </button>
-        <button className="ra-btn ra-btn-secondary ra-btn-full" onClick={() => setActiveForm('edit-status')}>
+        <button
+          className="ra-btn ra-btn-secondary ra-btn-full"
+          onClick={() => setActiveForm('edit-status')}
+        >
           <RefreshCw className="w-4 h-4 inline mr-1" /> Modificar Estado
         </button>
       </div>
@@ -464,20 +723,43 @@ function RoomActions({ room, consumos, onAction, onRefresh }) {
   // ── OCCUPIED: Show consumo manager + guest editor + checkout ──
   if (estado === 'ocupada') {
     if (activeForm === 'checkout') {
-      return <CheckoutPanel room={room} consumos={consumos} onAction={onAction} onRefresh={() => { setActiveForm(null); onRefresh(); }} />;
+      return (
+        <CheckoutPanel
+          room={room}
+          consumos={consumos}
+          onAction={onAction}
+          onRefresh={() => {
+            setActiveForm(null);
+            onRefresh();
+          }}
+        />
+      );
     }
     if (activeForm === 'edit-guest') {
-      return <GuestEditor room={room} onAction={onAction} onRefresh={onRefresh} onCancel={() => setActiveForm(null)} />;
+      return (
+        <GuestEditor
+          room={room}
+          onAction={onAction}
+          onRefresh={onRefresh}
+          onCancel={() => setActiveForm(null)}
+        />
+      );
     }
     return (
       <div className="ra-section">
         <ConsumoManager room={room} onAction={onAction} onRefresh={onRefresh} />
         <div className="ra-divider" />
-        <button className="ra-btn ra-btn-secondary ra-btn-full" onClick={() => setActiveForm('edit-guest')}>
+        <button
+          className="ra-btn ra-btn-secondary ra-btn-full"
+          onClick={() => setActiveForm('edit-guest')}
+        >
           <Edit2 className="w-4 h-4 inline mr-1" /> Editar Datos del Huésped
         </button>
         <div className="ra-divider" />
-        <button className="ra-btn ra-btn-danger ra-btn-full" onClick={() => setActiveForm('checkout')}>
+        <button
+          className="ra-btn ra-btn-danger ra-btn-full"
+          onClick={() => setActiveForm('checkout')}
+        >
           <CreditCard className="w-4 h-4 inline mr-1" /> Realizar Check-out
         </button>
       </div>
@@ -489,18 +771,42 @@ function RoomActions({ room, consumos, onAction, onRefresh }) {
     if (activeForm === 'confirm-checkin') {
       return (
         <div className="ra-confirm">
-          <p>¿Confirmar check-in para <strong>{room.huesped}</strong>?</p>
+          <p>
+            ¿Confirmar check-in para <strong>{room.huesped}</strong>?
+          </p>
           <div className="ra-btn-row">
-            <button className="ra-btn ra-btn-primary" onClick={async () => {
-              try {
-                await checkIn({ numero: room.numero, huesped: room.huesped, tipo: room.tipo });
-                onAction('success', `Check-in confirmado — Habitación #${room.numero}`);
-                onRefresh();
-              } catch (e) {
-                onAction('error', e.message);
-              }
-            }}><CheckCircle className="w-4 h-4 inline mr-1" /> Confirmar Check-in</button>
-            <button className="ra-btn ra-btn-secondary" onClick={() => setActiveForm(null)}>Volver</button>
+            <button
+              className="ra-btn ra-btn-primary"
+              onClick={async () => {
+                try {
+                  await checkIn({
+                    numero: room.numero,
+                    huesped: room.huesped,
+                    tipo: room.tipo,
+                    documento: room.documento,
+                    email: room.email,
+                    telefono: room.telefono,
+                    noches: room.noches,
+                    checkOut: room.checkOut,
+                  });
+                  onAction(
+                    'success',
+                    `Check-in confirmado — Habitación #${room.numero}`
+                  );
+                  onRefresh();
+                } catch (e) {
+                  onAction('error', e.message);
+                }
+              }}
+            >
+              <CheckCircle className="w-4 h-4 inline mr-1" /> Confirmar Check-in
+            </button>
+            <button
+              className="ra-btn ra-btn-secondary"
+              onClick={() => setActiveForm(null)}
+            >
+              Volver
+            </button>
           </div>
         </div>
       );
@@ -508,35 +814,68 @@ function RoomActions({ room, consumos, onAction, onRefresh }) {
     if (activeForm === 'confirm-cancel') {
       return (
         <div className="ra-confirm">
-          <p>¿Cancelar la reserva de <strong>{room.huesped}</strong>?</p>
-          <p className="ra-confirm-warn">La habitación volverá a estar disponible.</p>
+          <p>
+            ¿Cancelar la reserva de <strong>{room.huesped}</strong>?
+          </p>
+          <p className="ra-confirm-warn">
+            La habitación volverá a estar disponible.
+          </p>
           <div className="ra-btn-row">
-            <button className="ra-btn ra-btn-danger" onClick={async () => {
-              try {
-                await cancelReservation(room.id);
-                onAction('success', `Reserva cancelada — Habitación #${room.numero}`);
-                onRefresh();
-              } catch (e) {
-                onAction('error', e.message);
-              }
-            }}><Trash2 className="w-4 h-4 inline mr-1" /> Cancelar Reserva</button>
-            <button className="ra-btn ra-btn-secondary" onClick={() => setActiveForm(null)}>Volver</button>
+            <button
+              className="ra-btn ra-btn-danger"
+              onClick={async () => {
+                try {
+                  await cancelReservation(room.id);
+                  onAction(
+                    'success',
+                    `Reserva cancelada — Habitación #${room.numero}`
+                  );
+                  onRefresh();
+                } catch (e) {
+                  onAction('error', e.message);
+                }
+              }}
+            >
+              <Trash2 className="w-4 h-4 inline mr-1" /> Cancelar Reserva
+            </button>
+            <button
+              className="ra-btn ra-btn-secondary"
+              onClick={() => setActiveForm(null)}
+            >
+              Volver
+            </button>
           </div>
         </div>
       );
     }
     if (activeForm === 'edit-status') {
-      return <StatusEditor room={room} onAction={onAction} onRefresh={onRefresh} onCancel={() => setActiveForm(null)} />;
+      return (
+        <StatusEditor
+          room={room}
+          onAction={onAction}
+          onRefresh={onRefresh}
+          onCancel={() => setActiveForm(null)}
+        />
+      );
     }
     return (
       <div className="ra-section">
-        <button className="ra-btn ra-btn-primary ra-btn-full" onClick={() => setActiveForm('confirm-checkin')}>
+        <button
+          className="ra-btn ra-btn-primary ra-btn-full"
+          onClick={() => setActiveForm('confirm-checkin')}
+        >
           <Bell className="w-4 h-4 inline mr-1" /> Iniciar Check-in
         </button>
-        <button className="ra-btn ra-btn-secondary ra-btn-full" onClick={() => setActiveForm('confirm-cancel')}>
+        <button
+          className="ra-btn ra-btn-secondary ra-btn-full"
+          onClick={() => setActiveForm('confirm-cancel')}
+        >
           <Trash2 className="w-4 h-4 inline mr-1" /> Cancelar Reserva
         </button>
-        <button className="ra-btn ra-btn-secondary ra-btn-full" onClick={() => setActiveForm('edit-status')}>
+        <button
+          className="ra-btn ra-btn-secondary ra-btn-full"
+          onClick={() => setActiveForm('edit-status')}
+        >
           <RefreshCw className="w-4 h-4 inline mr-1" /> Modificar Estado
         </button>
       </div>
@@ -544,13 +883,27 @@ function RoomActions({ room, consumos, onAction, onRefresh }) {
   }
 
   // ── LIMPIEZA/MANTENIMIENTO/FUERA DE SERVICIO: Allow changing state
-  if (estado === 'limpieza' || estado === 'mantenimiento' || estado === 'fuera_servicio') {
+  if (
+    estado === 'limpieza' ||
+    estado === 'mantenimiento' ||
+    estado === 'fuera_servicio'
+  ) {
     if (activeForm === 'edit-status') {
-      return <StatusEditor room={room} onAction={onAction} onRefresh={onRefresh} onCancel={() => setActiveForm(null)} />;
+      return (
+        <StatusEditor
+          room={room}
+          onAction={onAction}
+          onRefresh={onRefresh}
+          onCancel={() => setActiveForm(null)}
+        />
+      );
     }
     return (
       <div className="ra-section">
-        <button className="ra-btn ra-btn-primary ra-btn-full" onClick={() => setActiveForm('edit-status')}>
+        <button
+          className="ra-btn ra-btn-primary ra-btn-full"
+          onClick={() => setActiveForm('edit-status')}
+        >
           <RefreshCw className="w-4 h-4 inline mr-1" /> Cambiar Estado
         </button>
       </div>
@@ -559,12 +912,22 @@ function RoomActions({ room, consumos, onAction, onRefresh }) {
 
   // Default: show status change button for all states
   if (activeForm === 'edit-status') {
-    return <StatusEditor room={room} onAction={onAction} onRefresh={onRefresh} onCancel={() => setActiveForm(null)} />;
+    return (
+      <StatusEditor
+        room={room}
+        onAction={onAction}
+        onRefresh={onRefresh}
+        onCancel={() => setActiveForm(null)}
+      />
+    );
   }
-  
+
   return (
     <div className="ra-section">
-      <button className="ra-btn ra-btn-primary ra-btn-full" onClick={() => setActiveForm('edit-status')}>
+      <button
+        className="ra-btn ra-btn-primary ra-btn-full"
+        onClick={() => setActiveForm('edit-status')}
+      >
         <RefreshCw className="w-4 h-4 inline mr-1" /> Cambiar Estado
       </button>
     </div>

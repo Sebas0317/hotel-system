@@ -1,12 +1,20 @@
-import { useState, useCallback, useMemo } from 'react';
-import { validarPin, fetchConsumos, checkout, safeText, normalizeErrorMessage as safeErrorMessage } from '../services/api';
-import { METODOS_PAGO, CAT_ICONS } from '../constants';
-import { COP, FECHA } from '../utils/helpers';
-import { calcularCheckout } from '../utils/checkoutCalc';
+import { AlertTriangle, Bed, Package } from 'lucide-react';
+import { useCallback, useMemo, useState } from 'react';
+import { METODOS_PAGO } from '../constants';
 import { usePrices } from '../hooks/usePrices';
-import PantallaForm from './PantallaForm';
+import {
+  checkout,
+  fetchConsumos,
+  normalizeErrorMessage as safeErrorMessage,
+  safeText,
+  setRoomToken,
+  validarPin,
+} from '../services/api';
+import { calcularCheckout } from '../utils/checkoutCalc';
+import { COP, FECHA } from '../utils/helpers';
 import FacturaImprimible from './FacturaImprimible';
-import { AlertTriangle, CheckCircle, Wallet, Bed, Package } from 'lucide-react';
+import PantallaForm from './PantallaForm';
+import ReCaptchaWidget from './ReCaptchaWidget';
 
 /**
  * Checkout screen - Three-step flow:
@@ -25,21 +33,28 @@ export default function PantallaCheckout({ onNav }) {
   const [factura, setFactura] = useState(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [recaptchaToken, setRecaptchaToken] = useState(null);
+  const [captchaError] = useState(false);
 
   const validar = async () => {
     if (!numero.trim() || !pin.trim()) {
       return setError('Ingresa número de habitación y PIN');
     }
+    if (!recaptchaToken && !captchaError)
+      return setError('Completa la verificacion de seguridad');
     setLoading(true);
     setError('');
     try {
-      const data = await validarPin(numero.trim(), pin.trim());
-      setRoom(data);
-      const consumosData = await fetchConsumos(data.id);
+      const data = await validarPin(numero.trim(), pin.trim(), recaptchaToken);
+      setRoomToken(data.roomToken);
+      setRoom(data.room);
+      const consumosData = await fetchConsumos(data.room.id);
       setConsumos(consumosData);
       setStep(2);
+      setRecaptchaToken(null);
     } catch (e) {
       setError(safeErrorMessage(e));
+      setRecaptchaToken(null);
     } finally {
       setLoading(false);
     }
@@ -48,15 +63,25 @@ export default function PantallaCheckout({ onNav }) {
   // Calculate room nights and total using shared utility
   const { tarifas } = usePrices();
   const totals = useMemo(
-    () => calcularCheckout({ roomTipo: room?.tipo, checkIn: room?.checkIn, consumos, tarifas }),
+    () =>
+      calcularCheckout({
+        roomTipo: room?.tipo,
+        checkIn: room?.checkIn,
+        consumos,
+        tarifas,
+      }),
     [room?.tipo, room?.checkIn, consumos, tarifas]
   );
 
   const confirmarCheckout = async () => {
     setLoading(true);
     try {
-      const valorFinal = metodoPago === 'efectivo' ? parseFloat(valorRecibido) : totals.total;
-      const data = await checkout(room.id, { metodoPago, valorRecibido: valorFinal });
+      const valorFinal =
+        metodoPago === 'efectivo' ? parseFloat(valorRecibido) : totals.total;
+      const data = await checkout(room.id, {
+        metodoPago,
+        valorRecibido: valorFinal,
+      });
       setFactura(data);
       setStep(3);
     } catch (e) {
@@ -87,23 +112,58 @@ export default function PantallaCheckout({ onNav }) {
             ? `Habitación #${safeText(room?.numero)} · ${safeText(room?.huesped, 'Sin huésped')}`
             : 'Checkout completado'
       }
-      onVolver={step === 3 ? undefined : () => {
-        if (step === 1) onNav('menu');
-        else if (step === 2) resetToStep1();
-      }}
+      onVolver={
+        step === 3
+          ? undefined
+          : () => {
+              if (step === 1) onNav('menu');
+              else if (step === 2) resetToStep1();
+            }
+      }
     >
       {step === 1 && (
         <>
           <div className="form-group">
             <label>Número de habitación</label>
-            <input type="text" placeholder="Ej: 101" value={numero} onChange={(e) => setNumero(e.target.value)} />
+            <input
+              type="text"
+              placeholder="Ej: 101"
+              value={numero}
+              onChange={(e) => setNumero(e.target.value)}
+            />
           </div>
           <div className="form-group">
             <label>PIN</label>
-            <input type="password" placeholder="4 dígitos" value={pin} onChange={(e) => setPin(e.target.value)} maxLength={4} />
+            <input
+              type="password"
+              placeholder="6 dígitos"
+              value={pin}
+              onChange={(e) => setPin(e.target.value)}
+              maxLength={6}
+            />
           </div>
-          {error && <div className="error-message"><AlertTriangle className="w-4 h-4" /> {error}</div>}
-          <button className="btn-main-action" onClick={validar} disabled={loading}>
+          <div className="flex justify-center pt-2">
+            <ReCaptchaWidget
+              onVerify={(token) => {
+                setRecaptchaToken(token);
+                setError('');
+              }}
+              onExpire={() => {
+                setRecaptchaToken(null);
+                setError('Verificacion expirada, intenta de nuevo');
+              }}
+            />
+          </div>
+          {error && (
+            <div className="error-message">
+              <AlertTriangle className="w-4 h-4" /> {error}
+            </div>
+          )}
+          <button
+            className="btn-main-action"
+            onClick={validar}
+            disabled={loading || (!recaptchaToken && !captchaError)}
+          >
             {loading ? 'Verificando...' : 'Verificar habitación'}
           </button>
         </>
@@ -112,20 +172,31 @@ export default function PantallaCheckout({ onNav }) {
       {step === 2 && (
         <>
           <div className="info-table">
-            <div className="it-row"><span>Check-in</span><strong>{FECHA(room.checkIn)}</strong></div>
-            <div className="it-row"><span>Tipo</span><strong>{room.tipo}</strong></div>
+            <div className="it-row">
+              <span>Check-in</span>
+              <strong>{FECHA(room.checkIn)}</strong>
+            </div>
+            <div className="it-row">
+              <span>Tipo</span>
+              <strong>{room.tipo}</strong>
+            </div>
           </div>
 
           {/* Cost breakdown */}
           <div className="checkout-breakdown">
             <div className="cb-row">
-              <span className="flex items-center gap-1"><Bed className="w-4 h-4" /> Habitacion x {totals.noches} noche{totals.noches > 1 ? 's' : ''}</span>
+              <span className="flex items-center gap-1">
+                <Bed className="w-4 h-4" /> Habitacion x {totals.noches} noche
+                {totals.noches > 1 ? 's' : ''}
+              </span>
               <strong>{COP(totals.cargoHabitacion)}</strong>
             </div>
             {totals.totalConsumos > 0 && (
               <>
                 <div className="consumos-section">
-                  <div className="cs-header"><span>Consumos ({consumos.length})</span></div>
+                  <div className="cs-header">
+                    <span>Consumos ({consumos.length})</span>
+                  </div>
                   {consumos.map((c) => (
                     <div key={c.id} className="consumo-row">
                       <Package className="w-4 h-4" />
@@ -167,7 +238,10 @@ export default function PantallaCheckout({ onNav }) {
                     setValorRecibido('');
                   }}
                 >
-                  <span className="flex items-center justify-center">{m.icon && <m.icon className="w-4 h-4" />}</span><span>{m.label}</span>
+                  <span className="flex items-center justify-center">
+                    {m.icon && <m.icon className="w-4 h-4" />}
+                  </span>
+                  <span>{m.label}</span>
                 </button>
               ))}
             </div>
@@ -183,10 +257,15 @@ export default function PantallaCheckout({ onNav }) {
                 placeholder={`Mín. ${totals.total.toLocaleString('es-CO')}`}
                 value={valorRecibido}
                 onChange={(e) => setValorRecibido(e.target.value)}
-                onKeyDown={(e) => { if (e.key === 'ArrowUp' || e.key === 'ArrowDown') e.preventDefault(); }}
+                onKeyDown={(e) => {
+                  if (e.key === 'ArrowUp' || e.key === 'ArrowDown')
+                    e.preventDefault();
+                }}
               />
               {valorRecibido && (
-                <div className={`cambio-preview ${cambio >= 0 ? 'positivo' : 'negativo'}`}>
+                <div
+                  className={`cambio-preview ${cambio >= 0 ? 'positivo' : 'negativo'}`}
+                >
                   {cambio > 0 && `Cambio a devolver: ${COP(cambio)}`}
                   {cambio < 0 && `Falta: ${COP(Math.abs(cambio))}`}
                   {cambio === 0 && `Pago exacto`}
@@ -195,11 +274,19 @@ export default function PantallaCheckout({ onNav }) {
             </div>
           )}
 
-          {error && <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm mb-4"><AlertTriangle className="w-4 h-4 inline mr-1" /> {error}</div>}
+          {error && (
+            <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm mb-4">
+              <AlertTriangle className="w-4 h-4 inline mr-1" /> {error}
+            </div>
+          )}
           <button
             className="btn-danger-action"
             onClick={confirmarCheckout}
-            disabled={loading || (metodoPago === 'efectivo' && (recibido < totals.total || !valorRecibido))}
+            disabled={
+              loading ||
+              (metodoPago === 'efectivo' &&
+                (recibido < totals.total || !valorRecibido))
+            }
           >
             {loading ? 'Procesando...' : 'Confirmar checkout y cobrar'}
           </button>
@@ -212,7 +299,9 @@ export default function PantallaCheckout({ onNav }) {
 
       {step === 3 && (
         <div style={{ marginTop: 16 }}>
-          <button className="btn-main-action" onClick={() => onNav('menu')}>← Volver al menú</button>
+          <button className="btn-main-action" onClick={() => onNav('menu')}>
+            ← Volver al menú
+          </button>
         </div>
       )}
     </PantallaForm>

@@ -17,7 +17,16 @@ const sizes = {
 };
 
 const Button = forwardRef(
-  ({ className = '', variant = 'default', size = 'default', disabled = false, ...props }, ref) => {
+  (
+    {
+      className = '',
+      variant = 'default',
+      size = 'default',
+      disabled = false,
+      ...props
+    },
+    ref
+  ) => {
     return (
       <button
         ref={ref}
@@ -36,4 +45,4 @@ const Button = forwardRef(
 
 Button.displayName = 'Button';
 
-export { Button, variants, sizes };
+export { Button, sizes, variants };

@@ -9,9 +9,12 @@ function requestTimeout(timeoutMs = 30000) {
   return (req, res, next) => {
     const timer = setTimeout(() => {
       if (!res.headersSent) {
-        res.status(408).json({ error: 'Request timeout. La solicitud tardó demasiado.' });
+        res
+          .status(408)
+          .json({ error: 'Request timeout. La solicitud tardó demasiado.' });
         req.timedOut = true;
       }
+      req.destroy(new Error('Request timeout'));
     }, timeoutMs);
 
     // Clear timer when response finishes
@@ -26,7 +29,7 @@ function requestTimeout(timeoutMs = 30000) {
  * Middleware to hide Express's X-Powered-By header.
  * Also removes Server header if possible (best-effort on Node.js).
  */
-function hideTechHeaders(_req, res, next) {
+function _hideTechHeaders(_req, res, next) {
   // X-Powered-By is already removed by helmet, but double-check
   res.removeHeader('X-Powered-By');
 

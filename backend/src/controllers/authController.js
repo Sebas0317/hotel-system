@@ -37,7 +37,12 @@ function setTokenCookie(res, token) {
 }
 
 function getClientIp(req) {
-  return req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.ip || req.connection?.remoteAddress || 'unknown';
+  return (
+    req.headers['x-forwarded-for']?.split(',')[0]?.trim() ||
+    req.ip ||
+    req.connection?.remoteAddress ||
+    'unknown'
+  );
 }
 
 function validatePasswordComplexity(password) {
@@ -61,15 +66,18 @@ function validatePasswordComplexity(password) {
 
 async function setup(req, res) {
   try {
-    const isAuthed = !!(req.user?.role);
+    const isAuthed = !!req.user?.role;
     const users = isAuthed ? await userStore.getUsers() : [];
-    const admin = users.find(u => u.role === 'admin');
+    const admin = users.find((u) => u.role === 'admin');
     const smtpConfig = emailService.isConfigured();
 
     // Only expose email/user count to authenticated admin/owner
     return res.json({
       configurado: isAuthed ? users.length > 0 : true,
-      email: (isAuthed && (req.user.role === 'admin' || req.user.role === 'owner')) ? (admin?.email || '') : '',
+      email:
+        isAuthed && (req.user.role === 'admin' || req.user.role === 'owner')
+          ? admin?.email || ''
+          : '',
       smtpConfigurado: smtpConfig,
       twoFactorHabilitado: admin?.twoFactorEnabled || false,
       emailVerificado: admin?.emailVerified || false,
@@ -93,17 +101,17 @@ async function logout(req, res) {
   return res.json({ mensaje: 'Sesion cerrada exitosamente' });
 }
 
-async function getAuthStatus(req, res) {
+async function getAuthStatus(_req, res) {
   try {
     const smtpConfig = emailService.isConfigured();
     const codeEmailService = emailService.isConfigured();
     const users = await userStore.getUsers();
-    const admin = users.find(u => u.role === 'admin');
+    const admin = users.find((u) => u.role === 'admin');
 
     return res.json({
       smtpConfigurado: smtpConfig,
       codeEmailService,
-      emailAdmin: !!(admin?.email),
+      emailAdmin: !!admin?.email,
       totalUsuarios: users.length,
       roles: userStore.ROLES,
     });
@@ -119,7 +127,9 @@ async function register(req, res) {
     const ip = getClientIp(req);
 
     if (!username || !email || !password) {
-      return res.status(400).json({ error: 'username, email y password son requeridos' });
+      return res
+        .status(400)
+        .json({ error: 'username, email y password son requeridos' });
     }
 
     const pwErr = validatePasswordComplexity(password);
@@ -132,36 +142,65 @@ async function register(req, res) {
 
     const usernameRegex = /^[a-zA-Z0-9_]{3,30}$/;
     if (!usernameRegex.test(username)) {
-      return res.status(400).json({ error: 'Username debe tener 3-30 caracteres (letras, numeros, _)' });
+      return res.status(400).json({
+        error: 'Username debe tener 3-30 caracteres (letras, numeros, _)',
+      });
     }
 
     const existingEmail = await userStore.findUserByEmail(email);
     if (existingEmail) {
-      return res.status(409).json({ error: 'El email ya esta registrado' });
+      return res
+        .status(409)
+        .json({ error: 'Ya existe un usuario con ese email o username' });
     }
 
     const existingUsername = await userStore.findUserByUsername(username);
     if (existingUsername) {
-      return res.status(409).json({ error: 'El username ya esta en uso' });
+      return res
+        .status(409)
+        .json({ error: 'Ya existe un usuario con ese email o username' });
     }
 
     const safeUser = await userStore.createUser({
-      username, email, password,
+      username,
+      email,
+      password,
       firstName: firstName || '',
       lastName: lastName || '',
-      role: ['owner', 'admin', 'operator', 'analyst', 'cliente'].includes(role) ? role : 'cliente',
+      role: 'cliente',
     });
 
     try {
       const { plainCode } = await codeStore.createCode({
-        userId: safeUser.id, type: 'email_verification', ttlMs: 300000,
+        userId: safeUser.id,
+        type: 'email_verification',
+        ttlMs: 300000,
       });
-      await emailService.sendVerificationCode(email, plainCode);
+      const sent = await emailService.sendVerificationCode(email, plainCode);
+      if (!sent.success) {
+        // Rollback: delete the user we just created
+        await userStore.deleteUser(safeUser.id);
+        return res.status(500).json({
+          error:
+            'Error al enviar el codigo de verificacion. Configura SMTP primero.',
+        });
+      }
     } catch (emailErr) {
-      logger.warn({ err: emailErr }, 'Failed to send verification email on register');
+      logger.warn(
+        { err: emailErr },
+        'Failed to send verification email on register'
+      );
+      await userStore.deleteUser(safeUser.id);
+      return res.status(500).json({
+        error:
+          'Error al enviar el codigo de verificacion. Configura SMTP primero.',
+      });
     }
 
-    logger.info({ userId: safeUser.id, email, role: safeUser.role }, 'User registered');
+    logger.info(
+      { userId: safeUser.id, email, role: safeUser.role },
+      'User registered'
+    );
     await auditor.register(safeUser.id, ip, email, safeUser.role);
 
     return res.status(201).json({
@@ -170,6 +209,9 @@ async function register(req, res) {
       requiereVerificarCorreo: true,
     });
   } catch (err) {
+    if (err.statusCode === 409) {
+      return res.status(409).json({ error: err.message });
+    }
     logger.error({ err }, 'Registration error');
     return res.status(500).json({ error: 'Error al registrar usuario' });
   }
@@ -181,22 +223,28 @@ async function login(req, res) {
     const ip = getClientIp(req);
 
     if (!identifier || !password) {
-      return res.status(400).json({ error: 'Usuario/email y contrasena requeridos' });
+      return res
+        .status(400)
+        .json({ error: 'Usuario/email y contrasena requeridos' });
     }
 
     const { blocked, lockUntil } = await securityTracker.isBlocked({
-      ip, action: 'login',
+      ip,
+      action: 'login',
     });
     if (blocked) {
-      const remaining = Math.ceil((lockUntil - Date.now()) / 1000);
-      return res.status(429).json({ error: `Demasiados intentos. Intenta en ${remaining}s` });
+      return res
+        .status(429)
+        .json({ error: 'Demasiados intentos. Intenta mas tarde.' });
     }
 
     const result = await userStore.verifyPassword(identifier, password);
 
     if (!result.valid) {
       const trackResult = await securityTracker.recordAttempt({
-        ip, action: 'login', success: false,
+        ip,
+        action: 'login',
+        success: false,
       });
 
       if (trackResult.blocked) {
@@ -210,23 +258,44 @@ async function login(req, res) {
     }
 
     const user = result.user;
+    if (!user.emailVerified) {
+      return res
+        .status(403)
+        .json({ error: 'Correo no verificado. Verifica tu correo primero.' });
+    }
+
     await securityTracker.resetAttempts({ ip, action: 'login' });
 
     await userStore.updateLastLogin(user.id, ip);
 
-    if (user.twoFactorEnabled && user.emailVerified) {
-      try {
-        const { plainCode } = await codeStore.createCode({
-          userId: user.id, type: '2fa', ttlMs: 300000,
+    if (user.twoFactorEnabled) {
+      const { plainCode } = await codeStore.createCode({
+        userId: user.id,
+        type: '2fa',
+        ttlMs: 300000,
+      });
+      const sent = await emailService.send2FACode(user.email, plainCode);
+      if (!sent.success) {
+        logger.error(
+          { userId: user.id, email: user.email },
+          'Failed to send 2FA code — SMTP unavailable'
+        );
+        return res.status(500).json({
+          error: 'Error al enviar codigo 2FA. Configura SMTP primero.',
         });
-        await emailService.send2FACode(user.email, plainCode);
-      } catch (emailErr) {
-        logger.warn({ err: emailErr }, 'Failed to send 2FA code');
       }
 
       logger.info({ userId: user.id, email: user.email }, '2FA code sent');
 
-    return res.json({
+      await securityTracker.logSecurityEvent({
+        type: 'info',
+        userId: user.id,
+        ip,
+        action: 'login_code',
+        detail: 'Codigo de inicio de sesion enviado',
+      });
+
+      return res.json({
         requires2FA: true,
         userId: user.id,
         expiresIn: 300,
@@ -236,14 +305,16 @@ async function login(req, res) {
     }
 
     const token = generateToken(user);
-    logger.info({ userId: user.id, email: user.email, role: user.role }, 'Successful login');
+    logger.info(
+      { userId: user.id, email: user.email, role: user.role },
+      'Successful login'
+    );
 
     await auditor.login(user.id, ip, user.email);
 
     setTokenCookie(res, token);
 
     return res.json({
-      token,
       usuario: userStore.sanitizeUser(user),
       expiresIn: process.env.JWT_EXPIRES_IN || '8h',
     });
@@ -262,48 +333,52 @@ async function verify2FA(req, res) {
       return res.status(400).json({ error: 'userId y code requeridos' });
     }
 
-    const { blocked, lockUntil } = await securityTracker.isBlocked({
-      userId, ip, action: '2fa',
+    const { blocked } = await securityTracker.isBlocked({
+      userId,
+      ip,
+      action: '2fa',
     });
     if (blocked) {
-      await securityTracker.logSecurityEvent({
-        type: 'block', userId, ip, action: '2fa',
-        detail: 'IP bloqueada por multiples intentos de 2FA',
-      });
-      const remaining = Math.ceil((lockUntil - Date.now()) / 1000);
-      return res.status(429).json({ error: `Demasiados intentos. Intenta en ${remaining}s` });
+      return res
+        .status(429)
+        .json({ error: 'Demasiados intentos. Espera unos minutos.' });
     }
 
-    let result = await codeStore.verifyCode(userId, '2fa', code);
-    if (!result.valid) {
-      result = await codeStore.verifyCode(userId, 'login', code);
-    }
+    const result = await codeStore.verifyCode(userId, '2fa', code);
 
     if (!result.valid) {
       await securityTracker.recordAttempt({
-        userId, ip, action: '2fa', success: false,
+        userId,
+        ip,
+        action: '2fa',
+        success: false,
       });
-      return res.status(401).json({ error: result.reason || 'Codigo invalido' });
-    }
-
-    const user = await userStore.findUserById(userId);
-    if (!user) {
-      return res.status(404).json({ error: 'Usuario no encontrado' });
-    }
-    if (!user.isActive) {
-      return res.status(403).json({ error: 'Cuenta desactivada' });
+      return res
+        .status(401)
+        .json({ error: result.reason || 'Codigo invalido' });
     }
 
     await securityTracker.resetAttempts({ userId, ip, action: '2fa' });
 
-    await auditor.login(user.id, ip, user.email);
+    const token = generateToken(result.user);
+    logger.info(
+      { userId, email: result.user.email },
+      '2FA verification successful'
+    );
 
-    const token = generateToken(user);
-    logger.info({ userId, email: user.email }, '2FA verification successful');
+    await securityTracker.logSecurityEvent({
+      type: 'success',
+      userId: userId,
+      ip,
+      action: '2fa_verify',
+      detail: 'Codigo de recuperacion verificado exitosamente',
+    });
 
     setTokenCookie(res, token);
 
-    return res.json({ token, usuario: userStore.sanitizeUser(user) });
+    return res.json({
+      usuario: userStore.sanitizeUser(result.user),
+    });
   } catch (err) {
     logger.error({ err }, '2FA verification error');
     return res.status(500).json({ error: 'Error al verificar codigo 2FA' });
@@ -316,38 +391,58 @@ async function sendLoginCode(req, res) {
     const ip = getClientIp(req);
 
     if (!identifier || !password) {
-      return res.status(400).json({ error: 'Usuario/email y contrasena requeridos' });
+      return res
+        .status(400)
+        .json({ error: 'Usuario/email y contrasena requeridos' });
     }
 
-    const { blocked } = await securityTracker.isBlocked({ ip, action: 'login' });
+    const { blocked } = await securityTracker.isBlocked({
+      ip,
+      action: 'login',
+    });
     if (blocked) {
-      return res.status(429).json({ error: 'Demasiados intentos. Intenta mas tarde.' });
+      return res
+        .status(429)
+        .json({ error: 'Demasiados intentos. Intenta mas tarde.' });
     }
 
     const result = await userStore.verifyPassword(identifier, password);
     if (!result.valid) {
-      await securityTracker.recordAttempt({ ip, action: 'login', success: false });
+      await securityTracker.recordAttempt({
+        ip,
+        action: 'login',
+        success: false,
+      });
       return res.status(401).json({ error: 'Credenciales invalidas' });
     }
 
     const user = result.user;
     if (!user.emailVerified) {
-      return res.status(403).json({ error: 'Correo no verificado. Verifica tu correo primero.' });
+      return res
+        .status(403)
+        .json({ error: 'Correo no verificado. Verifica tu correo primero.' });
     }
 
     const { plainCode } = await codeStore.createCode({
-      userId: user.id, type: 'login', ttlMs: 300000,
+      userId: user.id,
+      type: 'login',
+      ttlMs: 300000,
     });
 
     const sent = await emailService.send2FACode(user.email, plainCode);
     if (!sent.success) {
-      return res.status(500).json({ error: 'Error al enviar el codigo. Configura SMTP primero.' });
+      return res
+        .status(500)
+        .json({ error: 'Error al enviar el codigo. Configura SMTP primero.' });
     }
 
     logger.info({ userId: user.id, email: user.email }, 'Login code sent');
 
     await securityTracker.logSecurityEvent({
-      type: 'info', userId: user.id, ip, action: 'login_code',
+      type: 'info',
+      userId: user.id,
+      ip,
+      action: 'login_code',
       detail: 'Codigo de inicio de sesion enviado',
     });
 
@@ -358,7 +453,9 @@ async function sendLoginCode(req, res) {
     });
   } catch (err) {
     logger.error({ err }, 'Send login code error');
-    return res.status(500).json({ error: 'Error al enviar codigo de inicio de sesion' });
+    return res
+      .status(500)
+      .json({ error: 'Error al enviar codigo de inicio de sesion' });
   }
 }
 
@@ -379,66 +476,113 @@ async function enviarCodigoVerificacion(req, res) {
     }
 
     if (!user) {
-      return res.status(404).json({ error: 'Usuario no encontrado' });
+      return res.json({
+        mensaje: 'Si el usuario existe, se enviara un codigo a su correo',
+        expiresIn: 600,
+      });
     }
 
     const { plainCode, expiresAt } = await codeStore.createCode({
-      userId: user.id, type: 'email_verification', ttlMs: 300000,
+      userId: user.id,
+      type: 'email_verification',
+      ttlMs: 300000,
     });
 
     const sent = await emailService.sendVerificationCode(user.email, plainCode);
     if (!sent.success) {
-      return res.status(500).json({ error: 'Error al enviar el codigo. Configura SMTP primero.' });
+      return res
+        .status(500)
+        .json({ error: 'Error al enviar el codigo. Configura SMTP primero.' });
     }
 
     logger.info({ email: user.email }, 'Codigo de verificacion enviado');
 
+    await securityTracker.logSecurityEvent({
+      type: 'info',
+      userId: user.id,
+      ip,
+      action: 'recovery_request',
+      detail: 'Codigo de recuperacion enviado',
+    });
+
     return res.json({
       mensaje: 'Codigo enviado a tu correo',
-      expiresIn: 300,
+      expiresIn: 600,
     });
   } catch (err) {
     logger.error({ err }, 'Send verification code error');
-    return res.status(500).json({ error: 'Error al enviar codigo de verificacion' });
+    return res
+      .status(500)
+      .json({ error: 'Error al enviar codigo de verificacion' });
   }
 }
 
 async function verificarCorreo(req, res) {
   try {
-    const { userId, code } = req.body;
+    const { identifier, email, code } = req.body;
     const ip = getClientIp(req);
 
-    if (!userId || !code) {
-      return res.status(400).json({ error: 'userId y code requeridos' });
+    if (!identifier || !email || !code) {
+      return res
+        .status(400)
+        .json({ error: 'identifier, email y code requeridos' });
+    }
+
+    let user;
+    if (identifier) {
+      user = await userStore.findUserByEmailOrUsername(identifier);
+    } else {
+      user = await userStore.findUserByEmail(email);
+    }
+
+    if (!user) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
     }
 
     const { blocked } = await securityTracker.isBlocked({
-      userId, ip, action: 'code_verify',
+      userId: user.id,
+      ip,
+      action: 'code_verify',
     });
     if (blocked) {
-      return res.status(429).json({ error: 'Demasiados intentos. Espera unos minutos.' });
+      return res
+        .status(429)
+        .json({ error: 'Demasiados intentos. Espera unos minutos.' });
     }
 
-    const result = await codeStore.verifyCode(userId, 'email_verification', code);
+    const result = await codeStore.verifyCode(
+      user.id,
+      'email_verification',
+      code
+    );
 
     if (!result.valid) {
       await securityTracker.recordAttempt({
-        userId, ip, action: 'code_verify', success: false,
+        userId: user.id,
+        ip,
+        action: 'code_verify',
+        success: false,
       });
-      return res.status(401).json({ error: result.reason || 'Codigo invalido' });
+      return res
+        .status(401)
+        .json({ error: result.reason || 'Codigo invalido o expirado' });
     }
 
-    await securityTracker.resetAttempts({ userId, ip, action: 'code_verify' });
+    await securityTracker.resetAttempts({
+      userId: user.id,
+      ip,
+      action: 'code_verify',
+    });
 
-    await userStore.updateUser(userId, { emailVerified: true });
+    await userStore.updateUser(user.id, { emailVerified: true });
 
-    const user = await userStore.findUserById(userId);
-    if (user) {
-      await emailService.sendWelcome(user.email);
+    const userAfter = await userStore.findUserById(user.id);
+    if (userAfter) {
+      await emailService.sendWelcome(userAfter.email);
     }
 
-    logger.info({ userId }, 'Email verified successfully');
-    await auditor.emailVerified(userId, ip);
+    logger.info({ userId: user.id }, 'Email verified successfully');
+    await auditor.emailVerified(user.id, ip);
 
     return res.json({ mensaje: 'Correo verificado exitosamente' });
   } catch (err) {
@@ -449,33 +593,45 @@ async function verificarCorreo(req, res) {
 
 async function solicitarRecuperacion(req, res) {
   try {
-    const { identifier, email } = req.body;
+    const { identifier } = req.body;
     const ip = getClientIp(req);
+
+    if (!identifier) {
+      return res.status(400).json({ error: 'identifier requerido' });
+    }
 
     let user = null;
     if (identifier) {
       user = await userStore.findUserByEmailOrUsername(identifier);
-    } else if (email) {
-      user = await userStore.findUserByEmail(email);
     }
 
     if (!user) {
-      return res.status(404).json({ error: identifier ? 'Usuario no encontrado' : 'Email no registrado' });
+      return res.json({
+        mensaje: 'Si el usuario existe, recibiras un codigo en tu correo',
+        expiresIn: 600,
+      });
     }
 
     const { plainCode, expiresAt } = await codeStore.createCode({
-      userId: user.id, type: 'password_recovery', ttlMs: 600000,
+      userId: user.id,
+      type: 'password_recovery',
+      ttlMs: 600000,
     });
 
     const sent = await emailService.sendRecoveryCode(user.email, plainCode);
     if (!sent.success) {
-      return res.status(500).json({ error: 'Error al enviar el codigo. Configura SMTP primero.' });
+      return res
+        .status(500)
+        .json({ error: 'Error al enviar el codigo. Configura SMTP primero.' });
     }
 
     logger.info({ email: user.email }, 'Recovery code sent');
 
     await securityTracker.logSecurityEvent({
-      type: 'info', userId: user.id, ip, action: 'recovery_request',
+      type: 'info',
+      userId: user.id,
+      ip,
+      action: 'recovery_request',
       detail: 'Codigo de recuperacion enviado',
     });
 
@@ -491,18 +647,16 @@ async function solicitarRecuperacion(req, res) {
 
 async function verificarCodigoRecuperacion(req, res) {
   try {
-    const { identifier, email, code } = req.body;
+    const { identifier, code } = req.body;
     const ip = getClientIp(req);
 
-    if (!code) {
-      return res.status(400).json({ error: 'Codigo requerido' });
+    if (!identifier || !code) {
+      return res.status(400).json({ error: 'identifier y code requeridos' });
     }
 
     let user = null;
     if (identifier) {
       user = await userStore.findUserByEmailOrUsername(identifier);
-    } else if (email) {
-      user = await userStore.findUserByEmail(email);
     }
 
     if (!user) {
@@ -510,22 +664,39 @@ async function verificarCodigoRecuperacion(req, res) {
     }
 
     const { blocked } = await securityTracker.isBlocked({
-      userId: user.id, ip, action: 'recovery',
+      userId: user.id,
+      ip,
+      action: 'recovery',
     });
     if (blocked) {
-      return res.status(429).json({ error: 'Demasiados intentos. Espera unos minutos.' });
+      return res
+        .status(429)
+        .json({ error: 'Demasiados intentos. Espera unos minutos.' });
     }
 
-    const result = await codeStore.verifyCode(user.id, 'password_recovery', code);
+    const result = await codeStore.verifyCode(
+      user.id,
+      'password_recovery',
+      code
+    );
 
     if (!result.valid) {
       await securityTracker.recordAttempt({
-        userId: user.id, ip, action: 'recovery', success: false,
+        userId: user.id,
+        ip,
+        action: 'recovery',
+        success: false,
       });
-      return res.status(401).json({ error: result.reason || 'Codigo invalido o expirado' });
+      return res
+        .status(401)
+        .json({ error: result.reason || 'Codigo invalido o expirado' });
     }
 
-    await securityTracker.resetAttempts({ userId: user.id, ip, action: 'recovery' });
+    await securityTracker.resetAttempts({
+      userId: user.id,
+      ip,
+      action: 'recovery',
+    });
 
     const resetToken = jwt.sign(
       { id: user.id, purpose: 'password_reset' },
@@ -536,13 +707,22 @@ async function verificarCodigoRecuperacion(req, res) {
     logger.info({ userId: user.id }, 'Recovery code verified');
 
     await securityTracker.logSecurityEvent({
-      type: 'success', userId: user.id, ip, action: 'recovery_verify',
+      type: 'success',
+      userId: user.id,
+      ip,
+      action: 'recovery_verify',
       detail: 'Codigo de recuperacion verificado exitosamente',
     });
 
+    res.cookie('resetToken', resetToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 5 * 60 * 1000,
+      path: '/api/auth/cambiar-contrasena',
+    });
     return res.json({
       puedeCambiar: true,
-      resetToken,
       mensaje: 'Codigo verificado. Ahora puedes cambiar tu contrasena.',
     });
   } catch (err) {
@@ -553,11 +733,14 @@ async function verificarCodigoRecuperacion(req, res) {
 
 async function cambiarContrasena(req, res) {
   try {
-    const { resetToken, nuevaContrasena, userId, currentPassword } = req.body;
+    const { nuevaContrasena, userId, currentPassword } = req.body;
+    const resetToken = req.cookies?.resetToken;
     const ip = getClientIp(req);
 
     if (!nuevaContrasena) {
-      return res.status(400).json({ error: 'La contrasena debe tener al menos 8 caracteres' });
+      return res
+        .status(400)
+        .json({ error: 'La contrasena debe tener al menos 8 caracteres' });
     }
     const pwErr2 = validatePasswordComplexity(nuevaContrasena);
     if (pwErr2) return res.status(400).json({ error: pwErr2 });
@@ -566,14 +749,18 @@ async function cambiarContrasena(req, res) {
 
     if (resetToken) {
       try {
-        const decoded = jwt.verify(resetToken, getJwtSecret(), { algorithms: ['HS256'] });
+        const decoded = jwt.verify(resetToken, getJwtSecret(), {
+          algorithms: ['HS256'],
+        });
         if (decoded.purpose !== 'password_reset') {
           return res.status(400).json({ error: 'Token invalido' });
         }
         targetUserId = decoded.id;
       } catch {
         await securityTracker.logSecurityEvent({
-          type: 'suspicious', ip, action: 'password_change',
+          type: 'suspicious',
+          ip,
+          action: 'password_change',
           detail: 'Intento de cambio de contrasena con token invalido/expirado',
         });
         return res.status(401).json({ error: 'Token expirado o invalido' });
@@ -581,7 +768,9 @@ async function cambiarContrasena(req, res) {
     }
 
     if (!targetUserId) {
-      return res.status(400).json({ error: 'Informacion insuficiente para cambiar contrasena' });
+      return res
+        .status(400)
+        .json({ error: 'Informacion insuficiente para cambiar contrasena' });
     }
 
     const user = await userStore.findUserById(targetUserId);
@@ -589,28 +778,40 @@ async function cambiarContrasena(req, res) {
       return res.status(404).json({ error: 'Usuario no encontrado' });
     }
 
-    if (!resetToken && currentPassword) {
-      const { valid } = await userStore.verifyPassword(user.email, currentPassword);
-      if (!valid) {
-        await securityTracker.logSecurityEvent({
-          type: 'failed_login', userId: targetUserId, ip, action: 'password_change',
-          detail: 'Contrasena actual incorrecta al cambiar contrasena',
+    if (!resetToken) {
+      if (currentPassword) {
+        const { valid } = await userStore.verifyPassword(
+          user.email,
+          currentPassword
+        );
+        if (!valid) {
+          await securityTracker.logSecurityEvent({
+            type: 'failed_login',
+            userId: targetUserId,
+            ip,
+            action: 'password_change',
+            detail: 'Contrasena actual incorrecta al cambiar propia contrasena',
+          });
+          return res
+            .status(401)
+            .json({ error: 'Contrasena actual incorrecta' });
+        }
+      } else {
+        return res.status(401).json({
+          error: 'Token de recuperacion o contrasena actual requerida',
         });
-        return res.status(401).json({ error: 'Contrasena actual incorrecta' });
       }
     }
 
     await userStore.changePassword(targetUserId, nuevaContrasena);
-
-    await emailService.sendPasswordChanged(user.email);
-
-    await codeStore.invalidateUserCodes(targetUserId, 'password_recovery');
-
-    logger.info({ userId: targetUserId }, 'Password changed');
+    logger.info({ userId: targetUserId }, 'Own password changed');
 
     await securityTracker.logSecurityEvent({
-      type: 'success', userId: targetUserId, ip, action: 'password_change',
-      detail: 'Contrasena cambiada exitosamente',
+      type: 'success',
+      userId: targetUserId,
+      ip,
+      action: 'password_change',
+      detail: 'Contrasena propia cambiada exitosamente',
     });
 
     return res.json({ mensaje: 'Contrasena cambiada exitosamente' });
@@ -622,11 +823,11 @@ async function cambiarContrasena(req, res) {
 
 async function toggle2FA(req, res) {
   try {
-    const userId = req.body?.userId || req.user?.id;
+    const userId = req.user?.id;
     const ip = getClientIp(req);
 
     if (!userId) {
-      return res.status(400).json({ error: 'userId requerido' });
+      return res.status(401).json({ error: 'Debes iniciar sesion' });
     }
 
     const user = await userStore.findUserById(userId);
@@ -635,7 +836,9 @@ async function toggle2FA(req, res) {
     }
 
     if (!user.emailVerified) {
-      return res.status(400).json({ error: 'Debes verificar tu correo primero' });
+      return res
+        .status(400)
+        .json({ error: 'Debes verificar tu correo primero' });
     }
 
     const newState = !user.twoFactorEnabled;
@@ -671,7 +874,11 @@ async function getProfile(req, res) {
 async function updateProfile(req, res) {
   try {
     const { firstName, lastName, avatar } = req.body;
-    const user = await userStore.updateUser(req.user.id, { firstName, lastName, avatar });
+    const user = await userStore.updateUser(req.user.id, {
+      firstName,
+      lastName,
+      avatar,
+    });
     if (!user) {
       return res.status(404).json({ error: 'Usuario no encontrado' });
     }
@@ -688,16 +895,24 @@ async function changeOwnPassword(req, res) {
     const ip = getClientIp(req);
 
     if (!currentPassword || !newPassword) {
-      return res.status(400).json({ error: 'Contrasena actual y nueva requeridas' });
+      return res
+        .status(400)
+        .json({ error: 'Contrasena actual y nueva requeridas' });
     }
 
     const pwErr3 = validatePasswordComplexity(newPassword);
     if (pwErr3) return res.status(400).json({ error: pwErr3 });
 
-    const { valid } = await userStore.verifyPassword(req.user.email, currentPassword);
+    const { valid } = await userStore.verifyPassword(
+      req.user.email,
+      currentPassword
+    );
     if (!valid) {
       await securityTracker.logSecurityEvent({
-        type: 'failed_login', userId: req.user.id, ip, action: 'password_change',
+        type: 'failed_login',
+        userId: req.user.id,
+        ip,
+        action: 'password_change',
         detail: 'Contrasena actual incorrecta al cambiar propia contrasena',
       });
       return res.status(401).json({ error: 'Contrasena actual incorrecta' });
@@ -707,7 +922,10 @@ async function changeOwnPassword(req, res) {
     logger.info({ userId: req.user.id }, 'Own password changed');
 
     await securityTracker.logSecurityEvent({
-      type: 'success', userId: req.user.id, ip, action: 'password_change',
+      type: 'success',
+      userId: req.user.id,
+      ip,
+      action: 'password_change',
       detail: 'Contrasena propia cambiada exitosamente',
     });
 
@@ -718,9 +936,12 @@ async function changeOwnPassword(req, res) {
   }
 }
 
-async function getLastLogin(req, res) {
+async function getLastLogin(_req, res) {
   try {
-    const events = await securityTracker.getSecurityEvents({ limit: 1, type: 'login' });
+    const events = await securityTracker.getSecurityEvents({
+      limit: 1,
+      type: 'login',
+    });
     const last = events[0];
     if (!last) return res.json({ lastLogin: null });
 
@@ -741,14 +962,19 @@ async function getLastLogin(req, res) {
 
 async function getLoginLogs(req, res) {
   try {
-    const limit = Math.min(parseInt(req.query.limit) || 50, 500);
-    const events = await securityTracker.getSecurityEvents({ limit: 1000 });
+    const limit = Math.min(parseInt(req.query.limit, 10) || 50, 500);
+    const events = await securityTracker.getSecurityEvents({
+      limit: 1000,
+    });
     const logs = events
-      .filter(e => e.type === 'login' || e.type === 'failed_login')
+      .filter((e) => e.type === 'login' || e.type === 'failed_login')
       .slice(0, limit)
-      .map(e => {
+      .map((e) => {
         const isLogin = e.type === 'login';
-        const email = e.detail?.replace(/^Inicio de sesion: |^Intento fallido: /, '').split(' - ')[0] || '';
+        const email =
+          e.detail
+            ?.replace(/^Inicio de sesion: |^Intento fallido: /, '')
+            .split(' - ')[0] || '';
         return {
           id: e.id,
           timestamp: e.timestamp,
@@ -756,7 +982,9 @@ async function getLoginLogs(req, res) {
           identifier: email,
           userId: e.userId,
           success: isLogin,
-          reason: isLogin ? null : (e.detail?.split(' - ')[1] || 'Credenciales invalidas'),
+          reason: isLogin
+            ? null
+            : e.detail?.split(' - ')[1] || 'Credenciales invalidas',
         };
       });
     return res.json(logs);
@@ -767,7 +995,7 @@ async function getLoginLogs(req, res) {
 
 async function getSecurityEvents(req, res) {
   try {
-    const limit = Math.min(parseInt(req.query.limit) || 100, 500);
+    const limit = Math.min(parseInt(req.query.limit, 10) || 100, 500);
     const events = await securityTracker.getSecurityEvents({
       limit,
       type: req.query.type || null,
@@ -776,7 +1004,9 @@ async function getSecurityEvents(req, res) {
     return res.json(events);
   } catch (err) {
     logger.error({ err }, 'Get security events error');
-    return res.status(500).json({ error: 'Error al obtener eventos de seguridad' });
+    return res
+      .status(500)
+      .json({ error: 'Error al obtener eventos de seguridad' });
   }
 }
 
@@ -794,14 +1024,24 @@ async function hashPassword(req, res) {
 }
 
 module.exports = {
-  setup, getAuthStatus,
+  setup,
+  getAuthStatus,
   register,
-  login, verify2FA, sendLoginCode, logout,
-  enviarCodigoVerificacion, verificarCorreo,
-  solicitarRecuperacion, verificarCodigoRecuperacion, cambiarContrasena,
+  login,
+  verify2FA,
+  sendLoginCode,
+  logout,
+  enviarCodigoVerificacion,
+  verificarCorreo,
+  solicitarRecuperacion,
+  verificarCodigoRecuperacion,
+  cambiarContrasena,
   toggle2FA,
-  getProfile, updateProfile, changeOwnPassword,
-  getLastLogin, getLoginLogs,
+  getProfile,
+  updateProfile,
+  changeOwnPassword,
+  getLastLogin,
+  getLoginLogs,
   getSecurityEvents,
   hashPassword,
 };

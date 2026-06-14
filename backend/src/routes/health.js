@@ -40,7 +40,7 @@ const startTime = Date.now();
  *                   type: string
  *                   format: date-time
  */
-router.get('/', (req, res) => {
+router.get('/', (_req, res) => {
   const uptimeMs = Date.now() - startTime;
   const hours = Math.floor(uptimeMs / (1000 * 60 * 60));
   const minutes = Math.floor((uptimeMs % (1000 * 60 * 60)) / (1000 * 60));
@@ -78,7 +78,7 @@ router.get('/', (req, res) => {
  *                 dataFiles:
  *                   type: object
  */
-router.get('/detailed', async (req, res) => {
+router.get('/detailed', async (_req, res) => {
   const uptimeMs = Date.now() - startTime;
   const memUsage = process.memoryUsage();
 
@@ -86,7 +86,7 @@ router.get('/detailed', async (req, res) => {
   const integrity = await validateAll();
 
   res.json({
-    status: integrity.overall?.valid ? 'healthy' : 'degraded',
+    status: integrity.overall ? 'healthy' : 'degraded',
     uptime: {
       ms: uptimeMs,
       human: `${Math.floor(uptimeMs / (1000 * 60 * 60))}h ${Math.floor((uptimeMs % (1000 * 60 * 60)) / (1000 * 60))}m ${Math.floor((uptimeMs % (1000 * 60)) / 1000)}s`,
@@ -118,7 +118,7 @@ router.get('/detailed', async (req, res) => {
  *       200:
  *         description: System metrics
  */
-router.get('/metrics', (req, res) => {
+router.get('/metrics', (_req, res) => {
   const memUsage = process.memoryUsage();
 
   res.json({
@@ -137,7 +137,7 @@ router.get('/metrics', (req, res) => {
 /**
  * POST /health/json-integrity - Run JSON data integrity check
  */
-router.post('/json-integrity', async (req, res) => {
+router.post('/json-integrity', async (_req, res) => {
   try {
     const report = await validateAll();
     const repairResults = {};
@@ -156,7 +156,9 @@ router.post('/json-integrity', async (req, res) => {
       repairs: repairResults,
     });
   } catch (err) {
-    res.status(500).json({ error: 'Integrity check failed', message: err.message });
+    res
+      .status(500)
+      .json({ error: 'Integrity check failed', message: err.message });
   }
 });
 

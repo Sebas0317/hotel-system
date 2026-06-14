@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { fetchPrices, updatePrices } from '../services/api';
 
 /**
@@ -14,7 +14,7 @@ export function usePrices() {
     queryKey: ['prices'],
     queryFn: fetchPrices,
     staleTime: 5 * 60 * 1000, // 5 minutes — prices change rarely
-    gcTime: 30 * 60 * 1000,   // Keep in cache for 30 minutes
+    gcTime: 30 * 60 * 1000, // Keep in cache for 30 minutes
     retry: 1,
   });
 
