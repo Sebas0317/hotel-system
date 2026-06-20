@@ -9,6 +9,13 @@ const cron = require('node-cron');
 const fs = require('node:fs').promises;
 const path = require('node:path');
 const { logger } = require('./logger');
+// Simple in‑process mutex to serialize backup runs
+let backupLock = Promise.resolve();
+function queueBackup(fn) {
+  // Ensure any error does not break the chain
+  backupLock = backupLock.then(() => fn()).catch(() => fn());
+  return backupLock;
+}
 
 const BACKUP_DIR = path.join(__dirname, '../../backups');
 const DATA_DIR = path.join(__dirname, '../..');
@@ -27,7 +34,7 @@ const MAX_BACKUP_DAYS = 30;
 /**
  * Create backup of all data files.
  */
-async function createBackup() {
+async function _createBackup() {
   try {
     const timestamp = new Date()
       .toISOString()
@@ -129,6 +136,11 @@ async function restoreBackup(timestamp) {
   }
 }
 
+// Public wrapper that ensures backup runs sequentially
+function createBackup() {
+  return queueBackup(_createBackup);
+}
+
 // Schedule daily backup at 2:00 AM
 if (process.env.NODE_ENV !== 'test') {
   cron.schedule('0 2 * * *', async () => {
@@ -142,7 +154,6 @@ if (process.env.NODE_ENV !== 'test') {
     }
   });
 }
-})
 
 // Export for manual trigger via API
 module.exports = {

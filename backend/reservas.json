@@ -11,7 +11,7 @@
     "checkOut": "2026-05-09",
     "noches": 4,
     "personas": 4,
-    "estado": "reservada",
+    "estado": "no_show",
     "createdAt": "2026-04-25T20:05:48.322Z"
   },
   {
@@ -26,7 +26,7 @@
     "checkOut": "2026-05-13",
     "noches": 2,
     "personas": 4,
-    "estado": "reservada",
+    "estado": "no_show",
     "createdAt": "2026-04-25T20:05:48.322Z"
   },
   {
@@ -41,7 +41,7 @@
     "checkOut": "2026-05-19",
     "noches": 3,
     "personas": 2,
-    "estado": "reservada",
+    "estado": "no_show",
     "createdAt": "2026-04-25T20:05:48.322Z"
   },
   {
@@ -56,7 +56,7 @@
     "checkOut": "2026-05-26",
     "noches": 3,
     "personas": 2,
-    "estado": "reservada",
+    "estado": "no_show",
     "createdAt": "2026-04-25T20:05:48.322Z"
   },
   {
@@ -71,7 +71,7 @@
     "checkOut": "2026-05-11",
     "noches": 1,
     "personas": 1,
-    "estado": "reservada",
+    "estado": "no_show",
     "createdAt": "2026-04-25T20:05:48.322Z"
   },
   {
@@ -86,7 +86,7 @@
     "checkOut": "2026-05-15",
     "noches": 1,
     "personas": 2,
-    "estado": "reservada",
+    "estado": "no_show",
     "createdAt": "2026-04-25T20:05:48.322Z"
   },
   {
@@ -101,7 +101,7 @@
     "checkOut": "2026-05-18",
     "noches": 1,
     "personas": 4,
-    "estado": "reservada",
+    "estado": "no_show",
     "createdAt": "2026-04-25T20:05:48.322Z"
   },
   {
@@ -116,7 +116,7 @@
     "checkOut": "2026-04-23",
     "noches": 2,
     "personas": 2,
-    "estado": "reservada"
+    "estado": "no_show"
   },
   {
     "id": "sim-hd-501-2026-05-09-1",
@@ -130,7 +130,7 @@
     "checkOut": "2026-05-10",
     "noches": 1,
     "personas": 2,
-    "estado": "reservada",
+    "estado": "no_show",
     "createdAt": "2026-04-25T20:05:48.322Z"
   },
   {
@@ -145,7 +145,7 @@
     "checkOut": "2026-05-19",
     "noches": 4,
     "personas": 2,
-    "estado": "reservada",
+    "estado": "no_show",
     "createdAt": "2026-04-25T20:05:48.322Z"
   },
   {
@@ -160,7 +160,7 @@
     "checkOut": "2026-05-26",
     "noches": 4,
     "personas": 2,
-    "estado": "reservada",
+    "estado": "no_show",
     "createdAt": "2026-04-25T20:05:48.322Z"
   },
   {
@@ -175,7 +175,7 @@
     "checkOut": "2026-06-04",
     "noches": 4,
     "personas": 2,
-    "estado": "reservada",
+    "estado": "no_show",
     "createdAt": "2026-04-25T20:05:48.322Z"
   },
   {
@@ -190,7 +190,7 @@
     "checkOut": "2026-06-09",
     "noches": 1,
     "personas": 2,
-    "estado": "reservada",
+    "estado": "no_show",
     "createdAt": "2026-04-25T20:05:48.322Z"
   },
   {
@@ -205,7 +205,7 @@
     "checkOut": "2026-05-11",
     "noches": 2,
     "personas": 2,
-    "estado": "reservada",
+    "estado": "no_show",
     "createdAt": "2026-04-25T20:05:48.322Z"
   },
   {
@@ -220,7 +220,7 @@
     "checkOut": "2026-05-17",
     "noches": 1,
     "personas": 2,
-    "estado": "reservada",
+    "estado": "no_show",
     "createdAt": "2026-04-25T20:05:48.322Z"
   },
   {
@@ -235,7 +235,7 @@
     "checkOut": "2026-05-19",
     "noches": 1,
     "personas": 2,
-    "estado": "reservada",
+    "estado": "no_show",
     "createdAt": "2026-04-25T20:05:48.322Z"
   },
   {
@@ -250,7 +250,7 @@
     "checkOut": "2026-05-21",
     "noches": 1,
     "personas": 1,
-    "estado": "reservada",
+    "estado": "no_show",
     "createdAt": "2026-04-25T20:05:48.322Z"
   },
   {
@@ -265,7 +265,7 @@
     "checkOut": "2026-05-30",
     "noches": 4,
     "personas": 2,
-    "estado": "reservada",
+    "estado": "no_show",
     "createdAt": "2026-04-25T20:05:48.322Z"
   },
   {
@@ -280,7 +280,7 @@
     "checkOut": "2026-04-22",
     "noches": 2,
     "personas": 2,
-    "estado": "reservada"
+    "estado": "no_show"
   },
   {
     "id": "sim-hp-401-2026-05-03-1",
@@ -294,7 +294,7 @@
     "checkOut": "2026-05-05",
     "noches": 2,
     "personas": 2,
-    "estado": "reservada",
+    "estado": "no_show",
     "createdAt": "2026-04-25T20:05:48.322Z"
   },
   {
@@ -309,7 +309,7 @@
     "checkOut": "2026-05-11",
     "noches": 3,
     "personas": 2,
-    "estado": "reservada",
+    "estado": "no_show",
     "createdAt": "2026-04-25T20:05:48.322Z"
   },
   {
@@ -324,7 +324,7 @@
     "checkOut": "2026-05-13",
     "noches": 1,
     "personas": 1,
-    "estado": "reservada",
+    "estado": "no_show",
     "createdAt": "2026-04-25T20:05:48.322Z"
   },
   {
@@ -339,7 +339,7 @@
     "checkOut": "2026-05-19",
     "noches": 4,
     "personas": 2,
-    "estado": "reservada",
+    "estado": "no_show",
     "createdAt": "2026-04-25T20:05:48.322Z"
   },
   {
@@ -354,7 +354,7 @@
     "checkOut": "2026-05-26",
     "noches": 3,
     "personas": 2,
-    "estado": "reservada",
+    "estado": "no_show",
     "createdAt": "2026-04-25T20:05:48.322Z"
   },
   {
@@ -369,7 +369,7 @@
     "checkOut": "2026-04-25",
     "noches": 2,
     "personas": 1,
-    "estado": "reservada"
+    "estado": "no_show"
   },
   {
     "id": "sim-hp-402-2026-05-07-1",
@@ -383,7 +383,7 @@
     "checkOut": "2026-05-11",
     "noches": 4,
     "personas": 2,
-    "estado": "reservada",
+    "estado": "no_show",
     "createdAt": "2026-04-25T20:05:48.322Z"
   },
   {
@@ -398,7 +398,7 @@
     "checkOut": "2026-05-15",
     "noches": 1,
     "personas": 2,
-    "estado": "reservada",
+    "estado": "no_show",
     "createdAt": "2026-04-25T20:05:48.322Z"
   },
   {
@@ -413,7 +413,7 @@
     "checkOut": "2026-05-20",
     "noches": 2,
     "personas": 2,
-    "estado": "reservada",
+    "estado": "no_show",
     "createdAt": "2026-04-25T20:05:48.322Z"
   },
   {
@@ -428,7 +428,7 @@
     "checkOut": "2026-04-22",
     "noches": 2,
     "personas": 2,
-    "estado": "reservada"
+    "estado": "no_show"
   },
   {
     "id": "sim-sb-101-2026-04-25-1",
@@ -442,7 +442,7 @@
     "checkOut": "2026-04-28",
     "noches": 3,
     "personas": 2,
-    "estado": "reservada",
+    "estado": "no_show",
     "createdAt": "2026-04-25T20:05:48.321Z"
   },
   {
@@ -457,7 +457,7 @@
     "checkOut": "2026-05-02",
     "noches": 3,
     "personas": 2,
-    "estado": "reservada",
+    "estado": "no_show",
     "createdAt": "2026-04-25T20:05:48.321Z"
   },
   {
@@ -472,7 +472,7 @@
     "checkOut": "2026-05-06",
     "noches": 1,
     "personas": 1,
-    "estado": "reservada",
+    "estado": "no_show",
     "createdAt": "2026-04-25T20:05:48.321Z"
   },
   {
@@ -487,7 +487,7 @@
     "checkOut": "2026-05-12",
     "noches": 2,
     "personas": 2,
-    "estado": "reservada",
+    "estado": "no_show",
     "createdAt": "2026-04-25T20:05:48.321Z"
   },
   {
@@ -502,7 +502,7 @@
     "checkOut": "2026-05-18",
     "noches": 3,
     "personas": 2,
-    "estado": "reservada",
+    "estado": "no_show",
     "createdAt": "2026-04-25T20:05:48.321Z"
   },
   {
@@ -517,7 +517,7 @@
     "checkOut": "2026-05-25",
     "noches": 4,
     "personas": 2,
-    "estado": "reservada",
+    "estado": "no_show",
     "createdAt": "2026-04-25T20:05:48.321Z"
   },
   {
@@ -532,7 +532,7 @@
     "checkOut": "2026-05-28",
     "noches": 1,
     "personas": 2,
-    "estado": "reservada",
+    "estado": "no_show",
     "createdAt": "2026-04-25T20:05:48.321Z"
   },
   {
@@ -547,7 +547,7 @@
     "checkOut": "2026-05-30",
     "noches": 1,
     "personas": 2,
-    "estado": "reservada",
+    "estado": "no_show",
     "createdAt": "2026-04-25T20:05:48.321Z"
   },
   {
@@ -562,7 +562,7 @@
     "checkOut": "2026-04-25",
     "noches": 5,
     "personas": 2,
-    "estado": "reservada"
+    "estado": "no_show"
   },
   {
     "id": "sim-sb-102-2026-05-03-1",
@@ -576,7 +576,7 @@
     "checkOut": "2026-05-07",
     "noches": 4,
     "personas": 1,
-    "estado": "reservada",
+    "estado": "no_show",
     "createdAt": "2026-04-25T20:05:48.322Z"
   },
   {
@@ -591,7 +591,7 @@
     "checkOut": "2026-05-12",
     "noches": 2,
     "personas": 2,
-    "estado": "reservada",
+    "estado": "no_show",
     "createdAt": "2026-04-25T20:05:48.322Z"
   },
   {
@@ -606,7 +606,7 @@
     "checkOut": "2026-05-19",
     "noches": 2,
     "personas": 2,
-    "estado": "reservada",
+    "estado": "no_show",
     "createdAt": "2026-04-25T20:05:48.322Z"
   },
   {
@@ -621,7 +621,7 @@
     "checkOut": "2026-05-24",
     "noches": 1,
     "personas": 2,
-    "estado": "reservada",
+    "estado": "no_show",
     "createdAt": "2026-04-25T20:05:48.322Z"
   },
   {
@@ -636,7 +636,7 @@
     "checkOut": "2026-05-29",
     "noches": 3,
     "personas": 2,
-    "estado": "reservada",
+    "estado": "no_show",
     "createdAt": "2026-04-25T20:05:48.322Z"
   },
   {
@@ -651,7 +651,7 @@
     "checkOut": "2026-04-23",
     "noches": 2,
     "personas": 1,
-    "estado": "reservada"
+    "estado": "no_show"
   },
   {
     "id": "res-104-2026-04-22",
@@ -665,7 +665,7 @@
     "checkOut": "2026-04-24",
     "noches": 2,
     "personas": 2,
-    "estado": "reservada"
+    "estado": "no_show"
   },
   {
     "id": "res-105-2026-04-23",
@@ -679,7 +679,7 @@
     "checkOut": "2026-04-26",
     "noches": 3,
     "personas": 3,
-    "estado": "reservada"
+    "estado": "no_show"
   },
   {
     "id": "res-301-2026-04-20",
@@ -693,7 +693,7 @@
     "checkOut": "2026-04-25",
     "noches": 5,
     "personas": 2,
-    "estado": "reservada"
+    "estado": "no_show"
   },
   {
     "id": "sim-se-301-2026-05-01-1",
@@ -707,7 +707,7 @@
     "checkOut": "2026-05-04",
     "noches": 3,
     "personas": 2,
-    "estado": "reservada",
+    "estado": "no_show",
     "createdAt": "2026-04-25T20:05:48.322Z"
   },
   {
@@ -722,7 +722,7 @@
     "checkOut": "2026-05-11",
     "noches": 4,
     "personas": 2,
-    "estado": "reservada",
+    "estado": "no_show",
     "createdAt": "2026-04-25T20:05:48.322Z"
   },
   {
@@ -737,7 +737,7 @@
     "checkOut": "2026-05-17",
     "noches": 3,
     "personas": 2,
-    "estado": "reservada",
+    "estado": "no_show",
     "createdAt": "2026-04-25T20:05:48.322Z"
   },
   {
@@ -752,7 +752,7 @@
     "checkOut": "2026-05-25",
     "noches": 3,
     "personas": 2,
-    "estado": "reservada",
+    "estado": "no_show",
     "createdAt": "2026-04-25T20:05:48.322Z"
   },
   {
@@ -767,7 +767,7 @@
     "checkOut": "2026-04-28",
     "noches": 4,
     "personas": 2,
-    "estado": "reservada"
+    "estado": "no_show"
   },
   {
     "id": "sim-se-302-2026-05-06-1",
@@ -781,7 +781,7 @@
     "checkOut": "2026-05-09",
     "noches": 3,
     "personas": 2,
-    "estado": "reservada",
+    "estado": "no_show",
     "createdAt": "2026-04-25T20:05:48.322Z"
   },
   {
@@ -796,7 +796,7 @@
     "checkOut": "2026-05-14",
     "noches": 4,
     "personas": 1,
-    "estado": "reservada",
+    "estado": "no_show",
     "createdAt": "2026-04-25T20:05:48.322Z"
   },
   {
@@ -811,7 +811,7 @@
     "checkOut": "2026-05-18",
     "noches": 2,
     "personas": 2,
-    "estado": "reservada",
+    "estado": "no_show",
     "createdAt": "2026-04-25T20:05:48.322Z"
   },
   {
@@ -826,7 +826,7 @@
     "checkOut": "2026-05-22",
     "noches": 3,
     "personas": 1,
-    "estado": "reservada",
+    "estado": "no_show",
     "createdAt": "2026-04-25T20:05:48.322Z"
   },
   {
@@ -841,7 +841,7 @@
     "checkOut": "2026-04-27",
     "noches": 7,
     "personas": 2,
-    "estado": "reservada"
+    "estado": "no_show"
   },
   {
     "id": "sim-ss-201-2026-05-01-1",
@@ -855,7 +855,7 @@
     "checkOut": "2026-05-02",
     "noches": 1,
     "personas": 2,
-    "estado": "reservada",
+    "estado": "no_show",
     "createdAt": "2026-04-25T20:05:48.322Z"
   },
   {
@@ -870,7 +870,7 @@
     "checkOut": "2026-05-08",
     "noches": 4,
     "personas": 2,
-    "estado": "reservada",
+    "estado": "no_show",
     "createdAt": "2026-04-25T20:05:48.322Z"
   },
   {
@@ -885,7 +885,7 @@
     "checkOut": "2026-05-11",
     "noches": 1,
     "personas": 2,
-    "estado": "reservada",
+    "estado": "no_show",
     "createdAt": "2026-04-25T20:05:48.322Z"
   },
   {
@@ -900,7 +900,7 @@
     "checkOut": "2026-05-18",
     "noches": 3,
     "personas": 2,
-    "estado": "reservada",
+    "estado": "no_show",
     "createdAt": "2026-04-25T20:05:48.322Z"
   },
   {
@@ -915,7 +915,7 @@
     "checkOut": "2026-05-22",
     "noches": 3,
     "personas": 2,
-    "estado": "reservada",
+    "estado": "no_show",
     "createdAt": "2026-04-25T20:05:48.322Z"
   },
   {
@@ -930,7 +930,7 @@
     "checkOut": "2026-04-22",
     "noches": 1,
     "personas": 2,
-    "estado": "reservada"
+    "estado": "no_show"
   },
   {
     "id": "sim-ss-202-2026-05-04-1",
@@ -944,7 +944,7 @@
     "checkOut": "2026-05-05",
     "noches": 1,
     "personas": 2,
-    "estado": "reservada",
+    "estado": "no_show",
     "createdAt": "2026-04-25T20:05:48.322Z"
   },
   {
@@ -959,7 +959,7 @@
     "checkOut": "2026-05-12",
     "noches": 2,
     "personas": 2,
-    "estado": "reservada",
+    "estado": "no_show",
     "createdAt": "2026-04-25T20:05:48.322Z"
   },
   {
@@ -974,7 +974,7 @@
     "checkOut": "2026-05-18",
     "noches": 3,
     "personas": 2,
-    "estado": "reservada",
+    "estado": "no_show",
     "createdAt": "2026-04-25T20:05:48.322Z"
   },
   {
@@ -989,7 +989,7 @@
     "checkOut": "2026-05-25",
     "noches": 4,
     "personas": 2,
-    "estado": "reservada",
+    "estado": "no_show",
     "createdAt": "2026-04-25T20:05:48.322Z"
   },
   {
@@ -1004,7 +1004,7 @@
     "checkOut": "2026-06-03",
     "noches": 4,
     "personas": 2,
-    "estado": "reservada",
+    "estado": "no_show",
     "createdAt": "2026-04-25T20:05:48.322Z"
   }
 ]

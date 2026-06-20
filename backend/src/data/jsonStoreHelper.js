@@ -65,7 +65,11 @@ async function writeJsonFile(filePath, data) {
     let fd = null;
     try {
       fd = await fs.open(tmp, 'r');
-      await fd.sync();
+      if (process.platform !== 'win32') {
+        await fd.sync();
+      } else {
+        logger.debug({ file: tmp }, 'fsync skipped on Windows');
+      }
     } catch (syncErr) {
       logger.warn({ err: syncErr, file: tmp }, 'fsync skipped');
     } finally {

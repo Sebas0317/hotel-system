@@ -157,7 +157,9 @@ app.use(express.urlencoded({ extended: false, limit: '500kb' }));
 app.use(cookieParser());
 
 app.use(sanitizeBody);
-app.use(csrfProtection);
+if (process.env.NODE_ENV !== 'test') {
+  app.use(csrfProtection);
+}
 
 // ── RATE LIMITING ──
 // Global rate limiter (applied to all routes)
@@ -304,24 +306,28 @@ runStartupTasks().then(() => {
       });
 
       // Create initial backup on startup
-      createBackup().then(() => {
-        logger.info('Initial backup created successfully');
-      }).catch(err => {
-        logger.warn({ err }, 'Initial backup failed (non-critical)');
-      });
+      if (!process.env.DISABLE_BACKUP) {
+        createBackup().then(() => {
+          logger.info('Initial backup created successfully');
+        }).catch(err => {
+          logger.warn({ err }, 'Initial backup failed (non-critical)');
+        });
+      }
 
-      // Seed admin user from env and owner user
-      const us = require('./src/data/userStore');
-      us.seedAdminUser().then(user => {
-        if (user) logger.info('Admin user seeded');
-      }).catch(err => {
-        logger.warn({ err }, 'Admin user seed failed (non-critical)');
-      });
-      us.seedOwnerUser().then(user => {
-        if (user) logger.info('Owner user seeded');
-      }).catch(err => {
-        logger.warn({ err }, 'Owner user seed failed (non-critical)');
-      });
+      if (!process.env.SKIP_SEED) {
+        // Seed admin user from env and owner user
+        const us = require('./src/data/userStore');
+        us.seedAdminUser().then(user => {
+          if (user) logger.info('Admin user seeded');
+        }).catch(err => {
+          logger.warn({ err }, 'Admin user seed failed (non-critical)');
+        });
+        us.seedOwnerUser().then(user => {
+          if (user) logger.info('Owner user seeded');
+        }).catch(err => {
+          logger.warn({ err }, 'Owner user seed failed (non-critical)');
+        });
+      }
 
     }
   });

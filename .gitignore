@@ -26,3 +26,22 @@ backend/swagger.json
 .ai-reports/
 semgrep-report.json
 .opencode/
+
+# Runtime artifacts
+stderr.log
+stdout.log
+test_stderr.log
+test_stdout.log
+ngrok_err.log
+ngrok.log
+
+# Tunnel binaries
+ngrok.exe
+cloudflared.exe
+
+# AI context
+CLAUDE.md
+.claude/
+
+# Root lock
+package-lock.json
