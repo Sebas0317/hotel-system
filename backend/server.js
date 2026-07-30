@@ -199,10 +199,13 @@ app.get('/', (_req, res) => res.json({
 
 // On Vercel, strip the route prefix so Express routes match correctly
 if (process.env.VERCEL) {
-  const PREFIX = '/_/backend';
+  const PREFIXES = ['/_/backend', '/api'];
   app.use((req, _res, next) => {
-    if (req.url.startsWith(PREFIX)) {
-      req.url = req.url.slice(PREFIX.length);
+    for (const prefix of PREFIXES) {
+      if (req.url.startsWith(prefix)) {
+        req.url = req.url.slice(prefix.length);
+        break;
+      }
     }
     next();
   });
