@@ -1,24 +1,13 @@
 [
   {
-    "id": "1781629798394-4d237bd4",
-    "userId": "1781629798392-ce021e86",
+    "id": "1785384252078-73a12340",
+    "userId": "1785384252075-342547c2",
     "type": "email_verification",
-    "codeHash": "0ecae6b1866e98c5a7e7c0ca3b97cfffd323ad1a2ea1548f120b4f0980b79acb",
-    "expiresAt": 1781630098394,
+    "codeHash": "ca786b57527f207868652b51383ca7e1d7d1fcb3b2be501425849b51f8d65643",
+    "expiresAt": 1785384552078,
     "attempts": 0,
     "maxAttempts": 5,
     "used": false,
-    "createdAt": "2026-06-16T17:09:58.395Z"
-  },
-  {
-    "id": "1781629814495-8bc92495",
-    "userId": "1781629814492-95dce687",
-    "type": "email_verification",
-    "codeHash": "dce4256eb97125e6159d964a713bdc4618bf1ef215388d67bb98f9e90ed87fdd",
-    "expiresAt": 1781630114495,
-    "attempts": 0,
-    "maxAttempts": 5,
-    "used": false,
-    "createdAt": "2026-06-16T17:10:14.495Z"
+    "createdAt": "2026-07-30T04:04:12.078Z"
   }
 ]

@@ -7,14 +7,14 @@
     "firstName": "Sebastian",
     "lastName": "Sandoval",
     "avatar": null,
-    "role": "admin",
+    "role": "owner",
     "isActive": true,
     "emailVerified": true,
     "twoFactorEnabled": false,
     "lastLogin": null,
     "lastIp": null,
     "createdAt": "2026-06-14T03:08:55.621Z",
-    "updatedAt": "2026-06-16T16:14:49.343Z"
+    "updatedAt": "2026-07-30T01:52:46.496Z"
   },
   {
     "id": "1781406782820-806e0c43",
@@ -389,5 +389,56 @@
     "lastIp": "::ffff:127.0.0.1",
     "createdAt": "2026-06-16T17:10:14.492Z",
     "updatedAt": "2026-06-16T17:10:15.011Z"
+  },
+  {
+    "id": "1785377247161-d1525dd9",
+    "username": "admin",
+    "email": "admin@ecobosque.com",
+    "passwordHash": "$2b$12$hNnAF0HgqBqfT6ca160BXerS8vil.kmLfXMHzhYdmWWm4/yZ90Y6.",
+    "firstName": "Admin",
+    "lastName": "EcoBosque",
+    "avatar": null,
+    "role": "admin",
+    "isActive": true,
+    "emailVerified": true,
+    "twoFactorEnabled": false,
+    "lastLogin": "2026-07-30T03:46:39.917Z",
+    "lastIp": "127.0.0.1",
+    "createdAt": "2026-07-30T02:07:27.161Z",
+    "updatedAt": "2026-07-30T03:46:39.917Z"
+  },
+  {
+    "id": "1785383755565-a9f8fb09",
+    "username": "test_1785383753522",
+    "email": "test_1785383753522@test.com",
+    "passwordHash": "$2b$12$hykSFY8Emt8abBW00Yu5gu1XsWF.2N3MKN/2TxkaRWbod8V/5UEgq",
+    "firstName": "",
+    "lastName": "",
+    "avatar": null,
+    "role": "cliente",
+    "isActive": true,
+    "emailVerified": false,
+    "twoFactorEnabled": false,
+    "lastLogin": "2026-07-30T03:55:56.160Z",
+    "lastIp": "::ffff:127.0.0.1",
+    "createdAt": "2026-07-30T03:55:55.565Z",
+    "updatedAt": "2026-07-30T03:55:56.160Z"
+  },
+  {
+    "id": "1785384252075-342547c2",
+    "username": "test_1785384250166",
+    "email": "test_1785384250166@test.com",
+    "passwordHash": "$2b$12$hywe5g7hNoEZun3IuqeL0udyWULcUIGuk/qJMhvp8aVCNgPEu5Dka",
+    "firstName": "",
+    "lastName": "",
+    "avatar": null,
+    "role": "cliente",
+    "isActive": true,
+    "emailVerified": false,
+    "twoFactorEnabled": false,
+    "lastLogin": "2026-07-30T04:04:12.635Z",
+    "lastIp": "::ffff:127.0.0.1",
+    "createdAt": "2026-07-30T04:04:12.075Z",
+    "updatedAt": "2026-07-30T04:04:12.635Z"
   }
 ]
