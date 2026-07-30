@@ -206,14 +206,40 @@ app.get('/', (_req, res) => res.json({
 if (process.env.VERCEL) {
   const PREFIXES = ['/_/backend', '/api'];
   app.use((req, _res, next) => {
+    const originalUrl = req.url;
     for (const prefix of PREFIXES) {
       if (req.url.startsWith(prefix)) {
         req.url = req.url.slice(prefix.length);
         break;
       }
     }
+    console.error('[PREFIX] originalUrl=%s stripped=%s', originalUrl, req.url);
     next();
   });
+}
+
+// ── DEBUG: echo request URL (Vercel only) ──
+if (process.env.VERCEL) {
+  app.use('/debug-url', [
+    (req, res, next) => {
+      // Before route matching, log the URL state
+      console.error('[DEBUG] url=%s originalUrl=%s path=%s', req.url, req.originalUrl, req.path);
+      next();
+    },
+    (req, res) => {
+      res.json({
+        originalUrl: req.originalUrl,
+        url: req.url,
+        baseUrl: req.baseUrl,
+        path: req.path,
+        method: req.method,
+        __dirname,
+        cwd: process.cwd(),
+        env: { VERCEL: process.env.VERCEL, NODE_ENV: process.env.NODE_ENV },
+        headers: req.headers,
+      });
+    },
+  ]);
 }
 
 // ── ROUTES (v1 + unversioned for backward compatibility) ──
