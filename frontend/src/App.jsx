@@ -8,7 +8,7 @@ import {
   useRef,
   useState,
 } from 'react';
-import { Route, Routes, useNavigate } from 'react-router-dom';
+import { Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { Toaster, toast } from 'sonner';
 import CybersecurityPanel from './components/CybersecurityPanel';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -146,6 +146,7 @@ export default function App() {
     return userInfo ? userInfo.role : null;
   });
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleRol = useCallback((r) => {
     setRol(r);
@@ -153,9 +154,11 @@ export default function App() {
 
   useEffect(() => {
     if (!rol) return;
+    const guestRoutes = ['/', '/login/admin', '/login/forgot', '/forgot'];
+    if (!guestRoutes.includes(location.pathname)) return;
     const path = rol === 'user' || rol === 'cliente' ? '/user' : '/admin';
     navigate(path, { replace: true });
-  }, [rol, navigate]);
+  }, [rol, location.pathname, navigate]);
 
   const [showSessionModal, setShowSessionModal] = useState(false);
 
