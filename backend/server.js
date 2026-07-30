@@ -188,7 +188,10 @@ app.use('/auth', authRateLimiter, authRoutes);
 
 // ── CSRF PROTECTION (only in production) ──
 if (process.env.NODE_ENV === 'production') {
-  app.use(csrfProtection);
+  app.use((req, res, next) => {
+    if (req.path.includes('/validar')) return next();
+    return csrfProtection(req, res, next);
+  });
 }
 
 // ── RATE LIMITING ──
