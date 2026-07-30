@@ -43,7 +43,7 @@ const swaggerSpecs = require('./src/config/swagger');
 
 // Import middleware
 const { requestLogger, errorHandler, notFoundHandler } = require('./src/middleware/errorHandler');
-const { requireAuth, csrfProtection } = require('./src/middleware/auth');
+const { requireAuth } = require('./src/middleware/auth');
 const { sanitizeBody } = require('./src/middleware/sanitize');
 const { requestTimeout } = require('./src/middleware/requestTimeout');
 const cookieParser = require('cookie-parser');
@@ -185,14 +185,6 @@ if (process.env.VERCEL) {
 // ── AUTH ROUTES (mounted before CSRF so login/register don't need CSRF tokens) ──
 app.use('/v1/auth', authRateLimiter, authRoutes);
 app.use('/auth', authRateLimiter, authRoutes);
-
-// ── CSRF PROTECTION (only in production) ──
-if (process.env.NODE_ENV === 'production') {
-  app.use((req, res, next) => {
-    if (req.path.includes('/validar')) return next();
-    return csrfProtection(req, res, next);
-  });
-}
 
 // ── RATE LIMITING ──
 // Global rate limiter (applied to all routes)
