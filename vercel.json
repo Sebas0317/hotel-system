@@ -5,8 +5,8 @@
   ],
   "installCommand": "npm install --install-strategy=nested && cd frontend && npm install",
   "rewrites": [
-    { "source": "/_/backend/(.*)", "destination": "/api/$1" },
-    { "source": "/api/(.*)", "destination": "/api/$1" },
+    { "source": "/_/backend/(.*)", "destination": "/api" },
+    { "source": "/api/(.*)", "destination": "/api" },
     { "source": "/v1/(.*)", "destination": "/api/v1/$1" },
     { "source": "/(.*)", "destination": "/" }
   ]
