@@ -11,7 +11,7 @@ const express = require('express');
 const router = express.Router();
 const roomController = require('../controllers/roomController');
 const { requireFields, validateEnum } = require('../middleware/validation');
-const { requireAuth, requireRole } = require('../middleware/auth');
+const { requireAuth, optionalAuth, requireRole } = require('../middleware/auth');
 const { requireRoomAccess } = require('../middleware/roomAccess');
 const {
   writeRateLimiter,
@@ -23,7 +23,7 @@ const METODOS_PAGO = ['efectivo', 'tarjeta', 'transferencia'];
 // ── PUBLIC ROUTES (no auth required) ──
 
 // GET /rooms - List all rooms
-router.get('/', roomController.getAllRooms);
+router.get('/', optionalAuth, roomController.getAllRooms);
 
 // GET /rooms/stats - Room statistics
 router.get('/stats', roomController.getRoomStats);

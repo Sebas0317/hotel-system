@@ -105,6 +105,25 @@ function revalidateRole(req, res, next) {
   })();
 }
 
+function optionalAuth(req, res, next) {
+  const token = req.cookies?.token;
+  if (!token || token.length < 10) {
+    return next();
+  }
+  try {
+    const decoded = jwt.verify(token, getJwtSecret(), {
+      algorithms: ['HS256'],
+      clockTolerance: 30,
+    });
+    if (decoded && typeof decoded === 'object' && decoded.role && decoded.id) {
+      req.user = decoded;
+    }
+    next();
+  } catch {
+    next();
+  }
+}
+
 // CSRF protection: requires a custom header on state-changing requests.
 // CSRF protection using csurf (cookie token) — gracefully handles Express 5 incompatibility
 let csrfProtection;
@@ -120,6 +139,7 @@ try {
 
 module.exports = {
   requireAuth,
+  optionalAuth,
   requirePermission,
   requireRole,
   revalidateRole,
