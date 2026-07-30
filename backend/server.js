@@ -118,7 +118,7 @@ app.use(helmet({
   permittedCrossDomainPolicies: { permittedPolicies: 'none' },
 }));
 
-// ── CORS (strict) ──
+// ── CORS (strict, with Vercel support) ──
 const vercelUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null;
 const defaultOrigins = ['http://localhost:5173', 'http://localhost:4173'];
 if (vercelUrl) defaultOrigins.push(vercelUrl);
@@ -130,8 +130,10 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
 app.use(cors({
   origin: function (origin, callback) {
     if (!origin) return callback(null, true);
-    if (allowedOrigins.indexOf(origin) !== -1) {
-      return callback(null, true);
+    if (allowedOrigins.indexOf(origin) !== -1) return callback(null, true);
+    if (process.env.VERCEL) {
+      const host = origin.replace(/^https?:\/\//, '');
+      if (host.endsWith('.vercel.app') || host === process.env.VERCEL_URL) return callback(null, true);
     }
     callback(new Error('Not allowed by CORS'));
   },
