@@ -16,7 +16,7 @@ let redis = null;
 
 function getRedis() {
   if (redis) return redis;
-  if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) {
+  if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN && !process.env.VERCEL) {
     const { Redis } = require('@upstash/redis');
     redis = new Redis({
       url: process.env.KV_REST_API_URL,
@@ -28,7 +28,7 @@ function getRedis() {
 }
 
 function isRedisAvailable() {
-  return !!(process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN);
+  return !!(process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN && !process.env.VERCEL);
 }
 
 // ── File paths (used as Redis keys) ──

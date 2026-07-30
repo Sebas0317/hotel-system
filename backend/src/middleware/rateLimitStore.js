@@ -8,7 +8,7 @@ const KV_REST_API_TOKEN = process.env.KV_REST_API_TOKEN;
 let redis = null;
 let redisAvailable = false;
 
-if (KV_REST_API_URL && KV_REST_API_TOKEN) {
+if (KV_REST_API_URL && KV_REST_API_TOKEN && !process.env.VERCEL) {
   try {
     redis = new Redis({ url: KV_REST_API_URL, token: KV_REST_API_TOKEN });
     redisAvailable = true;

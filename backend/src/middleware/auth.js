@@ -3,14 +3,6 @@
 const jwt = require('jsonwebtoken');
 const logger = require('../utils/logger');
 const { hasPermission } = require('../utils/permissions');
-let csurf;
-try {
-  csurf = require('csurf');
-} catch (e) {
-  // csurf not installed (e.g., in test environment). Use a no‑op middleware.
-  csurf = () => (req, res, next) => next();
-}
-
 const { getJwtSecret } = require('../utils/secretLoader');
 
 function requireAuth(req, res, next) {
@@ -114,10 +106,17 @@ function revalidateRole(req, res, next) {
 }
 
 // CSRF protection: requires a custom header on state-changing requests.
-// CSRF protection using csurf (cookie token)
-const csrfProtection = (process.env.NODE_ENV === 'test')
-  ? (req, res, next) => next()
-  : csurf({ cookie: true });
+// CSRF protection using csurf (cookie token) — gracefully handles Express 5 incompatibility
+let csrfProtection;
+try {
+  const csurf = require('csurf');
+  csrfProtection = (process.env.NODE_ENV === 'test')
+    ? (req, res, next) => next()
+    : csurf({ cookie: true });
+} catch (e) {
+  logger.warn('csurf not available — CSRF protection disabled');
+  csrfProtection = (req, res, next) => next();
+}
 
 module.exports = {
   requireAuth,
