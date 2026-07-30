@@ -163,6 +163,23 @@ app.use(cookieParser());
 
 app.use(sanitizeBody);
 
+// ── VERCEL PREFIX STRIPPING ──
+// On Vercel, /api path prefix is NOT stripped by the rewrite; we strip it here
+// so Express internal routes (/v1/*, /auth/*, etc.) match correctly.
+// Must be BEFORE all route registrations.
+if (process.env.VERCEL) {
+  const PREFIXES = ['/_/backend', '/api'];
+  app.use((req, _res, next) => {
+    for (const prefix of PREFIXES) {
+      if (req.url.startsWith(prefix)) {
+        req.url = req.url.slice(prefix.length);
+        break;
+      }
+    }
+    next();
+  });
+}
+
 // ── AUTH ROUTES (mounted before CSRF so login/register don't need CSRF tokens) ──
 app.use('/v1/auth', authRateLimiter, authRoutes);
 app.use('/auth', authRateLimiter, authRoutes);
@@ -202,45 +219,7 @@ app.get('/', (_req, res) => res.json({
   health: '/health/detailed',
 }));
 
-// On Vercel, strip the route prefix so Express routes match correctly
-if (process.env.VERCEL) {
-  const PREFIXES = ['/_/backend', '/api'];
-  app.use((req, _res, next) => {
-    const originalUrl = req.url;
-    for (const prefix of PREFIXES) {
-      if (req.url.startsWith(prefix)) {
-        req.url = req.url.slice(prefix.length);
-        break;
-      }
-    }
-    console.error('[PREFIX] originalUrl=%s stripped=%s', originalUrl, req.url);
-    next();
-  });
-}
 
-// ── DEBUG: echo request URL (Vercel only) ──
-if (process.env.VERCEL) {
-  app.use('/debug-url', [
-    (req, res, next) => {
-      // Before route matching, log the URL state
-      console.error('[DEBUG] url=%s originalUrl=%s path=%s', req.url, req.originalUrl, req.path);
-      next();
-    },
-    (req, res) => {
-      res.json({
-        originalUrl: req.originalUrl,
-        url: req.url,
-        baseUrl: req.baseUrl,
-        path: req.path,
-        method: req.method,
-        __dirname,
-        cwd: process.cwd(),
-        env: { VERCEL: process.env.VERCEL, NODE_ENV: process.env.NODE_ENV },
-        headers: req.headers,
-      });
-    },
-  ]);
-}
 
 // ── ROUTES (v1 + unversioned for backward compatibility) ──
 
