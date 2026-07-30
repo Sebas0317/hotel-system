@@ -1,4 +1,4 @@
-import { AnimatePresence } from 'framer-motion';
+
 import {
   Component,
   lazy,
@@ -8,7 +8,7 @@ import {
   useRef,
   useState,
 } from 'react';
-import { Route, Routes, useLocation, useNavigate } from 'react-router-dom';
+import { Route, Routes, useNavigate } from 'react-router-dom';
 import { Toaster, toast } from 'sonner';
 import CybersecurityPanel from './components/CybersecurityPanel';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -167,7 +167,6 @@ export default function App() {
     navigate('/', { replace: true });
   }, [navigate]);
 
-  const location = useLocation();
   const warnedRef = useRef(false);
 
   const { isWarning, reset: resetSession } = useSession({
@@ -302,8 +301,7 @@ export default function App() {
         <CybersecurityPanel />
 
         <Suspense fallback={<LoadingFallback />}>
-          <AnimatePresence mode="wait" initial={false}>
-            <Routes location={location}>
+          <Routes>
               <Route
                 path="/"
                 element={
@@ -411,7 +409,6 @@ export default function App() {
               <Route path="/landing/*" element={<EcoWeb />} />
               <Route path="*" element={<SafeNavigate to="/" replace />} />
             </Routes>
-          </AnimatePresence>
         </Suspense>
       </div>
     </ErrorBoundary>
