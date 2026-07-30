@@ -301,7 +301,7 @@ export default function App() {
           </div>
         )}
 
-        <CybersecurityPanel />
+        {false && <CybersecurityPanel />}
 
         <Suspense fallback={<LoadingFallback />}>
           <Routes>
