@@ -70,6 +70,10 @@ const reservasRoutes = require('./src/routes/reservas');
 const usersRoutes = require('./src/routes/users');
 
 const app = express();
+
+// Trust Vercel proxy for real client IP (required for rate limiting / security)
+app.set('trust proxy', true);
+
 const PORT = process.env.PORT || 3001;
 
 // Track server start time for health checks
@@ -269,75 +273,81 @@ async function runStartupTasks() {
   }
 }
 
-runStartupTasks().then(() => {
-  server = app.listen(PORT, '0.0.0.0', () => {
-    // Initialize WebSocket server for real-time updates
-    initWebSocket(server);
+// Seed users on startup (both local and Vercel serverless)
+async function seedUsers() {
+  if (process.env.NODE_ENV === 'test' || process.env.SKIP_SEED) return;
+  try {
+    const us = require('./src/data/userStore');
+    const adminUser = await us.seedAdminUser();
+    if (adminUser) logger.info('Admin user seeded');
+    const ownerUser = await us.seedOwnerUser();
+    if (ownerUser) logger.info('Owner user seeded');
+  } catch (err) {
+    logger.warn({ err }, 'User seed failed (non-critical)');
+  }
+}
 
-    logger.info(`EcoBosque API running on http://localhost:${PORT}`);
+// Only start the HTTP server when NOT running on Vercel (serverless)
+if (!process.env.VERCEL) {
+  runStartupTasks().then(() => {
+    server = app.listen(PORT, '0.0.0.0', () => {
+      // Initialize WebSocket server for real-time updates
+      initWebSocket(server);
 
-    // ── OPTIONAL HTTPS (self-signed dev certs) ──
-    if (process.env.NODE_ENV !== 'test') {
-      const certPath = path.join(__dirname, 'certs', 'dev-cert.pem');
-      const keyPath = path.join(__dirname, 'certs', 'dev-key.pem');
-      if (fs.existsSync(certPath) && fs.existsSync(keyPath)) {
-        const httpsOpts = {
-          cert: fs.readFileSync(certPath),
-          key: fs.readFileSync(keyPath),
-        };
-        const httpsServer = https.createServer(httpsOpts, app);
-        const HTTPS_PORT = process.env.HTTPS_PORT || 3443;
-        httpsServer.listen(HTTPS_PORT, '0.0.0.0', () => {
-          initWebSocket(httpsServer);
-          logger.info(`EcoBosque API running on https://localhost:${HTTPS_PORT}`);
-        });
-      }
-    }
+      logger.info(`EcoBosque API running on http://localhost:${PORT}`);
 
-    logger.info(`API Documentation: http://localhost:${PORT}/api-docs`);
-    logger.info(`Health Check: http://localhost:${PORT}/health/detailed`);
-
-    // Avoid expensive startup side-effects during tests.
-    if (process.env.NODE_ENV !== 'test') {
-      // Run JSON integrity check on startup
-      const { startupValidation } = require('./src/utils/jsonValidator');
-      startupValidation().then(report => {
-        if (report.overall) {
-          logger.info('JSON integrity check passed');
-        } else {
-          logger.warn('JSON integrity check found issues');
+      // ── OPTIONAL HTTPS (self-signed dev certs) ──
+      if (process.env.NODE_ENV !== 'test') {
+        const certPath = path.join(__dirname, 'certs', 'dev-cert.pem');
+        const keyPath = path.join(__dirname, 'certs', 'dev-key.pem');
+        if (fs.existsSync(certPath) && fs.existsSync(keyPath)) {
+          const httpsOpts = {
+            cert: fs.readFileSync(certPath),
+            key: fs.readFileSync(keyPath),
+          };
+          const httpsServer = https.createServer(httpsOpts, app);
+          const HTTPS_PORT = process.env.HTTPS_PORT || 3443;
+          httpsServer.listen(HTTPS_PORT, '0.0.0.0', () => {
+            initWebSocket(httpsServer);
+            logger.info(`EcoBosque API running on https://localhost:${HTTPS_PORT}`);
+          });
         }
-      }).catch(err => {
-        logger.warn({ err }, 'JSON integrity check failed (non-critical)');
-      });
-
-      // Create initial backup on startup
-      if (!process.env.DISABLE_BACKUP) {
-        createBackup().then(() => {
-          logger.info('Initial backup created successfully');
-        }).catch(err => {
-          logger.warn({ err }, 'Initial backup failed (non-critical)');
-        });
       }
 
-      if (!process.env.SKIP_SEED) {
-        // Seed admin user from env and owner user
-        const us = require('./src/data/userStore');
-        us.seedAdminUser().then(user => {
-          if (user) logger.info('Admin user seeded');
-        }).catch(err => {
-          logger.warn({ err }, 'Admin user seed failed (non-critical)');
-        });
-        us.seedOwnerUser().then(user => {
-          if (user) logger.info('Owner user seeded');
-        }).catch(err => {
-          logger.warn({ err }, 'Owner user seed failed (non-critical)');
-        });
-      }
+      logger.info(`API Documentation: http://localhost:${PORT}/api-docs`);
+      logger.info(`Health Check: http://localhost:${PORT}/health/detailed`);
 
-    }
+      // Avoid expensive startup side-effects during tests.
+      if (process.env.NODE_ENV !== 'test') {
+        // Run JSON integrity check on startup
+        const { startupValidation } = require('./src/utils/jsonValidator');
+        startupValidation().then(report => {
+          if (report.overall) {
+            logger.info('JSON integrity check passed');
+          } else {
+            logger.warn('JSON integrity check found issues');
+          }
+        }).catch(err => {
+          logger.warn({ err }, 'JSON integrity check failed (non-critical)');
+        });
+
+        // Create initial backup on startup
+        if (!process.env.DISABLE_BACKUP) {
+          createBackup().then(() => {
+            logger.info('Initial backup created successfully');
+          }).catch(err => {
+            logger.warn({ err }, 'Initial backup failed (non-critical)');
+          });
+        }
+
+        seedUsers();
+      }
+    });
   });
-});
+} else {
+  // On Vercel, seed users on cold start
+  seedUsers();
+}
 
 module.exports = app; // Export for Vercel serverless
 module.exports.app = app;

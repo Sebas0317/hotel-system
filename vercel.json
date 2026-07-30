@@ -1,10 +1,12 @@
 {
   "buildCommand": "cd frontend && npm run build",
   "outputDirectory": "frontend/dist",
-  "installCommand": "cd frontend && npm install",
+  "installCommand": "npm install && cd frontend && npm install",
   "framework": "vite",
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api" },
+    { "source": "/_/backend/v1/(.*)", "destination": "/api/v1/$1" },
+    { "source": "/_/backend/(.*)", "destination": "/api/$1" },
+    { "source": "/api/(.*)", "destination": "/api/$1" },
     { "source": "/v1/(.*)", "destination": "/api/v1/$1" },
     { "source": "/(.*)", "destination": "/" }
   ]
