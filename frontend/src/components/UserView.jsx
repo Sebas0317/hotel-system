@@ -161,12 +161,28 @@ export default function UserView({ onExit }) {
                   <p className="rdp-empty">Sin consumos registrados</p>
                 ) : (
                   <div className="rdp-consumos-list">
-                    {consumos.map((c) => (
-                      <div key={c.id} className="rdp-consumo-item">
-                        <span>{c.descripcion}</span>
-                        <span>{COP(c.precio)}</span>
-                      </div>
-                    ))}
+                    {(() => {
+                      const grouped = {};
+                      consumos.forEach((c) => {
+                        const key = c.descripcion + '|' + c.precio;
+                        if (!grouped[key]) grouped[key] = { ...c, cantidad: 1 };
+                        else grouped[key].cantidad++;
+                      });
+                      return Object.values(grouped).map((c) => (
+                        <div key={c.id} className="rdp-consumo-item">
+                          <span>
+                            {c.descripcion}
+                            {c.cantidad > 1 && (
+                              <span className="rdp-consumo-cantidad">
+                                {' '}
+                                &times;{c.cantidad}
+                              </span>
+                            )}
+                          </span>
+                          <span>{COP(c.precio * c.cantidad)}</span>
+                        </div>
+                      ));
+                    })()}
                   </div>
                 )}
                 {consumos.length > 0 && (
@@ -178,6 +194,12 @@ export default function UserView({ onExit }) {
               </div>
 
               <div className="rdp-totals">
+                {checkoutCalc.iva > 0 && (
+                  <div className="rdp-total-row">
+                    <span>IVA (19%)</span>
+                    <span>{COP(checkoutCalc.iva)}</span>
+                  </div>
+                )}
                 <div className="rdp-total-row rdp-total-grand">
                   <span>Total de la Estancia</span>
                   <span>{COP(totalAPagar)}</span>
