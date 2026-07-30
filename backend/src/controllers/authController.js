@@ -268,42 +268,6 @@ async function login(req, res) {
 
     await userStore.updateLastLogin(user.id, ip);
 
-    if (user.twoFactorEnabled) {
-      const { plainCode } = await codeStore.createCode({
-        userId: user.id,
-        type: '2fa',
-        ttlMs: 300000,
-      });
-      const sent = await emailService.send2FACode(user.email, plainCode);
-      if (!sent.success) {
-        logger.error(
-          { userId: user.id, email: user.email },
-          'Failed to send 2FA code — SMTP unavailable'
-        );
-        return res.status(500).json({
-          error: 'Error al enviar codigo 2FA. Configura SMTP primero.',
-        });
-      }
-
-      logger.info({ userId: user.id, email: user.email }, '2FA code sent');
-
-      await securityTracker.logSecurityEvent({
-        type: 'info',
-        userId: user.id,
-        ip,
-        action: 'login_code',
-        detail: 'Codigo de inicio de sesion enviado',
-      });
-
-      return res.json({
-        requires2FA: true,
-        userId: user.id,
-        expiresIn: 300,
-        email: user.email,
-        metodo: 'email',
-      });
-    }
-
     const token = generateToken(user);
     logger.info(
       { userId: user.id, email: user.email, role: user.role },

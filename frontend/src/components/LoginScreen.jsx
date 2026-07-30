@@ -12,7 +12,7 @@ import {
   UserPlus,
 } from 'lucide-react';
 import { useState } from 'react';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import {
   loginAdmin,
   registerUser,
@@ -21,7 +21,6 @@ import {
 } from '../services/api';
 import ForgotPasswordScreen from './ForgotPasswordScreen';
 import HotelTitle from './HotelTitle';
-import TwoFactorScreen from './TwoFactorScreen';
 
 // ── Animated Background ──
 
@@ -329,13 +328,6 @@ function AdminLogin({ onBack, onRole }) {
     setError('');
     try {
       const result = await loginAdmin(identifier, password);
-      if (result.requires2FA) {
-        navigate(`/2fa/${result.userId}`, {
-          state: { email: result.email, expiresIn: result.expiresIn },
-          replace: true,
-        });
-        return;
-      }
       // JWT is set as httpOnly cookie by the server — no localStorage needed
       if (result.usuario) {
         setUserInfo(result.usuario);
@@ -673,34 +665,6 @@ function AdminLogin({ onBack, onRole }) {
   );
 }
 
-// ── 2FA Screen Route ──
-function TwoFactorRoute({ onRole }) {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const params = useParams();
-  const userId = params.userId;
-  const state = location.state || {};
-
-  const handleVerified = (_token, usuario) => {
-    // JWT is set as httpOnly cookie by the server — no localStorage needed
-    if (usuario) {
-      setUserInfo(usuario);
-      onRole(usuario.role || 'admin');
-    } else {
-      onRole('admin');
-    }
-  };
-
-  return (
-    <TwoFactorScreen
-      userId={userId}
-      email={state.email}
-      onVerified={handleVerified}
-      onBack={() => navigate('/login/admin', { replace: true })}
-    />
-  );
-}
-
 // ── Forgot Password Route ──
 function ForgotRoute() {
   const navigate = useNavigate();
@@ -728,10 +692,6 @@ export default function LoginScreen({ onRole }) {
 
   if (path === '/login/forgot' || path === '/forgot') {
     return <ForgotRoute />;
-  }
-
-  if (path.startsWith('/login/2fa/') || path.startsWith('/2fa/')) {
-    return <TwoFactorRoute onRole={onRole} />;
   }
 
   // Default: role selection

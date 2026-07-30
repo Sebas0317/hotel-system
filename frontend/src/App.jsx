@@ -337,25 +337,7 @@ export default function App() {
                 }
               />
               <Route
-                path="/login/2fa/:userId"
-                element={
-                  <ProtectedRoute rol={rol} allowed="guest">
-                    <LoginScreen onRole={handleRol} />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/2fa/:userId"
-                element={
-                  <ProtectedRoute rol={rol} allowed="guest">
-                    <LoginScreen onRole={handleRol} />
-                  </ProtectedRoute>
-                }
-              />
-
-              {/* ── Admin routes with nested layout ── */}
-              <Route
-                path="/admin"
+                path="/login/forgot"
                 element={
                   <ProtectedRoute rol={rol} allowed="admin">
                     <AdminShell rol={rol} onSalir={handleExit} />

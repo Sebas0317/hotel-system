@@ -4,6 +4,8 @@
   "installCommand": "cd frontend && npm install",
   "framework": "vite",
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api" }
+    { "source": "/api/(.*)", "destination": "/api" },
+    { "source": "/v1/(.*)", "destination": "/api/v1/$1" },
+    { "source": "/(.*)", "destination": "/" }
   ]
 }
