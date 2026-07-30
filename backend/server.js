@@ -72,7 +72,8 @@ const usersRoutes = require('./src/routes/users');
 const app = express();
 
 // Trust Vercel proxy for real client IP (required for rate limiting / security)
-app.set('trust proxy', true);
+// '1' = trust 1 proxy hop (Vercel). 'true' would trigger ERR_ERL_PERMISSIVE_TRUST_PROXY in express-rate-limit v8.
+app.set('trust proxy', 1);
 
 const PORT = process.env.PORT || 3001;
 

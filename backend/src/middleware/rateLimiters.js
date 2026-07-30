@@ -11,6 +11,7 @@ function createLimiter(opts) {
   return rateLimit({
     standardHeaders: true,
     legacyHeaders: false,
+    validate: { trustProxy: false },
     ...opts,
   });
 }
