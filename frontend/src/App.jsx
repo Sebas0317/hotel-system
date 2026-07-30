@@ -337,7 +337,7 @@ export default function App() {
                 }
               />
               <Route
-                path="/login/forgot"
+                path="/admin"
                 element={
                   <ProtectedRoute rol={rol} allowed="admin">
                     <AdminShell rol={rol} onSalir={handleExit} />
