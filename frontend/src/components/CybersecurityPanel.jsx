@@ -23,22 +23,6 @@ import { useState } from 'react';
 
 const SECTIONS = [
   {
-    id: 'recaptcha',
-    icon: ShieldCheck,
-    title: 'Google reCAPTCHA v2',
-    scope: 'POST /auth/login • /auth/register • /rooms/access',
-    explanation:
-      'reCAPTCHA es un mecanismo de seguridad que permite diferenciar entre usuarios humanos y programas automatizados (bots). Antes de permitir el inicio de sesion, registro o acceso a habitaciones, el sistema solicita una validacion mediante el servicio de Google reCAPTCHA.',
-    code: `// backend/src/middleware/recaptcha.js
-const result = await verifyRecaptcha(token);
-if (!result.success)
-  return res.status(403).json(
-    { error: 'Verificacion de seguridad fallida' }
-  );`,
-    benefit:
-      'Reduce ataques automatizados, intentos masivos de acceso y abuso de formularios publicos.',
-  },
-  {
     id: '2fa',
     icon: Fingerprint,
     title: 'Autenticacion de Doble Factor (2FA)',

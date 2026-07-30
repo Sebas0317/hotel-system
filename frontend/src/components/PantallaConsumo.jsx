@@ -10,7 +10,6 @@ import {
 } from '../services/api';
 import { COP } from '../utils/helpers';
 import PantallaForm from './PantallaForm';
-import ReCaptchaWidget from './ReCaptchaWidget';
 
 /**
  * Consumption registration screen - Two-step flow:
@@ -27,25 +26,20 @@ export default function PantallaConsumo({ onNav }) {
   const [error, setError] = useState('');
   const [exito, setExito] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [recaptchaToken, setRecaptchaToken] = useState(null);
-  const [captchaError] = useState(false);
 
   const validar = async () => {
     if (!numero.trim() || !pin.trim()) {
       return setError('Ingresa número de habitación y PIN');
     }
-    if (!recaptchaToken && !captchaError)
-      return setError('Completa la verificacion de seguridad');
     setLoading(true);
     setError('');
     try {
-      const data = await validarPin(numero.trim(), pin.trim(), recaptchaToken);
+      const data = await validarPin(numero.trim(), pin.trim());
       setRoomToken(data.roomToken);
       setRoom(data.room);
       setStep(2);
     } catch (e) {
       setError(safeErrorMessage(e));
-      setRecaptchaToken(null);
     } finally {
       setLoading(false);
     }
@@ -145,18 +139,6 @@ export default function PantallaConsumo({ onNav }) {
               maxLength={6}
             />
           </div>
-          <div className="flex justify-center pt-2">
-            <ReCaptchaWidget
-              onVerify={(token) => {
-                setRecaptchaToken(token);
-                setError('');
-              }}
-              onExpire={() => {
-                setRecaptchaToken(null);
-                setError('Verificacion expirada, intenta de nuevo');
-              }}
-            />
-          </div>
           {error && (
             <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm mb-4">
               <AlertTriangle className="w-4 h-4 inline mr-1" /> {error}
@@ -165,7 +147,7 @@ export default function PantallaConsumo({ onNav }) {
           <button
             className="btn-main-action"
             onClick={validar}
-            disabled={loading || (!recaptchaToken && !captchaError)}
+            disabled={loading}
           >
             {loading ? 'Verificando...' : 'Verificar con PIN'}
           </button>

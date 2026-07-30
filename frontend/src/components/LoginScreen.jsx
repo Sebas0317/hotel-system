@@ -21,7 +21,6 @@ import {
 } from '../services/api';
 import ForgotPasswordScreen from './ForgotPasswordScreen';
 import HotelTitle from './HotelTitle';
-import ReCaptchaWidget from './ReCaptchaWidget';
 import TwoFactorScreen from './TwoFactorScreen';
 
 // ── Animated Background ──
@@ -319,8 +318,6 @@ function AdminLogin({ onBack, onRole }) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [recaptchaToken, setRecaptchaToken] = useState(null);
-  const [captchaError] = useState(false);
 
   const [registered, setRegistered] = useState(false);
   const [registeredEmail, setRegisteredEmail] = useState('');
@@ -328,12 +325,10 @@ function AdminLogin({ onBack, onRole }) {
   const handleLogin = async () => {
     if (!identifier.trim()) return setError('Ingresa tu usuario o correo');
     if (!password.trim()) return setError('Ingresa tu contrasena');
-    if (!recaptchaToken && !captchaError)
-      return setError('Completa la verificacion de seguridad');
     setLoading(true);
     setError('');
     try {
-      const result = await loginAdmin(identifier, password, recaptchaToken);
+      const result = await loginAdmin(identifier, password);
       if (result.requires2FA) {
         navigate(`/2fa/${result.userId}`, {
           state: { email: result.email, expiresIn: result.expiresIn },
@@ -493,22 +488,6 @@ function AdminLogin({ onBack, onRole }) {
                   />
                 </motion.div>
 
-                <motion.div
-                  variants={itemVariants}
-                  className="flex justify-center my-4"
-                >
-                  <ReCaptchaWidget
-                    onVerify={(token) => {
-                      setRecaptchaToken(token);
-                      setError('');
-                    }}
-                    onExpire={() => {
-                      setRecaptchaToken(null);
-                      setError('Verificacion expirada, intenta de nuevo');
-                    }}
-                  />
-                </motion.div>
-
                 <AnimatePresence>
                   {error && (
                     <motion.div
@@ -524,7 +503,7 @@ function AdminLogin({ onBack, onRole }) {
                 <motion.div variants={itemVariants} className="mt-6">
                   <AnimatedButton
                     onClick={handleLogin}
-                    disabled={loading || (!recaptchaToken && !captchaError)}
+                    disabled={loading}
                     loading={loading}
                     icon={LogIn}
                   >

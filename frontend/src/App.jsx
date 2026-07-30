@@ -147,14 +147,15 @@ export default function App() {
   });
   const navigate = useNavigate();
 
-  const handleRol = (r) => {
+  const handleRol = useCallback((r) => {
     setRol(r);
-    if (r === 'user' || r === 'cliente') {
-      navigate('/user', { replace: true });
-    } else {
-      navigate('/admin', { replace: true });
-    }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (!rol) return;
+    const path = rol === 'user' || rol === 'cliente' ? '/user' : '/admin';
+    navigate(path, { replace: true });
+  }, [rol, navigate]);
 
   const [showSessionModal, setShowSessionModal] = useState(false);
 

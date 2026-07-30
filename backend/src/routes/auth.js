@@ -4,7 +4,6 @@ const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
 const { requireAuth } = require('../middleware/auth');
-const { requireRecaptcha } = require('../middleware/recaptcha');
 const {
   writeRateLimiter,
   pinRateLimiter,
@@ -19,17 +18,15 @@ router.get('/status', requireAuth, authController.getAuthStatus);
 
 router.post(
   '/register',
-  requireRecaptcha,
   writeRateLimiter,
   authController.register
 );
-router.post('/login', requireRecaptcha, loginLimiter, authController.login);
+router.post('/login', loginLimiter, authController.login);
 router.post('/2fa/verify', codeVerifyLimiter, authController.verify2FA);
 router.post('/login-code/send', loginLimiter, authController.sendLoginCode);
 
 router.post(
   '/verification/enviar',
-  requireRecaptcha,
   emailCodeLimiter,
   authController.enviarCodigoVerificacion
 );
@@ -41,7 +38,6 @@ router.post(
 
 router.post(
   '/recovery/solicitar',
-  requireRecaptcha,
   emailCodeLimiter,
   authController.solicitarRecuperacion
 );

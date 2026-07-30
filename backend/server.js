@@ -157,7 +157,13 @@ app.use(express.urlencoded({ extended: false, limit: '500kb' }));
 app.use(cookieParser());
 
 app.use(sanitizeBody);
-if (process.env.NODE_ENV !== 'test') {
+
+// ── AUTH ROUTES (mounted before CSRF so login/register don't need CSRF tokens) ──
+app.use('/v1/auth', authRateLimiter, authRoutes);
+app.use('/auth', authRateLimiter, authRoutes);
+
+// ── CSRF PROTECTION (only in production) ──
+if (process.env.NODE_ENV === 'production') {
   app.use(csrfProtection);
 }
 
@@ -203,9 +209,6 @@ if (process.env.VERCEL) {
 }
 
 // ── ROUTES (v1 + unversioned for backward compatibility) ──
-// Auth routes (strict rate limiting)
-app.use('/v1/auth', authRateLimiter, authRoutes);
-app.use('/auth', authRateLimiter, authRoutes);
 
 // Rooms routes (rate limiters applied per-route inside the router)
 app.use('/v1/rooms', roomsRoutes);

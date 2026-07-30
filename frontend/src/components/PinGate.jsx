@@ -1,7 +1,6 @@
 import { AlertCircle, ArrowRight, Key, Shield } from 'lucide-react';
 import { useState } from 'react';
 import { setRoomToken, validarPin } from '../services/api';
-import ReCaptchaWidget from './ReCaptchaWidget';
 
 export default function PinGate({
   onAccess,
@@ -13,31 +12,23 @@ export default function PinGate({
   const [pin, setPin] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [recaptchaToken, setRecaptchaToken] = useState(null);
-  const [captchaError] = useState(false);
 
   const handleSubmit = async (e) => {
     e?.preventDefault();
     if (!numero.trim() || !pin.trim())
       return setError('Ingresa numero de habitacion y PIN');
-    if (!recaptchaToken && !captchaError)
-      return setError('Completa la verificacion de seguridad');
     setLoading(true);
     setError('');
     try {
-      const data = await validarPin(numero.trim(), pin.trim(), recaptchaToken);
+      const data = await validarPin(numero.trim(), pin.trim());
       setRoomToken(data.roomToken);
-      setRecaptchaToken(null);
       onAccess(data.room);
     } catch (e) {
       setError(e.message || 'PIN o numero de habitacion incorrecto');
-      setRecaptchaToken(null);
     } finally {
       setLoading(false);
     }
   };
-
-  const isButtonDisabled = loading || (!recaptchaToken && !captchaError);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-emerald-50/40 flex items-center justify-center p-4">
@@ -100,19 +91,6 @@ export default function PinGate({
               </div>
             </div>
 
-            <div className="flex justify-center pt-2">
-              <ReCaptchaWidget
-                onVerify={(token) => {
-                  setRecaptchaToken(token);
-                  setError('');
-                }}
-                onExpire={() => {
-                  setRecaptchaToken(null);
-                  setError('Verificacion expirada, intenta de nuevo');
-                }}
-              />
-            </div>
-
             {error && (
               <div className="flex items-start gap-2 text-sm text-red-600 bg-red-50/80 border border-red-200/60 rounded-xl p-3">
                 <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
@@ -122,7 +100,7 @@ export default function PinGate({
 
             <button
               type="submit"
-              disabled={isButtonDisabled}
+              disabled={loading}
               className="w-full py-3 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all duration-300 bg-gradient-to-r from-emerald-600 to-green-600 text-white shadow-lg shadow-emerald-200/30 hover:shadow-xl hover:shadow-emerald-200/40 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? (

@@ -14,7 +14,6 @@ import { calcularCheckout } from '../utils/checkoutCalc';
 import { COP, FECHA } from '../utils/helpers';
 import FacturaImprimible from './FacturaImprimible';
 import PantallaForm from './PantallaForm';
-import ReCaptchaWidget from './ReCaptchaWidget';
 
 /**
  * Checkout screen - Three-step flow:
@@ -33,28 +32,21 @@ export default function PantallaCheckout({ onNav }) {
   const [factura, setFactura] = useState(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [recaptchaToken, setRecaptchaToken] = useState(null);
-  const [captchaError] = useState(false);
-
   const validar = async () => {
     if (!numero.trim() || !pin.trim()) {
       return setError('Ingresa número de habitación y PIN');
     }
-    if (!recaptchaToken && !captchaError)
-      return setError('Completa la verificacion de seguridad');
     setLoading(true);
     setError('');
     try {
-      const data = await validarPin(numero.trim(), pin.trim(), recaptchaToken);
+      const data = await validarPin(numero.trim(), pin.trim());
       setRoomToken(data.roomToken);
       setRoom(data.room);
       const consumosData = await fetchConsumos(data.room.id);
       setConsumos(consumosData);
       setStep(2);
-      setRecaptchaToken(null);
     } catch (e) {
       setError(safeErrorMessage(e));
-      setRecaptchaToken(null);
     } finally {
       setLoading(false);
     }
@@ -142,18 +134,6 @@ export default function PantallaCheckout({ onNav }) {
               maxLength={6}
             />
           </div>
-          <div className="flex justify-center pt-2">
-            <ReCaptchaWidget
-              onVerify={(token) => {
-                setRecaptchaToken(token);
-                setError('');
-              }}
-              onExpire={() => {
-                setRecaptchaToken(null);
-                setError('Verificacion expirada, intenta de nuevo');
-              }}
-            />
-          </div>
           {error && (
             <div className="error-message">
               <AlertTriangle className="w-4 h-4" /> {error}
@@ -162,7 +142,7 @@ export default function PantallaCheckout({ onNav }) {
           <button
             className="btn-main-action"
             onClick={validar}
-            disabled={loading || (!recaptchaToken && !captchaError)}
+            disabled={loading}
           >
             {loading ? 'Verificando...' : 'Verificar habitación'}
           </button>

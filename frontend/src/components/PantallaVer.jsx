@@ -9,7 +9,6 @@ import {
 } from '../services/api';
 import { COP, FECHA } from '../utils/helpers';
 import PantallaForm from './PantallaForm';
-import ReCaptchaWidget from './ReCaptchaWidget';
 
 export default function PantallaVer({ onNav }) {
   const [numero, setNumero] = useState('');
@@ -18,26 +17,21 @@ export default function PantallaVer({ onNav }) {
   const [consumos, setConsumos] = useState([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [recaptchaToken, setRecaptchaToken] = useState(null);
-  const [captchaError] = useState(false);
 
   const consultar = async () => {
     if (!numero.trim() || !pin.trim()) {
       return setError('Ingresa número de habitación y PIN');
     }
-    if (!recaptchaToken && !captchaError)
-      return setError('Completa la verificacion de seguridad');
     setLoading(true);
     setError('');
     try {
-      const data = await validarPin(numero.trim(), pin.trim(), recaptchaToken);
+      const data = await validarPin(numero.trim(), pin.trim());
       setRoomToken(data.roomToken);
       setRoom(data.room);
       const consumosData = await fetchConsumos(data.room.id);
       setConsumos(consumosData);
     } catch (e) {
       setError(safeErrorMessage(e));
-      setRecaptchaToken(null);
     } finally {
       setLoading(false);
     }
@@ -50,7 +44,6 @@ export default function PantallaVer({ onNav }) {
     setConsumos([]);
     setNumero('');
     setPin('');
-    setRecaptchaToken(null);
   };
 
   return (
@@ -89,18 +82,6 @@ export default function PantallaVer({ onNav }) {
               maxLength={6}
             />
           </div>
-          <div className="flex justify-center pt-2">
-            <ReCaptchaWidget
-              onVerify={(token) => {
-                setRecaptchaToken(token);
-                setError('');
-              }}
-              onExpire={() => {
-                setRecaptchaToken(null);
-                setError('Verificacion expirada, intenta de nuevo');
-              }}
-            />
-          </div>
           {error && (
             <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm mb-4">
               <AlertTriangle className="w-4 h-4 inline mr-1" /> {error}
@@ -109,7 +90,7 @@ export default function PantallaVer({ onNav }) {
           <button
             className="btn-main-action"
             onClick={consultar}
-            disabled={loading || (!recaptchaToken && !captchaError)}
+            disabled={loading}
           >
             {loading ? 'Consultando...' : 'Consultar'}
           </button>

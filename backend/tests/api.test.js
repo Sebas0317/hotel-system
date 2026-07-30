@@ -61,24 +61,21 @@ describe('Authentication flow', () => {
   it('should fail login with wrong password', async () => {
     const res = await request(app)
       .post('/auth/login')
-      .send({ identifier: 'admin@ecobosque.com', password: 'wrongpassword', recaptchaToken: 'test' })
-      .set('x-test-skip-captcha', 'true');
+      .send({ identifier: 'admin@ecobosque.com', password: 'wrongpassword' })
     expect(res.statusCode).toBe(401);
   });
 
   it('should register a test user', { timeout: 20000 }, async () => {
     const res = await request(app)
       .post('/auth/register')
-      .send({ ...TEST_USER, recaptchaToken: 'test' })
-      .set('x-test-skip-captcha', 'true');
+      .send({ ...TEST_USER })
     expect(res.statusCode).toBe(201);
   });
 
   it('should login as test user and get cookie', async () => {
     const res = await request(app)
       .post('/auth/login')
-      .send({ identifier: TEST_USER.email, password: TEST_USER.password, recaptchaToken: 'test' })
-      .set('x-test-skip-captcha', 'true');
+      .send({ identifier: TEST_USER.email, password: TEST_USER.password })
     expect(res.statusCode).toBe(200);
     expect(res.body).toHaveProperty('token');
     // Extract the httpOnly cookie for subsequent requests
@@ -91,8 +88,7 @@ describe('Authentication flow', () => {
   it('should set httpOnly cookie on login', async () => {
     const res = await request(app)
       .post('/auth/login')
-      .send({ identifier: TEST_USER.email, password: TEST_USER.password, recaptchaToken: 'test' })
-      .set('x-test-skip-captcha', 'true');
+      .send({ identifier: TEST_USER.email, password: TEST_USER.password })
     expect(res.statusCode).toBe(200);
     const cookies = res.headers['set-cookie'];
     expect(cookies).toBeDefined();
@@ -148,8 +144,7 @@ describe('Rate Limiting', () => {
     const promises = Array.from({ length: 8 }, () =>
       request(app)
         .post('/auth/login')
-        .send({ identifier: 'test@test.com', password: 'wrong', recaptchaToken: 'test' })
-        .set('x-test-skip-captcha', 'true')
+        .send({ identifier: 'test@test.com', password: 'wrong' })
     );
     const results = await Promise.all(promises);
     const rateLimited = results.some(r => r.statusCode === 429);

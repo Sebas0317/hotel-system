@@ -8,6 +8,9 @@ const ROLES = {
 };
 
 export default function ProtectedRoute({ rol, allowed, children }) {
+  if (allowed === 'guest' && rol) {
+    return null;
+  }
   const check = ROLES[allowed] || ROLES.any;
   if (check(rol)) return children;
   return <Navigate to="/" replace />;

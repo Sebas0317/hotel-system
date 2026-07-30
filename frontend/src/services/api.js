@@ -241,13 +241,12 @@ async function apiFetch(endpoint, options = {}, timeout = 10000) {
  * Login with email/username and password
  * @param {string} identifier - Email or username
  * @param {string} password - Password
- * @param {string} [recaptchaToken] - Google reCAPTCHA token
  * @returns {Promise<{requires2FA?: boolean, userId?: string, usuario?: object}>}
  */
-export async function loginAdmin(identifier, password, recaptchaToken) {
+export async function loginAdmin(identifier, password) {
   return apiFetch('/auth/login', {
     method: 'POST',
-    body: { identifier, password, recaptchaToken },
+    body: { identifier, password },
   });
 }
 
@@ -573,13 +572,12 @@ export async function checkOutReserva(id) {
  * Validate room PIN
  * @param {string} numero - Room number
  * @param {string} pin - 6-digit PIN
- * @param {string} [recaptchaToken] - Google reCAPTCHA token
  * @returns {Promise<object>} Room data
  */
-export async function validarPin(numero, pin, recaptchaToken) {
+export async function validarPin(numero, pin) {
   return apiFetch('/rooms/validar', {
     method: 'POST',
-    body: { numero, pin, recaptchaToken },
+    body: { numero, pin },
   });
 }
 
