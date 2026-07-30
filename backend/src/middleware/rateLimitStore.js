@@ -8,9 +8,11 @@ const KV_REST_API_TOKEN = process.env.KV_REST_API_TOKEN;
 let redis = null;
 let redisAvailable = false;
 
-if (KV_REST_API_URL && KV_REST_API_TOKEN && !process.env.VERCEL) {
+if (KV_REST_API_URL && KV_REST_API_TOKEN) {
   try {
-    redis = new Redis({ url: KV_REST_API_URL, token: KV_REST_API_TOKEN });
+    const timeoutFetch = (url, init) =>
+      fetch(url, { ...init, signal: AbortSignal.timeout(5000) });
+    redis = new Redis({ url: KV_REST_API_URL, token: KV_REST_API_TOKEN, fetch: timeoutFetch });
     redisAvailable = true;
   } catch {
     redisAvailable = false;

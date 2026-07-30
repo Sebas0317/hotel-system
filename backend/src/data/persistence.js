@@ -16,11 +16,14 @@ let redis = null;
 
 function getRedis() {
   if (redis) return redis;
-  if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN && !process.env.VERCEL) {
+  if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) {
     const { Redis } = require('@upstash/redis');
+    const timeoutFetch = (url, init) =>
+      fetch(url, { ...init, signal: AbortSignal.timeout(5000) });
     redis = new Redis({
       url: process.env.KV_REST_API_URL,
       token: process.env.KV_REST_API_TOKEN,
+      fetch: timeoutFetch,
     });
     logger.info('Using Upstash Redis for persistence');
   }
@@ -28,7 +31,7 @@ function getRedis() {
 }
 
 function isRedisAvailable() {
-  return !!(process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN && !process.env.VERCEL);
+  return !!(process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN);
 }
 
 // ── File paths (used as Redis keys) ──
