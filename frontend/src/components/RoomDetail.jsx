@@ -107,6 +107,15 @@ function RoomDetail({ room, onRefresh }) {
     setToast({ type, message });
   }, []);
 
+  const handleRefreshConsumos = useCallback(() => {
+    setConsumosLoading(true);
+    fetchConsumos(room.id)
+      .then((data) => setConsumos(data))
+      .catch(() => {})
+      .finally(() => setConsumosLoading(false));
+    onRefresh?.();
+  }, [room.id, onRefresh]);
+
   return (
     <div className="room-detail">
       {toast && (
@@ -841,7 +850,7 @@ function RoomDetail({ room, onRefresh }) {
         room={room}
         consumos={consumos}
         onAction={showToast}
-        onRefresh={onRefresh}
+        onRefresh={handleRefreshConsumos}
       />
     </div>
   );
