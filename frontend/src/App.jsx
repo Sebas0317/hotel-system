@@ -303,7 +303,7 @@ export default function App() {
 
         <Suspense fallback={<LoadingFallback />}>
           <AnimatePresence mode="wait" initial={false}>
-            <Routes location={location} key={location.pathname}>
+            <Routes location={location}>
               <Route
                 path="/"
                 element={
